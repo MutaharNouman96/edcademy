@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('educator_verifications', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('educator_profile_id')->constrained()->onDelete('cascade');
+
+            $table->foreignId("user_id")->constrained()->onDelete('cascade');
+            $table->foreignId('reviewed_by')->nullable()->constrained('users');
+            $table->enum('verification_stage', ['documents', 'expert_review', 'final_approval']);
+            $table->text('review_notes')->nullable();
+            $table->boolean('is_verified')->default(false);
+            $table->timestamp('reviewed_at')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('educator_verifications');
+    }
+};

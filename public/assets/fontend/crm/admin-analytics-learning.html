@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ed-Cademy • Analytics • Learning Analytics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Bootstrap & Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --brand: #0b3c77;
+        --light: #f8fafc;
+      }
+      body {
+        background: var(--light);
+      }
+      .sidebar {
+        min-height: 100vh;
+        background: var(--brand);
+        color: #fff;
+      }
+      .sidebar .nav-link {
+        color: #d1d5db;
+        border-radius: 0.5rem;
+      }
+      .sidebar .nav-link.active,
+      .sidebar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+      }
+      .main-content {
+        padding: 2rem;
+      }
+      .card {
+        border-radius: 1rem;
+      }
+      .section-title {
+        font-weight: 700;
+        color: var(--brand);
+      }
+      .kpi-card {
+        background: #fff;
+        border-radius: 1rem;
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .kpi-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <aside class="col-md-3 col-lg-2 p-3 sidebar">
+          <h4 class="mb-4">
+            <i class="bi bi-mortarboard-fill me-2"></i>Ed-Cademy
+          </h4>
+          <nav class="nav flex-column gap-1">
+            <a class="nav-link" href="#"
+              ><i class="bi bi-people-fill"></i>User Management</a
+            >
+            <a class="nav-link" href="#"
+              ><i class="bi bi-shield-check"></i>Content Moderation</a
+            >
+            <a class="nav-link" href="#"
+              ><i class="bi bi-calendar3"></i>Tutoring & Sessions</a
+            >
+            <a class="nav-link" href="#"
+              ><i class="bi bi-basket"></i>Marketplace & Products</a
+            >
+            <a class="nav-link" href="#"
+              ><i class="bi bi-cash-coin"></i>Financials</a
+            >
+            <a class="nav-link active" href="#"
+              ><i class="bi bi-bar-chart-line"></i>Analytics & Reporting</a
+            >
+          </nav>
+        </aside>
+
+        <!-- Main -->
+        <main class="col-md-9 col-lg-10 main-content">
+          <h2 class="mb-4">Analytics & Reporting • Learning Analytics</h2>
+
+          <!-- KPI Row -->
+          <div class="row g-4 mb-4">
+            <div class="col-md-4">
+              <div class="kpi-card text-center">
+                <h6>Avg. Completion Rate</h6>
+                <div class="kpi-value text-success">68%</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kpi-card text-center">
+                <h6>Avg. Quiz Score</h6>
+                <div class="kpi-value text-primary">74%</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kpi-card text-center">
+                <h6>Certificates Issued</h6>
+                <div class="kpi-value text-warning">1,240</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Completion Rates -->
+          <div class="card p-4 mb-4">
+            <h5 class="section-title mb-3">
+              <i class="bi bi-bar-chart me-2"></i>Course Completion Rates
+            </h5>
+            <canvas id="completionChart" height="120"></canvas>
+          </div>
+
+          <!-- Quiz Performance -->
+          <div class="card p-4 mb-4">
+            <h5 class="section-title mb-3">
+              <i class="bi bi-clipboard-check me-2"></i>Quiz / Assessment
+              Performance
+            </h5>
+            <canvas id="quizChart" height="120"></canvas>
+          </div>
+
+          <!-- Certificates -->
+          <div class="card p-4 mb-4">
+            <h5 class="section-title mb-3">
+              <i class="bi bi-award me-2"></i>Certificates Issued Over Time
+            </h5>
+            <canvas id="certChart" height="120"></canvas>
+          </div>
+
+          <!-- Certificates Table -->
+          <div class="card p-4">
+            <h5 class="section-title mb-3">
+              <i class="bi bi-table me-2"></i>Issued Certificates
+            </h5>
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Student</th>
+                  <th>Course</th>
+                  <th>Date</th>
+                  <th>Certificate</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>C-901</td>
+                  <td>John P.</td>
+                  <td>Algebra Basics</td>
+                  <td>2025-09-20</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary">View</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>C-902</td>
+                  <td>Fatima K.</td>
+                  <td>Biology 101</td>
+                  <td>2025-09-21</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary">View</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Completion Rate Chart
+      new Chart(document.getElementById('completionChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Math', 'Biology', 'History', 'Physics', 'English'],
+          datasets: [
+            {
+              label: 'Completion %',
+              data: [72, 65, 80, 59, 64],
+              backgroundColor: [
+                '#0B3C77',
+                '#1d9bf0',
+                '#16a34a',
+                '#f59e0b',
+                '#94a3b8'
+              ]
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, max: 100 } }
+        }
+      })
+
+      // Quiz Performance Radar
+      new Chart(document.getElementById('quizChart'), {
+        type: 'radar',
+        data: {
+          labels: ['Math', 'Biology', 'History', 'Physics', 'English'],
+          datasets: [
+            {
+              label: 'Avg. Quiz Score (%)',
+              data: [75, 68, 82, 70, 76],
+              borderColor: '#0B3C77',
+              backgroundColor: 'rgba(11,60,119,0.1)'
+            }
+          ]
+        },
+        options: { responsive: true }
+      })
+
+      // Certificates Line Chart
+      new Chart(document.getElementById('certChart'), {
+        type: 'line',
+        data: {
+          labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+          datasets: [
+            {
+              label: 'Certificates Issued',
+              data: [120, 150, 210, 180, 290, 240],
+              borderColor: '#16a34a',
+              backgroundColor: 'rgba(22,163,74,0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: { responsive: true }
+      })
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

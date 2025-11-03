@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ed‑Cademy — Educator Profile Settings</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+
+  <style>
+    :root{
+      --primary-cyan:#006b7d; /* consistent with other Ed‑Cademy pages */
+      --dark-cyan:#004a57;
+      --light-cyan:#e0f7fa;
+      --bg-soft:#f6f8f9;
+      --accent:#ff6b35;
+    }
+    body{background:var(--bg-soft);} 
+    .brand{color:var(--primary-cyan);font-weight:700;} 
+    .header{position:sticky;top:0;z-index:1020;background:#fff;border-bottom:1px solid rgba(0,0,0,.06);} 
+    .sidebar{position:sticky;top:0;height:100dvh;overflow-y:auto;background:#fff;border-right:1px solid rgba(0,0,0,.06);} 
+    .sidebar .nav-link{color:#425466;border-radius:.5rem;} 
+    .sidebar .nav-link.active{background:var(--light-cyan);color:var(--dark-cyan);font-weight:600;} 
+    .sidebar .nav-link:hover{background:rgba(0,107,125,.08);color:var(--dark-cyan);} 
+    .btn-primary{background:var(--primary-cyan);border-color:var(--primary-cyan);} 
+    .btn-primary:hover{background:var(--dark-cyan);border-color:var(--dark-cyan);} 
+    .btn-outline-primary{color:var(--primary-cyan);border-color:var(--primary-cyan);} 
+    .btn-outline-primary:hover{background:var(--primary-cyan);border-color:var(--primary-cyan);color:#fff;} 
+    .card{border-radius:16px;} 
+    .section-header{background:var(--light-cyan);border-radius:16px 16px 0 0;padding:1.25rem;border-bottom:1px solid rgba(0,0,0,.06);} 
+    .section-title{color:var(--dark-cyan);font-weight:700;margin:0;display:flex;gap:.5rem;align-items:center;} 
+    .nav-tabs .nav-link{border:0;border-bottom:3px solid transparent;color:#495057;font-weight:600;}
+    .nav-tabs .nav-link.active{border-color:var(--primary-cyan);color:var(--dark-cyan);} 
+    .avatar{width:84px;height:84px;border-radius:999px;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 4px rgba(0,0,0,.06);} 
+    .tz-pill{background:#fff;border:1px dashed rgba(0,0,0,.15);padding:.25rem .6rem;border-radius:999px;font-size:.8rem;color:#6b7a8c;}
+    .help{color:#6b7a8c;font-size:.86rem;}
+    .switch .form-check-input{cursor:pointer}
+    .req::after{content:"*";color:#dc3545;margin-left:.25rem;}
+    .danger-zone{border:1px dashed rgba(220,53,69,.35);border-radius:16px;padding:1rem;background:#fff5f5;}
+    .schedule-grid{border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden;background:#fff}
+    .schedule-grid thead th{background:#fafafa;font-weight:600;color:#6b7a8c}
+    .chip{display:inline-flex;align-items:center;gap:.35rem;background:#fff;border:1px solid rgba(0,0,0,.12);padding:.25rem .5rem;border-radius:999px;font-size:.85rem;margin:.15rem}
+    .chip .x{cursor:pointer}
+    .method-badge{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:999px;padding:.25rem .6rem;font-size:.8rem;}
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header py-2">
+    <div class="container-fluid px-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <a href="/educator" class="text-decoration-none brand">
+            <i class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy
+          </a>
+          <span class="d-none d-md-inline text-muted">Educator Settings</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button id="btnSaveAll" class="btn btn-sm btn-primary">
+            <i class="bi bi-save2 me-1"></i> Save All
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
+        <nav class="nav flex-column gap-1">
+          <a class="nav-link" href="/educator"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+          <a class="nav-link" href="/educator/courses"><i class="bi bi-journal-code me-2"></i> My Courses</a>
+          <a class="nav-link" href="/educator/sessions"><i class="bi bi-calendar3 me-2"></i> Sessions/Bookings</a>
+          <a class="nav-link" href="/educator/payouts"><i class="bi bi-cash-stack me-2"></i> Payouts</a>
+          <a class="nav-link active" href="/educator/settings"><i class="bi bi-gear me-2"></i> Settings</a>
+        </nav>
+        <hr/>
+        <div class="p-3 rounded" style="background:var(--light-cyan);">
+          <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+            <div>
+              <strong>Tip:</strong>
+              <p class="mb-2 small">Set availability first, then enable instant booking.</p>
+              <span class="tz-pill" id="tzChip">—</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="col-12 col-md-9 col-lg-10 p-4">
+        <div class="card shadow-sm">
+          <div class="section-header">
+            <h2 class="section-title"><i class="bi bi-gear"></i> Profile & Account Settings</h2>
+          </div>
+          <div class="p-3">
+            <!-- Tabs -->
+            <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#tab-profile" type="button" role="tab" aria-controls="tab-profile" aria-selected="true"><i class="bi bi-person me-1"></i> Profile</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#tab-security" type="button" role="tab" aria-controls="tab-security" aria-selected="false"><i class="bi bi-shield-lock me-1"></i> Security</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#tab-payments" type="button" role="tab" aria-controls="tab-payments" aria-selected="false"><i class="bi bi-bank me-1"></i> Payments</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="availability-tab" data-bs-toggle="tab" data-bs-target="#tab-availability" type="button" role="tab" aria-controls="tab-availability" aria-selected="false"><i class="bi bi-calendar2-week me-1"></i> Availability</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#tab-notifications" type="button" role="tab" aria-controls="tab-notifications" aria-selected="false"><i class="bi bi-bell me-1"></i> Notifications</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="privacy-tab" data-bs-toggle="tab" data-bs-target="#tab-privacy" type="button" role="tab" aria-controls="tab-privacy" aria-selected="false"><i class="bi bi-eye-slash me-1"></i> Privacy</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="verification-tab" data-bs-toggle="tab" data-bs-target="#tab-verification" type="button" role="tab" aria-controls="tab-verification" aria-selected="false"><i class="bi bi-patch-check me-1"></i> Verification</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="connections-tab" data-bs-toggle="tab" data-bs-target="#tab-connections" type="button" role="tab" aria-controls="tab-connections" aria-selected="false"><i class="bi bi-plug me-1"></i> Connections</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="preferences-tab" data-bs-toggle="tab" data-bs-target="#tab-preferences" type="button" role="tab" aria-controls="tab-preferences" aria-selected="false"><i class="bi bi-sliders me-1"></i> Preferences</button>
+              </li>
+            </ul>
+
+            <div class="tab-content pt-3">
+              <!-- Profile -->
+              <div class="tab-pane fade show active" id="tab-profile" role="tabpanel">
+                <form id="formProfile" class="row g-3">
+                  <div class="col-12 d-flex align-items-center gap-3">
+                    <img id="avatarPreview" class="avatar" src="https://i.pravatar.cc/120?img=10" alt="Avatar">
+                    <div>
+                      <div class="btn-group">
+                        <label class="btn btn-sm btn-outline-primary mb-0">
+                          <i class="bi bi-upload me-1"></i> Change Photo
+                          <input id="avatarInput" type="file" accept="image/*" hidden>
+                        </label>
+                        <button type="button" id="btnRemoveAvatar" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle me-1"></i> Remove</button>
+                      </div>
+                      <div class="help mt-1">Max 2MB JPG/PNG. Square works best.</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label req">Full name</label>
+                    <input name="name" class="form-control" placeholder="Your name" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label req">Public handle</label>
+                    <div class="input-group">
+                      <span class="input-group-text">@</span>
+                      <input name="handle" class="form-control" placeholder="username" required>
+                    </div>
+                    <div class="form-text">Used in your public profile URL.</div>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Headline</label>
+                    <input name="headline" class="form-control" placeholder="e.g., Math Educator • SAT & Algebra specialist">
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Bio</label>
+                    <textarea name="bio" class="form-control" rows="4" placeholder="Introduce yourself to students…"></textarea>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label">Subjects</label>
+                    <input id="subjectsInput" class="form-control" placeholder="Type & press Enter">
+                    <div id="subjectsChips" class="mt-2"></div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Languages</label>
+                    <select name="languages" class="form-select" multiple>
+                      <option>English</option>
+                      <option>Urdu</option>
+                      <option>Arabic</option>
+                      <option>Chinese</option>
+                      <option>French</option>
+                      <option>German</option>
+                    </select>
+                    <div class="form-text">Ctrl/Cmd‑click to select multiple.</div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Hourly rate (USD)</label>
+                    <div class="input-group"><span class="input-group-text">$</span><input name="rate" type="number" step="1" min="0" class="form-control" placeholder="25"></div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Location</label>
+                    <input name="location" class="form-control" placeholder="City, Country">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Promo video URL</label>
+                    <input name="video_url" class="form-control" placeholder="https://…">
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Website</label>
+                    <input name="website" class="form-control" placeholder="https://…">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Social</label>
+                    <input name="social" class="form-control" placeholder="@twitter, linkedin URL, etc.">
+                  </div>
+
+                  <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i> Save Profile</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Security -->
+              <div class="tab-pane fade" id="tab-security" role="tabpanel">
+                <form id="formPassword" class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label req">Current password</label>
+                    <input name="current" type="password" class="form-control" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label req">New password</label>
+                    <input name="password" id="newPass" type="password" class="form-control" minlength="8" required>
+                    <div class="form-text">Min 8 chars, include number & symbol.</div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label req">Confirm</label>
+                    <input name="confirm" id="newPass2" type="password" class="form-control" required>
+                  </div>
+                  <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-shield-lock me-1"></i> Update Password</button>
+                  </div>
+                </form>
+
+                <hr class="my-4"/>
+
+                <form id="form2FA" class="row g-3 align-items-center">
+                  <div class="col-md-4">
+                    <div class="form-check form-switch switch">
+                      <input class="form-check-input" type="checkbox" id="twoFA">
+                      <label class="form-check-label" for="twoFA">Enable 2‑factor authentication</label>
+                    </div>
+                    <div class="help">Use authenticator app or SMS.</div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Method</label>
+                    <select id="twoFAMethod" class="form-select" disabled>
+                      <option value="app">Authenticator App</option>
+                      <option value="sms">SMS</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Phone (for SMS)</label>
+                    <input id="twoFAPhone" class="form-control" placeholder="+971…" disabled>
+                  </div>
+                  <div class="col-12 d-flex justify-content-end">
+                    <button id="btn2FASave" class="btn btn-outline-primary" type="button" disabled><i class="bi bi-check2 me-1"></i> Save 2FA</button>
+                  </div>
+
+                  <div id="appHint" class="col-12 help d-none"><i class="bi bi-qr-code me-1"></i> Scan QR in your app → enter code to verify.</div>
+                </form>
+
+                <hr class="my-4"/>
+
+                <div class="danger-zone">
+                  <h6 class="text-danger mb-2"><i class="bi bi-exclamation-triangle me-1"></i> Danger Zone</h6>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button id="btnLogoutAll" class="btn btn-sm btn-outline-danger"><i class="bi bi-box-arrow-right me-1"></i> Log out of all devices</button>
+                    <button id="btnDeleteAcc" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i> Delete account</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payments -->
+              <div class="tab-pane fade" id="tab-payments" role="tabpanel">
+                <form id="formPayout" class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">Default currency</label>
+                    <select name="currency" class="form-select">
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="AED">AED</option>
+                      <option value="GBP">GBP</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Payout schedule</label>
+                    <select name="schedule" class="form-select">
+                      <option value="manual">Manual</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Min payout threshold</label>
+                    <div class="input-group"><span class="input-group-text">$</span><input name="threshold" type="number" step="1" min="0" class="form-control" placeholder="50"></div>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Payment methods</label>
+                    <div id="payMethods" class="d-flex flex-wrap gap-2">
+                      <!-- filled dynamically -->
+                    </div>
+                    <button id="btnAddMethod" type="button" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-plus-lg me-1"></i>Add method</button>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Billing name</label>
+                    <input name="billing_name" class="form-control" placeholder="Your legal name / business">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Billing address</label>
+                    <input name="billing_address" class="form-control" placeholder="Street, City, ZIP, Country">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Tax/VAT number</label>
+                    <input name="tax_id" class="form-control" placeholder="(optional)">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Invoice email</label>
+                    <input name="invoice_email" type="email" class="form-control" placeholder="billing@you.com">
+                  </div>
+
+                  <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i> Save Payments</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Availability -->
+              <div class="tab-pane fade" id="tab-availability" role="tabpanel">
+                <form id="formAvail" class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">Timezone</label>
+                    <input id="tzInput" name="timezone" class="form-control" readonly>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Default session length</label>
+                    <select name="default_length" class="form-select">
+                      <option value="30">30 min</option>
+                      <option value="45">45 min</option>
+                      <option value="60" selected>60 min</option>
+                      <option value="90">90 min</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Buffer between sessions</label>
+                    <select name="buffer" class="form-select">
+                      <option value="0">No buffer</option>
+                      <option value="10">10 min</option>
+                      <option value="15">15 min</option>
+                      <option value="30">30 min</option>
+                    </select>
+                  </div>
+
+                  <div class="col-12">
+                    <div class="form-check form-switch switch">
+                      <input class="form-check-input" type="checkbox" id="instantBooking">
+                      <label class="form-check-label" for="instantBooking">Enable instant booking</label>
+                    </div>
+                    <div class="help">Students can book available slots without your approval.</div>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Weekly schedule</label>
+                    <div class="schedule-grid p-2">
+                      <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                          <thead><tr><th style="width:120px">Day</th><th>Available</th><th style="width:210px">Start</th><th style="width:210px">End</th></tr></thead>
+                          <tbody id="weekBody"></tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div class="help mt-2">Add exceptions in your calendar for holidays or special days.</div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Lead time (min)</label>
+                    <select name="lead" class="form-select">
+                      <option value="2">2 hours</option>
+                      <option value="6">6 hours</option>
+                      <option value="12">12 hours</option>
+                      <option value="24" selected>24 hours</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Max sessions / day</label>
+                    <input name="max_per_day" type="number" class="form-control" min="1" value="6">
+                  </div>
+
+                  <div class="col-12">
+                    <div class="form-check form-switch switch">
+                      <input class="form-check-input" type="checkbox" id="vacationMode">
+                      <label class="form-check-label" for="vacationMode">Vacation mode</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Vacation start</label>
+                    <input id="vacStart" type="date" class="form-control" disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Vacation end</label>
+                    <input id="vacEnd" type="date" class="form-control" disabled>
+                  </div>
+
+                  <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i> Save Availability</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Notifications -->
+              <div class="tab-pane fade" id="tab-notifications" role="tabpanel">
+                <form id="formNotify" class="row g-3">
+                  <div class="col-12">
+                    <h6>Delivery channels</h6>
+                    <div class="row g-3">
+                      <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="email" checked> <label class="form-check-label">Email</label></div></div>
+                      <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="sms"> <label class="form-check-label">SMS</label></div></div>
+                      <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="push" checked> <label class="form-check-label">Push</label></div></div>
+                      <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="whatsapp"> <label class="form-check-label">WhatsApp</label></div></div>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <h6 class="mt-2">Events</h6>
+                    <div class="row g-3">
+                      <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="evt_new_booking" checked> <label class="form-check-label">New booking</label></div></div>
+                      <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="evt_cancel" checked> <label class="form-check-label">Cancellation</label></div></div>
+                      <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="evt_messages" checked> <label class="form-check-label">New message</label></div></div>
+                      <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="evt_review" checked> <label class="form-check-label">New review</label></div></div>
+                      <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="evt_payout" checked> <label class="form-check-label">Payout events</label></div></div>
+                      <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="evt_low_balance"> <label class="form-check-label">Low balance/escrow</label></div></div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label">Digest frequency</label>
+                    <select name="digest" class="form-select">
+                      <option value="off">Off</option>
+                      <option value="daily">Daily</option>
+                      <option value="weekly" selected>Weekly</option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i> Save Notifications</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Privacy -->
+              <div class="tab-pane fade" id="tab-privacy" role="tabpanel">
+                <form id="formPrivacy" class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Profile visibility</label>
+                    <select name="visibility" class="form-select">
+                      <option value="public">Public</option>
+                      <option value="students">Students only</option>
+                      <option value="private">Private</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 d-flex align-items-center">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" name="allow_messages" checked>
+                      <label class="form-check-label">Allow students to message</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6 d-flex align-items-center">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" name="allow_direct_book" checked>
+                      <label class="form-check-label">Allow direct booking</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6 d-flex align-items-center">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" name="show_location">
+                      <label class="form-check-label">Show city on profile</label>
+                    </div>
+                  </div>
+                  <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i> Save Privacy</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Verification -->
+              <div class="tab-pane fade" id="tab-verification" role="tabpanel">
+                <form id="formVerify" class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Government ID</label>
+                    <input id="idFile" type="file" class="form-control" accept="image/*,application/pdf">
+                    <div class="form-text">Stored securely. Only admins can view.</div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Teaching credential (optional)</label>
+                    <input id="credFile" type="file" class="form-control" accept="image/*,application/pdf">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Business type</label>
+                    <select name="business_type" class="form-select">
+                      <option value="individual">Individual</option>
+                      <option value="company">Company</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Agreement</label>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="tos" required>
+                      <label class="form-check-label">I agree to the Educator Terms of Service</label>
+                    </div>
+                  </div>
+                  <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i> Submit Verification</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Connections -->
+              <div class="tab-pane fade" id="tab-connections" role="tabpanel">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="p-3 border rounded-3 bg-white h-100">
+                      <h6><i class="bi bi-calendar4-week me-1"></i> Google Calendar</h6>
+                      <p class="help mb-2">Sync your availability and accept bookings automatically.</p>
+                      <div id="googleConn" class="mb-2"><span class="badge text-bg-warning">Not connected</span></div>
+                      <button id="btnConnectGoogle" class="btn btn-sm btn-outline-primary"><i class="bi bi-link-45deg me-1"></i> Connect</button>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="p-3 border rounded-3 bg-white h-100">
+                      <h6><i class="bi bi-camera-video me-1"></i> Zoom</h6>
+                      <p class="help mb-2">Auto‑create meeting links for sessions.</p>
+                      <div id="zoomConn" class="mb-2"><span class="badge text-bg-warning">Not connected</span></div>
+                      <button id="btnConnectZoom" class="btn btn-sm btn-outline-primary"><i class="bi bi-link-45deg me-1"></i> Connect</button>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="p-3 border rounded-3 bg-white h-100">
+                      <h6><i class="bi bi-credit-card-2-front me-1"></i> Stripe Connect</h6>
+                      <p class="help mb-2">Faster payouts and instant verification.</p>
+                      <div id="stripeConn" class="mb-2"><span class="badge text-bg-warning">Not connected</span></div>
+                      <button id="btnConnectStripe" class="btn btn-sm btn-outline-primary"><i class="bi bi-link-45deg me-1"></i> Connect</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Preferences -->
+              <div class="tab-pane fade" id="tab-preferences" role="tabpanel">
+                <form id="formPrefs" class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">Language</label>
+                    <select name="lang" class="form-select">
+                      <option value="en">English</option>
+                      <option value="de">Deutsch</option>
+                      <option value="ar">العربية</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Theme</label>
+                    <select name="theme" class="form-select">
+                      <option value="system">System</option>
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Time format</label>
+                    <select name="timefmt" class="form-select">
+                      <option value="24">24‑hour</option>
+                      <option value="12">12‑hour</option>
+                    </select>
+                  </div>
+                  <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i> Save Preferences</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal fade" id="methodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-bank me-2"></i>Add Payment Method</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Type</label>
+            <select id="pmType" class="form-select">
+              <option value="bank">Bank Transfer</option>
+              <option value="paypal">PayPal</option>
+              <option value="wise">Wise</option>
+              <option value="stripe">Stripe Connect</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Label</label>
+            <input id="pmLabel" class="form-control" placeholder="e.g., USD Bank (IBAN)">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Details</label>
+            <textarea id="pmDetails" class="form-control" rows="3" placeholder="IBAN ****, SWIFT **** (stored securely)"></textarea>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pmDefault">
+            <label class="form-check-label" for="pmDefault">Set as default</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="saveMethodBtn" class="btn btn-primary"><i class="bi bi-save me-1"></i> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ===== Utilities =====
+    function createToastContainer(){
+      const c=document.createElement('div');
+      c.id='toastContainer';
+      c.className='toast-container position-fixed bottom-0 end-0 p-3';
+      c.style.zIndex='1055';
+      document.body.appendChild(c);
+      return c;
+    }
+    function showToast(message,type='info'){
+      const container=document.getElementById('toastContainer')||createToastContainer();
+      const el=document.createElement('div');
+      el.className=`toast align-items-center text-bg-${type} border-0`;
+      el.role='alert';
+      el.innerHTML=`
+        <div class='d-flex'>
+          <div class='toast-body'>
+            <i class='bi bi-${type==='success'?'check-circle':type==='danger'?'x-circle':'info-circle'} me-2'></i>
+            ${message}
+          </div>
+          <button type='button' class='btn-close btn-close-white me-2 m-auto' data-bs-dismiss='toast'></button>
+        </div>`;
+      container.appendChild(el);
+      new bootstrap.Toast(el,{delay:3000}).show();
+      el.addEventListener('hidden.bs.toast',()=>el.remove());
+    }
+    function serializeForm(form){
+      const data={};
+      new FormData(form).forEach((v,k)=>{
+        if(data[k]!==undefined){ if(!Array.isArray(data[k])) data[k]=[data[k]]; data[k].push(v); }
+        else data[k]=v;
+      });
+      // switches not included when unchecked → add explicitly
+      form.querySelectorAll('input[type="checkbox"]').forEach(cb=>{ if(!form.contains) return; if(!cb.checked){ if(data[cb.name]===undefined) data[cb.name]=false; } else { if(cb.name) data[cb.name]=true; }});
+      return data;
+    }
+
+    // ===== State =====
+    let payMethods=[];
+
+    document.addEventListener('DOMContentLoaded',()=>{
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      document.getElementById('tzChip').textContent = tz;
+      document.getElementById('tzInput').value = tz;
+
+      initSubjectsChips();
+      initWeekGrid();
+      wireSecurity();
+      wirePayments();
+      wireAvailability();
+      wireForms();
+    });
+
+    // ===== Profile: subjects chips =====
+    function initSubjectsChips(){
+      const input=document.getElementById('subjectsInput');
+      const holder=document.getElementById('subjectsChips');
+      const subjects=new Set();
+      function render(){
+        holder.innerHTML='';
+        subjects.forEach(s=>{
+          const span=document.createElement('span');
+          span.className='chip';
+          span.innerHTML=`<i class='bi bi-book me-1'></i>${s}<span class='x bi bi-x' data-x='${s}'></span>`;
+          holder.appendChild(span);
+        });
+      }
+      input.addEventListener('keydown',e=>{
+        if(e.key==='Enter' && input.value.trim()){
+          e.preventDefault();
+          subjects.add(input.value.trim());
+          input.value='';
+          render();
+        }
+      });
+      holder.addEventListener('click',e=>{
+        const x=e.target.getAttribute('data-x');
+        if(x){ subjects.delete(x); render(); }
+      });
+    }
+
+    // ===== Availability: weekly grid =====
+    function initWeekGrid(){
+      const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      const body=document.getElementById('weekBody');
+      days.forEach((d,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td><strong>${d}</strong></td>
+          <td><div class='form-check form-switch'><input class='form-check-input day-active' type='checkbox' data-day='${i}' checked></div></td>
+          <td><input class='form-control form-control-sm start' type='time' value='09:00'></td>
+          <td><input class='form-control form-control-sm end' type='time' value='17:00'></td>`;
+        body.appendChild(tr);
+      });
+      body.addEventListener('change',e=>{
+        if(e.target.classList.contains('day-active')){
+          const row=e.target.closest('tr');
+          row.querySelectorAll('input[type="time"]').forEach(inp=> inp.disabled=!e.target.checked);
+        }
+      });
+    }
+
+    // ===== Security wiring =====
+    function wireSecurity(){
+      const twoFA=document.getElementById('twoFA');
+      const method=document.getElementById('twoFAMethod');
+      const phone=document.getElementById('twoFAPhone');
+      const appHint=document.getElementById('appHint');
+      const saveBtn=document.getElementById('btn2FASave');
+
+      twoFA.addEventListener('change',()=>{
+        const on=twoFA.checked; method.disabled=!on; phone.disabled=!on || method.value!=='sms'; saveBtn.disabled=!on; appHint.classList.toggle('d-none', !(on && method.value==='app'));
+      });
+      method.addEventListener('change',()=>{
+        phone.disabled = !twoFA.checked || method.value!=='sms';
+        appHint.classList.toggle('d-none', !(twoFA.checked && method.value==='app'));
+      });
+
+      document.getElementById('formPassword').addEventListener('submit',async e=>{
+        e.preventDefault();
+        const p1=document.getElementById('newPass').value; const p2=document.getElementById('newPass2').value;
+        if(p1!==p2){ showToast('Passwords do not match.','danger'); return; }
+        try{
+          const res = await fetch('/api/educator/security/password',{method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(serializeForm(e.target))});
+          if(!res.ok) throw 0; showToast('Password updated.','success'); e.target.reset();
+        }catch{ showToast('Failed to update password (demo).','danger'); }
+      });
+
+      document.getElementById('btn2FASave').addEventListener('click', async ()=>{
+        try{
+          const payload={enabled: twoFA.checked, method: method.value, phone: phone.value};
+          const res = await fetch('/api/educator/security/2fa',{method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+          if(!res.ok) throw 0; showToast('2FA settings saved.','success');
+        }catch{ showToast('Failed to save 2FA (demo).','danger'); }
+      });
+
+      document.getElementById('btnLogoutAll').addEventListener('click', async ()=>{
+        try{ await fetch('/api/educator/security/logout-all',{method:'POST'}); showToast('Logged out of all devices.','success'); }catch{ showToast('Failed (demo).','danger'); }
+      });
+      document.getElementById('btnDeleteAcc').addEventListener('click', async ()=>{
+        if(!confirm('Delete your account? This cannot be undone.')) return;
+        try{ await fetch('/api/educator/security/delete',{method:'DELETE'}); showToast('Account deletion requested.','success'); }catch{ showToast('Failed (demo).','danger'); }
+      });
+    }
+
+    // ===== Payments wiring =====
+    function wirePayments(){
+      const wrap=document.getElementById('payMethods');
+      function render(){
+        wrap.innerHTML='';
+        payMethods.forEach(m=>{
+          const el=document.createElement('div');
+          el.className='method-badge d-flex align-items-center gap-2';
+          el.innerHTML=`<i class='bi bi-${iconFor(m.type)}'></i>${labelFor(m.type)} — <strong>${m.label}</strong> ${m.default?'<span class="badge text-bg-success ms-1">Default</span>':''}
+            <button class='btn btn-sm btn-outline-secondary ms-2' onclick='setDefaultMethod("${m.id}")'><i class='bi bi-check2-circle'></i></button>
+            <button class='btn btn-sm btn-outline-secondary' onclick='editMethod("${m.id}")'><i class='bi bi-pencil'></i></button>
+            <button class='btn btn-sm btn-outline-danger' onclick='removeMethod("${m.id}")'><i class='bi bi-trash'></i></button>`;
+          wrap.appendChild(el);
+        });
+      }
+      window.renderPayMethods = render;
+
+      // Demo initial
+      payMethods=[
+        {id:'m1', type:'bank', label:'Personal USD Bank', default:true},
+        {id:'m2', type:'paypal', label:'PayPal educator@example.com', default:false}
+      ];
+      render();
+
+      document.getElementById('btnAddMethod').addEventListener('click',()=> new bootstrap.Modal('#methodModal').show());
+      document.getElementById('saveMethodBtn').addEventListener('click',()=>{
+        const type=document.getElementById('pmType').value;
+        const label=document.getElementById('pmLabel').value.trim();
+        const details=document.getElementById('pmDetails').value.trim();
+        const isDefault=document.getElementById('pmDefault').checked;
+        const id='m'+(payMethods.length+1);
+        payMethods.push({id,type,label,details, default:isDefault});
+        if(isDefault){ payMethods.forEach(m=> m.default = (m.id===id)); }
+        render();
+        bootstrap.Modal.getInstance(document.getElementById('methodModal')).hide();
+        showToast('Payment method added.','success');
+      });
+
+      window.setDefaultMethod=(id)=>{ payMethods.forEach(m=> m.default=(m.id===id)); render(); showToast('Default method updated.','success'); };
+      window.editMethod=(id)=>{ alert('Open edit modal for '+id+' (wire to API).'); };
+      window.removeMethod=(id)=>{ payMethods = payMethods.filter(m=>m.id!==id); render(); showToast('Payment method removed.','success'); };
+    }
+    function labelFor(type){ return {bank:'Bank Transfer', paypal:'PayPal', wise:'Wise', stripe:'Stripe Connect'}[type]||type; }
+    function iconFor(type){ return {bank:'bank', paypal:'paypal', wise:'currency-exchange', stripe:'credit-card-2-front'}[type]||'credit-card'; }
+
+    // ===== Availability wiring =====
+    function wireAvailability(){
+      const vac=document.getElementById('vacationMode');
+      const start=document.getElementById('vacStart');
+      const end=document.getElementById('vacEnd');
+      vac.addEventListener('change',()=>{ start.disabled=end.disabled=!vac.checked; });
+    }
+
+    // ===== Forms submit wiring =====
+    function wireForms(){
+      document.getElementById('formProfile').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        try{ const res=await fetch('/api/educator/profile',{method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(serializeForm(e.target))}); if(!res.ok) throw 0; showToast('Profile saved.','success'); }catch{ showToast('Failed to save (demo).','danger'); }
+      });
+      document.getElementById('formPayout').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        try{ const res=await fetch('/api/educator/payments',{method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(serializeForm(e.target))}); if(!res.ok) throw 0; showToast('Payment settings saved.','success'); }catch{ showToast('Failed to save (demo).','danger'); }
+      });
+      document.getElementById('formAvail').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const grid=[...document.querySelectorAll('#weekBody tr')].map(tr=>({
+          active: tr.querySelector('.day-active').checked,
+          start: tr.querySelector('.start').value,
+          end: tr.querySelector('.end').value,
+        }));
+        const payload={...serializeForm(e.target), grid};
+        try{ const res=await fetch('/api/educator/availability',{method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)}); if(!res.ok) throw 0; showToast('Availability saved.','success'); }catch{ showToast('Failed to save (demo).','danger'); }
+      });
+      document.getElementById('formNotify').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        try{ const res=await fetch('/api/educator/notifications',{method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(serializeForm(e.target))}); if(!res.ok) throw 0; showToast('Notification settings saved.','success'); }catch{ showToast('Failed to save (demo).','danger'); }
+      });
+      document.getElementById('formPrivacy').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        try{ const res=await fetch('/api/educator/privacy',{method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(serializeForm(e.target))}); if(!res.ok) throw 0; showToast('Privacy settings saved.','success'); }catch{ showToast('Failed to save (demo).','danger'); }
+      });
+      document.getElementById('formVerify').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        // For file upload you'd use multipart/form-data; here we demo only
+        showToast('Verification submitted (demo).','success');
+      });
+      document.getElementById('formPrefs').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        try{ const res=await fetch('/api/educator/preferences',{method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(serializeForm(e.target))}); if(!res.ok) throw 0; showToast('Preferences saved.','success'); }catch{ showToast('Failed to save (demo).','danger'); }
+      });
+
+      document.getElementById('btnSaveAll').addEventListener('click', ()=>{
+        document.getElementById('formProfile').requestSubmit();
+        document.getElementById('formPayout').requestSubmit();
+        document.getElementById('formAvail').requestSubmit();
+        document.getElementById('formNotify').requestSubmit();
+        document.getElementById('formPrivacy').requestSubmit();
+        document.getElementById('formPrefs').requestSubmit();
+      });
+
+      // Avatar preview
+      const avatarInput=document.getElementById('avatarInput');
+      const avatarPreview=document.getElementById('avatarPreview');
+      avatarInput.addEventListener('change',()=>{
+        const f=avatarInput.files?.[0]; if(!f) return; const url=URL.createObjectURL(f); avatarPreview.src=url;
+      });
+      document.getElementById('btnRemoveAvatar').addEventListener('click',()=>{ avatarPreview.src='https://i.pravatar.cc/120?u=placeholder'; });
+
+      // Connections buttons (demo)
+      document.getElementById('btnConnectGoogle').addEventListener('click',()=>{ document.getElementById('googleConn').innerHTML='<span class="badge text-bg-success">Connected</span>'; showToast('Google connected (demo).','success'); });
+      document.getElementById('btnConnectZoom').addEventListener('click',()=>{ document.getElementById('zoomConn').innerHTML='<span class="badge text-bg-success">Connected</span>'; showToast('Zoom connected (demo).','success'); });
+      document.getElementById('btnConnectStripe').addEventListener('click',()=>{ document.getElementById('stripeConn').innerHTML='<span class="badge text-bg-success">Connected</span>'; showToast('Stripe connected (demo).','success'); });
+    }
+  </script>
+</body>
+</html>

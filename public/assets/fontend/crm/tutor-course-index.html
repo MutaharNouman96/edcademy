@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ed-Cademy — Courses</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+
+  <!-- jQuery & DataTables (Bootstrap 5 theme) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"/>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+  <style>
+    :root{
+      --primary-cyan:#006b7d;
+      --dark-cyan:#004a57;
+      --light-cyan:#e0f7fa;
+      --accent:#ff6b35;
+      --bg-soft:#f6f8f9;
+    }
+    body{background:var(--bg-soft);}
+    .brand{color:var(--primary-cyan);font-weight:700;}
+    .header{position:sticky;top:0;z-index:1020;background:#fff;border-bottom:1px solid rgba(0,0,0,.06);}
+    .sidebar{position:sticky;top:0;height:100dvh;overflow-y:auto;background:#fff;border-right:1px solid rgba(0,0,0,.06);}
+    .sidebar .nav-link{color:#425466;border-radius:.5rem;}
+    .sidebar .nav-link.active{background:var(--light-cyan);color:var(--dark-cyan);font-weight:600;}
+    .sidebar .nav-link:hover{background:rgba(0,107,125,.08);color:var(--dark-cyan);}
+    .btn-primary{background:var(--primary-cyan);border-color:var(--primary-cyan);}
+    .btn-primary:hover{background:var(--dark-cyan);border-color:var(--dark-cyan);}
+    .btn-outline-primary{color:var(--primary-cyan);border-color:var(--primary-cyan);}
+    .btn-outline-primary:hover{background:var(--primary-cyan);border-color:var(--primary-cyan);color:#fff;}
+    .card{border-radius:16px;}
+    .table thead th{color:#6b7a8c;font-weight:600;}
+    .section-header{background:var(--light-cyan);border-radius:16px 16px 0 0;padding:1.25rem;border-bottom:1px solid rgba(0,0,0,.06);}
+    .section-title{color:var(--dark-cyan);font-weight:700;margin:0;display:flex;gap:.5rem;align-items:center;}
+    .badge-soft{background:rgba(0,107,125,.1);color:var(--dark-cyan);}
+    .status-badge{font-size:.75rem;padding:.35rem .6rem;border-radius:999px}
+    .status-published{background:rgba(25,135,84,.12);color:#198754;}
+    .status-draft{background:rgba(108,117,125,.12);color:#6c757d;}
+    .status-scheduled{background:rgba(255,193,7,.15);color:#b58100;}
+    .thumb{width:56px;height:40px;object-fit:cover;border-radius:8px;border:1px solid rgba(0,0,0,.06);}
+    .toolbar .form-select,.toolbar .form-control{max-width:220px}
+    .dt-bootstrap5 .row:nth-child(1){align-items:center}
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header py-2">
+    <div class="container-fluid px-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <a href="#" class="text-decoration-none brand">
+            <i class="bi bi-mortarboard-fill me-2"></i>Ed-Cademy
+          </a>
+          <span class="d-none d-md-inline text-muted">All Courses</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <a href="edcademy_course_form.html" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Create Course
+          </a>
+          <div class="dropdown">
+            <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle me-1"></i> Sarah J.
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#">View Public Profile</a></li>
+              <li><a class="dropdown-item" href="#">Account Settings</a></li>
+              <li><a class="dropdown-item" href="#">Switch to Student View</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#">Sign out</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
+        <nav class="nav flex-column gap-1">
+          <a class="nav-link" href="#section-overview"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+          <a class="nav-link active" href="#section-courses"><i class="bi bi-journal-code me-2"></i> My Courses</a>
+          <a class="nav-link" href="#section-videos"><i class="bi bi-camera-video me-2"></i> Videos & Stats</a>
+          <a class="nav-link" href="#section-sessions"><i class="bi bi-calendar3 me-2"></i> Sessions/Bookings</a>
+          <a class="nav-link" href="#section-earnings"><i class="bi bi-cash-coin me-2"></i> Earnings</a>
+          <a class="nav-link" href="#section-escrow"><i class="bi bi-shield-check me-2"></i> Escrow</a>
+          <a class="nav-link" href="#section-payouts"><i class="bi bi-bank me-2"></i> Payouts</a>
+          <a class="nav-link" href="#section-reviews"><i class="bi bi-star-half me-2"></i> Reviews</a>
+          <a class="nav-link" href="#section-messages"><i class="bi bi-chat-dots me-2"></i> Messages</a>
+          <a class="nav-link" href="#section-resources"><i class="bi bi-folder2-open me-2"></i> Resources</a>
+          <a class="nav-link" href="#section-settings"><i class="bi bi-gear me-2"></i> Settings</a>
+        </nav>
+        <hr/>
+        <div class="p-3 rounded" style="background:var(--light-cyan);">
+          <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+            <div>
+              <strong>Finish payouts setup</strong>
+              <p class="mb-2 small">Connect Stripe/PayPal to receive earnings.</p>
+              <button class="btn btn-sm btn-primary w-100"><i class="bi bi-link-45deg me-1"></i> Connect Payouts</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="col-12 col-md-9 col-lg-10 p-4">
+        <div class="card shadow-sm">
+          <div class="section-header">
+            <div class="d-flex align-items-center justify-content-between">
+              <h2 class="section-title"><i class="bi bi-collection"></i> Courses</h2>
+              <div class="toolbar d-flex flex-wrap gap-2">
+                <select id="filterStatus" class="form-select form-select-sm">
+                  <option value="">All Statuses</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                  <option value="scheduled">Scheduled</option>
+                </select>
+                <select id="filterType" class="form-select form-select-sm">
+                  <option value="">All Types</option>
+                  <option value="module">Online Module</option>
+                  <option value="video">Video Pack</option>
+                  <option value="live">Live Cohort</option>
+                </select>
+                <input id="filterSubject" class="form-control form-control-sm" placeholder="Filter by subject…"/>
+                <button id="resetFilters" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+              </div>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="table-responsive">
+              <table id="coursesTable" class="table table-striped align-middle w-100">
+                <thead>
+                  <tr>
+                    <th>Thumb</th>
+                    <th>Title</th>
+                    <th>Subject</th>
+                    <th>Level</th>
+                    <th>Price</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Lessons</th>
+                    <th>Students</th>
+                    <th>Created</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-trash3 me-2"></i>Delete Course</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">Are you sure you want to delete <strong id="delCourseTitle">this course</strong>? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button id="confirmDeleteBtn" class="btn btn-danger">
+            <i class="bi bi-trash3 me-1"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Toast utilities (same style as create page)
+    function createToastContainer(){
+      const c=document.createElement('div');
+      c.id='toastContainer';
+      c.className='toast-container position-fixed bottom-0 end-0 p-3';
+      c.style.zIndex='1055';
+      document.body.appendChild(c);
+      return c;
+    }
+    function showToast(message,type='info'){
+      const container=document.getElementById('toastContainer')||createToastContainer();
+      const el=document.createElement('div');
+      el.className=`toast align-items-center text-bg-${type} border-0`;
+      el.role='alert';
+      el.innerHTML=`
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-${type==='success'?'check-circle':type==='danger'?'x-circle':'info-circle'} me-2"></i>
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>`;
+      container.appendChild(el);
+      new bootstrap.Toast(el,{delay:3000}).show();
+      el.addEventListener('hidden.bs.toast',()=>el.remove());
+    }
+
+    // Helpers
+    function money(v){ return v==null ? '—' : ('$'+Number(v).toFixed(2)); }
+    function statusBadge(s){
+      const map={published:'status-published',draft:'status-draft',scheduled:'status-scheduled'};
+      const label={published:'Published',draft:'Draft',scheduled:'Scheduled'}[s]||s;
+      return `<span class="status-badge ${map[s]||'status-draft'}">${label}</span>`;
+    }
+    function typeLabel(t){
+      return t==='module'?'Online Module':t==='video'?'Video Pack':t==='live'?'Live Cohort':'—';
+    }
+
+    let table, deleteTarget = {id:null,title:''};
+
+    $(function(){
+      // DataTable
+      table = $('#coursesTable').DataTable({
+        processing:true,
+        deferRender:true,
+        ajax:{
+          url:'/api/courses', // <-- replace with your endpoint
+          dataSrc:'',
+          error: function(){
+            // Fallback demo data (only if API fails)
+            const demo=[
+              {id:101, thumbnail:'https://picsum.photos/seed/alg/160/90', title:'Algebra I Crash Course', subject:'Mathematics', level:'High School', price:39, type:'module', status:'published', lessons_count:18, students_count:432, created_at:'2025-08-21T14:03:00Z'},
+              {id:102, thumbnail:'https://picsum.photos/seed/phy/160/90', title:'Physics: Kinematics', subject:'Physics', level:'University', price:59, type:'video', status:'draft', lessons_count:9, students_count:0, created_at:'2025-09-02T09:41:00Z'},
+              {id:103, thumbnail:'https://picsum.photos/seed/eng/160/90', title:'Academic Writing Bootcamp', subject:'English', level:'Professional', price:79, type:'live', status:'scheduled', lessons_count:6, students_count:128, created_at:'2025-09-10T11:10:00Z'}
+            ];
+            table.clear().rows.add(demo).draw();
+            showToast('Loaded demo data (API unavailable).','danger');
+          }
+        },
+        columns:[
+          {data:'thumbnail', orderable:false, render:(d)=>`<img src="${d||''}" class="thumb" alt="thumb">`},
+          {data:null, render:(row)=>`
+            <div class="fw-semibold">${row.title||'Untitled'}</div>
+            <div class="text-muted small">ID: ${row.id}</div>`},
+          {data:'subject', defaultContent:'—'},
+          {data:'level', defaultContent:'—'},
+          {data:'price', render:(d)=>money(d)},
+          {data:'type', render:(d)=>typeLabel(d)},
+          {data:'status', render:(d)=>statusBadge(d)},
+          {data:'lessons_count', defaultContent:0},
+          {data:'students_count', defaultContent:0},
+          {data:'created_at', render:(d)=> d? new Date(d).toLocaleDateString(): '—'},
+          {data:null, orderable:false, searchable:false, className:'text-end', render:(row)=>actionsHtml(row)}
+        ],
+        order:[[9,'desc']],
+        pageLength:10,
+        language:{ searchPlaceholder:'Search courses…', search:'', },
+        initComplete:function(){
+          // Filters
+          $('#filterStatus').on('change',function(){ table.column(6).search(this.value? this.value:'', true, false).draw(); });
+          $('#filterType').on('change',function(){ table.column(5).search($(this).val()? typeLabel($(this).val()):'', true, false).draw(); });
+          $('#filterSubject').on('input',function(){ table.column(2).search(this.value).draw(); });
+          $('#resetFilters').on('click',function(){
+            $('#filterStatus,#filterType').val('');
+            $('#filterSubject').val('');
+            table.search('').columns().search('').draw();
+          });
+        }
+      });
+
+      // Row action handlers (event delegation)
+      $('#coursesTable').on('click','.btn-view',function(){
+        const row = table.row($(this).closest('tr')).data();
+        window.location.href = `/educator/courses/${row.id}`;
+      });
+      $('#coursesTable').on('click','.btn-edit',function(){
+        const row = table.row($(this).closest('tr')).data();
+        window.location.href = `/educator/courses/${row.id}/edit`;
+      });
+      $('#coursesTable').on('click','.btn-delete',function(){
+        const row = table.row($(this).closest('tr')).data();
+        deleteTarget={id:row.id,title:row.title};
+        document.getElementById('delCourseTitle').textContent=row.title || `Course #${row.id}`;
+        new bootstrap.Modal('#deleteModal').show();
+      });
+
+      // "More" menu actions
+      $('#coursesTable').on('click','.act-lessons',function(e){
+        e.preventDefault();
+        const row = table.row($(this).closest('tr')).data();
+        window.location.href = `/educator/courses/${row.id}/lessons`;
+      });
+      $('#coursesTable').on('click','.act-students',function(e){
+        e.preventDefault();
+        const row = table.row($(this).closest('tr')).data();
+        window.location.href = `/educator/courses/${row.id}/students`;
+      });
+      $('#coursesTable').on('click','.act-stats',function(e){
+        e.preventDefault();
+        const row = table.row($(this).closest('tr')).data();
+        window.location.href = `/educator/courses/${row.id}/stats`;
+      });
+
+      // Confirm delete
+      document.getElementById('confirmDeleteBtn').addEventListener('click', async function(){
+        if(!deleteTarget.id) return;
+        try{
+          const res = await fetch(`/api/courses/${deleteTarget.id}`, {method:'DELETE'});
+          if(!res.ok) throw new Error('Failed');
+          showToast(`Deleted “${deleteTarget.title||'Course'}”.`,'success');
+          bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+          table.ajax.reload(null,false);
+        }catch(err){
+          showToast('Unable to delete course.','danger');
+        }
+      });
+    });
+
+    function actionsHtml(row){
+      const id=row.id;
+      return `
+        <div class="btn-group">
+          <button class="btn btn-sm btn-outline-primary btn-view" title="View"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm btn-outline-primary btn-edit" title="Edit"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-delete" title="Delete"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="visually-hidden">More</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item act-lessons" href="#"><i class="bi bi-list-ol me-2"></i>View lessons</a></li>
+            <li><a class="dropdown-item act-students" href="#"><i class="bi bi-people me-2"></i>View subscribed students</a></li>
+            <li><a class="dropdown-item act-stats" href="#"><i class="bi bi-graph-up-arrow me-2"></i>Open course stats</a></li>
+          </ul>
+        </div>`;
+    }
+  </script>
+</body>
+</html>

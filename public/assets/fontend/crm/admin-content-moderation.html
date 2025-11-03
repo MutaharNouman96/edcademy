@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ed-Cademy • Content Moderation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Bootstrap & Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --brand: #0b3c77;
+        --light: #f8fafc;
+      }
+      body {
+        background: var(--light);
+      }
+      .sidebar {
+        min-height: 100vh;
+        background: var(--brand);
+        color: #fff;
+      }
+      .sidebar .nav-link {
+        color: #d1d5db;
+        border-radius: 0.5rem;
+      }
+      .sidebar .nav-link.active,
+      .sidebar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+      }
+      .main-content {
+        padding: 2rem;
+      }
+      .card {
+        border-radius: 1rem;
+      }
+      .table thead th {
+        color: #6b7280;
+        font-weight: 600;
+      }
+      .btn-approve {
+        background: #16a34a;
+        color: #fff;
+      }
+      .btn-reject {
+        background: #dc2626;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <aside class="col-md-3 col-lg-2 p-3 sidebar">
+          <h4 class="mb-4">
+            <i class="bi bi-mortarboard-fill me-2"></i>Ed-Cademy
+          </h4>
+          <nav class="nav flex-column gap-1">
+            <a class="nav-link" href="#"
+              ><i class="bi bi-people-fill"></i>User Management</a
+            >
+            <a class="nav-link active" href="#"
+              ><i class="bi bi-shield-check"></i>Content Moderation</a
+            >
+            <a class="nav-link" href="#"
+              ><i class="bi bi-calendar3"></i>Tutoring & Sessions</a
+            >
+            <a class="nav-link" href="#"
+              ><i class="bi bi-basket"></i>Marketplace & Products</a
+            >
+          </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="col-md-9 col-lg-10 main-content">
+          <h2 class="mb-4">Content Moderation</h2>
+
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+              <button
+                class="nav-link active"
+                data-bs-toggle="tab"
+                data-bs-target="#courses"
+              >
+                Courses
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#lessons"
+              >
+                Lessons
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#videos"
+              >
+                Videos
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#worksheets"
+              >
+                Worksheets
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#assessments"
+              >
+                Assessments
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#flagged"
+              >
+                Flagged Queue
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- Courses -->
+            <div class="tab-pane fade show active" id="courses">
+              <div class="card p-3 mb-4">
+                <h5 class="mb-3">
+                  <i class="bi bi-journal-bookmark me-2"></i>Courses Pending
+                  Review
+                </h5>
+                <table class="table table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Title</th>
+                      <th>Educator</th>
+                      <th>Category</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>101</td>
+                      <td>Algebra Basics</td>
+                      <td>Maryam B.</td>
+                      <td>Mathematics</td>
+                      <td><span class="badge bg-warning">Pending</span></td>
+                      <td>
+                        <button class="btn btn-sm btn-approve">Approve</button>
+                        <button class="btn btn-sm btn-reject">Reject</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>102</td>
+                      <td>World History</td>
+                      <td>Ali R.</td>
+                      <td>History</td>
+                      <td><span class="badge bg-warning">Pending</span></td>
+                      <td>
+                        <button class="btn btn-sm btn-approve">Approve</button>
+                        <button class="btn btn-sm btn-reject">Reject</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Lessons -->
+            <div class="tab-pane fade" id="lessons">
+              <div class="card p-3 mb-4">
+                <h5 class="mb-3">
+                  <i class="bi bi-list-ol me-2"></i>Lesson Moderation
+                </h5>
+                <table class="table table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Lesson</th>
+                      <th>Course</th>
+                      <th>Educator</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>201</td>
+                      <td>Introduction to Cells</td>
+                      <td>Biology 101</td>
+                      <td>Sara M.</td>
+                      <td>
+                        <button class="btn btn-sm btn-approve">Approve</button>
+                        <button class="btn btn-sm btn-reject">Reject</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Videos -->
+            <div class="tab-pane fade" id="videos">
+              <div class="card p-3 mb-4">
+                <h5 class="mb-3">
+                  <i class="bi bi-camera-video me-2"></i>Video Moderation
+                </h5>
+                <table class="table table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Video Title</th>
+                      <th>Course</th>
+                      <th>Duration</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>301</td>
+                      <td>Limits Concept</td>
+                      <td>Calculus</td>
+                      <td>12m</td>
+                      <td>
+                        <button class="btn btn-sm btn-approve">Approve</button>
+                        <button class="btn btn-sm btn-reject">Reject</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Worksheets -->
+            <div class="tab-pane fade" id="worksheets">
+              <div class="card p-3 mb-4">
+                <h5 class="mb-3">
+                  <i class="bi bi-file-earmark-text me-2"></i>Worksheet
+                  Moderation
+                </h5>
+                <table class="table table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Worksheet</th>
+                      <th>Subject</th>
+                      <th>Author</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>401</td>
+                      <td>Algebra Practice</td>
+                      <td>Math</td>
+                      <td>Omar H.</td>
+                      <td>
+                        <button class="btn btn-sm btn-approve">Approve</button>
+                        <button class="btn btn-sm btn-reject">Reject</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Assessments -->
+            <div class="tab-pane fade" id="assessments">
+              <div class="card p-3 mb-4">
+                <h5 class="mb-3">
+                  <i class="bi bi-ui-checks-grid me-2"></i>Assessment Moderation
+                </h5>
+                <table class="table table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Assessment</th>
+                      <th>Course</th>
+                      <th>Questions</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>501</td>
+                      <td>Quiz 1</td>
+                      <td>Physics</td>
+                      <td>10</td>
+                      <td>
+                        <button class="btn btn-sm btn-approve">Approve</button>
+                        <button class="btn btn-sm btn-reject">Reject</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Flagged Queue -->
+            <div class="tab-pane fade" id="flagged">
+              <div class="card p-3 mb-4">
+                <h5 class="mb-3">
+                  <i class="bi bi-flag-fill me-2 text-danger"></i>Flagged Items
+                  Queue
+                </h5>
+                <table class="table table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Type</th>
+                      <th>Title</th>
+                      <th>Reported By</th>
+                      <th>Reason</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>701</td>
+                      <td>Video</td>
+                      <td>Derivatives Explained</td>
+                      <td>User #202</td>
+                      <td>Copyright Claim</td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-secondary">
+                          Review
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>702</td>
+                      <td>Worksheet</td>
+                      <td>Essay Template</td>
+                      <td>User #88</td>
+                      <td>Inappropriate Content</td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-secondary">
+                          Review
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

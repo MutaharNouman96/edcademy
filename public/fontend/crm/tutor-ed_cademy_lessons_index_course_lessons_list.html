@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ed‑Cademy — Course Lessons</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+
+  <!-- jQuery & DataTables (Bootstrap 5 theme) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"/>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+  <style>
+    :root{
+      --primary-cyan:#006b7d;
+      --dark-cyan:#004a57;
+      --light-cyan:#e0f7fa;
+      --accent:#ff6b35;
+      --bg-soft:#f6f8f9;
+    }
+    body{background:var(--bg-soft);}
+    .brand{color:var(--primary-cyan);font-weight:700;}
+    .header{position:sticky;top:0;z-index:1020;background:#fff;border-bottom:1px solid rgba(0,0,0,.06);} 
+    .sidebar{position:sticky;top:0;height:100dvh;overflow-y:auto;background:#fff;border-right:1px solid rgba(0,0,0,.06);} 
+    .sidebar .nav-link{color:#425466;border-radius:.5rem;}
+    .sidebar .nav-link.active{background:var(--light-cyan);color:var(--dark-cyan);font-weight:600;}
+    .sidebar .nav-link:hover{background:rgba(0,107,125,.08);color:var(--dark-cyan);} 
+    .btn-primary{background:var(--primary-cyan);border-color:var(--primary-cyan);} 
+    .btn-primary:hover{background:var(--dark-cyan);border-color:var(--dark-cyan);} 
+    .btn-outline-primary{color:var(--primary-cyan);border-color:var(--primary-cyan);} 
+    .btn-outline-primary:hover{background:var(--primary-cyan);border-color:var(--primary-cyan);color:#fff;} 
+    .card{border-radius:16px;} 
+    .table thead th{color:#6b7a8c;font-weight:600;} 
+    .section-header{background:var(--light-cyan);border-radius:16px 16px 0 0;padding:1.25rem;border-bottom:1px solid rgba(0,0,0,.06);} 
+    .section-title{color:var(--dark-cyan);font-weight:700;margin:0;display:flex;gap:.5rem;align-items:center;} 
+    .status-badge{font-size:.75rem;padding:.35rem .6rem;border-radius:999px}
+    .status-published{background:rgba(25,135,84,.12);color:#198754;}
+    .status-draft{background:rgba(108,117,125,.12);color:#6c757d;}
+    .status-scheduled{background:rgba(255,193,7,.15);color:#b58100;}
+    .type-chip{font-size:.75rem;padding:.25rem .55rem;border:1px solid rgba(0,0,0,.08);border-radius:999px;background:#fff;}
+    .toolbar .form-select,.toolbar .form-control{max-width:220px}
+    .dt-bootstrap5 .row:nth-child(1){align-items:center}
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header py-2">
+    <div class="container-fluid px-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <a href="/educator/courses" class="text-decoration-none brand">
+            <i class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy
+          </a>
+          <nav aria-label="breadcrumb" class="d-none d-md-block">
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="/educator/courses" class="text-decoration-none">Courses</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Lessons</li>
+            </ol>
+          </nav>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button id="btnCreateLesson" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Create Lesson
+          </button>
+          <div class="dropdown">
+            <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle me-1"></i> Sarah J.
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#">View Public Profile</a></li>
+              <li><a class="dropdown-item" href="#">Account Settings</a></li>
+              <li><a class="dropdown-item" href="#">Switch to Student View</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#">Sign out</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
+        <nav class="nav flex-column gap-1">
+          <a class="nav-link" href="/educator"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+          <a class="nav-link active" href="/educator/courses"><i class="bi bi-journal-code me-2"></i> My Courses</a>
+          <a class="nav-link" href="#section-videos"><i class="bi bi-camera-video me-2"></i> Videos & Stats</a>
+          <a class="nav-link" href="#section-sessions"><i class="bi bi-calendar3 me-2"></i> Sessions/Bookings</a>
+          <a class="nav-link" href="#section-earnings"><i class="bi bi-cash-coin me-2"></i> Earnings</a>
+          <a class="nav-link" href="#section-escrow"><i class="bi bi-shield-check me-2"></i> Escrow</a>
+          <a class="nav-link" href="#section-payouts"><i class="bi bi-bank me-2"></i> Payouts</a>
+          <a class="nav-link" href="#section-reviews"><i class="bi bi-star-half me-2"></i> Reviews</a>
+          <a class="nav-link" href="#section-messages"><i class="bi bi-chat-dots me-2"></i> Messages</a>
+          <a class="nav-link" href="#section-resources"><i class="bi bi-folder2-open me-2"></i> Resources</a>
+          <a class="nav-link" href="#section-settings"><i class="bi bi-gear me-2"></i> Settings</a>
+        </nav>
+        <hr/>
+        <div class="p-3 rounded" style="background:var(--light-cyan);">
+          <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+            <div>
+              <strong>Tip:</strong>
+              <p class="mb-2 small">Use the dropdown to see who watched a lesson or open analytics.</p>
+              <button class="btn btn-sm btn-outline-primary w-100" id="btnBackToCourse"><i class="bi bi-arrow-left me-1"></i> Back to Course</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="col-12 col-md-9 col-lg-10 p-4">
+        <div class="card shadow-sm">
+          <div class="section-header">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <h2 class="section-title"><i class="bi bi-list-ol"></i> Lessons <span id="courseTitleSpan" class="ms-2 text-muted fs-6"></span></h2>
+              <div class="toolbar d-flex flex-wrap gap-2">
+                <select id="filterStatus" class="form-select form-select-sm">
+                  <option value="">All Statuses</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                  <option value="scheduled">Scheduled</option>
+                </select>
+                <select id="filterType" class="form-select form-select-sm">
+                  <option value="">All Types</option>
+                  <option value="video">Video</option>
+                  <option value="quiz">Quiz</option>
+                  <option value="reading">Reading</option>
+                  <option value="assignment">Assignment</option>
+                  <option value="live">Live Session</option>
+                </select>
+                <input id="filterText" class="form-control form-control-sm" placeholder="Filter by title…"/>
+                <button id="resetFilters" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+              </div>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="table-responsive">
+              <table id="lessonsTable" class="table table-striped align-middle w-100">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th>Completions</th>
+                    <th>Published</th>
+                    <th>Updated</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-trash3 me-2"></i>Delete Lesson</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">Are you sure you want to delete <strong id="delLessonTitle">this lesson</strong>? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button id="confirmDeleteBtn" class="btn btn-danger">
+            <i class="bi bi-trash3 me-1"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ===== Utilities =====
+    function parseQuery(){
+      const q={};
+      const qs = window.location.search.substring(1).split('&').filter(Boolean);
+      for(const kv of qs){const [k,v] = kv.split('='); q[decodeURIComponent(k)] = decodeURIComponent(v||'');}
+      return q;
+    }
+    function createToastContainer(){
+      const c=document.createElement('div');
+      c.id='toastContainer';
+      c.className='toast-container position-fixed bottom-0 end-0 p-3';
+      c.style.zIndex='1055';
+      document.body.appendChild(c);
+      return c;
+    }
+    function showToast(message,type='info'){
+      const container=document.getElementById('toastContainer')||createToastContainer();
+      const el=document.createElement('div');
+      el.className=`toast align-items-center text-bg-${type} border-0`;
+      el.role='alert';
+      el.innerHTML=`
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-${type==='success'?'check-circle':type==='danger'?'x-circle':'info-circle'} me-2"></i>
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>`;
+      container.appendChild(el);
+      new bootstrap.Toast(el,{delay:3000}).show();
+      el.addEventListener('hidden.bs.toast',()=>el.remove());
+    }
+    const money=v=> v==null? '—' : ('$'+Number(v).toFixed(2));
+    function statusBadge(s){
+      const map={published:'status-published',draft:'status-draft',scheduled:'status-scheduled'};
+      const label={published:'Published',draft:'Draft',scheduled:'Scheduled'}[s]||s;
+      return `<span class="status-badge ${map[s]||'status-draft'}">${label}</span>`;
+    }
+    function typeChip(t){
+      const label={video:'Video',quiz:'Quiz',reading:'Reading',assignment:'Assignment',live:'Live Session'}[t]||'—';
+      return `<span class="type-chip"><i class="bi bi-${t==='video'?'camera-video':t==='quiz'?'patch-question':t==='reading'?'book':t==='assignment'?'clipboard-check':'broadcast'} me-1"></i>${label}</span>`;
+    }
+    const durationFmt = s=>{
+      if(s==null) return '—';
+      const m = Math.floor(s/60), sec=s%60; 
+      return m ? `${m}m ${sec?s%60+'s':''}`.trim() : `${sec}s`;
+    }
+
+    let table, deleteTarget={id:null,title:''}, courseId=null, courseTitle='';
+
+    $(function(){
+      const q=parseQuery();
+      courseId = q.course_id || q.courseId || (window.COURSE_ID||'123');
+      courseTitle = q.course_title || q.title || '';
+      if(courseTitle) document.getElementById('courseTitleSpan').textContent = `— ${courseTitle}`;
+
+      // Button actions
+      document.getElementById('btnCreateLesson').addEventListener('click',()=>{
+        window.location.href = `/educator/courses/${courseId}/lessons/create`;
+      });
+      document.getElementById('btnBackToCourse').addEventListener('click',()=>{
+        window.location.href = `/educator/courses/${courseId}`;
+      });
+
+      // DataTable init
+      table = $('#lessonsTable').DataTable({
+        processing:true,
+        deferRender:true,
+        ajax:{
+          url:`/api/courses/${courseId}/lessons`, // <-- replace with your endpoint
+          dataSrc:'',
+          error:function(){
+            const demo=[
+              {id:201, index:1, title:'Introduction & Syllabus', type:'video', duration_sec:420, status:'published', views:812, completions:700, published_at:'2025-08-21T16:00:00Z', updated_at:'2025-09-05T10:00:00Z'},
+              {id:202, index:2, title:'Lesson 1: Variables & Types', type:'reading', duration_sec:540, status:'published', views:640, completions:512, published_at:'2025-08-22T16:00:00Z', updated_at:'2025-09-07T09:12:00Z'},
+              {id:203, index:3, title:'Quiz 1 (Basics)', type:'quiz', duration_sec:300, status:'draft', views:0, completions:0, published_at:null, updated_at:'2025-09-10T12:15:00Z'},
+              {id:204, index:4, title:'Project: Mini‑Calculator', type:'assignment', duration_sec:900, status:'scheduled', views:12, completions:4, published_at:'2025-09-20T12:00:00Z', updated_at:'2025-09-12T12:00:00Z'}
+            ];
+            table.clear().rows.add(demo).draw();
+            showToast('Loaded demo lessons (API unavailable).','danger');
+          }
+        },
+        columns:[
+          {data:'index', defaultContent:'—', width:'36px'},
+          {data:null, render:(row)=>`<div class="fw-semibold">${row.title||'Untitled lesson'}</div><div class="text-muted small">ID: ${row.id}</div>`},
+          {data:'type', render:(d)=>typeChip(d)},
+          {data:'duration_sec', render:(d)=>durationFmt(Number(d||0))},
+          {data:'status', render:(d)=>statusBadge(d)},
+          {data:'views', defaultContent:0},
+          {data:'completions', defaultContent:0},
+          {data:'published_at', render:(d)=> d? new Date(d).toLocaleString(): '—'},
+          {data:'updated_at', render:(d)=> d? new Date(d).toLocaleString(): '—'},
+          {data:null, orderable:false, searchable:false, className:'text-end', render:(row)=>actionsHtml(row)}
+        ],
+        order:[[0,'asc']],
+        pageLength:10,
+        language:{ searchPlaceholder:'Search lessons…', search:'', },
+        initComplete:function(){
+          $('#filterStatus').on('change',function(){ table.column(4).search(this.value? this.value:'', true, false).draw(); });
+          $('#filterType').on('change',function(){ const v=$(this).val(); table.column(2).search(v? v:'' , true, false).draw(); });
+          $('#filterText').on('input',function(){ table.column(1).search(this.value).draw(); });
+          $('#resetFilters').on('click',function(){
+            $('#filterStatus,#filterType').val('');
+            $('#filterText').val('');
+            table.search('').columns().search('').draw();
+          });
+        }
+      });
+
+      // Row actions
+      $('#lessonsTable').on('click','.btn-view',function(){
+        const row = table.row($(this).closest('tr')).data();
+        window.location.href = `/educator/courses/${courseId}/lessons/${row.id}`;
+      });
+      $('#lessonsTable').on('click','.btn-edit',function(){
+        const row = table.row($(this).closest('tr')).data();
+        window.location.href = `/educator/courses/${courseId}/lessons/${row.id}/edit`;
+      });
+      $('#lessonsTable').on('click','.btn-delete',function(){
+        const row = table.row($(this).closest('tr')).data();
+        deleteTarget={id:row.id,title:row.title};
+        document.getElementById('delLessonTitle').textContent=row.title || `Lesson #${row.id}`;
+        new bootstrap.Modal('#deleteModal').show();
+      });
+
+      // More dropdown actions
+      $('#lessonsTable').on('click','.act-students',function(e){
+        e.preventDefault();
+        const row = table.row($(this).closest('tr')).data();
+        window.location.href = `/educator/courses/${courseId}/lessons/${row.id}/students`;
+      });
+      $('#lessonsTable').on('click','.act-analytics',function(e){
+        e.preventDefault();
+        const row = table.row($(this).closest('tr')).data();
+        window.location.href = `/educator/courses/${courseId}/lessons/${row.id}/analytics`;
+      });
+
+      // Confirm delete
+      document.getElementById('confirmDeleteBtn').addEventListener('click', async function(){
+        if(!deleteTarget.id) return;
+        try{
+          const res = await fetch(`/api/courses/${courseId}/lessons/${deleteTarget.id}`, {method:'DELETE'});
+          if(!res.ok) throw new Error('Failed');
+          showToast(`Deleted “${deleteTarget.title||'Lesson'}”.`,'success');
+          bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+          table.ajax.reload(null,false);
+        }catch(err){
+          showToast('Unable to delete lesson.','danger');
+        }
+      });
+    });
+
+    function actionsHtml(row){
+      return `
+        <div class="btn-group">
+          <button class="btn btn-sm btn-outline-primary btn-view" title="View"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm btn-outline-primary btn-edit" title="Edit"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-delete" title="Delete"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="visually-hidden">More</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item act-students" href="#"><i class="bi bi-people me-2"></i>Students watched</a></li>
+            <li><a class="dropdown-item act-analytics" href="#"><i class="bi bi-graph-up-arrow me-2"></i>Lesson analytics</a></li>
+          </ul>
+        </div>`;
+    }
+  </script>
+</body>
+</html>

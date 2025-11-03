@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ed-Cademy — Profile Settings</title>
+
+  <!-- Bootstrap & Icons (matching project) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --primary: #6f42c1;
+      --primary-dark: #4b2a87;
+      --primary-50: #f3e8ff;
+      --bg: #f7f7fb;
+      --muted: #6b7280;
+    }
+    html,body{height:100%}
+    body{background:var(--bg); color:#111; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    .brand{color:var(--primary); font-weight:700;}
+    .header{position:sticky; top:0; z-index:1020; background:#fff; border-bottom:1px solid rgba(0,0,0,.06)}
+    .sidebar{position:sticky; top:58px; height:calc(100dvh - 58px); overflow-y:auto; background:#fff; border-right:1px solid rgba(0,0,0,.06)}
+    .sidebar .nav-link{color:#4b5563; border-radius:.5rem;}
+    .sidebar .nav-link.active{background:var(--primary-50); color:var(--primary-dark); font-weight:600;}
+    .card{border-radius:12px;}
+    .kpi-card{border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.05);}
+    .avatar-preview{width:88px; height:88px; border-radius:12px; object-fit:cover; border:1px solid rgba(0,0,0,.06);}
+    .form-section{background:#fff; border-radius:12px; padding:1rem;}
+    .small-muted{color:var(--muted); font-size:.9rem;}
+    .pill{padding:.15rem .5rem; border-radius:9999px; font-size:.75rem;}
+    /* Accessibility helper */
+    .large-text{font-size:1.125rem}
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header py-2">
+    <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <a class="brand text-decoration-none" href="edcademy-landing.html"><i class="bi bi-mortarboard-fill me-2"></i>Ed-Cademy</a>
+        <span class="text-muted d-none d-md-inline">Student settings</span>
+      </div>
+
+      <div class="d-flex gap-2 align-items-center">
+        <a class="btn btn-sm btn-outline-primary" href="#"><i class="bi bi-chat-dots me-1"></i> Messages</a>
+        <div class="dropdown">
+          <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-person-circle me-1"></i> Niaz</button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="edcademy_student_dashboard.html">Dashboard</a></li>
+            <li><a class="dropdown-item" href="edcademy_student_payments.html">Payments</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#">Sign out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
+        <nav class="nav flex-column gap-1">
+          <a class="nav-link" href="edcademy_student_dashboard.html"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+          <a class="nav-link" href="edcademy_student_my_courses.html"><i class="bi bi-journal-richtext me-2"></i> My Courses</a>
+          <a class="nav-link" href="edcademy_student_analytics.html"><i class="bi bi-graph-up-arrow me-2"></i> Analytics</a>
+          <a class="nav-link" href="edcademy_student_payments.html"><i class="bi bi-wallet2 me-2"></i> Payments</a>
+          <a class="nav-link active" href="#"><i class="bi bi-gear me-2"></i> Settings</a>
+        </nav>
+
+        <hr/>
+        <div class="p-3 rounded" style="background:var(--primary-50);">
+          <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-lightning-charge-fill text-warning fs-5"></i>
+            <div>
+              <strong>Pro tip</strong>
+              <p class="mb-0 small text-muted">Enable 2-factor for stronger account protection.</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="col-12 col-md-9 col-lg-10 p-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h2 class="h4 mb-0">Profile & Settings</h2>
+          <div class="small-muted">Manage your account, privacy, notifications and learning preferences</div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="card p-3">
+              <!-- Tabs -->
+              <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                <li class="nav-item" role="presentation"><button class="nav-link active" id="tab-profile" data-bs-toggle="tab" data-bs-target="#pane-profile" type="button" role="tab">Profile</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" id="tab-account" data-bs-toggle="tab" data-bs-target="#pane-account" type="button" role="tab">Account</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" id="tab-security" data-bs-toggle="tab" data-bs-target="#pane-security" type="button" role="tab">Security</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" id="tab-notifications" data-bs-toggle="tab" data-bs-target="#pane-notifications" type="button" role="tab">Notifications</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" id="tab-privacy" data-bs-toggle="tab" data-bs-target="#pane-privacy" type="button" role="tab">Privacy & Data</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" id="tab-learning" data-bs-toggle="tab" data-bs-target="#pane-learning" type="button" role="tab">Learning Preferences</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" id="tab-billing" data-bs-toggle="tab" data-bs-target="#pane-billing" type="button" role="tab">Billing & Payments</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" id="tab-access" data-bs-toggle="tab" data-bs-target="#pane-access" type="button" role="tab">Accessibility</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" id="tab-connections" data-bs-toggle="tab" data-bs-target="#pane-connections" type="button" role="tab">Connected Accounts</button></li>
+                <li class="nav-item ms-auto" role="presentation"><button class="btn btn-sm btn-outline-secondary" id="saveAllBtn">Save All</button></li>
+              </ul>
+
+              <div class="tab-content mt-3">
+                <!-- Profile Pane -->
+                <div class="tab-pane fade show active" id="pane-profile" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <div class="form-section">
+                        <div class="d-flex flex-column align-items-center text-center">
+                          <img id="avatarPreview" src="https://www.teachhub.com/wp-content/uploads/2021/09/Aug-30-Challenges-Faced-by-a-First-Generation-College-Student_web-768x519.jpg" alt="avatar" class="avatar-preview mb-2">
+                          <div class="mb-2">
+                            <small class="text-muted d-block">Profile picture</small>
+                            <input class="form-control form-control-sm mt-2" type="file" id="avatarInput" accept="image/*">
+                          </div>
+                          <button class="btn btn-sm btn-outline-primary" id="removeAvatarBtn">Remove</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-8">
+                      <div class="form-section">
+                        <div class="mb-3 row">
+                          <label class="col-sm-3 col-form-label">Full name</label>
+                          <div class="col-sm-9"><input id="fullName" class="form-control" value="Muhammad Niaz Khan"></div>
+                        </div>
+
+                        <div class="mb-3 row">
+                          <label class="col-sm-3 col-form-label">Display name</label>
+                          <div class="col-sm-9"><input id="displayName" class="form-control" value="Niaz"></div>
+                        </div>
+
+                        <div class="mb-3 row">
+                          <label class="col-sm-3 col-form-label">Pronouns</label>
+                          <div class="col-sm-9">
+                            <select id="pronouns" class="form-select">
+                              <option value="">Prefer not to say</option>
+                              <option value="he/him" selected>He/Him</option>
+                              <option value="she/her">She/Her</option>
+                              <option value="they/them">They/Them</option>
+                              <option value="other">Other</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="mb-3 row">
+                          <label class="col-sm-3 col-form-label">Bio</label>
+                          <div class="col-sm-9">
+                            <textarea id="bio" class="form-control" rows="3" placeholder="Short bio — what you'd like teachers & peers to know.">PhD candidate, soft robotics & web dev enthusiast.</textarea>
+                            <small class="text-muted">Shown on your profile. Max 250 characters.</small>
+                          </div>
+                        </div>
+
+                        <div class="row g-3">
+                          <div class="col-md-6">
+                            <label class="form-label small-muted">Location</label>
+                            <input id="location" class="form-control" value="Dubai, UAE">
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label small-muted">Website / Portfolio</label>
+                            <input id="website" class="form-control" placeholder="https://">
+                          </div>
+                        </div>
+
+                        <div class="row g-3 mt-3">
+                          <div class="col-md-6">
+                            <label class="form-label small-muted">Education level</label>
+                            <select id="education" class="form-select">
+                              <option value="university" selected>University</option>
+                              <option value="high">High School</option>
+                              <option value="professional">Professional</option>
+                              <option value="other">Other</option>
+                            </select>
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label small-muted">Interests</label>
+                            <input id="interests" class="form-control" placeholder="e.g., calculus, robotics, IELTS">
+                          </div>
+                        </div>
+
+                        <div class="mt-3 d-flex gap-2">
+                          <button class="btn btn-primary" data-save="profile">Save profile</button>
+                          <button class="btn btn-outline-secondary" id="previewProfileBtn">Preview public profile</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Account Pane -->
+                <div class="tab-pane fade" id="pane-account" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-md-8">
+                      <div class="form-section">
+                        <h6>Account</h6>
+                        <div class="mb-3 row">
+                          <label class="col-sm-3 col-form-label">Email</label>
+                          <div class="col-sm-9">
+                            <input id="email" class="form-control" value="niaz@example.com" type="email">
+                            <small class="text-muted">Primary email used for sign in and notifications.</small>
+                          </div>
+                        </div>
+
+                        <div class="mb-3 row">
+                          <label class="col-sm-3 col-form-label">Phone</label>
+                          <div class="col-sm-9">
+                            <input id="phone" class="form-control" value="+971 50 123 4567">
+                            <small class="text-muted">Used for SMS notifications and 2-factor.</small>
+                          </div>
+                        </div>
+
+                        <div class="row g-3">
+                          <div class="col-md-6">
+                            <label class="form-label">Language</label>
+                            <select id="language" class="form-select">
+                              <option value="en" selected>English</option>
+                              <option value="ar">Arabic</option>
+                              <option value="zh">中文</option>
+                              <option value="fr">Français</option>
+                            </select>
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label">Timezone</label>
+                            <select id="timezone" class="form-select">
+                              <option value="Asia/Dubai" selected>UTC+04:00 — Asia/Dubai</option>
+                              <option value="Europe/London">UTC+00:00 — Europe/London</option>
+                              <option value="America/New_York">UTC-04:00 — America/New_York</option>
+                              <option value="Asia/Kolkata">UTC+05:30 — Asia/Kolkata</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="mt-3 d-flex gap-2">
+                          <button class="btn btn-primary" data-save="account">Save account</button>
+                          <button class="btn btn-outline-secondary" id="exportDataBtn">Export my data</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-section">
+                        <h6>Connected devices & sessions</h6>
+                        <div id="sessionsList" class="small-muted">
+                          <!-- populated by JS -->
+                        </div>
+                        <div class="mt-3">
+                          <button class="btn btn-sm btn-outline-danger" id="revokeAllSessions">Sign out all devices</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Security Pane -->
+                <div class="tab-pane fade" id="pane-security" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-md-7">
+                      <div class="form-section">
+                        <h6>Change password</h6>
+                        <div class="mb-2">
+                          <label class="form-label small-muted">Current password</label>
+                          <input id="curPass" class="form-control" type="password" placeholder="••••••">
+                        </div>
+                        <div class="mb-2">
+                          <label class="form-label small-muted">New password</label>
+                          <input id="newPass" class="form-control" type="password" placeholder="At least 8 characters">
+                        </div>
+                        <div class="mb-2">
+                          <label class="form-label small-muted">Confirm new</label>
+                          <input id="confirmPass" class="form-control" type="password">
+                        </div>
+                        <div class="mt-2">
+                          <button class="btn btn-primary" data-save="password">Update password</button>
+                        </div>
+                      </div>
+
+                      <div class="form-section mt-3">
+                        <h6>Two-factor authentication (2FA)</h6>
+                        <p class="small-muted">Add an extra layer of account security.</p>
+                        <div class="d-flex align-items-center gap-3">
+                          <div>
+                            <div class="form-check form-switch">
+                              <input class="form-check-input" id="toggle2fa" type="checkbox">
+                              <label class="form-check-label" for="toggle2fa">Enable 2FA</label>
+                            </div>
+                            <small class="text-muted">Use an authenticator app (TOTP) or SMS.</small>
+                          </div>
+                          <div class="ms-auto">
+                            <button id="setup2faBtn" class="btn btn-sm btn-outline-primary">Setup</button>
+                          </div>
+                        </div>
+                        <div id="twoFaDetails" class="mt-3 small-muted" style="display:none;">
+                          <p><strong>Recovery codes</strong>: <span class="pill bg-light border">XXXX-XXXX</span></p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-5">
+                      <div class="form-section">
+                        <h6>Active sessions</h6>
+                        <div id="sessionCards" class="list-group small-muted">
+                          <!-- JS will insert real sessions -->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Notifications Pane -->
+                <div class="tab-pane fade" id="pane-notifications" role="tabpanel">
+                  <div class="form-section">
+                    <h6>Notification preferences</h6>
+                    <p class="small-muted mb-3">Choose how you would like to receive platform updates, course alerts and marketing.</p>
+
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <h6 class="mb-2">By channel</h6>
+                        <div class="form-check"><input class="form-check-input" id="notifyEmail" type="checkbox" checked><label class="form-check-label" for="notifyEmail">Email</label></div>
+                        <div class="form-check"><input class="form-check-input" id="notifySMS" type="checkbox"><label class="form-check-label" for="notifySMS">SMS</label></div>
+                        <div class="form-check"><input class="form-check-input" id="notifyPush" type="checkbox" checked><label class="form-check-label" for="notifyPush">Push (mobile)</label></div>
+                        <div class="form-check"><input class="form-check-input" id="notifyInApp" type="checkbox" checked><label class="form-check-label" for="notifyInApp">In-app</label></div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <h6 class="mb-2">By event</h6>
+                        <div class="form-check"><input class="form-check-input" id="evtCourseRelease" type="checkbox" checked><label class="form-check-label" for="evtCourseRelease">New lesson released</label></div>
+                        <div class="form-check"><input class="form-check-input" id="evtAssignment" type="checkbox" checked><label class="form-check-label" for="evtAssignment">Assignment & quiz results</label></div>
+                        <div class="form-check"><input class="form-check-input" id="evtPromos" type="checkbox"><label class="form-check-label" for="evtPromos">Promotions & offers</label></div>
+                        <div class="form-check"><input class="form-check-input" id="evtSystem" type="checkbox" checked><label class="form-check-label" for="evtSystem">System notices (billing, security)</label></div>
+                      </div>
+                    </div>
+
+                    <div class="mt-3 d-flex gap-2">
+                      <button class="btn btn-primary" data-save="notifications">Save notifications</button>
+                      <button class="btn btn-outline-secondary" id="muteAllBtn">Mute non-essential</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Privacy Pane -->
+                <div class="tab-pane fade" id="pane-privacy" role="tabpanel">
+                  <div class="form-section">
+                    <h6>Privacy & Data</h6>
+                    <p class="small-muted mb-3">Control profile visibility, data export and account deletion.</p>
+
+                    <div class="mb-3">
+                      <label class="form-label">Profile visibility</label>
+                      <select id="profileVisibility" class="form-select">
+                        <option value="public">Public — visible to others</option>
+                        <option value="registered" selected>Registered users only</option>
+                        <option value="private">Private — only me</option>
+                      </select>
+                      <small class="text-muted">Choose who can view your profile and activity.</small>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Search & discovery</label>
+                      <div class="form-check"><input class="form-check-input" id="allowDiscovery" type="checkbox" checked><label class="form-check-label" for="allowDiscovery">Allow search engines to index my public profile</label></div>
+                    </div>
+
+                    <hr/>
+
+                    <h6>Data controls</h6>
+                    <div class="mb-3">
+                      <button class="btn btn-outline-primary" id="downloadDataBtn">Download a copy of my data</button>
+                      <button class="btn btn-outline-secondary ms-2" id="requestDeletionBtn">Request data deletion</button>
+                    </div>
+
+                    <div class="mt-3 text-danger">
+                      <strong>Danger zone</strong>
+                      <p class="small-muted">Delete your account and all associated data. This action is irreversible.</p>
+                      <button class="btn btn-danger" id="deleteAccountBtn">Delete account</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Learning Preferences Pane -->
+                <div class="tab-pane fade" id="pane-learning" role="tabpanel">
+                  <div class="form-section">
+                    <h6>Learning preferences</h6>
+                    <p class="small-muted">Personalize how lessons are delivered and suggested.</p>
+
+                    <div class="row g-3">
+                      <div class="col-md-4">
+                        <label class="form-label">Default playback speed</label>
+                        <select id="playbackSpeed" class="form-select"><option>1x</option><option>1.25x</option><option>1.5x</option><option>0.75x</option></select>
+                      </div>
+
+                      <div class="col-md-4">
+                        <label class="form-label">Subtitles / CC</label>
+                        <select id="ccPref" class="form-select"><option>Off</option><option selected>On (preferred language)</option></select>
+                      </div>
+
+                      <div class="col-md-4">
+                        <label class="form-label">Autoplay next</label>
+                        <div class="form-check form-switch mt-2"><input class="form-check-input" id="autoplayNext" type="checkbox" checked></div>
+                      </div>
+
+                      <div class="col-12 mt-3">
+                        <label class="form-label">Preferred topics (for recommendations)</label>
+                        <input id="prefTopics" class="form-control" placeholder="e.g., calculus, IELTS, data science">
+                        <small class="text-muted">Comma separated — used to personalize course suggestions.</small>
+                      </div>
+
+                      <div class="col-12 mt-3">
+                        <label class="form-label">Study goals</label>
+                        <textarea id="studyGoals" class="form-control" rows="3" placeholder="e.g., finish Calculus I by December, 1 lesson per day"></textarea>
+                      </div>
+                    </div>
+
+                    <div class="mt-3">
+                      <button class="btn btn-primary" data-save="learning">Save learning prefs</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Billing Pane -->
+                <div class="tab-pane fade" id="pane-billing" role="tabpanel">
+                  <div class="form-section">
+                    <h6>Billing & payment methods</h6>
+                    <p class="small-muted">Manage cards, receipts and subscription status.</p>
+
+                    <div class="mb-3">
+                      <label class="form-label">Default payment method</label>
+                      <div class="d-flex align-items-center gap-3">
+                        <div>
+                          <div class="fw-semibold">Visa •••• 4242</div>
+                          <small class="text-muted d-block">Expires 10/2026</small>
+                        </div>
+                        <div class="ms-auto">
+                          <button class="btn btn-sm btn-outline-primary" id="editCardBtn">Edit</button>
+                          <button class="btn btn-sm btn-outline-danger" id="removeCardBtn">Remove</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <button class="btn btn-sm btn-outline-primary" id="addCardBtn"><i class="bi bi-plus-circle me-1"></i> Add new card</button>
+                      <button class="btn btn-sm btn-outline-secondary ms-2" id="downloadInvoicesBtn">Download invoices</button>
+                    </div>
+
+                    <hr/>
+
+                    <h6>Subscriptions</h6>
+                    <div class="d-flex align-items-center gap-3">
+                      <div>
+                        <div class="fw-semibold">Premium</div>
+                        <small class="text-muted d-block">Monthly • Next billed Oct 15, 2025</small>
+                      </div>
+                      <div class="ms-auto">
+                        <button class="btn btn-outline-danger" id="cancelSubBtn">Cancel subscription</button>
+                        <button class="btn btn-primary ms-2" id="upgradeSubBtn">Upgrade</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Accessibility Pane -->
+                <div class="tab-pane fade" id="pane-access" role="tabpanel">
+                  <div class="form-section">
+                    <h6>Accessibility</h6>
+                    <p class="small-muted mb-3">Adjust visual and interaction preferences.</p>
+
+                    <div class="row g-3">
+                      <div class="col-md-4">
+                        <div class="form-check form-switch">
+                          <input class="form-check-input" id="highContrast" type="checkbox">
+                          <label class="form-check-label" for="highContrast">High contrast</label>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="form-check form-switch">
+                          <input class="form-check-input" id="dyslexiaFont" type="checkbox">
+                          <label class="form-check-label" for="dyslexiaFont">Dyslexia-friendly font</label>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">Font size</label>
+                        <select id="fontSize" class="form-select">
+                          <option value="normal" selected>Normal</option>
+                          <option value="large">Large</option>
+                          <option value="xlarge">Extra large</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="mt-3">
+                      <button class="btn btn-primary" data-save="accessibility">Save accessibility</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Connections Pane -->
+                <div class="tab-pane fade" id="pane-connections" role="tabpanel">
+                  <div class="form-section">
+                    <h6>Connected accounts</h6>
+                    <p class="small-muted mb-3">Link social & SSO providers for quick sign-in and calendar sync.</p>
+
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <div class="border rounded p-3 d-flex align-items-center justify-content-between">
+                          <div><i class="bi bi-google fs-3 text-danger me-2"></i><strong>Google</strong><div class="small text-muted">Connected — calendar sync enabled</div></div>
+                          <div><button class="btn btn-sm btn-outline-danger" id="unlinkGoogle">Unlink</button></div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="border rounded p-3 d-flex align-items-center justify-content-between">
+                          <div><i class="bi bi-microsoft fs-3 text-primary me-2"></i><strong>Microsoft</strong><div class="small text-muted">Not connected</div></div>
+                          <div><button class="btn btn-sm btn-outline-primary" id="linkMicrosoft">Connect</button></div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 mt-2">
+                        <div class="border rounded p-3 d-flex align-items-center justify-content-between">
+                          <div><i class="bi bi-facebook fs-3 text-primary me-2"></i><strong>Facebook</strong><div class="small text-muted">Not connected</div></div>
+                          <div><button class="btn btn-sm btn-outline-primary" id="linkFacebook">Connect</button></div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 mt-2">
+                        <div class="border rounded p-3 d-flex align-items-center justify-content-between">
+                          <div><i class="bi bi-calendar-plus fs-3 text-success me-2"></i><strong>Calendar (iCal)</strong><div class="small text-muted">Not enabled</div></div>
+                          <div><button class="btn btn-sm btn-outline-primary" id="enableICal">Enable</button></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-3">
+                      <button class="btn btn-outline-secondary" id="manageOAuthBtn">Manage OAuth apps</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div> <!-- tab-content -->
+            </div> <!-- card -->
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1060"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ---------- Helper: toasts ----------
+    function showToast(message, type = 'info') {
+      const tc = document.getElementById('toastContainer');
+      const toastEl = document.createElement('div');
+      toastEl.className = `toast align-items-center text-bg-${type} border-0`;
+      toastEl.role = 'alert';
+      toastEl.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi me-2"></i>${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>`;
+      tc.appendChild(toastEl);
+      const t = new bootstrap.Toast(toastEl, { delay: 3000 });
+      t.show();
+      toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+    }
+
+    // ---------- Avatar preview ----------
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarPreview = document.getElementById('avatarPreview');
+    avatarInput.addEventListener('change', (e) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => avatarPreview.src = ev.target.result;
+      reader.readAsDataURL(f);
+    });
+    document.getElementById('removeAvatarBtn').addEventListener('click', () => {
+      avatarPreview.src = 'https://via.placeholder.com/120x120/ffffff/6f42c1?text=N';
+      avatarInput.value = '';
+      showToast('Profile picture removed', 'info');
+    });
+
+    // ---------- Sessions mock ----------
+    const sessions = [
+      { id: 's1', device: 'Chrome on macOS', loc: 'Dubai, AE', ip: '185.12.34.56', last: '2 hours ago' },
+      { id: 's2', device: 'iPhone (App)', loc: 'Dubai, AE', ip: '185.12.33.11', last: 'Yesterday' }
+    ];
+    function renderSessions() {
+      const list = document.getElementById('sessionsList');
+      list.innerHTML = sessions.map(s => `<div class="d-flex justify-content-between align-items-center mb-2">
+        <div><strong>${s.device}</strong><div class="small text-muted">${s.loc} • ${s.ip}</div></div>
+        <div><small class="text-muted">${s.last}</small> <button class="btn btn-sm btn-outline-danger ms-2" data-revoke="${s.id}">Revoke</button></div>
+      </div>`).join('');
+      const cards = document.getElementById('sessionCards');
+      cards.innerHTML = sessions.map(s => `<div class="list-group-item d-flex justify-content-between align-items-center">
+        <div><i class="bi bi-laptop me-2"></i><strong>${s.device}</strong><div class="small text-muted">${s.loc} • ${s.last}</div></div>
+        <div><button class="btn btn-sm btn-outline-danger" data-revoke="${s.id}">Revoke</button></div>
+      </div>`).join('');
+    }
+    renderSessions();
+    document.addEventListener('click', (e) => {
+      if (e.target.dataset.revoke) {
+        const id = e.target.dataset.revoke;
+        const idx = sessions.findIndex(s => s.id === id);
+        if (idx > -1) sessions.splice(idx,1);
+        renderSessions();
+        showToast('Session revoked', 'info');
+      }
+    });
+    document.getElementById('revokeAllSessions').addEventListener('click', () => {
+      if (!confirm('Sign out of all devices?')) return;
+      sessions.length = 0;
+      renderSessions();
+      showToast('Signed out from all devices', 'success');
+    });
+
+    // ---------- 2FA toggle ----------
+    const toggle2fa = document.getElementById('toggle2fa');
+    const twoFaDetails = document.getElementById('twoFaDetails');
+    document.getElementById('setup2faBtn').addEventListener('click', () => {
+      toggle2fa.checked = true;
+      twoFaDetails.style.display = 'block';
+      showToast('2FA enabled — store your recovery codes', 'success');
+    });
+    toggle2fa.addEventListener('change', () => {
+      twoFaDetails.style.display = toggle2fa.checked ? 'block' : 'none';
+      showToast(toggle2fa.checked ? '2FA enabled' : '2FA disabled', 'info');
+    });
+
+    // ---------- Save handlers (simulate) ----------
+    document.querySelectorAll('[data-save]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const key = e.currentTarget.dataset.save;
+        // gather minimal info per section (simulated)
+        showToast(`${capitalize(key)} settings saved`, 'success');
+      });
+    });
+    document.getElementById('saveAllBtn').addEventListener('click', () => {
+      showToast('All settings saved', 'success');
+    });
+
+    function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+    // ---------- Export / Data ----------
+    document.getElementById('exportDataBtn').addEventListener('click', () => {
+      showToast('Preparing data export. You will receive an email when ready.', 'info');
+    });
+    document.getElementById('downloadDataBtn').addEventListener('click', () => {
+      showToast('Download started (simulated)', 'success');
+    });
+    document.getElementById('requestDeletionBtn').addEventListener('click', () => {
+      if (confirm('Request account deletion? This will begin the deletion process.')) {
+        showToast('Deletion request submitted', 'info');
+      }
+    });
+    document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+      if (confirm('Delete account permanently? This cannot be undone.')) {
+        showToast('Account deleted (simulated)', 'danger');
+      }
+    });
+
+    // ---------- Billing actions ----------
+    document.getElementById('addCardBtn').addEventListener('click', () => showToast('Open add card modal (not implemented)', 'info'));
+    document.getElementById('removeCardBtn').addEventListener('click', () => showToast('Card removed (simulated)', 'info'));
+    document.getElementById('cancelSubBtn').addEventListener('click', () => {
+      if (confirm('Cancel subscription?')) showToast('Subscription cancelled', 'info');
+    });
+    document.getElementById('upgradeSubBtn').addEventListener('click', () => showToast('Redirecting to upgrade (simulated)', 'info'));
+    document.getElementById('downloadInvoicesBtn').addEventListener('click', () => showToast('Invoices download started', 'info'));
+
+    // ---------- Connections ----------
+    document.getElementById('unlinkGoogle').addEventListener('click', () => showToast('Google disconnected', 'info'));
+    document.getElementById('linkMicrosoft').addEventListener('click', () => showToast('Microsoft connected (simulated)', 'success'));
+    document.getElementById('linkFacebook').addEventListener('click', () => showToast('Facebook connected (simulated)', 'success'));
+    document.getElementById('enableICal').addEventListener('click', () => showToast('iCal enabled — copy URL from integrations', 'info'));
+    document.getElementById('manageOAuthBtn').addEventListener('click', () => showToast('Manage OAuth apps (simulated)', 'info'));
+
+    // ---------- Misc ----------
+    document.getElementById('previewProfileBtn').addEventListener('click', () => showToast('Opening public profile preview (simulated)', 'info'));
+    document.getElementById('muteAllBtn').addEventListener('click', () => {
+      ['notifyEmail','notifySMS','notifyPush','notifyInApp'].forEach(id => document.getElementById(id).checked = false);
+      showToast('Non-essential notifications muted', 'info');
+    });
+
+    // Apply accessibility font-size toggle
+    document.getElementById('fontSize').addEventListener('change', (e) => {
+      const val = e.target.value;
+      document.documentElement.style.fontSize = val === 'large' ? '18px' : val === 'xlarge' ? '20px' : '';
+      showToast('Font size updated', 'info');
+    });
+
+    // Set some initial UI states
+    if(toggle2fa.checked) twoFaDetails.style.display = 'block';
+  </script>
+</body>
+</html>
+```

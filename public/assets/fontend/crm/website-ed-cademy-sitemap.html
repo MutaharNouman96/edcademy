@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ed‑Cademy • Clickable Sitemap</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --panel:#f6fafb;
+  --text:#0b2530;
+  --muted:#5b7a86;
+  --accent:#0e7490; /* dark cyan */
+  --accent-2:#0891b2;
+  --border:#e4eef2;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+}
+header{
+  position:sticky;top:0;z-index:10;
+  background:linear-gradient(180deg, #fff, #ffffffd9 70%, transparent);
+  backdrop-filter:saturate(1.2) blur(6px);
+  border-bottom:1px solid var(--border);
+}
+.container{max-width:1100px;margin:0 auto;padding:20px}
+h1{font-size:22px;margin:0 0 8px 0}
+.controls{
+  display:grid;grid-template-columns:1fr 200px 200px 140px;gap:10px;align-items:center;
+}
+input[type="search"],select{
+  width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--text);
+}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);color:var(--muted);}
+.badge.p0{background:#e6f9ff;border-color:#bfefff;color:#075a6a}
+.badge.p1{background:#f2f7f9;}
+button{
+  padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--text);
+}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.link{border:none;background:transparent;color:var(--accent);padding:0 4px;cursor:pointer}
+.tree{margin:16px 0 40px 0;border:1px solid var(--border);border-radius:14px;background:var(--panel);padding:10px;}
+details{background:#fff;border:1px solid var(--border);border-radius:12px;margin:10px 0;padding:8px}
+summary{list-style:none;cursor:pointer;font-weight:600;color:#052631;display:flex;align-items:center;gap:8px}
+summary::-webkit-details-marker{display:none}
+summary .caret{transition:transform .2s ease;display:inline-block}
+details[open] > summary .caret{transform:rotate(90deg)}
+ul{list-style:none;margin:8px 0 0 22px;padding:0}
+li.page{
+  display:flex;gap:10px;align-items:flex-start;border-bottom:1px dashed var(--border);padding:8px 0;
+}
+li.page:last-child{border-bottom:none}
+.path{
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  padding:2px 6px;border-radius:6px;background:#f6fbfd;border:1px solid var(--border);font-size:13px;color:#0a3a49
+}
+.meta{color:var(--muted);font-size:12px}
+.footer{color:var(--muted);font-size:12px;text-align:center;margin:20px 0 40px}
+hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+.kbd{font-family:ui-monospace,monospace;font-size:12px;border:1px solid var(--border);background:#fff;border-bottom-width:3px;padding:0 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <h1>Ed‑Cademy • Clickable Sitemap</h1>
+    <div class="controls">
+      <input id="search" type="search" placeholder="Filter by page, section, path… (⌘/Ctrl + K)" />
+      <select id="moduleFilter"><option value="">All modules</option></select>
+      <select id="priorityFilter">
+        <option value="">All priorities</option>
+        <option value="P0">MVP (P0)</option>
+        <option value="P1">Nice to have (P1)</option>
+      </select>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button id="expandAll">Expand all</button>
+        <button id="collapseAll">Collapse all</button>
+      </div>
+    </div>
+  </div>
+</header>
+<main class="container">
+  <div class="tree" id="tree"></div>
+  <div class="footer">Tip: Use <span class="kbd">⌘/Ctrl</span> + <span class="kbd">K</span> to jump to search. Click a path to copy it.</div>
+</main>
+<script>
+const data = {"Admin": {"Analytics": [{"page": "Platform Analytics", "path": "/admin/analytics", "type": "Page", "notes": "Funnel, cohorts, reliability", "priority": "P0"}], "Compliance": [{"page": "Compliance & Privacy", "path": "/admin/compliance-privacy", "type": "Page", "notes": "COPPA/FERPA/GDPR, retention, audit", "priority": "P0"}], "Content": [{"page": "Content Moderation", "path": "/admin/content/moderation", "type": "Queue", "notes": "Violations, approvals", "priority": "P0"}], "Disputes": [{"page": "Disputes & Appeals", "path": "/admin/disputes-appeals", "type": "Queue", "notes": "DMCA/takedown; strikes; counter‑notices", "priority": "P0"}], "Finance": [{"page": "Financials", "path": "/admin/financials", "type": "Page", "notes": "Payouts, refunds, chargebacks, taxes/VAT", "priority": "P0"}], "Home": [{"page": "Executive Dashboard", "path": "/admin/dashboard", "type": "Page", "notes": "GMV, purchases, sessions, completions, risk", "priority": "P0"}], "Integrations": [{"page": "Integrations", "path": "/admin/integrations", "type": "Page", "notes": "Stripe/PayPal/ACH, Calendars, SSO/LTI, Email/SMS, CDN", "priority": "P0"}], "LMS": [{"page": "LMS Oversight", "path": "/admin/lms", "type": "Page", "notes": "Catalog, certificate verification", "priority": "P0"}], "Marketplace": [{"page": "Marketplace Config", "path": "/admin/marketplace", "type": "Page", "notes": "Categories, placements, coupons", "priority": "P0"}], "System": [{"page": "System", "path": "/admin/system", "type": "Page", "notes": "Feature flags, observability, error/crash reports", "priority": "P0"}], "Trust & Safety": [{"page": "Trust & Safety", "path": "/admin/trust-safety", "type": "Page", "notes": "Abuse, auto-masking, fraud/risk scoring", "priority": "P0"}], "Tutoring": [{"page": "Tutoring Settings", "path": "/admin/tutoring/settings", "type": "Page", "notes": "Reschedule/cancel, retention", "priority": "P0"}], "Users": [{"page": "Users & Roles", "path": "/admin/users", "type": "List", "notes": "Students, educators, orgs; SSO", "priority": "P0"}]}, "Generic Website": {"Commerce": [{"page": "Cart", "path": "/cart", "type": "Page", "notes": "Line items, coupons, tax/VAT", "priority": "P0"}, {"page": "Checkout", "path": "/checkout", "type": "Flow", "notes": "Split payouts; secure payment", "priority": "P0"}, {"page": "Order Confirmation", "path": "/order/confirmation", "type": "Page", "notes": "Receipt, next steps", "priority": "P0"}], "Content": [{"page": "Blog", "path": "/blog", "type": "List", "notes": "Marketing articles", "priority": "P1"}], "Help": [{"page": "Help Center", "path": "/help", "type": "Page", "notes": "Public FAQ + contact", "priority": "P0"}], "Home": [{"page": "Home", "path": "/", "type": "Page", "notes": "Hero, value prop, featured educators/courses", "priority": "P0"}], "Integrations": [{"page": "Integrations", "path": "/integrations", "type": "Page", "notes": "Stripe/PayPal, Calendars, SSO, Email/SMS", "priority": "P0"}], "Marketplace": [{"page": "Bundles & Collections", "path": "/bundles", "type": "List", "notes": NaN, "priority": "P0"}, {"page": "Explore Marketplace", "path": "/explore", "type": "Search/List", "notes": "Filter by subject, grade, price", "priority": "P0"}, {"page": "Product Detail", "path": "/product/:slug", "type": "Detail", "notes": "Video/Unit/Worksheet/Assessment/Module", "priority": "P0"}, {"page": "Wishlists", "path": "/wishlists", "type": "List", "notes": "Requires auth", "priority": "P1"}], "Modules": [{"page": "Online Modules Catalog", "path": "/modules", "type": "Search/List", "notes": "Course cards, certificates", "priority": "P0"}], "Pricing": [{"page": "Pricing", "path": "/pricing", "type": "Page", "notes": "Platform fees + Educator Premium tier", "priority": "P0"}], "Schools": [{"page": "For Schools", "path": "/schools", "type": "Page", "notes": "SSO/LTI overview", "priority": "P0"}], "Trust & IP": [{"page": "Originality & IP Protection", "path": "/originality-ip", "type": "Doc", "notes": "Watermarking, fingerprinting, takedown", "priority": "P0"}, {"page": "Trust & Safety", "path": "/trust-and-safety", "type": "Doc", "notes": "Policies, abuse reporting", "priority": "P0"}], "Tutoring": [{"page": "How Tutoring Works", "path": "/how-tutoring-works", "type": "Doc", "notes": "Policies, reschedule/cancel, recordings", "priority": "P0"}, {"page": "Tutoring Directory", "path": "/educators", "type": "Search/List", "notes": "Educator cards, ratings, price, availability", "priority": "P0"}]}, "Global": {"Assistant": [{"page": "AI Help Panel", "path": "overlay:/ai", "type": "Overlay", "notes": "Contextual assistant across app", "priority": "P1"}], "Auth": [{"page": "Forgot Password", "path": "/auth/forgot", "type": "Flow", "notes": NaN, "priority": "P0"}, {"page": "MFA", "path": "/auth/mfa", "type": "Flow", "notes": "TOTP/SMS/email", "priority": "P0"}, {"page": "Reset Password", "path": "/auth/reset", "type": "Flow", "notes": NaN, "priority": "P0"}, {"page": "Sign In", "path": "/auth/login", "type": "Flow", "notes": "Email/phone + password; social SSO (optional)", "priority": "P0"}, {"page": "Sign Up", "path": "/auth/register", "type": "Flow", "notes": "Role pick after auth", "priority": "P0"}], "Compliance": [{"page": "Accessibility", "path": "/accessibility", "type": "Doc", "notes": "WCAG 2.2 AA statement", "priority": "P0"}], "Help": [{"page": "Help Center", "path": "/help", "type": "Page", "notes": "FAQs, contact support", "priority": "P0"}], "Legal": [{"page": "Cookies", "path": "/legal/cookies", "type": "Doc", "notes": NaN, "priority": "P0"}, {"page": "DMCA / Takedown", "path": "/legal/dmca", "type": "Doc", "notes": "Reporting & counter-notice", "priority": "P0"}, {"page": "Licensing & Provenance (C2PA)", "path": "/legal/provenance", "type": "Doc", "notes": "Watermarking / fingerprinting explainer", "priority": "P0"}, {"page": "Privacy Policy", "path": "/legal/privacy", "type": "Doc", "notes": NaN, "priority": "P0"}, {"page": "Terms of Service", "path": "/legal/terms", "type": "Doc", "notes": NaN, "priority": "P0"}], "Messages": [{"page": "Inbox", "path": "/messages", "type": "Page", "notes": "Student↔Tutor threads; attachments", "priority": "P0"}], "Notifications": [{"page": "Notification Settings", "path": "/settings/notifications", "type": "Page", "notes": "Email, SMS, push", "priority": "P0"}], "Onboarding": [{"page": "Onboarding", "path": "/onboarding", "type": "Flow", "notes": "Select role: Student/Educator/Org; preferences", "priority": "P0"}]}, "Student": {"Commerce": [{"page": "Orders & Billing", "path": "/student/orders", "type": "List", "notes": "Invoices, refunds", "priority": "P0"}], "Comms": [{"page": "Messages", "path": "/student/messages", "type": "Page", "notes": "Educator threads", "priority": "P0"}], "Home": [{"page": "Dashboard", "path": "/student/dashboard", "type": "Page", "notes": "Continue learning, upcoming sessions, orders, recs", "priority": "P0"}], "Learning": [{"page": "Certificates", "path": "/student/certificates", "type": "List", "notes": "Download/verify", "priority": "P0"}, {"page": "Lesson Player", "path": "/student/learning/module/:id/lesson/:lessonId", "type": "App", "notes": "Video/notes/resources", "priority": "P0"}, {"page": "Module Overview", "path": "/student/learning/module/:id", "type": "Detail", "notes": "Syllabus, progress", "priority": "P0"}, {"page": "My Modules", "path": "/student/learning/modules", "type": "List", "notes": "Enrolled modules", "priority": "P0"}, {"page": "Quiz / Assignment", "path": "/student/learning/module/:id/quiz/:quizId", "type": "App", "notes": "Quizzes, submissions, grades", "priority": "P0"}], "Library": [{"page": "Session Recordings", "path": "/student/library/recordings", "type": "List", "notes": "Playback & notes", "priority": "P0"}], "Marketplace": [{"page": "Wishlists", "path": "/student/wishlists", "type": "List", "notes": NaN, "priority": "P0"}], "Profile": [{"page": "Profile & Preferences", "path": "/student/profile", "type": "Page", "notes": "Subjects, grades, goals", "priority": "P0"}], "Tutoring": [{"page": "Booking Flow", "path": "/student/tutoring/book/:tutorId", "type": "Flow", "notes": "TZ-aware scheduling, payment", "priority": "P0"}, {"page": "Find a Educator", "path": "/student/tutoring/find", "type": "Search/List", "notes": NaN, "priority": "P0"}, {"page": "Live Session Room", "path": "/student/tutoring/room/:sessionId", "type": "App", "notes": "Video/live; whiteboard; record", "priority": "P0"}, {"page": "My Sessions", "path": "/student/tutoring/sessions", "type": "List", "notes": "Upcoming/past; reschedule/cancel", "priority": "P0"}]}, "Educator": {"Analytics": [{"page": "Sales & Learning Analytics", "path": "/educator/analytics", "type": "Page", "notes": "Conversions, cohorts; module analytics", "priority": "P0"}], "Assessments": [{"page": "Item Bank", "path": "/educator/items", "type": "List", "notes": "Question items", "priority": "P0"}, {"page": "Quiz Builder", "path": "/educator/quizzes/new", "type": "App", "notes": "Auto/AI-assist grading", "priority": "P0"}], "Content Studio": [{"page": "Edit Product", "path": "/educator/content/:id/edit", "type": "App", "notes": "Versioning, attachments", "priority": "P0"}, {"page": "My Products", "path": "/educator/content", "type": "List", "notes": "Videos, units, worksheets, assessments, modules", "priority": "P0"}, {"page": "New Upload / Editor", "path": "/educator/content/new", "type": "App", "notes": "Metadata, licensing, watermark options", "priority": "P0"}, {"page": "Pricing & Promotions", "path": "/educator/pricing-promos", "type": "Page", "notes": "Coupons, bundles, tiers", "priority": "P0"}], "Customers": [{"page": "Customers & Orders", "path": "/educator/customers", "type": "List", "notes": "Purchases, refunds, messaging", "priority": "P0"}], "Finance": [{"page": "Payouts", "path": "/educator/payouts", "type": "List", "notes": "History, status", "priority": "P0"}, {"page": "Tax Forms", "path": "/educator/tax-forms", "type": "Page", "notes": "W-9/W-8 details", "priority": "P0"}], "Home": [{"page": "Dashboard", "path": "/educator/dashboard", "type": "Page", "notes": "Earnings, sales trend, ratings sentiment, content health", "priority": "P0"}], "Integrity": [{"page": "Originality & IP Console", "path": "/educator/originality-ip", "type": "Page", "notes": "Fingerprint hits, takedowns", "priority": "P0"}], "Modules": [{"page": "Module Builder (edit)", "path": "/educator/modules/:id/edit", "type": "App", "notes": NaN, "priority": "P0"}, {"page": "Module Builder (new)", "path": "/educator/modules/new", "type": "App", "notes": "Sequence, prerequisites, drip", "priority": "P0"}], "Reputation": [{"page": "Reviews Manager", "path": "/educator/reviews", "type": "List", "notes": "Moderate & reply", "priority": "P0"}], "Settings": [{"page": "Settings", "path": "/educator/settings", "type": "Page", "notes": "Profile, verification, MFA, notifications", "priority": "P0"}], "Tutoring Manager": [{"page": "Availability & Calendar", "path": "/educator/tutoring/availability", "type": "App", "notes": "Sync calendars", "priority": "P0"}, {"page": "Live Session Room", "path": "/educator/tutoring/room/:sessionId", "type": "App", "notes": "Video/live; notes; hand‑off", "priority": "P0"}, {"page": "Recordings", "path": "/educator/tutoring/recordings", "type": "List", "notes": NaN, "priority": "P0"}, {"page": "Sessions", "path": "/educator/tutoring/sessions", "type": "List", "notes": "Upcoming/past", "priority": "P0"}]}};
+const treeEl = document.getElementById('tree');
+const moduleFilter = document.getElementById('moduleFilter');
+const priorityFilter = document.getElementById('priorityFilter');
+const search = document.getElementById('search');
+
+// Populate module filter
+const modules = Object.keys(data);
+modules.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; moduleFilter.appendChild(o); });
+
+// Render function
+function makeCaret(){ const span=document.createElement('span'); span.className='caret'; span.textContent='▶'; return span; }
+function render() {
+  treeEl.innerHTML = '';
+  const q = search.value.toLowerCase();
+  const modSel = moduleFilter.value;
+  const prSel = priorityFilter.value;
+
+  for (const [module, sections] of Object.entries(data)) {
+    if (modSel && module!==modSel) continue;
+
+    const d1 = document.createElement('details');
+    const s1 = document.createElement('summary');
+    s1.appendChild(makeCaret());
+    const title1 = document.createElement('span');
+    title1.textContent = module;
+    s1.appendChild(title1);
+    d1.appendChild(s1);
+
+    for (const [section, pages] of Object.entries(sections)) {
+      // Section container
+      const d2 = document.createElement('details');
+      const s2 = document.createElement('summary');
+      s2.appendChild(makeCaret());
+      const title2 = document.createElement('span');
+      title2.textContent = section;
+      s2.appendChild(title2);
+      d2.appendChild(s2);
+
+      const ul = document.createElement('ul');
+
+      pages.forEach(p => {
+        const hay = (p.page + ' ' + p.path + ' ' + p.type + ' ' + p.notes + ' ' + p.priority + ' ' + section + ' ' + module).toLowerCase();
+        if (q && !hay.includes(q)) return;
+        if (prSel && p.priority !== prSel) return;
+
+        const li = document.createElement('li');
+        li.className='page';
+        const left = document.createElement('div');
+        left.innerHTML = '<strong>'+escapeHtml(p.page)+'</strong> <span class="meta">('+escapeHtml(p.type)+')</span> ' +
+                         (p.priority==='P0' ? '<span class="badge p0">P0</span>' : '<span class="badge p1">P1</span>') +
+                         (p.notes ? ' <span class="meta">• '+escapeHtml(p.notes)+'</span>' : '');
+        const right = document.createElement('div');
+        const a = document.createElement('a');
+        a.href = p.path;
+        a.textContent = p.path;
+        a.className='path';
+        a.addEventListener('click', (e) => { e.preventDefault(); copy(p.path); a.textContent='Copied!'; setTimeout(()=>a.textContent=p.path,900); });
+        right.appendChild(a);
+        right.style.marginLeft='auto';
+        right.style.flexShrink='0';
+        li.appendChild(left);
+        li.appendChild(right);
+        ul.appendChild(li);
+      });
+      if (ul.children.length>0) {
+        d2.appendChild(ul);
+        d1.appendChild(d2);
+      }
+    }
+    if (d1.querySelector('ul')) treeEl.appendChild(d1);
+  }
+}
+
+function copy(text){ navigator.clipboard.writeText(text); }
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c] ); }
+
+render();
+
+// Expand/collapse helpers
+document.getElementById('expandAll').onclick = ()=>{ document.querySelectorAll('details').forEach(d=>d.open=true); };
+document.getElementById('collapseAll').onclick = ()=>{ document.querySelectorAll('details').forEach(d=>d.open=false); };
+
+// Filters
+moduleFilter.onchange = render;
+priorityFilter.onchange = render;
+search.oninput = render;
+
+// CMD/CTRL+K focus search
+window.addEventListener('keydown', (e)=>{ if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k') { e.preventDefault(); search.focus(); } });
+</script>
+</body></html>

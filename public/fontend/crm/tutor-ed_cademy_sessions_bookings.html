@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ed‑Cademy — Sessions & Bookings</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+
+  <!-- jQuery & DataTables (Bootstrap 5 theme) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"/>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+  <style>
+    :root{
+      --primary-cyan:#006b7d;
+      --dark-cyan:#004a57;
+      --light-cyan:#e0f7fa;
+      --accent:#ff6b35;
+      --bg-soft:#f6f8f9;
+    }
+    body{background:var(--bg-soft);} 
+    .brand{color:var(--primary-cyan);font-weight:700;} 
+    .header{position:sticky;top:0;z-index:1020;background:#fff;border-bottom:1px solid rgba(0,0,0,.06);} 
+    .sidebar{position:sticky;top:0;height:100dvh;overflow-y:auto;background:#fff;border-right:1px solid rgba(0,0,0,.06);} 
+    .sidebar .nav-link{color:#425466;border-radius:.5rem;} 
+    .sidebar .nav-link.active{background:var(--light-cyan);color:var(--dark-cyan);font-weight:600;} 
+    .sidebar .nav-link:hover{background:rgba(0,107,125,.08);color:var(--dark-cyan);} 
+    .btn-primary{background:var(--primary-cyan);border-color:var(--primary-cyan);} 
+    .btn-primary:hover{background:var(--dark-cyan);border-color:var(--dark-cyan);} 
+    .btn-outline-primary{color:var(--primary-cyan);border-color:var(--primary-cyan);} 
+    .btn-outline-primary:hover{background:var(--primary-cyan);border-color:var(--primary-cyan);color:#fff;} 
+    .card{border-radius:16px;} 
+    .section-header{background:var(--light-cyan);border-radius:16px 16px 0 0;padding:1.25rem;border-bottom:1px solid rgba(0,0,0,.06);} 
+    .section-title{color:var(--dark-cyan);font-weight:700;margin:0;display:flex;gap:.5rem;align-items:center;} 
+    .table thead th{color:#6b7a8c;font-weight:600;} 
+    .status-badge{font-size:.75rem;padding:.35rem .6rem;border-radius:999px} 
+    .status-confirmed{background:rgba(25,135,84,.12);color:#198754;} 
+    .status-pending{background:rgba(13,110,253,.12);color:#0d6efd;} 
+    .status-cancelled{background:rgba(220,53,69,.12);color:#dc3545;} 
+    .status-completed{background:rgba(102,16,242,.12);color:#6610f2;} 
+    .status-no-show{background:rgba(255,193,7,.15);color:#b58100;} 
+    .type-chip{font-size:.75rem;padding:.25rem .55rem;border:1px solid rgba(0,0,0,.08);border-radius:999px;background:#fff;} 
+    .toolbar .form-select,.toolbar .form-control{max-width:220px}
+    .dt-bootstrap5 .row:nth-child(1){align-items:center}
+    .avatar{width:32px;height:32px;border-radius:999px;object-fit:cover;border:1px solid rgba(0,0,0,.08);} 
+    .tz-pill{background:#fff;border:1px dashed rgba(0,0,0,.15);padding:.25rem .5rem;border-radius:999px;font-size:.75rem;color:#6b7a8c;}
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header py-2">
+    <div class="container-fluid px-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <a href="/educator" class="text-decoration-none brand">
+            <i class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy
+          </a>
+          <span class="d-none d-md-inline text-muted">Sessions & Bookings</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button id="btnNewBooking" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> New Booking
+          </button>
+          <div class="dropdown">
+            <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle me-1"></i> Sarah J.
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#">View Public Profile</a></li>
+              <li><a class="dropdown-item" href="#">Account Settings</a></li>
+              <li><a class="dropdown-item" href="#">Switch to Student View</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#">Sign out</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
+        <nav class="nav flex-column gap-1">
+          <a class="nav-link" href="/educator"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+          <a class="nav-link" href="/educator/courses"><i class="bi bi-journal-code me-2"></i> My Courses</a>
+          <a class="nav-link active" href="/educator/sessions"><i class="bi bi-calendar3 me-2"></i> Sessions/Bookings</a>
+          <a class="nav-link" href="#section-earnings"><i class="bi bi-cash-coin me-2"></i> Earnings</a>
+          <a class="nav-link" href="#section-messages"><i class="bi bi-chat-dots me-2"></i> Messages</a>
+          <a class="nav-link" href="#section-settings"><i class="bi bi-gear me-2"></i> Settings</a>
+        </nav>
+        <hr/>
+        <div class="p-3 rounded" style="background:var(--light-cyan);">
+          <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+            <div>
+              <strong>Timezone</strong>
+              <p class="mb-2 small">All times shown in <span id="tzLabel" class="tz-pill">—</span></p>
+              <button class="btn btn-sm btn-outline-primary w-100" id="btnSyncCalendar"><i class="bi bi-calendar4-week me-1"></i> Sync Calendar</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="col-12 col-md-9 col-lg-10 p-4">
+        <div class="card shadow-sm mb-3">
+          <div class="section-header">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <h2 class="section-title"><i class="bi bi-calendar3-event"></i> Sessions</h2>
+              <div class="toolbar d-flex flex-wrap gap-2">
+                <select id="filterType" class="form-select form-select-sm">
+                  <option value="">All Types</option>
+                  <option value="1on1">1:1</option>
+                  <option value="group">Group</option>
+                  <option value="cohort">Cohort</option>
+                </select>
+                <select id="filterStatus" class="form-select form-select-sm">
+                  <option value="">All Status</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="pending">Pending</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="completed">Completed</option>
+                  <option value="no-show">No‑show</option>
+                </select>
+                <input id="searchText" class="form-control form-control-sm" placeholder="Search name/course…"/>
+                <button id="resetFilters" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 pt-0">
+            <ul class="nav nav-pills gap-2 mt-3" id="sessionTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="today-tab" data-bs-toggle="pill" data-bs-target="#today" type="button" role="tab" aria-controls="today" aria-selected="true"><i class="bi bi-sun me-1"></i> Today</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="upcoming-tab" data-bs-toggle="pill" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="false"><i class="bi bi-calendar2-week me-1"></i> Upcoming</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="past-tab" data-bs-toggle="pill" data-bs-target="#past" type="button" role="tab" aria-controls="past" aria-selected="false"><i class="bi bi-clock-history me-1"></i> Past</button>
+              </li>
+            </ul>
+
+            <div class="tab-content mt-3">
+              <!-- Today -->
+              <div class="tab-pane fade show active" id="today" role="tabpanel">
+                <div class="table-responsive">
+                  <table id="todayTable" class="table table-striped align-middle w-100">
+                    <thead>
+                      <tr>
+                        <th>Time</th>
+                        <th>Student</th>
+                        <th>Course/Lesson</th>
+                        <th>Type</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Upcoming -->
+              <div class="tab-pane fade" id="upcoming" role="tabpanel">
+                <div class="table-responsive">
+                  <table id="upcomingTable" class="table table-striped align-middle w-100">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Student</th>
+                        <th>Course/Lesson</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Past -->
+              <div class="tab-pane fade" id="past" role="tabpanel">
+                <div class="table-responsive">
+                  <table id="pastTable" class="table table-striped align-middle w-100">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Student</th>
+                        <th>Course/Lesson</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th class="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Reschedule Modal -->
+  <div class="modal fade" id="rescheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-calendar2-plus me-2"></i>Reschedule Session</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">New date & time</label>
+            <input id="rescheduleDateTime" type="datetime-local" class="form-control"/>
+            <div class="form-text">Shown in your timezone (<span id="tzLabel2">—</span>).</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Reason (optional)</label>
+            <textarea id="rescheduleReason" class="form-control" rows="3" placeholder="Add a short note for the student…"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="confirmRescheduleBtn" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Modal -->
+  <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-x-octagon me-2"></i>Cancel Session</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted">Cancellations may follow your policy (automatic refund/credit rules apply).</p>
+          <div class="mb-3">
+            <label class="form-label">Reason</label>
+            <textarea id="cancelReason" class="form-control" rows="3" placeholder="Share a brief reason (sent to student)"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep session</button>
+          <button id="confirmCancelBtn" class="btn btn-danger"><i class="bi bi-trash3 me-1"></i> Cancel session</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ===== Utilities =====
+    function parseQuery(){
+      const q={};
+      const qs = window.location.search.substring(1).split('&').filter(Boolean);
+      for(const kv of qs){const [k,v] = kv.split('='); q[decodeURIComponent(k)] = decodeURIComponent(v||'');}
+      return q;
+    }
+    function createToastContainer(){
+      const c=document.createElement('div');
+      c.id='toastContainer';
+      c.className='toast-container position-fixed bottom-0 end-0 p-3';
+      c.style.zIndex='1055';
+      document.body.appendChild(c);
+      return c;
+    }
+    function showToast(message,type='info'){
+      const container=document.getElementById('toastContainer')||createToastContainer();
+      const el=document.createElement('div');
+      el.className=`toast align-items-center text-bg-${type} border-0`;
+      el.role='alert';
+      el.innerHTML=`
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-${type==='success'?'check-circle':type==='danger'?'x-circle':'info-circle'} me-2"></i>
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>`;
+      container.appendChild(el);
+      new bootstrap.Toast(el,{delay:3000}).show();
+      el.addEventListener('hidden.bs.toast',()=>el.remove());
+    }
+    function statusBadge(s){
+      const map={confirmed:'status-confirmed',pending:'status-pending',cancelled:'status-cancelled',completed:'status-completed','no-show':'status-no-show'};
+      const label={confirmed:'Confirmed',pending:'Pending',cancelled:'Cancelled',completed:'Completed','no-show':'No‑show'}[s]||s;
+      return `<span class="status-badge ${map[s]||'status-pending'}">${label}</span>`;
+    }
+    function typeChip(t){
+      const label={"1on1":'1:1',group:'Group',cohort:'Cohort'}[t]||'—';
+      const icon={"1on1":'person',group:'people',cohort:'cast'}[t]||'circle';
+      return `<span class="type-chip"><i class="bi bi-${icon} me-1"></i>${label}</span>`;
+    }
+    function timeRangeISO(startISO, minutes){
+      const start=new Date(startISO);
+      const end=new Date(start.getTime()+minutes*60000);
+      return `${start.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})} – ${end.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
+    }
+
+    let todayTable, upcomingTable, pastTable;
+    let rescheduleTarget=null, cancelTarget=null;
+
+    $(function(){
+      const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
+      document.getElementById('tzLabel').textContent = tz;
+      document.getElementById('tzLabel2').textContent = tz;
+
+      // Buttons
+      document.getElementById('btnNewBooking').addEventListener('click',()=>{
+        window.location.href='/educator/sessions/create';
+      });
+      document.getElementById('btnSyncCalendar').addEventListener('click',()=>{
+        window.location.href='/educator/sessions/calendar/sync';
+      });
+
+      // DataTables
+      initTables();
+      wireFilters();
+
+      // Auto-refresh today/upcoming every 30s
+      setInterval(()=>{ todayTable.ajax.reload(null,false); upcomingTable.ajax.reload(null,false); }, 30000);
+    });
+
+    function initTables(){
+      todayTable = $('#todayTable').DataTable({
+        processing:true,
+        deferRender:true,
+        ajax:{
+          url:'/api/sessions?scope=today',
+          dataSrc:'',
+          error:function(){
+            const now=new Date();
+            const pad=n=> String(n).padStart(2,'0');
+            const todayISO = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T`;
+            const demo=[
+              {id:9001, start_at: todayISO+'10:00:00Z', duration_min:45, student:{name:'Ayesha Khan', email:'ayesha@example.com', avatar:'https://i.pravatar.cc/80?img=5'}, course:'Algebra I', lesson:'Solving Linear Eq.', type:'1on1', status:'confirmed', meeting_url:'/meet/9001'},
+              {id:9002, start_at: todayISO+'13:30:00Z', duration_min:60, student:{name:'Omar Farooq', email:'omar@example.com', avatar:'https://i.pravatar.cc/80?img=15'}, course:'Physics', lesson:'Kinematics Q&A', type:'group', status:'pending', meeting_url:'/meet/9002'}
+            ];
+            todayTable.clear().rows.add(demo).draw();
+            showToast('Loaded demo “Today” sessions (API unavailable).','danger');
+          }
+        },
+        columns:[
+          {data:null, render:(row)=> timeRangeISO(row.start_at, row.duration_min)},
+          {data:null, render:(row)=> studentCell(row)},
+          {data:null, render:(row)=> `<div class='fw-semibold'>${row.course||'—'}</div><div class='small text-muted'>${row.lesson||''}</div>`},
+          {data:'type', render:(d)=> typeChip(d)},
+          {data:'duration_min', render:(d)=> `${d||0} min`},
+          {data:'status', render:(d)=> statusBadge(d)},
+          {data:null, orderable:false, searchable:false, className:'text-end', render:(row)=> actionsHtml(row)}
+        ],
+        order:[[0,'asc']],
+        pageLength:10,
+        language:{search:'', searchPlaceholder:'Search…'}
+      });
+
+      upcomingTable = $('#upcomingTable').DataTable({
+        processing:true,
+        deferRender:true,
+        ajax:{
+          url:'/api/sessions?scope=upcoming',
+          dataSrc:'',
+          error:function(){
+            const demo=[
+              {id:9010, date:'2025-09-22', start_at:'2025-09-22T09:00:00Z', duration_min:60, student:{name:'Liu Wei', email:'liu@example.com', avatar:'https://i.pravatar.cc/80?img=25'}, course:'English Writing', lesson:'Essay Structure', type:'1on1', status:'confirmed', meeting_url:'/meet/9010'},
+              {id:9011, date:'2025-09-23', start_at:'2025-09-23T17:00:00Z', duration_min:90, student:{name:'Maria Garcia', email:'maria@example.com', avatar:'https://i.pravatar.cc/80?img=32'}, course:'SAT Prep', lesson:'Math Drills', type:'group', status:'confirmed', meeting_url:'/meet/9011'}
+            ];
+            upcomingTable.clear().rows.add(demo).draw();
+            showToast('Loaded demo “Upcoming” sessions (API unavailable).','danger');
+          }
+        },
+        columns:[
+          {data:'start_at', render:(d)=> new Date(d).toLocaleDateString()},
+          {data:'start_at', render:(d,_,row)=> timeRangeISO(d, row.duration_min)},
+          {data:null, render:(row)=> studentCell(row)},
+          {data:null, render:(row)=> `<div class='fw-semibold'>${row.course||'—'}</div><div class='small text-muted'>${row.lesson||''}</div>`},
+          {data:'type', render:(d)=> typeChip(d)},
+          {data:'status', render:(d)=> statusBadge(d)},
+          {data:null, orderable:false, searchable:false, className:'text-end', render:(row)=> actionsHtml(row)}
+        ],
+        order:[[0,'asc']],
+        pageLength:10,
+        language:{search:'', searchPlaceholder:'Search…'}
+      });
+
+      pastTable = $('#pastTable').DataTable({
+        processing:true,
+        deferRender:true,
+        ajax:{
+          url:'/api/sessions?scope=past',
+          dataSrc:'',
+          error:function(){
+            const demo=[
+              {id:8901, start_at:'2025-09-10T14:00:00Z', duration_min:45, student:{name:'Chen Li', email:'chen@example.com', avatar:'https://i.pravatar.cc/80?img=11'}, course:'Chemistry', lesson:'Stoichiometry', type:'1on1', status:'completed', notes:'Good progress', meeting_url:'/meet/8901'},
+              {id:8902, start_at:'2025-09-12T18:30:00Z', duration_min:60, student:{name:'Ahmed N.', email:'ahmed@example.com', avatar:'https://i.pravatar.cc/80?img=7'}, course:'Biology', lesson:'Cell Structure', type:'group', status:'no-show', notes:'Student missed', meeting_url:'/meet/8902'}
+            ];
+            pastTable.clear().rows.add(demo).draw();
+            showToast('Loaded demo “Past” sessions (API unavailable).','danger');
+          }
+        },
+        columns:[
+          {data:'start_at', render:(d)=> new Date(d).toLocaleString()},
+          {data:null, render:(row)=> studentCell(row)},
+          {data:null, render:(row)=> `<div class='fw-semibold'>${row.course||'—'}</div><div class='small text-muted'>${row.lesson||''}</div>`},
+          {data:'type', render:(d)=> typeChip(d)},
+          {data:'status', render:(d)=> statusBadge(d)},
+          {data:'notes', defaultContent:'—'},
+          {data:null, orderable:false, searchable:false, className:'text-end', render:(row)=> actionsHtml(row)}
+        ],
+        order:[[0,'desc']],
+        pageLength:10,
+        language:{search:'', searchPlaceholder:'Search…'}
+      });
+
+      // Row actions (delegation)
+      $('#todayTable, #upcomingTable, #pastTable').on('click','.btn-join',function(){
+        const row = $(this).closest('table').DataTable().row($(this).closest('tr')).data();
+        window.location.href = row.meeting_url || `/educator/sessions/${row.id}`;
+      });
+      $('#todayTable, #upcomingTable, #pastTable').on('click','.btn-reschedule',function(){
+        const dt = $(this).closest('table').DataTable();
+        const row = dt.row($(this).closest('tr')).data();
+        rescheduleTarget=row;
+        const start = new Date(row.start_at);
+        const isoLocal = new Date(start.getTime()-start.getTimezoneOffset()*60000).toISOString().slice(0,16);
+        document.getElementById('rescheduleDateTime').value = isoLocal;
+        document.getElementById('rescheduleReason').value='';
+        new bootstrap.Modal('#rescheduleModal').show();
+      });
+      $('#todayTable, #upcomingTable, #pastTable').on('click','.btn-cancel',function(){
+        const dt = $(this).closest('table').DataTable();
+        cancelTarget = dt.row($(this).closest('tr')).data();
+        document.getElementById('cancelReason').value='';
+        new bootstrap.Modal('#cancelModal').show();
+      });
+      $('#todayTable, #upcomingTable, #pastTable').on('click','.act-open',function(e){
+        e.preventDefault();
+        const dt = $(this).closest('table').DataTable();
+        const row = dt.row($(this).closest('tr')).data();
+        window.location.href = `/educator/sessions/${row.id}`;
+      });
+      $('#todayTable, #upcomingTable, #pastTable').on('click','.act-message',function(e){
+        e.preventDefault();
+        const dt = $(this).closest('table').DataTable();
+        const row = dt.row($(this).closest('tr')).data();
+        window.location.href = `/educator/messages/compose?to=${encodeURIComponent(row.student?.email||'')}`;
+      });
+      $('#todayTable, #upcomingTable, #pastTable').on('click','.act-notes',function(e){
+        e.preventDefault();
+        const dt = $(this).closest('table').DataTable();
+        const row = dt.row($(this).closest('tr')).data();
+        window.location.href = `/educator/sessions/${row.id}/notes`;
+      });
+    }
+
+    function wireFilters(){
+      const applyFilters=()=>{
+        const q = $('#searchText').val();
+        const status=$('#filterStatus').val();
+        const type=$('#filterType').val();
+        [todayTable,upcomingTable,pastTable].forEach(dt=>{
+          if(!dt) return;
+          dt.search(q);
+          // Status col index varies: today=5, upcoming=5, past=4; Type col index: today=3, upcoming=4, past=3
+          const map = dt.table().node().id==='pastTable' ? {status:4,type:3} : {status:5,type:3+(dt.table().node().id==='upcomingTable'?1:0)};
+          dt.column(map.status).search(status? status:'', true, false);
+          dt.column(map.type).search(type? type:'', true, false);
+          dt.draw();
+        });
+      };
+      $('#searchText,#filterStatus,#filterType').on('input change',applyFilters);
+      $('#resetFilters').on('click',function(){
+        $('#searchText').val('');
+        $('#filterStatus').val('');
+        $('#filterType').val('');
+        applyFilters();
+      });
+    }
+
+    // Confirm reschedule/cancel
+    document.addEventListener('DOMContentLoaded', function(){
+      document.getElementById('confirmRescheduleBtn').addEventListener('click', async function(){
+        if(!rescheduleTarget) return;
+        try{
+          const payload={
+            start_at: new Date(document.getElementById('rescheduleDateTime').value).toISOString(),
+            reason: document.getElementById('rescheduleReason').value
+          };
+          const res = await fetch(`/api/sessions/${rescheduleTarget.id}/reschedule`,{method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+          if(!res.ok) throw new Error('fail');
+          showToast('Session rescheduled.','success');
+          bootstrap.Modal.getInstance(document.getElementById('rescheduleModal')).hide();
+          todayTable.ajax.reload(null,false); upcomingTable.ajax.reload(null,false); pastTable.ajax.reload(null,false);
+        }catch(e){
+          showToast('Unable to reschedule (demo mode used).','danger');
+          bootstrap.Modal.getInstance(document.getElementById('rescheduleModal')).hide();
+        }
+      });
+
+      document.getElementById('confirmCancelBtn').addEventListener('click', async function(){
+        if(!cancelTarget) return;
+        try{
+          const payload={ reason: document.getElementById('cancelReason').value };
+          const res = await fetch(`/api/sessions/${cancelTarget.id}/cancel`,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+          if(!res.ok) throw new Error('fail');
+          showToast('Session cancelled.','success');
+          bootstrap.Modal.getInstance(document.getElementById('cancelModal')).hide();
+          todayTable.ajax.reload(null,false); upcomingTable.ajax.reload(null,false); pastTable.ajax.reload(null,false);
+        }catch(e){
+          showToast('Unable to cancel (demo mode used).','danger');
+          bootstrap.Modal.getInstance(document.getElementById('cancelModal')).hide();
+        }
+      });
+    });
+
+    // Helpers
+    function studentCell(row){
+      const s=row.student||{};
+      return `<div class='d-flex align-items-center gap-2'>
+        <img class='avatar' src='${s.avatar||"https://i.pravatar.cc/80?img=1"}' alt='${s.name||"Student"}'>
+        <div>
+          <div class='fw-semibold'>${s.name||'—'}</div>
+          <div class='small text-muted'>${s.email||''}</div>
+        </div>
+      </div>`;
+    }
+
+    function actionsHtml(row){
+      const isPast = (new Date(row.start_at).getTime()+ (row.duration_min||0)*60000) < Date.now();
+      const joinBtn = !isPast && row.status!=='cancelled' ? `<button class="btn btn-sm btn-outline-primary btn-join" title="Join"><i class="bi bi-camera-video"></i></button>` : '';
+      const resBtn  = row.status!=='cancelled' && !isPast ? `<button class="btn btn-sm btn-outline-primary btn-reschedule" title="Reschedule"><i class="bi bi-calendar2-plus"></i></button>` : '';
+      const cancelBtn = row.status!=='cancelled' ? `<button class="btn btn-sm btn-outline-danger btn-cancel" title="Cancel"><i class="bi bi-x-octagon"></i></button>` : '';
+      return `
+        <div class="btn-group">
+          ${joinBtn}
+          ${resBtn}
+          ${cancelBtn}
+          <button class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="visually-hidden">More</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item act-open" href="#"><i class="bi bi-eye me-2"></i>Open booking</a></li>
+            <li><a class="dropdown-item act-notes" href="#"><i class="bi bi-journal-text me-2"></i>Session notes</a></li>
+            <li><a class="dropdown-item act-message" href="#"><i class="bi bi-envelope me-2"></i>Message student</a></li>
+          </ul>
+        </div>`;
+    }
+  </script>
+</body>
+</html>

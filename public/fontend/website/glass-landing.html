@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ed-Cademy - Learn. Create. Share.</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-landing--hero {
+            background: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80') no-repeat center center;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+            padding: 40px 0;
+        }
+
+        .glass-landing--hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-landing--content {
+            position: relative;
+            z-index: 1;
+            color: white;
+        }
+
+        .glass-landing--main-title {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .glass-landing--subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            max-width: 500px;
+        }
+
+        .glass-landing--btn-primary {
+            background-color: #0891b2;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 5px;
+            margin-right: 15px;
+            transition: all 0.3s;
+        }
+
+        .glass-landing--btn-primary:hover {
+            background-color: #0e7490;
+            transform: translateY(-2px);
+        }
+
+        .glass-landing--btn-secondary {
+            background-color: #f59e0b;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .glass-landing--btn-secondary:hover {
+            background-color: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .glass-landing--section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            margin-top: 50px;
+        }
+
+        .glass-landing--tab-container {
+            margin-bottom: 30px;
+        }
+
+        .glass-landing--tab-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 30px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .glass-landing--tab-btn:hover,
+        .glass-landing--tab-btn.active {
+            background-color: white;
+            color: #0891b2;
+        }
+
+        .glass-landing--card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+
+        .glass-landing--card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-landing--card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .glass-landing--card-body {
+            padding: 20px;
+        }
+
+        .glass-landing--card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .glass-landing--card-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0891b2;
+            margin-bottom: 15px;
+        }
+
+        .glass-landing--card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .glass-landing--tutor-name {
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .glass-landing--stars {
+            color: #f59e0b;
+        }
+
+        .glass-landing--spotlight {
+            background: rgba(8, 145, 178, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            margin-top: 50px;
+        }
+
+        .glass-landing--spotlight-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .glass-landing--tutor-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .glass-landing--tutor-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 20px;
+            object-fit: cover;
+        }
+
+        .glass-landing--tutor-info h4 {
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+        }
+
+        .glass-landing--tutor-info p {
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .glass-landing--follow-btn {
+            background-color: #f59e0b;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .glass-landing--follow-btn:hover {
+            background-color: #d97706;
+        }
+
+        .glass-landing--stats {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .glass-landing--stats-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .glass-landing--stats-number {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .glass-landing--stats-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .glass-landing--play-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #0891b2;
+        }
+
+        @media (max-width: 768px) {
+            .glass-landing--main-title {
+                font-size: 2.5rem;
+            }
+
+            .glass-landing--section-title {
+                font-size: 2rem;
+            }
+
+            .glass-landing--btn-primary,
+            .glass-landing--btn-secondary {
+                padding: 12px 25px;
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+
+            .glass-landing--spotlight {
+                margin-top: 30px;
+            }
+
+            .glass-landing--stats-number {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-landing--hero">
+        <div class="container glass-landing--content">
+            <div class="row">
+                <div class="col-lg-7 col-md-12">
+                    <h1 class="glass-landing--main-title">
+                        Learn.<br>
+                        Create.<br>
+                        Share.
+                    </h1>
+                    <p class="glass-landing--subtitle">
+                        Follow your favorite tutors, buy videos, worksheets, or complete bundles - all in one place.
+                    </p>
+                    <div class="glass-landing--btn-group">
+                        <button class="btn glass-landing--btn-primary">Browse Content</button>
+                        <button class="btn glass-landing--btn-secondary">Become a Tutor</button>
+                    </div>
+
+                    <!-- Why Choose Section -->
+                    <h2 class="glass-landing--section-title">Why Choose Ed-Cademy?</h2>
+                    
+                    <div class="glass-landing--tab-container">
+                        <button class="btn glass-landing--tab-btn active">Videos</button>
+                        <button class="btn glass-landing--tab-btn">Worksheets</button>
+                        <button class="btn glass-landing--tab-btn">Bundles</button>
+                        <button class="btn glass-landing--tab-btn">Tutors</button>
+                    </div>
+
+                    <!-- Cards -->
+                    <div class="row g-3">
+                        <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="glass-landing--card">
+                                <div style="position: relative;">
+                                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Algebra" class="glass-landing--card-img">
+                                    <div class="glass-landing--play-icon">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                </div>
+                                <div class="glass-landing--card-body">
+                                    <h3 class="glass-landing--card-title">Algebra Video Lesson</h3>
+                                    <div class="glass-landing--card-price">$3.99</div>
+                                    <div class="glass-landing--card-meta">
+                                        <div>
+                                            <span class="glass-landing--stars">★</span>
+                                            <span class="glass-landing--tutor-name">Davty. L</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-secondary">Follow</button>
+                                    </div>
+                                    <div class="glass-landing--card-meta" style="border-top: none; padding-top: 5px;">
+                                        <div>
+                                            <span class="glass-landing--stars">★★★</span>
+                                            <span style="color: #9ca3af;">46</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-secondary">Follow</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="glass-landing--card">
+                                <img src="https://images.unsplash.com/photo-1516534775068-ba3e7458af70?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Worksheets" class="glass-landing--card-img">
+                                <div class="glass-landing--card-body">
+                                    <h3 class="glass-landing--card-title">Download Worksheets</h3>
+                                    <div class="glass-landing--card-price">$92.5</div>
+                                    <div class="glass-landing--card-meta">
+                                        <div>
+                                            <span class="glass-landing--stars">★</span>
+                                            <span class="glass-landing--tutor-name">David S.</span>
+                                        </div>
+                                        <span style="font-weight: 600;">4.4</span>
+                                    </div>
+                                    <div class="glass-landing--card-meta" style="border-top: none; padding-top: 5px;">
+                                        <div>
+                                            <span style="color: #4b5563; font-weight: 600;">43</span>
+                                        </div>
+                                        <span style="font-weight: 600; color: #4b5563;">$3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="glass-landing--card">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Bundles" class="glass-landing--card-img">
+                                <div class="glass-landing--card-body">
+                                    <h3 class="glass-landing--card-title">Bundles & Units</h3>
+                                    <div class="glass-landing--card-price">$12.00</div>
+                                    <div class="glass-landing--card-meta">
+                                        <div>
+                                            <span class="glass-landing--stars">★</span>
+                                            <span class="glass-landing--tutor-name">Sarah L.</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-landing--card-meta" style="border-top: none; padding-top: 5px;">
+                                        <div>
+                                            <span class="glass-landing--stars">★★★★★★</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-5 col-md-12">
+                    <div class="glass-landing--spotlight">
+                        <h3 class="glass-landing--spotlight-title">Tutor Spotlight</h3>
+                        <div class="glass-landing--tutor-profile">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Jessica R." class="glass-landing--tutor-avatar">
+                            <div class="glass-landing--tutor-info">
+                                <h4>Jessica R.</h4>
+                                <p>Science</p>
+                                <div class="glass-landing--stars">★★★★★</div>
+                            </div>
+                        </div>
+                        <button class="btn glass-landing--follow-btn">Follow</button>
+                    </div>
+
+                    <div class="glass-landing--stats">
+                        <h4 class="glass-landing--stats-title">New from this tutor</h4>
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Tutor" style="width: 100%; border-radius: 10px; margin-bottom: 20px;">
+                        <div class="glass-landing--stats-number">10,000+</div>
+                        <div class="glass-landing--stats-label">Worksheets Downloaded</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

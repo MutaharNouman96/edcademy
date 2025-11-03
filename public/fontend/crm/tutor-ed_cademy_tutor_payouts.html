@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ed‑Cademy — Educator Payouts</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+
+  <!-- jQuery & DataTables (Bootstrap 5 theme) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"/>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+  <style>
+    :root{
+      --primary-cyan:#006b7d; /* keep consistent with other Ed‑Cademy pages */
+      --dark-cyan:#004a57;
+      --light-cyan:#e0f7fa;
+      --bg-soft:#f6f8f9;
+      --accent:#ff6b35;
+    }
+    body{background:var(--bg-soft);} 
+    .brand{color:var(--primary-cyan);font-weight:700;} 
+    .header{position:sticky;top:0;z-index:1020;background:#fff;border-bottom:1px solid rgba(0,0,0,.06);} 
+    .sidebar{position:sticky;top:0;height:100dvh;overflow-y:auto;background:#fff;border-right:1px solid rgba(0,0,0,.06);} 
+    .sidebar .nav-link{color:#425466;border-radius:.5rem;} 
+    .sidebar .nav-link.active{background:var(--light-cyan);color:var(--dark-cyan);font-weight:600;} 
+    .sidebar .nav-link:hover{background:rgba(0,107,125,.08);color:var(--dark-cyan);} 
+    .btn-primary{background:var(--primary-cyan);border-color:var(--primary-cyan);} 
+    .btn-primary:hover{background:var(--dark-cyan);border-color:var(--dark-cyan);} 
+    .btn-outline-primary{color:var(--primary-cyan);border-color:var(--primary-cyan);} 
+    .btn-outline-primary:hover{background:var(--primary-cyan);border-color:var(--primary-cyan);color:#fff;} 
+    .card{border-radius:16px;} 
+    .section-header{background:var(--light-cyan);border-radius:16px 16px 0 0;padding:1.25rem;border-bottom:1px solid rgba(0,0,0,.06);} 
+    .section-title{color:var(--dark-cyan);font-weight:700;margin:0;display:flex;gap:.5rem;align-items:center;} 
+    .kpi{border-radius:14px;border:1px solid rgba(0,0,0,.06);background:#fff;padding:1rem;} 
+    .kpi .label{color:#6b7a8c;font-size:.85rem;} 
+    .kpi .value{font-weight:800;font-size:1.8rem;color:#0f172a;} 
+    .kpi .hint{font-size:.8rem;color:#6b7a8c;} 
+    .table thead th{color:#6b7a8c;font-weight:600;} 
+    .status-badge{font-size:.75rem;padding:.35rem .6rem;border-radius:999px}
+    .status-processing{background:rgba(13,110,253,.12);color:#0d6efd;}
+    .status-paid{background:rgba(25,135,84,.12);color:#198754;}
+    .status-failed{background:rgba(220,53,69,.12);color:#dc3545;}
+    .status-hold{background:rgba(255,193,7,.15);color:#b58100;}
+    .method-badge{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:999px;padding:.25rem .6rem;font-size:.8rem;}
+    .tz-pill{background:#fff;border:1px dashed rgba(0,0,0,.15);padding:.25rem .5rem;border-radius:999px;font-size:.75rem;color:#6b7a8c;}
+    .thumb{width:36px;height:24px;border-radius:4px;object-fit:cover;border:1px solid rgba(0,0,0,.06);} 
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header py-2">
+    <div class="container-fluid px-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <a href="/educator" class="text-decoration-none brand">
+            <i class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy
+          </a>
+          <span class="d-none d-md-inline text-muted">Payouts & Earnings</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button id="btnWithdraw" class="btn btn-sm btn-primary">
+            <i class="bi bi-cash-coin me-1"></i> Withdraw
+          </button>
+          <a href="/educator/payouts/settings" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-gear me-1"></i> Payment Settings
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
+        <nav class="nav flex-column gap-1">
+          <a class="nav-link" href="/educator"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+          <a class="nav-link" href="/educator/courses"><i class="bi bi-journal-code me-2"></i> My Courses</a>
+          <a class="nav-link" href="/educator/sessions"><i class="bi bi-calendar3 me-2"></i> Sessions/Bookings</a>
+          <a class="nav-link active" href="/educator/payouts"><i class="bi bi-cash-stack me-2"></i> Payouts</a>
+          <a class="nav-link" href="/educator/reports"><i class="bi bi-graph-up me-2"></i> Reports</a>
+        </nav>
+        <hr/>
+        <div class="p-3 rounded" style="background:var(--light-cyan);">
+          <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+            <div>
+              <strong>Note:</strong>
+              <p class="mb-2 small">Escrow releases follow your cancellation window. All times in <span id="tzLabel" class="tz-pill">—</span>.</p>
+              <button class="btn btn-sm btn-outline-primary w-100" id="btnConnect"><i class="bi bi-link-45deg me-1"></i> Connect Payout Method</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="col-12 col-md-9 col-lg-10 p-4">
+        <!-- KPIs -->
+        <section>
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-6 col-lg-3">
+              <div class="kpi">
+                <div class="label">In Escrow</div>
+                <div class="value" id="kpiEscrow">—</div>
+                <div class="hint" id="kpiEscrowHint">Pending release</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+              <div class="kpi">
+                <div class="label">Available to withdraw</div>
+                <div class="value" id="kpiAvailable">—</div>
+                <div class="hint">After fees</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+              <div class="kpi">
+                <div class="label">Paid this month</div>
+                <div class="value" id="kpiPaidMonth">—</div>
+                <div class="hint" id="kpiPaidMonthCount">— payouts</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+              <div class="kpi">
+                <div class="label">Lifetime paid</div>
+                <div class="value" id="kpiLifetime">—</div>
+                <div class="hint">Since joining</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Upcoming Releases & Payment Method -->
+        <section class="row g-3">
+          <div class="col-12 col-lg-7">
+            <div class="card shadow-sm h-100">
+              <div class="section-header d-flex justify-content-between align-items-center">
+                <h2 class="section-title"><i class="bi bi-calendar2-week"></i> Upcoming Payment Releases</h2>
+                <div class="d-flex gap-2 align-items-center">
+                  <input id="upcomingFrom" type="date" class="form-control form-control-sm"/>
+                  <input id="upcomingTo" type="date" class="form-control form-control-sm"/>
+                  <button id="upcomingApply" class="btn btn-sm btn-outline-secondary"><i class="bi bi-funnel me-1"></i>Apply</button>
+                </div>
+              </div>
+              <div class="p-3">
+                <div class="table-responsive">
+                  <table id="upcomingTable" class="table table-striped align-middle w-100">
+                    <thead>
+                      <tr>
+                        <th>Release Date</th>
+                        <th>Source</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-5">
+            <div class="card shadow-sm h-100">
+              <div class="section-header d-flex justify-content-between align-items-center">
+                <h2 class="section-title"><i class="bi bi-bank"></i> Payment Methods</h2>
+                <button id="btnAddMethod" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg me-1"></i>Add</button>
+              </div>
+              <div class="p-3">
+                <ul id="methodList" class="list-group list-group-flush">
+                  <!-- dynamically filled -->
+                </ul>
+                <div class="mt-3 small text-muted">Manage your default method and verification.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Payout History -->
+        <section class="mt-4">
+          <div class="card shadow-sm">
+            <div class="section-header d-flex justify-content-between align-items-center">
+              <h2 class="section-title"><i class="bi bi-clock-history"></i> Payout History</h2>
+              <div class="d-flex flex-wrap gap-2">
+                <select id="historyStatus" class="form-select form-select-sm">
+                  <option value="">All Status</option>
+                  <option value="processing">Processing</option>
+                  <option value="paid">Paid</option>
+                  <option value="failed">Failed</option>
+                  <option value="hold">On Hold</option>
+                </select>
+                <input id="historySearch" class="form-control form-control-sm" placeholder="Search ref / note…"/>
+                <button id="historyReset" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+              </div>
+            </div>
+            <div class="p-3">
+              <div class="table-responsive">
+                <table id="historyTable" class="table table-striped align-middle w-100">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Reference</th>
+                      <th>Method</th>
+                      <th>Amount</th>
+                      <th>Fees</th>
+                      <th>Net</th>
+                      <th>Status</th>
+                      <th>Note</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Withdraw Modal -->
+  <div class="modal fade" id="withdrawModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i>Withdraw Funds</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Amount</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input id="wdAmount" type="number" min="0" step="0.01" class="form-control" placeholder="0.00"/>
+              </div>
+              <div class="form-text">Max available: <span id="wdMax">—</span></div>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Method</label>
+              <select id="wdMethod" class="form-select">
+                <!-- filled dynamically from methods -->
+              </select>
+              <div class="form-text">Default method preselected.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Note (optional)</label>
+              <textarea id="wdNote" class="form-control" rows="2" placeholder="Add a note for your records…"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="confirmWithdrawBtn" class="btn btn-primary"><i class="bi bi-send me-1"></i> Request Withdrawal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Method Modal -->
+  <div class="modal fade" id="methodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-bank me-2"></i>Payment Method</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Type</label>
+            <select id="pmType" class="form-select">
+              <option value="bank">Bank Transfer</option>
+              <option value="paypal">PayPal</option>
+              <option value="wise">Wise</option>
+              <option value="stripe">Stripe Connect</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Label</label>
+            <input id="pmLabel" class="form-control" placeholder="e.g., Personal USD Bank"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Details</label>
+            <textarea id="pmDetails" class="form-control" rows="3" placeholder="IBAN ****, SWIFT **** (stored securely)"></textarea>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pmDefault">
+            <label class="form-check-label" for="pmDefault">Set as default</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="saveMethodBtn" class="btn btn-primary"><i class="bi bi-save me-1"></i> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ===== Utilities =====
+    function money(v){ return v==null ? '—' : ('$'+Number(v).toFixed(2)); }
+    function statusBadge(s){
+      const map={processing:'status-processing',paid:'status-paid',failed:'status-failed',hold:'status-hold'};
+      const label={processing:'Processing',paid:'Paid',failed:'Failed',hold:'On Hold'}[s]||s;
+      return `<span class="status-badge ${map[s]||'status-processing'}">${label}</span>`;
+    }
+    function createToastContainer(){
+      const c=document.createElement('div');
+      c.id='toastContainer';
+      c.className='toast-container position-fixed bottom-0 end-0 p-3';
+      c.style.zIndex='1055';
+      document.body.appendChild(c);
+      return c;
+    }
+    function showToast(message,type='info'){
+      const container=document.getElementById('toastContainer')||createToastContainer();
+      const el=document.createElement('div');
+      el.className=`toast align-items-center text-bg-${type} border-0`;
+      el.role='alert';
+      el.innerHTML=`
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-${type==='success'?'check-circle':type==='danger'?'x-circle':'info-circle'} me-2"></i>
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>`;
+      container.appendChild(el);
+      new bootstrap.Toast(el,{delay:3000}).show();
+      el.addEventListener('hidden.bs.toast',()=>el.remove());
+    }
+
+    let upcomingTable, historyTable;
+    let methods=[]; // cached methods
+
+    $(function(){
+      // timezone chip
+      document.getElementById('tzLabel').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      // Load summary KPIs
+      loadSummary();
+
+      // Init tables
+      initUpcomingTable();
+      initHistoryTable();
+
+      // Wire buttons
+      document.getElementById('btnWithdraw').addEventListener('click', openWithdraw);
+      document.getElementById('confirmWithdrawBtn').addEventListener('click', submitWithdraw);
+      document.getElementById('btnAddMethod').addEventListener('click', ()=> new bootstrap.Modal('#methodModal').show());
+      document.getElementById('saveMethodBtn').addEventListener('click', saveMethod);
+      document.getElementById('btnConnect').addEventListener('click', ()=> new bootstrap.Modal('#methodModal').show());
+      document.getElementById('upcomingApply').addEventListener('click', ()=> upcomingTable.ajax.reload());
+      document.getElementById('historyReset').addEventListener('click', ()=>{ $('#historyStatus').val(''); $('#historySearch').val(''); historyTable.search('').columns().search('').draw(); });
+      $('#historyStatus').on('change', function(){ historyTable.column(6).search(this.value? this.value:'', true, false).draw(); });
+      $('#historySearch').on('input', function(){ historyTable.search(this.value).draw(); });
+
+      // Preload payment methods
+      loadMethods();
+    });
+
+    async function loadSummary(){
+      try{
+        const res = await fetch('/api/payouts/summary');
+        if(!res.ok) throw new Error('fail');
+        const s = await res.json();
+        applySummary(s);
+      }catch(e){
+        // Demo summary
+        applySummary({
+          escrow_amount: 842.50,
+          escrow_hint: '3 orders clearing in 3–7 days',
+          available_amount: 312.35,
+          paid_this_month_amount: 1280.00,
+          paid_this_month_count: 4,
+          lifetime_paid_amount: 9820.42,
+          max_withdraw: 312.35
+        });
+        showToast('Loaded demo payout summary (API unavailable).','danger');
+      }
+    }
+
+    function applySummary(s){
+      document.getElementById('kpiEscrow').textContent = money(s.escrow_amount);
+      document.getElementById('kpiEscrowHint').textContent = s.escrow_hint || 'Pending release';
+      document.getElementById('kpiAvailable').textContent = money(s.available_amount);
+      document.getElementById('kpiPaidMonth').textContent = money(s.paid_this_month_amount);
+      document.getElementById('kpiPaidMonthCount').textContent = (s.paid_this_month_count||0) + ' payouts';
+      document.getElementById('kpiLifetime').textContent = money(s.lifetime_paid_amount);
+      document.getElementById('wdMax').textContent = money(s.max_withdraw||s.available_amount||0);
+      document.getElementById('wdAmount').value = (s.available_amount||0).toFixed(2);
+    }
+
+    function initUpcomingTable(){
+      upcomingTable = $('#upcomingTable').DataTable({
+        processing:true,
+        deferRender:true,
+        ajax:{
+          url:'/api/payouts/upcoming',
+          data:function(d){ d.from=$('#upcomingFrom').val(); d.to=$('#upcomingTo').val(); },
+          dataSrc:'',
+          error:function(){
+            const demo=[
+              {id:'REL-1001', release_at:new Date(Date.now()+2*86400000).toISOString(), source:'Course #101 • Algebra I', amount:120.00, status:'processing'},
+              {id:'REL-1002', release_at:new Date(Date.now()+5*86400000).toISOString(), source:'Live Cohort • Kinematics', amount:220.50, status:'processing'},
+              {id:'REL-1003', release_at:new Date(Date.now()+9*86400000).toISOString(), source:'Video Pack • Writing Tips', amount:86.00, status:'hold'}
+            ];
+            upcomingTable.clear().rows.add(demo).draw();
+          }
+        },
+        columns:[
+          {data:'release_at', render:(d)=> new Date(d).toLocaleDateString()},
+          {data:'source', render:(d)=> d||'—'},
+          {data:'amount', render:(d)=> money(d)},
+          {data:'status', render:(d)=> statusBadge(d)},
+          {data:null, orderable:false, searchable:false, className:'text-end', render:(row)=> `
+            <div class='btn-group'>
+              <a class='btn btn-sm btn-outline-secondary' href='/educator/payouts/release/${row.id}' title='Open'><i class='bi bi-eye'></i></a>
+              <button class='btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split' data-bs-toggle='dropdown'></button>
+              <ul class='dropdown-menu dropdown-menu-end'>
+                <li><a class='dropdown-item' href='/educator/orders?ref=${encodeURIComponent(row.id)}'><i class='bi bi-receipt me-2'></i>Related orders</a></li>
+              </ul>
+            </div>`}
+        ],
+        order:[[0,'asc']],
+        pageLength:5,
+        language:{search:'', searchPlaceholder:'Search…'}
+      });
+    }
+
+    function initHistoryTable(){
+      historyTable = $('#historyTable').DataTable({
+        processing:true,
+        deferRender:true,
+        ajax:{
+          url:'/api/payouts/history',
+          dataSrc:'',
+          error:function(){
+            const demo=[
+              {id:'PO-9001', created_at:'2025-09-05T12:00:00Z', method:'Bank • ****1234', amount:500, fees:5, net:495, status:'paid', note:'Monthly auto‑payout'},
+              {id:'PO-9002', created_at:'2025-09-12T16:40:00Z', method:'PayPal • educator@example.com', amount:280, fees:6.2, net:273.8, status:'paid', note:'Manual withdrawal'},
+              {id:'PO-9003', created_at:'2025-09-16T09:10:00Z', method:'Bank • ****1234', amount:300, fees:5, net:295, status:'processing', note:'Scheduled'},
+              {id:'PO-9004', created_at:'2025-09-18T10:15:00Z', method:'Wise • USD', amount:150, fees:3, net:147, status:'failed', note:'Bank rejected — verify IBAN'}
+            ];
+            historyTable.clear().rows.add(demo).draw();
+          }
+        },
+        columns:[
+          {data:'created_at', render:(d)=> new Date(d).toLocaleString()},
+          {data:'id', render:(d)=> `<code>${d}</code>`},
+          {data:'method'},
+          {data:'amount', render:(d)=> money(d)},
+          {data:'fees', render:(d)=> money(d)},
+          {data:'net', render:(d)=> money(d)},
+          {data:'status', render:(d)=> statusBadge(d)},
+          {data:'note', defaultContent:'—'},
+          {data:null, orderable:false, searchable:false, className:'text-end', render:(row)=> `
+            <div class='btn-group'>
+              <a class='btn btn-sm btn-outline-secondary' href='/educator/payouts/${row.id}' title='Open'><i class='bi bi-eye'></i></a>
+              <button class='btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split' data-bs-toggle='dropdown'></button>
+              <ul class='dropdown-menu dropdown-menu-end'>
+                <li><a class='dropdown-item' href='/educator/reports?ref=${row.id}'><i class='bi bi-graph-up-arrow me-2'></i>Reports</a></li>
+                <li><a class='dropdown-item' href='/educator/support?ticket=new&ref=${row.id}'><i class='bi bi-life-preserver me-2'></i>Raise a ticket</a></li>
+              </ul>
+            </div>`}
+        ],
+        order:[[0,'desc']],
+        pageLength:10,
+        language:{search:'', searchPlaceholder:'Search…'}
+      });
+    }
+
+    async function loadMethods(){
+      try{
+        const res = await fetch('/api/payouts/methods');
+        if(!res.ok) throw new Error('fail');
+        methods = await res.json();
+      }catch(e){
+        // Demo methods
+        methods = [
+          {id:'m1', type:'bank', label:'Personal USD Bank', details:'••••1234 (IBAN ****7890)', default:true, verified:true},
+          {id:'m2', type:'paypal', label:'PayPal', details:'educator@example.com', default:false, verified:true},
+          {id:'m3', type:'wise', label:'Wise (USD)', details:'Acct ****5566', default:false, verified:false}
+        ];
+      }
+      renderMethods();
+    }
+
+    function renderMethods(){
+      const list=document.getElementById('methodList');
+      list.innerHTML='';
+      methods.forEach(m=>{
+        const li=document.createElement('li');
+        li.className='list-group-item d-flex justify-content-between align-items-center';
+        li.innerHTML=`
+          <div>
+            <span class='method-badge me-2'><i class='bi bi-${iconFor(m.type)} me-1'></i>${labelFor(m.type)}</span>
+            <strong>${m.label}</strong>
+            <div class='small text-muted'>${m.details||''}</div>
+            ${m.default? '<span class="badge text-bg-success me-1">Default</span>':''}
+            ${m.verified? '<span class="badge text-bg-primary">Verified</span>' : '<span class="badge text-bg-warning">Verify</span>'}
+          </div>
+          <div class='btn-group'>
+            <button class='btn btn-sm btn-outline-secondary' onclick='setDefaultMethod("${m.id}")'><i class='bi bi-check2-circle'></i></button>
+            <button class='btn btn-sm btn-outline-secondary' onclick='editMethod("${m.id}")'><i class='bi bi-pencil'></i></button>
+            <button class='btn btn-sm btn-outline-danger' onclick='removeMethod("${m.id}")'><i class='bi bi-trash'></i></button>
+          </div>`;
+        list.appendChild(li);
+      });
+
+      // also fill withdraw method select
+      const sel=document.getElementById('wdMethod');
+      sel.innerHTML = methods.map(m=> `<option value='${m.id}' ${m.default?'selected':''}>${labelFor(m.type)} — ${m.label}</option>`).join('');
+    }
+
+    function labelFor(type){ return {bank:'Bank Transfer', paypal:'PayPal', wise:'Wise', stripe:'Stripe Connect'}[type]||type; }
+    function iconFor(type){ return {bank:'bank', paypal:'paypal', wise:'currency-exchange', stripe:'credit-card-2-front'}[type]||'credit-card'; }
+
+    function openWithdraw(){
+      new bootstrap.Modal('#withdrawModal').show();
+    }
+
+    async function submitWithdraw(){
+      const amount = parseFloat(document.getElementById('wdAmount').value||'0');
+      const methodId = document.getElementById('wdMethod').value;
+      const note = document.getElementById('wdNote').value;
+      if(!amount || amount<=0){ showToast('Enter a valid amount.','danger'); return; }
+      try{
+        const res = await fetch('/api/payouts/withdraw', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({amount, method_id:methodId, note})});
+        if(!res.ok) throw new Error('fail');
+        showToast('Withdrawal request submitted.','success');
+        bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
+        loadSummary(); historyTable.ajax.reload(null,false);
+      }catch(e){
+        showToast('Unable to submit (demo mode).','danger');
+        bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
+      }
+    }
+
+    function editMethod(id){
+      const m=methods.find(x=>x.id===id); if(!m) return;
+      document.getElementById('pmType').value=m.type;
+      document.getElementById('pmLabel').value=m.label;
+      document.getElementById('pmDetails').value=m.details||'';
+      document.getElementById('pmDefault').checked=!!m.default;
+      document.getElementById('methodModal').setAttribute('data-editing', id);
+      new bootstrap.Modal('#methodModal').show();
+    }
+
+    async function saveMethod(){
+      const type=document.getElementById('pmType').value;
+      const label=document.getElementById('pmLabel').value.trim();
+      const details=document.getElementById('pmDetails').value.trim();
+      const isDefault=document.getElementById('pmDefault').checked;
+      const editingId=document.getElementById('methodModal').getAttribute('data-editing');
+      try{
+        if(editingId){
+          // PUT /api/payouts/methods/{id}
+          const idx=methods.findIndex(x=>x.id===editingId);
+          methods[idx] = {...methods[idx], type,label,details, default:isDefault};
+        }else{
+          // POST /api/payouts/methods
+          const newId='m'+(1+methods.length);
+          methods.push({id:newId, type,label,details, default:isDefault, verified:false});
+        }
+        if(isDefault){ methods.forEach(m=> m.default = (m.label===label)); }
+        renderMethods();
+        bootstrap.Modal.getInstance(document.getElementById('methodModal')).hide();
+        showToast('Payment method saved.','success');
+      }catch(e){
+        showToast('Unable to save (demo mode).','danger');
+      }
+    }
+
+    async function removeMethod(id){
+      if(!confirm('Remove this payment method?')) return;
+      try{
+        // DELETE /api/payouts/methods/{id}
+        methods = methods.filter(m=>m.id!==id);
+        renderMethods();
+        showToast('Payment method removed.','success');
+      }catch(e){ showToast('Unable to remove (demo mode).','danger'); }
+    }
+
+    async function setDefaultMethod(id){
+      methods.forEach(m=> m.default = (m.id===id));
+      renderMethods();
+      showToast('Default method updated.','success');
+    }
+  </script>
+</body>
+</html>

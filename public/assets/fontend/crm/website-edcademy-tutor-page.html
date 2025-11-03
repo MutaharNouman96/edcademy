@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe Teacher - Ed-Cademy Educator Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-cyan: #006b7d;
+            --dark-cyan: #004a57;
+            --light-cyan: #e0f7fa;
+            --accent: #ff6b35;
+            --success-green: #7cb342;
+            --light-green: #c5e1a5;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .sidebar {
+            background: white;
+            min-height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 2rem 0;
+        }
+        
+        .logo-section {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-cyan);
+            font-weight: bold;
+            font-size: 1.25rem;
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            width: 35px;
+            height: 35px;
+            background: var(--light-cyan);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .nav-menu a:hover {
+            background: var(--light-cyan);
+            color: var(--primary-cyan);
+        }
+        
+        .nav-menu a.active {
+            background: var(--light-cyan);
+            color: var(--primary-cyan);
+            font-weight: 500;
+        }
+        
+        .nav-menu i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-cyan), var(--dark-cyan));
+            border-radius: 15px;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+        }
+        
+        .teach-blocks {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .letter-block {
+            background: white;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--dark-cyan);
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: -80px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--dark-cyan);
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-title {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--light-green);
+            color: var(--success-green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .subscribe-btn {
+            background: var(--success-green);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .subscribe-btn:hover {
+            background: #689f38;
+            transform: translateY(-2px);
+        }
+        
+        .bio-section {
+            background: var(--light-cyan);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .bio-section p {
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .stats-row {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-cyan);
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--dark-cyan);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .video-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .video-thumbnail {
+            width: 100%;
+            height: 160px;
+            background: var(--light-cyan);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .play-button {
+            width: 50px;
+            height: 50px;
+            background: rgba(0,107,125,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+        
+        .video-duration {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        
+        .video-info {
+            padding: 1rem;
+        }
+        
+        .video-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .review-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .reviewer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light-cyan);
+        }
+        
+        .reviewer-info {
+            flex: 1;
+        }
+        
+        .reviewer-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .review-date {
+            font-size: 0.75rem;
+            color: #999;
+        }
+        
+        .rating {
+            color: #ffa500;
+        }
+        
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .package-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 2px solid #e0e0e0;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .package-card:hover {
+            border-color: var(--primary-cyan);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,107,125,0.1);
+        }
+        
+        .package-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--light-cyan);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: var(--primary-cyan);
+            font-size: 1.5rem;
+        }
+        
+        .package-name {
+            font-weight: bold;
+            color: var(--dark-cyan);
+            margin-bottom: 0.5rem;
+        }
+        
+        .package-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .package-duration {
+            color: #666;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+        
+        .package-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .package-features li {
+            padding: 0.25rem 0;
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .package-features li i {
+            color: var(--success-green);
+            margin-right: 0.5rem;
+        }
+        
+        .select-package-btn {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--primary-cyan);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .select-package-btn:hover {
+            background: var(--dark-cyan);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="logo-section">
+                    <a href="#" class="logo">
+                        <div class="logo-icon">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        Ed-Cademy
+                    </a>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li>
+                        <a href="#" class="active">
+                            <i class="bi bi-person"></i>
+                            Joe Teacher
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-house"></i>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-person-video3"></i>
+                            Tutoring
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-box"></i>
+                            Bundle Packages
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-play-circle"></i>
+                            Videos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-grid"></i>
+                            Worksheets
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-chat-square-text"></i>
+                            Teacher Section
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Hero Banner -->
+                <div class="hero-banner">
+                    <img src="https://via.placeholder.com/1200x200/006b7d/ffffff?text=Educational+Background" alt="Banner">
+                    <div class="teach-blocks">
+                        <div class="letter-block">T</div>
+                        <div class="letter-block">E</div>
+                        <div class="letter-block">A</div>
+                        <div class="letter-block">C</div>
+                        <div class="letter-block">H</div>
+                    </div>
+                </div>
+                
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <img src="https://talentnook.com/wp-content/uploads/2019/07/teach-hungarian-online.jpg" alt="Joe Teacher" class="profile-avatar">
+                        <div class="profile-info">
+                            <h1 class="profile-name">Joe Teacher 👨‍🏫</h1>
+                            <p class="profile-title">@joeteacher • Available now</p>
+                            <div class="verified-badge">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Verified certified teacher
+                            </div>
+                        </div>
+                        <button class="subscribe-btn">
+                            <i class="bi bi-bell me-2"></i>SUBSCRIBE
+                        </button>
+                    </div>
+                    
+                    <div class="bio-section">
+                        <p>
+                            Hello! I am Joe. I have 15 years of experience teaching in elementary school, and I have so much to share that will help you in your class preparation for lessons involving math and how to get the very best out of your students in this subject. I have demo lessons, worksheets, and even videos that you can watch and see if they are what you would need to implement in your classroom. I also do online tutoring and I am available to talk to you about time slots.
+                        </p>
+                        <p class="mt-2">
+                            <strong>I hope to interact with you soon!</strong>
+                        </p>
+                    </div>
+                    
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-value">4.9</div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">1,234</div>
+                            <div class="stat-label">Students</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">89</div>
+                            <div class="stat-label">Courses</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">15</div>
+                            <div class="stat-label">Years Experience</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Featured Videos Section -->
+                <div class="mt-4">
+                    <h2 class="section-title">
+                        <i class="bi bi-play-circle"></i>
+                        Featured Video Lessons
+                    </h2>
+                    <div class="video-grid">
+                        <div class="video-card">
+                            <div class="video-thumbnail">
+                                <div class="play-button">
+                                    <i class="bi bi-play-fill"></i>
+                                </div>
+                                <span class="video-duration">15:30</span>
+                            </div>
+                            <div class="video-info">
+                                <div class="video-title">Introduction to Fractions</div>
+                                <div class="video-meta">
+                                    <span>Grade 4-5</span>
+                                    <span>$9.99</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="video-card">
+                            <div class="video-thumbnail">
+                                <div class="play-button">
+                                    <i class="bi bi-play-fill"></i>
+                                </div>
+                                <span class="video-duration">22:45</span>
+                            </div>
+                            <div class="video-info">
+                                <div class="video-title">Advanced Math Techniques</div>
+                                <div class="video-meta">
+                                    <span>Grade 6-7</span>
+                                    <span>$12.99</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="video-card">
+                            <div class="video-thumbnail">
+                                <div class="play-button">
+                                    <i class="bi bi-play-fill"></i>
+                                </div>
+                                <span class="video-duration">18:20</span>
+                            </div>
+                            <div class="video-info">
+                                <div class="video-title">Problem Solving Strategies</div>
+                                <div class="video-meta">
+                                    <span>All Grades</span>
+                                    <span>$14.99</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tutoring Packages -->
+                <div class="mt-4">
+                    <h2 class="section-title">
+                        <i class="bi bi-box-seam"></i>
+                        Tutoring Packages
+                    </h2>
+                    <div class="packages-grid">
+                        <div class="package-card">
+                            <div class="package-icon">
+                                <i class="bi bi-star"></i>
+                            </div>
+                            <div class="package-name">Basic</div>
+                            <div class="package-price">$25</div>
+                            <div class="package-duration">30 minutes</div>
+                            <ul class="package-features">
+                                <li><i class="bi bi-check"></i>1-on-1 Session</li>
+                                <li><i class="bi bi-check"></i>Homework Help</li>
+                                <li><i class="bi bi-check"></i>Basic Resources</li>
+                            </ul>
+                            <button class="select-package-btn">Select Package</button>
+                        </div>
+                        <div class="package-card">
+                            <div class="package-icon">
+                                <i class="bi bi-award"></i>
+                            </div>
+                            <div class="package-name">Standard</div>
+                            <div class="package-price">$45</div>
+                            <div class="package-duration">60 minutes</div>
+                            <ul class="package-features">
+                                <li><i class="bi bi-check"></i>1-on-1 Session</li>
+                                <li><i class="bi bi-check"></i>Custom Lesson Plan</li>
+                                <li><i class="bi bi-check"></i>Practice Materials</li>
+                                <li><i class="bi bi-check"></i>Progress Report</li>
+                            </ul>
+                            <button class="select-package-btn">Select Package</button>
+                        </div>
+                        <div class="package-card">
+                            <div class="package-icon">
+                                <i class="bi bi-gem"></i>
+                            </div>
+                            <div class="package-name">Premium</div>
+                            <div class="package-price">$75</div>
+                            <div class="package-duration">90 minutes</div>
+                            <ul class="package-features">
+                                <li><i class="bi bi-check"></i>1-on-1 Session</li>
+                                <li><i class="bi bi-check"></i>Personalized Curriculum</li>
+                                <li><i class="bi bi-check"></i>Unlimited Resources</li>
+                                <li><i class="bi bi-check"></i>Weekly Progress Reports</li>
+                                <li><i class="bi bi-check"></i>Parent Consultation</li>
+                            </ul>
+                            <button class="select-package-btn">Select Package</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reviews Section -->
+                <div class="mt-4">
+                    <h2 class="section-title">
+                        <i class="bi bi-chat-square-quote"></i>
+                        Student Reviews
+                    </h2>
+                    
+                    <div class="review-card">
+                        <div class="review-header">
+                            <img src="https://via.placeholder.com/40x40/c5e1a5/333?text=SM" alt="Student" class="reviewer-avatar">
+                            <div class="reviewer-info">
+                                <div class="reviewer-name">Sarah Miller</div>
+                                <div class="review-date">7 hours ago</div>
+                            </div>
+                            <div class="rating">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                        </div>
+                        <p class="review-text">
+                            I have new lesson plans available for advanced math for fourth graders! Please check them out in the teacher section link!
+                        </p>
+                    </div>
+                    
+                    <div class="review-card">
+                        <div class="review-header">
+                            <img src="https://via.placeholder.com/40x40/c5e1a5/333?text=JD" alt="Student" class="reviewer-avatar">
+                            <div class="reviewer-info">
+                                <div class="reviewer-name">John Davis</div>
+                                <div class="review-date">2 days ago</div>
+                            </div>
+                            <div class="rating">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                        </div>
+                        <p class="review-text">
+                            Mr. Joe is an excellent teacher! My son's math grades improved significantly after just a few sessions. Highly recommended!
+                        </p>
+                    </div>
+                    
+                    <div class="review-card">
+                        <div class="review-header">
+                            <img src="https://via.placeholder.com/40x40/c5e1a5/333?text=EW" alt="Student" class="reviewer-avatar">
+                            <div class="reviewer-info">
+                                <div class="reviewer-name">Emily Wilson</div>
+                                <div class="review-date">1 week ago</div>
+                            </div>
+                            <div class="rating">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star"></i>
+                            </div>
+                        </div>
+                        <p class="review-text">
+                            Great teaching methods and very patient with students. The worksheets provided are very helpful for practice at home.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
