@@ -10,6 +10,7 @@ class VideoStatController extends Controller
     //
     public function index()
     {
+        
         return view('crm.educator.video_stats.index');
     }
 }
