@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\EducatorRegistered;
 use App\Models\User;
 use App\Models\EducatorProfile;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class EducatorController extends Controller
 {
@@ -49,6 +50,9 @@ class EducatorController extends Controller
                 'password' => Hash::make($request->password),
                 'role'     => 'educator',
             ]);
+            //send user verification email
+            $user->sendEmailVerificationNotification();
+
 
             // File uploads
             if ($request->hasFile('govt_id')) {
@@ -87,9 +91,11 @@ class EducatorController extends Controller
 
             DB::commit();
 
-            // Send email
-            // $user->sendEmailVerificationNotification();
-            //login the user
+            try {
+                event(new EducatorRegistered($user));
+            } catch (\Exception $e) {
+                \Log::error('Educator registration event failed: ' . $e->getMessage());
+            }
             auth()->login($user);
 
             return redirect()->route('educator.dashboard')->with('success', 'Your application has been submitted successfully!');

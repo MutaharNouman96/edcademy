@@ -16,8 +16,9 @@ return new class extends Migration
         Schema::create('educator_reviews', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('educator_id');
-            $table->unsignedBigInteger('student_id');
+            $table->foreignId('educator_id')->constrained("users", "id")->onDelete('cascade');
+            $table->foreignId('student_id')->constrained("users", 'id')->onDelete('cascade');
+
             $table->float('rating')->unsigned();
             $table->longText("comment")->nullable();
 

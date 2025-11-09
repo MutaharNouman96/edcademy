@@ -16,7 +16,8 @@
 
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="navbar">
+    <nav class="navbar navbar-expand-lg navbar-light {{ request()->is('/') ? 'fixed-top home-nav' : 'scrolled mb-5' }}"
+        id="navbar">
         <div class="container">
             <a class="navbar-brand" href="{{ url('/') }}"><i class="fas fa-graduation-cap"></i> Ed-Cademy</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -47,6 +48,8 @@
             </div>
         </div>
     </nav>
+ 
+    </nav>
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
@@ -67,10 +70,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+    
     {{ $slot }}
 
     <!-- Footer -->
-    <footer>
+    <footer class="mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4">

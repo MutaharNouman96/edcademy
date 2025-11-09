@@ -76,18 +76,27 @@
                             Videos &
                             Stats
                         </a>
-                        <a class="nav-link @if (request()->is('educator/sessions')) active @endif"
+                        <a class="nav-link @if (request()->is('educator/sessions*')) active @endif"
                             href="{{ route('educator.sessions.index') }}"><i class="bi bi-calendar3 me-2"></i>
                             Sessions/Bookings</a>
-                        <a class="nav-link" href="#section-earnings"><i class="bi bi-cash-coin me-2"></i> Earnings</a>
-                        <a class="nav-link" href="#section-escrow"><i class="bi bi-shield-check me-2"></i> Escrow</a>
+                        <hr>
+                        <a class="nav-link @if (request()->is('educator/payments*')) active @endif"
+                            href="{{ route('educator.payments.index') }}"><i
+                                class="bi bi-credit-card-2-front me-2"></i> Payments</a>
                         <a class="nav-link @if (request()->is('educator/payouts')) active @endif"
                             href="{{ route('educator.payouts.index') }}"><i class="bi bi-bank me-2"></i> Payouts</a>
-                        <a class="nav-link" href="#section-reviews"><i class="bi bi-star-half me-2"></i> Reviews</a>
+                        <a class="nav-link @if (request()->is('educator/earnings*')) active @endif"
+                            href="{{ route('educator.earnings.index') }}"><i class="bi bi-cash-coin me-2"></i>
+                            Earnings</a>
+                        <hr>
+                        <a class="nav-link @if (request()->is('educator/reviews*')) active @endif"
+                            href="{{ route('educator.reviews.index') }}"><i class="bi bi-star-half me-2"></i>
+                            Reviews</a>
                         <a class="nav-link" href="#section-messages"><i class="bi bi-chat-dots me-2"></i> Messages</a>
                         <a class="nav-link" href="#section-resources"><i class="bi bi-folder2-open me-2"></i>
                             Resources</a>
-                        <a class="nav-link" href="{{ route('educator.schedule.index') }}"><i class="bi bi-calendar-event me-2"></i>
+                        <a class="nav-link" href="{{ route('educator.schedule.index') }}"><i
+                                class="bi bi-calendar-event me-2"></i>
                             Schedule</a>
                         <a class="nav-link" href="#section-settings"><i class="bi bi-gear me-2"></i> Settings</a>
                     </nav>
