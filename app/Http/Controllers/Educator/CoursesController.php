@@ -62,7 +62,11 @@ class CoursesController extends Controller
         // Handle file upload
         $thumbnailPath = null;
         if ($request->hasFile('thumbnail')) {
-            $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+            $file = $request->file('thumbnail');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $destinationPath = public_path('storage/thumbnails');
+            $file->move($destinationPath, $fileName);
+            $thumbnailPath = 'storage/thumbnails/' . $fileName;
         }
 
         // Create new course

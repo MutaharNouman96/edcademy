@@ -1,34 +1,37 @@
 <x-educator-layout>
 
     <div class="card p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <form id="video-stat-filter-form" class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Video Statistics</h5>
             <div class="d-flex gap-2">
-                <select class="form-select form-select-sm" style="width:auto;">
+                <select name="course_id" class="form-select form-select-sm" style="width:auto;"
+                    onchange="document.getElementById('video-stat-filter-form').submit()">
                     <option>All Courses</option>
-                    <option>Math — Calculus I</option>
-                    <option>Physics — Motion & Force</option>
+                    @foreach ($myCourses as $course)
+                        <option {{ request()->get('course_id') == $course->id ? 'selected' : '' }}
+                            value="{{ $course->id }}">{{ $course->title }}</option>
+                    @endforeach
                 </select>
-                <select class="form-select form-select-sm" style="width:auto;">
-                    <option>Last 7 Days</option>
-                    <option>Last 30 Days</option>
+                <select class="form-select form-select-sm" name="date_range" style="width:auto;">
                     <option>All Time</option>
+                    <option {{ request()->get('date_range') == 'last_7_days' ? 'selected' : '' }}>Last 7 Days</option>
+                    <option {{ request()->get('date_range') == 'last_30_days' ? 'selected' : '' }}>Last 30 Days</option>
                 </select>
             </div>
-        </div>
+        </form>
 
         <!-- Stats Summary -->
         <div class="row g-3 text-center">
             <div class="col-6 col-md-3">
                 <div class="card border-0 shadow-sm p-3">
                     <div class="fw-semibold text-secondary small">Total Views</div>
-                    <div class="fs-4 fw-bold text-primary">12,430</div>
+                    <div class="fs-4 fw-bold text-primary">{{ $totalViews }}</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="card border-0 shadow-sm p-3">
                     <div class="fw-semibold text-secondary small">Average Watch Time</div>
-                    <div class="fs-4 fw-bold text-primary">7m 23s</div>
+                    <div class="fs-4 fw-bold text-primary">{{ $averageWatchTime ? $averageWatchTime : '0:00' }}</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
