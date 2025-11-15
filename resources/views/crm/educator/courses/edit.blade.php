@@ -324,7 +324,7 @@
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="lessonForm" class="row g-3">
+                        <form id="lessonForm" class="row g-3" enctype="multipart/form-data">
                             <input type="hidden" id="sectionId" />
                             <input type="hidden" id="lessonType" value="video" />
                             <input type="hidden" id="courseId" value="{{ $course->id }}" />
@@ -488,6 +488,10 @@
                 </div>
             </div>
         </div>
+
+    </div>
+
+    <div id="modal--container">
 
     </div>
 
@@ -749,6 +753,132 @@
                                         "beforeend",
                                         renderLessonItem(lessonItem, index + 1)
                                     );
+
+                                var response = lessonItem;
+                                //apend to modal--container
+                                document.querySelector("#modal--container").insertAdjacentHTML(
+                                    "beforeend",
+                                    `   <div class="modal fade" id="lessonModal-edit-${response.id}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title"><i class="bi bi-film me-2"></i>Update Lesson 
+                                                ${response.title}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                    <div class="modal-body">
+                                     <form id="lessonFormUpdate-${response.id}" class="row g-3" enctype="multipart/form-data">
+                                        <input type="hidden" id="lessonId" value="${response.id}" />
+                                        <input type="hidden" id="sectionId" value="${response.course_section_id}" />
+                                        <input type="hidden" id="lessonType" value="${response.type}" />
+                                        <input type="hidden" id="courseId" value="{{ $course->id }}" />
+
+                                        <!-- Title -->
+                                        <div class="col-12">
+                                            <label class="form-label">Title <span class="text-danger">*</span></label>
+                                            <input id="lfTitle" class="form-control"
+                                            value="${response.title}"
+                                                placeholder="e.g., Limits — Concept & Notation" required />
+                                        </div>
+
+                                        <!-- Tabs for Content Type -->
+                                        <div class="col-12">
+                                                <!-- Video Content -->
+                                                ${response.type == 'video' ? ` <div class="" id="videoContent" role="tabpanel" aria-labelledby="video-tab">
+                                                  <label class="form-label">Video</label>
+                                                  <input id="lfVideo" type="file" class="form-control mb-2" accept="video/*" />
+                                                  <input id="lfVideoLink" type="url" class="form-control mb-2" placeholder="Or paste a video link (YouTube, Vimeo)" />
+                                                  <div class="form-text">
+                                                    MP4/MOV up to 2 GB, or provide an external link.
+                                                  </div>
+                                                  <div id="videoPreview" class="border rounded mt-2 p-3 text-center bg-white">
+                                                    <i class="bi bi-camera-video fs-1 text-muted"></i>
+                                                    <p class="mb-0 small text-muted">No video selected</p>
+                                                  </div>
+                                                </div>` : ''}
+
+                                                <!-- Learning Materials -->
+                                                ${response.type == 'materials' ? `<div class=""id="materialsContent"role="tabpanel"aria-labelledby="materials-tab"><labelclass="form-label">UploadLearningMaterials(PDF,PPT)</label><inputid="lfMaterials"type="file"class="form-control"accept=".pdf,.ppt,.pptx"multiple/><divid="lfMatList"class="rowg-2mt-2"><divclass="col-12text-centertext-mutedsmall"><iclass="bibi-file-earmark-pptfs-4"></i><br/>Nomaterialsuploaded</div></div></div>` : '' }
+
+                                                <!-- Worksheets -->
+                                            ${response.type == 'worksheet' ? 
+                                                `<div class=""id="worksheetsContent"role="tabpanel"aria-labelledby="worksheets-tab"><labelclass="form-label">UploadWorksheets(PDF,Word)</label><inputid="lfWorksheets"type="file"class="form-control"accept=".pdf,.doc,.docx"multiple/><divid="lfWsList"class="rowg-2mt-2"><divclass="col-12text-centertext-mutedsmall"><iclass="bibi-file-earmark-textfs-4"></i><br/>Noworksheetsuploaded</div></div></div>` : ''}
+                                        </div>
+
+                                        <!-- Duration, Price, Status -->
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label">Duration (min) <span class="text-danger">*</span></label>
+                                            <input id="lfDuration" type="number" min="1" step="1" value="${response.duration}"
+                                                class="form-control" placeholder="8" required />
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label">Price (USD)</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input id="price" type="number" min="0" step="0.01"
+                                                    value="${response.price}"
+                                                    class="form-control" placeholder="49.00" />
+                                            </div>
+                                            <div class="form-check mt-2">
+                                                <input class="form-check-input" type="checkbox"
+                                                ${response.free == 1 ? 'checked' : ''}
+                                                id="freeCourse" />
+                                                <label class="form-check-label" for="freeCourse">Free course</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label">Status</label>
+                                            <select id="lfStatus" class="form-select">
+                                                <option value="Draft" ${response.status == 'Draft' ? 'selected' : ''}>Draft</option>
+                                                <option value="Published" ${response.status == 'Published' ? 'selected' : ''}>Published</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-4 d-flex align-items-end">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                ${response.preview == 1 ? 'checked' : ''}
+                                                type="checkbox" id="lfPreview" />
+                                                <label class="form-check-label" for="lfPreview">Free preview</label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Resources -->
+                                        <div class="col-12">
+                                            <label class="form-label">Additional Resources (links)</label>
+                                            <div class="input-group">
+                                                <input id="lfResourceUrl" class="form-control"
+                                                value="${response.resources}"
+                                                    placeholder="Paste a link (extra PDF, sheet, site)" />
+                                                <button class="btn btn-outline-primary" type="button" id="btnAddRes">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
+                                            <div id="lfResList" class="small mt-2 text-muted">
+                                                No links added
+                                            </div>
+                                        </div>
+
+                                        <!-- Notes -->
+                                        <div class="col-12">
+                                            <label class="form-label">Notes (optional)</label>
+                                            <textarea id="lfNotes" class="form-control" rows="2" placeholder="Key points, chapters, timecodes...">${response.notes}</textarea>
+                                        </div>
+                                    </form>
+                                </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-primary" data-bs-dismiss="modal">
+                            Close
+                        </button>
+                        <button class="btn btn-primary" onclick="updateLesson('lessonFormUpdate-${response.id}')" id="btnUpdateLesson-${response.id}">
+                            <i class="bi bi-check2-circle me-1"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`
+                                );
+
                             });
                         });
                     })
@@ -904,7 +1034,8 @@
                                     </div>
                                 </div>
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-light" data-act="edit"><i class="bi bi-pencil"></i></button>
+                                    <button
+                                     class="btn btn-light" data-act="edit"><i class="bi bi-pencil"></i></button>
                                     <button class="btn btn-light" data-act="up"><i class="bi bi-arrow-up"></i></button>
                                     <button class="btn btn-light" data-act="down"><i class="bi bi-arrow-down"></i></button>
                                     <button class="btn btn-light" data-act="delete" onclick="deleteSection('${response.id}')"><i class="bi bi-trash"></i></button>
@@ -930,6 +1061,12 @@
                     </div>
                 </div>
             </div>
+
+
+
+
+
+            
             `;
             }
 
@@ -961,12 +1098,20 @@
                                     </div>
                                 </div>
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-light" data-act="edit"><i class="bi bi-pencil"></i></button>
+                                    <button
+                                    data-bs-toggle="modal" data-bs-target="#lessonModal-edit-${response.id}"
+                                     class="btn btn-light" data-act="edit"><i class="bi bi-pencil"></i></button>
                                     <button class="btn btn-light" data-act="up"><i class="bi bi-arrow-up"></i></button>
                                     <button class="btn btn-light" data-act="down"><i class="bi bi-arrow-down"></i></button>
                                     <button class="btn btn-light" data-act="delete" onclick="deleteSection('${response.id}')"><i class="bi bi-trash"></i></button>
                                 </div>
-                            </li>`;
+                            </li>
+                            
+                            
+                          
+        
+                            
+                            `;
             }
 
 
@@ -1052,7 +1197,7 @@
                         document.getElementById('lfResList').innerHTML = 'No links added';
                         //close lessonModal IN bootstrap js
                         lessonModal.hide();
-                       
+
 
                     } else {
                         console.error('Validation errors:', data);
@@ -1068,6 +1213,119 @@
                         icon: 'error',
                         title: 'Error',
                         text: 'Something went wrong while creating the lesson.'
+                    });
+                }
+            }
+
+
+
+
+
+
+
+
+            async function updateLesson(formId) {
+                // e.preventDefault();
+
+                const form = document.getElementById(formId);
+
+                const formLessonId = document.querySelector('#' + formId + ' #lessonId').value
+                const formData = new FormData();
+
+                const lessonType = document.getElementById('lessonType').value;
+                const lessonEditModal = new bootstrap.Modal(document.getElementById('lessonModal-edit-' + formLessonId));
+
+
+                // Collect basic fields
+                formData.append('course_section_id', document.querySelector('#' + formId + ' #sectionId').value);
+                formData.append('course_id', document.querySelector('#' + formId + ' #courseId').value);
+                formData.append('type', document.querySelector('#' + formId + ' #lessonType').value);
+                formData.append('title', document.querySelector('#' + formId + ' #lfTitle').value);
+                formData.append('duration', document.querySelector('#' + formId + ' #lfDuration').value);
+                formData.append('price', document.querySelector('#' + formId + ' #price').value || 0);
+                formData.append('free', document.querySelector('#' + formId + ' #freeCourse').checked ? 1 : 0);
+                formData.append('status', document.querySelector('#' + formId + ' #lfStatus').value);
+                formData.append('preview', document.querySelector('#' + formId + ' #lfPreview').checked ? 1 : 0);
+                formData.append('notes', document.querySelector('#' + formId + ' #lfNotes').value);
+
+                // Video (upload or link)
+                if (lessonType == 'video') {
+                    const videoFile = document.querySelector('#' + formId + ' #lfVideo').files[0];
+                    const videoLink = document.querySelector('#' + formId + ' #lfVideoLink').value.trim();
+                    if (videoFile) {
+                        formData.append('video_path', videoFile);
+                    } else if (videoLink) {
+                        formData.append('video_link', videoLink);
+                    }
+                }
+
+                if (lessonType == 'material') {
+                    const videoFile = document.g
+                    // Materials
+                    const materials = document.querySelector('#' + formId + ' #lfMaterials').files;
+                    for (let i = 0; i < materials.length; i++) {
+                        formData.append('materials[]', materials[i]);
+                    }
+                }
+
+                if (lessonType == 'worksheet') {
+                    const videoFile = document.g
+                    // Worksheets
+                    const worksheets = document.querySelector('#' + formId + ' #lfWorksheets').files;
+                    for (let i = 0; i < worksheets.length; i++) {
+                        formData.append('worksheets[]', worksheets[i]);
+                    }
+                }
+
+                // Resources (extra links)
+                const resources = Array.from(document.querySelectorAll('#' + formId + ' #lfResList .badge'))
+                    .map(el => el.textContent.trim())
+                    .filter(Boolean);
+                if (resources.length > 0) {
+                    resources.forEach((r, i) => formData.append(`resources[${i}]`, r));
+                }
+                formData.append('_method', 'PUT');
+
+                // Send AJAX POST
+                try {
+                    const response = await fetch('{{ url('/educator/lessons/update/') }}/' + formLessonId, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Authorization': '{{ env('AUTH_KEY') }}'
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Lesson upated successfully',
+                            text: data.message
+                        });
+                        console.log(data);
+                        form.reset();
+                        document.getElementById('lfResList').innerHTML = 'No links added';
+                        //close lessonModal IN bootstrap js
+                        lessonModal.hide();
+
+
+                    } else {
+                        console.error('Validation errors:', data);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Validation Errors',
+                            text: Object.entries(data.errors).map(([key, value]) => `${key}: ${value}`).join('\n')
+                        });
+                    }
+                } catch (err) {
+                    console.error('Error:', err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong while updating the lesson. '
                     });
                 }
             }

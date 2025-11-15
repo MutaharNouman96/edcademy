@@ -39,7 +39,7 @@
         <div class="col-12 col-lg-7">
             <div class="card shadow-sm h-100">
                 <div class="section-header d-flex justify-content-between align-items-center">
-                    <h2 class="section-title"><i class="bi bi-calendar2-week"></i> Upcoming Payment Releases</h2>
+                    <h4 class="section-title"><i class="bi bi-calendar2-week"></i> Upcoming Payment Releases</h4>
                     <div class="d-flex gap-2 align-items-center">
                         <input id="upcomingFrom" type="date" class="form-control form-control-sm" />
                         <input id="upcomingTo" type="date" class="form-control form-control-sm" />
@@ -69,7 +69,7 @@
         <div class="col-12 col-lg-5">
             <div class="card shadow-sm h-100">
                 <div class="section-header d-flex justify-content-between align-items-center">
-                    <h2 class="section-title"><i class="bi bi-bank"></i> Payment Methods</h2>
+                    <h4 class="section-title"><i class="bi bi-bank"></i> Bank Accounts</h4>
                     <button id="btnAddMethod" class="btn btn-sm btn-outline-primary"><i
                             class="bi bi-plus-lg me-1"></i>Add</button>
                 </div>
@@ -77,7 +77,7 @@
                     <ul id="methodList" class="list-group list-group-flush">
                         <!-- dynamically filled -->
                     </ul>
-                    <div class="mt-3 small text-muted">Manage your default method and verification.</div>
+                    <div class="mt-3 small text-muted">Manage your default bank accounts for receiving payouts.</div>
                 </div>
             </div>
         </div>
@@ -87,7 +87,7 @@
     <section class="mt-4">
         <div class="card shadow-sm">
             <div class="section-header d-flex justify-content-between align-items-center">
-                <h2 class="section-title"><i class="bi bi-clock-history"></i> Payout History</h2>
+                <h4 class="section-title"><i class="bi bi-clock-history"></i> Payout History</h4>
                 <div class="d-flex flex-wrap gap-2">
                     <select id="historyStatus" class="form-select form-select-sm">
                         <option value="">All Status</option>

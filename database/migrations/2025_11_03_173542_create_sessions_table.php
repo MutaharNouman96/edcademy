@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('sessions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('educator_id');
+            $table->foreignId('educator_id')->constrained('users');
             $table->dateTime('start_time');
             $table->dateTime('end_time');
             $table->string('meeting_link');
