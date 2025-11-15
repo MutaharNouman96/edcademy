@@ -23,7 +23,8 @@ class EducatorSeeder extends Seeder
 
         // Optional: create one known test educator
         $user = User::factory()->educator()->create([
-            'name' => 'Test Educator',
+            'first_name' => 'Test',
+            'last_name' => 'Educator',
             'email' => 'educator@edcademy.com',
             'password' => bcrypt('password123'),
         ]);

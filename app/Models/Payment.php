@@ -9,12 +9,22 @@ class Payment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['educator_id', 'student_id', 'course_id', 'session_id', 'gross_amount', 'tax_amount', 'platform_commission', 'net_amount', 'currency', 'payment_method', 'transaction_id', 'status', 'notes'];
-
-    public function educator()
-    {
-        return $this->belongsTo(User::class, 'educator_id');
-    }
+    protected $fillable = [
+        'educator_id',
+        'student_id',
+        'course_id',
+        'course_resource_id',
+        'session_id',
+        'gross_amount',
+        'tax_amount',
+        'platform_commission',
+        'net_amount',
+        'currency',
+        'payment_method',
+        'transaction_id',
+        'status',
+        'notes',
+    ];
 
     public function student()
     {
@@ -26,13 +36,10 @@ class Payment extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function session()
+    public function paymentMethodDetails()
     {
-        return $this->belongsTo(Session::class);
+        return $this->belongsTo(PaymentMethod::class, 'payment_method', 'name');
     }
-
-    public function courseResource()
-    {
-        return $this->belongsTo(Lesson::class , 'id' , 'course_resource_id');
-    }
+    
+    protected $table = 'payments';
 }

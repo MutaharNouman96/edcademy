@@ -29,7 +29,7 @@ return new class extends Migration
             $table->boolean('is_free')->default(false);
 
             // Course type and details
-            $table->integer('duration')->nullable(); // in weeks
+            $table->string('duration')->nullable();
             $table->enum('difficulty', ['beginner', 'intermediate', 'advanced'])->nullable();
             $table->enum('type', ['module', 'video', 'live'])->default('module');
 
@@ -45,7 +45,7 @@ return new class extends Migration
             $table->enum('status', ['draft', 'published', 'scheduled'])->default('draft');
             //drip
             $table->boolean('drip')->default(false);
-            $table->integer('drip_duration')->nullable();
+            $table->string('drip_duration')->nullable();
 
             $table->timestamps();
         });

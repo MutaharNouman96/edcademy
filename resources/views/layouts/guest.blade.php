@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Teachers:wght@400;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ asset(path: 'assets/css/website-style.css') }}" />
-    <link rel="stylesheet" href="{{ asset(path: 'assets/css/glass-landing.css') }}" />
+    <link rel="stylesheet" href="{{ asset(path: 'public/assets/css/website-style.css') }}" />
+    <link rel="stylesheet" href="{{ asset(path: 'public/assets/css/glass-landing.css') }}" />
     @stack('styles')
 </head>
 
