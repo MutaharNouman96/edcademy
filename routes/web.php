@@ -10,7 +10,9 @@ use App\Http\Controllers\Educator\PayoutController;
 use App\Http\Controllers\Educator\SessionController;
 use App\Http\Controllers\Educator\VideoStatController;
 use App\Http\Controllers\EducatorController;
+use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\WebsiteController;
+use App\Http\Controllers\StudentDashboardController;
 //livewire routes
 
 
@@ -106,7 +108,15 @@ Route::middleware(['auth', 'role:student'])
     ->prefix('student')
     ->name('student.')
     ->group(function () {
-        Route::get('dashboard', fn() => view('student.dashboard'))->name('dashboard');
+        Route::get('dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+        Route::get('profile', [StudentProfileController::class, 'edit'])->name('profile.edit');
+        Route::post('profile', [StudentProfileController::class, 'update'])->name('profile.update');
     });
+
+Route::middleware(['guest'])->group(function () {
+    Route::get('student/signup', fn() => view('student.signup'))
+    ->name('student.signup');
+    Route::post('student/signup', [\App\Http\Controllers\Auth\RegisteredUserController::class, 'store'])->name('student.signup.store');
+});
 
 require __DIR__ . '/auth.php';

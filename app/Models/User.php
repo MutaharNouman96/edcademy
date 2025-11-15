@@ -69,6 +69,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(EducatorProfile::class);
     }
 
+    public function guardian()
+    {
+        return $this->hasOne(Guardian::class, 'student_id');
+    }
 
     public function sessions()
     {
