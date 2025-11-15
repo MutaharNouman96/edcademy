@@ -25,42 +25,36 @@
             </div>
         </div>
         <div class="p-3 pt-0">
-            <ul class="nav nav-pills gap-2 mt-3" id="sessionTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="today-tab" data-bs-toggle="pill" data-bs-target="#today"
-                        type="button" role="tab" aria-controls="today" aria-selected="true"><i
-                            class="bi bi-sun me-1"></i> Today</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="upcoming-tab" data-bs-toggle="pill" data-bs-target="#upcoming"
-                        type="button" role="tab" aria-controls="upcoming" aria-selected="false"><i
-                            class="bi bi-calendar2-week me-1"></i> Upcoming</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="past-tab" data-bs-toggle="pill" data-bs-target="#past" type="button"
-                        role="tab" aria-controls="past" aria-selected="false"><i
-                            class="bi bi-clock-history me-1"></i> Past</button>
-                </li>
-            </ul>
+            {{-- <div class="d-flex justify-content-between w-100">
+                <ul class="nav nav-pills gap-2 mt-3" id="sessionTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="today-tab" data-bs-toggle="pill" data-bs-target="#today"
+                            type="button" role="tab" aria-controls="today" aria-selected="true"><i
+                                class="bi bi-sun me-1"></i> Today</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="upcoming-tab" data-bs-toggle="pill" data-bs-target="#upcoming"
+                            type="button" role="tab" aria-controls="upcoming" aria-selected="false"><i
+                                class="bi bi-calendar2-week me-1"></i> Upcoming</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="past-tab" data-bs-toggle="pill" data-bs-target="#past"
+                            type="button" role="tab" aria-controls="past" aria-selected="false"><i
+                                class="bi bi-clock-history me-1"></i> Past</button>
+                    </li>
+                </ul>
+                <div>
+                    <a href="{{ route('educator.sessions.create') }}" class="btn btn-primary mt-3  ">
+                        <i class="bi bi-plus me-1"></i> New Session
+                    </a>
+                </div>
+            </div> --}}
 
-            <div class="tab-content mt-3">
+            {{-- <div class="tab-content mt-5">
                 <!-- Today -->
                 <div class="tab-pane fade show active" id="today" role="tabpanel">
                     <div class="table-responsive">
-                        <table id="todayTable" class="table table-striped align-middle w-100">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Student</th>
-                                    <th>Course/Lesson</th>
-                                    <th>Type</th>
-                                    <th>Duration</th>
-                                    <th>Status</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                       
                     </div>
                 </div>
                 <!-- Upcoming -->
@@ -100,6 +94,87 @@
                             <tbody></tbody>
                         </table>
                     </div>
+                </div>
+            </div> --}}
+
+            <div class="card">
+                <div class="card-body">
+                    <table id="todayTable" class="table table-striped table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Title</th>
+                                <th scope="col">Student</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Start Time</th>
+                                <th scope="col">End Time</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($sessions as $index => $session)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $session->title ?? 'Untitled Session' }}</td>
+                                    <td>
+                                        @if ($session->students && count($session->students))
+                                            {{ $session->students->first()->name }}
+                                        @else
+                                            <span class="text-muted">No student</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        {{ $session->is_paid ? 'Paid' : 'Free' }}
+                                    </td>
+                                    <td>
+                                        @if ($session->is_paid)
+                                            ${{ number_format($session->price, 2) }}
+                                        @else
+                                            <span class="badge bg-success-subtle text-success">Free</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ \Carbon\Carbon::parse($session->start_time)->format('M d, Y h:i A') }}
+                                    </td>
+                                    <td>{{ \Carbon\Carbon::parse($session->end_time)->format('M d, Y h:i A') }}</td>
+                                    <td>
+                                        @if ($session->status === 'booked')
+                                            <span class="badge bg-info-subtle text-info"><i
+                                                    class="bi bi-calendar-check me-1"></i> Booked</span>
+                                        @elseif($session->status === 'completed')
+                                            <span class="badge bg-success-subtle text-success"><i
+                                                    class="bi bi-check2-circle me-1"></i> Completed</span>
+                                        @elseif($session->status === 'cancelled')
+                                            <span class="badge bg-danger-subtle text-danger"><i
+                                                    class="bi bi-x-circle me-1"></i> Cancelled</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ $session->meeting_link }}" target="_blank"
+                                            class="btn btn-sm btn-outline-primary me-1" title="Join Meeting">
+                                            <i class="bi bi-camera-video"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-secondary me-1" title="Edit"
+                                            onclick="editSession({{ $session->id }})">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" title="Delete"
+                                            onclick="deleteSession({{ $session->id }})">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
+                                        No sessions scheduled yet.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

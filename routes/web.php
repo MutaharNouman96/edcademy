@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Educator\ReviewController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Educator\DashboardController as EducatorDashboardController;
+use App\Http\Controllers\Educator\EarningController;
 use App\Http\Controllers\Educator\PayoutController;
 use App\Http\Controllers\Educator\SessionController;
 use App\Http\Controllers\Educator\VideoStatController;
@@ -12,10 +14,7 @@ use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\StudentDashboardController;
 //livewire routes
-use App\Http\Livewire\Educator\Courses\CreateCourse;
-use App\Http\Livewire\Educator\Courses\EditCourse;
-use App\Http\Livewire\Educator\Courses\ShowCourse;
-use App\Http\Livewire\Educator\Courses\IndexCourse;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +48,11 @@ Route::middleware(['auth', 'role:admin'])
     ->name('admin.')
     ->group(function () {
         Route::get('dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+        Route::get("payouts", [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('admin.payouts.index');
+        Route::get("payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name("admin.payouts.show");
+        Route::post("process/payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name("admin.payouts.process");
+
+        Route::resource('earnings', App\Http\controllers\Admin\EarningController::class)->only(['index', 'show']);
     });
 
 // Educator routes
@@ -68,9 +72,20 @@ Route::middleware(['auth', 'role:educator', 'verified'])
         Route::get("video-stats/{video}", [VideoStatController::class, 'show']);
 
         Route::get("sessions", [SessionController::class, 'index'])->name('educator.sessions.index');
+        Route::get("sessions/create", [SessionController::class, 'create'])->name('educator.sessions.create');
+        Route::post("sessions/store", [SessionController::class, 'store'])->name('educator.sessions.store');
+
+        Route::get('payments', [\App\Http\Controllers\Educator\PaymentController::class, 'index'])->name('educator.payments.index');
+        Route::get("payment/{payment}", [\App\Http\Controllers\Educator\PaymentController::class, 'show'])->name("educator.payments.show");
+
+        Route::resource('earnings', EarningController::class)->only(['index', 'show'])->names('educator.earnings');
+
+
         Route::get("payouts", [PayoutController::class, 'index'])->name('educator.payouts.index');
 
         Route::resource('courses', \App\Http\Controllers\Educator\CoursesController::class)->names('educator.courses');
+
+        Route::get("reviews", [ReviewController::class, "index"])->name("educator.reviews.index");
 
 
         Route::get("course/get/sections/{course_id}", [\App\Http\Controllers\Educator\CoursesController::class, "course_sections"])->middleware('api.auth');
