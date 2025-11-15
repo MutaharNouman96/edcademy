@@ -1,6 +1,22 @@
 @extends('layouts.student')
 
 @section('content')
+  @if (!session('status') && Auth::user() && !Auth::user()->hasVerifiedEmail())
+    <div class="alert alert-warning fade show" role="alert">
+      Your email address is not verified. Please check your inbox for a verification link, or
+      <form class="d-inline" method="POST" action="{{ route('verification.send') }}">
+        @csrf
+        <button type="submit" class="btn btn-link p-0 m-0 align-baseline">click here to resend the verification email</button>.
+      </form>
+    </div>
+  @endif
+
+  @if (session('status') === 'verification-link-sent')
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      A new verification link has been sent to your email address.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  @endif
 <main class="col-12 col-md-12 col-lg-12 p-4">
     <!-- Overview / KPIs -->
     <section id="section-overview" class="mb-4">
@@ -20,7 +36,7 @@
               <span class="pill" style="background:var(--primary-50); color:var(--primary-dark)">Enrolled</span>
             </div>
             <div class="mt-3">
-              <div class="h3 mb-0" id="kpiEnrolled">6</div>
+              <div class="h3 mb-0" id="kpiEnrolled">{{ $enrolledCourses }}</div>
               <small class="text-muted">Active courses</small>
             </div>
           </div>
@@ -32,7 +48,7 @@
               <span class="pill" style="background:var(--primary-50); color:var(--primary-dark)">30 days</span>
             </div>
             <div class="mt-3">
-              <div class="h3 mb-0" id="kpiHours">18.6 h</div>
+              <div class="h3 mb-0" id="kpiHours">{{ round($watchedTime / 3600, 1) }} h</div>
               <small class="text-muted">Watched time</small>
             </div>
           </div>
@@ -44,7 +60,7 @@
               <span class="pill" style="background:var(--primary-50); color:var(--primary-dark)">Avg</span>
             </div>
             <div class="mt-3">
-              <div class="h3 mb-0" id="kpiCompletion">54%</div>
+              <div class="h3 mb-0" id="kpiCompletion">{{ $completionRate }}%</div>
               <small class="text-muted">Completion rate</small>
             </div>
           </div>
@@ -56,7 +72,7 @@
               <span class="pill" style="background:var(--primary-50); color:var(--primary-dark)">Total</span>
             </div>
             <div class="mt-3">
-              <div class="h3 mb-0" id="kpiSpend">$186.00</div>
+              <div class="h3 mb-0" id="kpiSpend">${{ number_format($totalSpent, 2) }}</div>
               <small class="text-muted">Spent to date</small>
             </div>
           </div>
@@ -161,10 +177,19 @@
 
     <!-- Settings placeholder -->
     <section id="section-settings" class="mt-3">
-      <div class="card p-3">
+      <div class="card p-3"></div>
         <h3 class="h6 mb-1">Settings</h3>
         <p class="small text-muted mb-0">Profile, notifications, language, time‑zone, and privacy controls.</p>
       </div>
     </section>
   </main>
+
+  <script>
+    const courseCompletionData = @json($courseCompletionData);
+    const watchTimeLabels = @json($watchTimeLabels);
+    const watchTimeData = @json($watchTimeData);
+    const myCourses = @json($myCourses);
+    const newVideos = @json($newVideosFeed);
+    const payments = @json($paymentData);
+  </script>
 @endsection

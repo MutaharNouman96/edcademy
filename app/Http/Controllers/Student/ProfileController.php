@@ -30,10 +30,27 @@ class ProfileController extends Controller
         ]);
 
         $user = auth()->user();
+
+        if ($user->guardian) {
+            $request->validate([
+                'guardian_name' => ['required', 'string', 'max:255'],
+                'guardian_relation' => ['required', 'string', 'max:255'],
+                'guardian_contact' => ['required', 'string', 'max:255'],
+            ]);
+        }
+
         $user->first_name = $request->first_name;
         $user->last_name = $request->last_name;
         $user->email = $request->email;
         $user->save();
+
+        if ($user->guardian) {
+            $user->guardian->update([
+                'guardian_name' => $request->guardian_name,
+                'guardian_contact' => $request->guardian_contact,
+                'guardian_relation' => $request->guardian_relation,
+            ]);
+        }
 
         return redirect()->route('student.profile.edit')->with('status', 'profile-updated');
     }

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Models\Guardian;
 
 class RegisteredUserController extends Controller
 {
@@ -53,6 +54,15 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'role' => 'student',
         ]);
+
+        if ($request->signupType === 'kid') {
+            $user->guardian()->create([
+                'guardian_name' => $request->guardian_name,
+                'guardian_contact' => $request->guardian_contact,
+                'guardian_relation' => $request->guardian_relation,
+                'is_verified' => false, // Default to false, can be changed later
+            ]);
+        }
 
         event(new Registered($user));
 

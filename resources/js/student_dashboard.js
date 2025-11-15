@@ -1,32 +1,32 @@
 // ---------- Sample Data (replace with API sources) ----------
-const myCourses = [
-  { id: 1, title: 'Calculus I — Limits & Derivatives', subject: 'Math', progress: 0.72, hours: 6.2, last: '2d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Math', newVideos: 1 },
-  { id: 2, title: 'Physics: Mechanics (GCSE)', subject: 'Physics', progress: 0.36, hours: 3.1, last: '5h ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Physics', newVideos: 0 },
-  { id: 3, title: 'IELTS Speaking Mastery', subject: 'English', progress: 0.58, hours: 4.4, last: '1d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=IELTS', newVideos: 2 },
-  { id: 4, title: 'Organic Chemistry Basics', subject: 'Chemistry', progress: 0.21, hours: 1.0, last: '6d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Chem', newVideos: 0 },
-  { id: 5, title: 'Algebra II — Functions', subject: 'Math', progress: 0.93, hours: 7.0, last: '3h ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Algebra', newVideos: 0 },
-  { id: 6, title: 'Essay Writing Bootcamp', subject: 'English', progress: 0.49, hours: 2.9, last: '4d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Writing', newVideos: 1 }
-];
+// const myCourses = [
+//   { id: 1, title: 'Calculus I — Limits & Derivatives', subject: 'Math', progress: 0.72, hours: 6.2, last: '2d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Math', newVideos: 1 },
+//   { id: 2, title: 'Physics: Mechanics (GCSE)', subject: 'Physics', progress: 0.36, hours: 3.1, last: '5h ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Physics', newVideos: 0 },
+//   { id: 3, title: 'IELTS Speaking Mastery', subject: 'English', progress: 0.58, hours: 4.4, last: '1d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=IELTS', newVideos: 2 },
+//   { id: 4, title: 'Organic Chemistry Basics', subject: 'Chemistry', progress: 0.21, hours: 1.0, last: '6d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Chem', newVideos: 0 },
+//   { id: 5, title: 'Algebra II — Functions', subject: 'Math', progress: 0.93, hours: 7.0, last: '3h ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Algebra', newVideos: 0 },
+//   { id: 6, title: 'Essay Writing Bootcamp', subject: 'English', progress: 0.49, hours: 2.9, last: '4d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Writing', newVideos: 1 }
+// ];
 
-const newVideos = [
-  { course: 'IELTS Speaking Mastery', lesson: 'Band 7+ Part 2', when: '2 hours ago', duration: '9m', id: 'nv1' },
-  { course: 'Calculus I — Limits & Derivatives', lesson: 'L\'Hôpital Rule Basics', when: 'Yesterday', duration: '12m', id: 'nv2' },
-  { course: 'Essay Writing Bootcamp', lesson: 'Upgrade your Thesis', when: '2 days ago', duration: '7m', id: 'nv3' }
-];
+// const newVideos = [
+//   { course: 'IELTS Speaking Mastery', lesson: 'Band 7+ Part 2', when: '2 hours ago', duration: '9m', id: 'nv1' },
+//   { course: 'Calculus I — Limits & Derivatives', lesson: 'L\'Hôpital Rule Basics', when: 'Yesterday', duration: '12m', id: 'nv2' },
+//   { course: 'Essay Writing Bootcamp', lesson: 'Upgrade your Thesis', when: '2 days ago', duration: '7m', id: 'nv3' }
+// ];
 
 const certificates = [
   { course: 'Algebra II — Functions', date: '2025‑09‑10', id: 'cert1' },
   { course: 'Intro to Data Literacy', date: '2025‑08‑02', id: 'cert2' }
 ];
 
-const payments = [
-  { date: '2025‑09‑12', course: 'IELTS Speaking Mastery', method: 'Card •••• 4242', amount: 39.00 },
-  { date: '2025‑09‑05', course: 'Organic Chemistry Basics', method: 'PayPal', amount: 35.00 },
-  { date: '2025‑08‑28', course: 'Essay Writing Bootcamp', method: 'Card •••• 4242', amount: 19.00 },
-  { date: '2025‑08‑20', course: 'Calculus I — Limits & Derivatives', method: 'Card •••• 4242', amount: 49.00 },
-  { date: '2025‑08‑15', course: 'Physics: Mechanics (GCSE)', method: 'Card •••• 4242', amount: 39.00 },
-  { date: '2025‑08‑02', course: 'Algebra II — Functions', method: 'Card •••• 4242', amount: 25.00 }
-];
+// const payments = [
+//   { date: '2025‑09‑12', course: 'IELTS Speaking Mastery', method: 'Card •••• 4242', amount: 39.00 },
+//   { date: '2025‑09‑05', course: 'Organic Chemistry Basics', method: 'PayPal', amount: 35.00 },
+//   { date: '2025‑08‑28', course: 'Essay Writing Bootcamp', method: 'Card •••• 4242', amount: 19.00 },
+//   { date: '2025‑08‑20', course: 'Calculus I — Limits & Derivatives', method: 'Card •••• 4242', amount: 49.00 },
+//   { date: '2025‑08‑15', course: 'Physics: Mechanics (GCSE)', method: 'Card •••• 4242', amount: 39.00 },
+//   { date: '2025‑08‑02', course: 'Algebra II — Functions', method: 'Card •••• 4242', amount: 25.00 }
+// ];
 
 // ---------- Populate UI ----------
 function renderCourses(list){
@@ -110,11 +110,11 @@ document.getElementById('courseSearch').addEventListener('input', (e)=>{
 // ---------- Charts ----------
 // Completion per course bar chart
 const compCtx = document.getElementById('completionBar');
-let courseOrder = [...myCourses];
+let courseOrder = [...courseCompletionData];
 function drawCompletion(sort='desc'){
-  courseOrder.sort((a,b)=> sort==='asc' ? a.progress - b.progress : b.progress - a.progress);
-  const labels = courseOrder.map(c=> c.title.split(' — ')[0]);
-  const data = courseOrder.map(c=> Math.round(c.progress*100));
+  courseOrder.sort((a,b)=> sort==='asc' ? a.completion_percentage - b.completion_percentage : b.completion_percentage - a.completion_percentage);
+  const labels = courseOrder.map(c=> c.course_title.split(' — ')[0]);
+  const data = courseOrder.map(c=> c.completion_percentage);
   new Chart(compCtx, {
     type: 'bar',
     data: { labels, datasets: [{ label: 'Completion %', data, backgroundColor: 'rgba(111,66,193,.6)' }] },
@@ -131,26 +131,31 @@ document.getElementById('progressSort').addEventListener('change', (e)=>{
 
 // Watch time line
 const watchCtx = document.getElementById('watchLine');
-const labels = Array.from({length: 14}, (_, i) => `D-${14-i}`);
-const mins = labels.map(()=> Math.floor(10 + Math.random()*40));
+// const labels = Array.from({length: 14}, (_, i) => `D-${14-i}`);
+// const mins = labels.map(()=> Math.floor(10 + Math.random()*40));
 new Chart(watchCtx, {
   type: 'line',
-  data: { labels, datasets: [{ label: 'Minutes', data: mins, tension:.35, borderColor: '#6f42c1', backgroundColor: 'rgba(111,66,193,.12)', fill: true, pointRadius: 0 }] },
+  data: { labels: watchTimeLabels, datasets: [{ label: 'Minutes', data: watchTimeData, tension:.35, borderColor: '#6f42c1', backgroundColor: 'rgba(111,66,193,.12)', fill: true, pointRadius: 0 }] },
   options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
 });
 
-// KPIs from data
+// KPIs from data (re-calculating to ensure accuracy if needed, though most should come from backend now)
+// If your backend provides these directly, you might remove these lines.
+// For now, re-calculating from `myCourses` as a fallback or if not all KPIs are directly passed.
 document.getElementById('kpiEnrolled').textContent = myCourses.length;
-const totalMins = mins.reduce((a,b)=>a+b,0) + myCourses.reduce((a,c)=>a + c.hours*60, 0);
-document.getElementById('kpiHours').textContent = (totalMins/60).toFixed(1) + ' h';
-const avgComp = Math.round(myCourses.reduce((a,c)=>a + c.progress, 0)/myCourses.length * 100);
-document.getElementById('kpiCompletion').textContent = avgComp + '%';
+const totalHoursWatchedFromCourses = myCourses.reduce((sum, course) => sum + course.hours, 0);
+document.getElementById('kpiHours').textContent = totalHoursWatchedFromCourses.toFixed(1) + ' h';
+
+const totalProgress = myCourses.reduce((sum, course) => sum + course.progress, 0);
+const avgCompletion = myCourses.length > 0 ? Math.round((totalProgress / myCourses.length) * 100) : 0;
+document.getElementById('kpiCompletion').textContent = avgCompletion + '%';
 
 // Refresh progress (demo)
 document.getElementById('refreshProgress').addEventListener('click', ()=>{
   // pretend new data: nudge progresses randomly
-  myCourses.forEach(c=> c.progress = Math.min(1, Math.max(0, c.progress + (Math.random()*.1 - .05))));
-  Chart.getChart(compCtx)?.destroy();
-  drawCompletion(document.getElementById('progressSort').value);
-  renderCourses(myCourses);
+  // myCourses.forEach(c=> c.progress = Math.min(1, Math.max(0, c.progress + (Math.random()*.1 - .05))));
+  // Chart.getChart(compCtx)?.destroy();
+  // drawCompletion(document.getElementById('progressSort').value);
+  // renderCourses(myCourses);
+  location.reload(); // Refresh the page to get new data
 });

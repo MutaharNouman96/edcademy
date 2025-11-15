@@ -172,7 +172,7 @@
                     name="signupType"
                     id="forMyself"
                     value="self"
-                    checked
+
                   />
                   <label class="form-check-label" for="forMyself"
                     >I’m signing up for myself</label
@@ -319,10 +319,36 @@
             .checked
             ? 'block'
             : 'none'
+
+          // Reset validation for guardian fields when switching back to 'self'
+          if (!document.getElementById('forKid').checked) {
+            document.getElementById('guardianName').removeAttribute('required');
+            document.getElementById('guardianRelation').removeAttribute('required');
+            document.getElementById('guardianContact').removeAttribute('required');
+          } else {
+            document.getElementById('guardianName').setAttribute('required', 'required');
+            document.getElementById('guardianRelation').setAttribute('required', 'required');
+            document.getElementById('guardianContact').setAttribute('required', 'required');
+          }
         })
       })
 
       nextBtn.addEventListener('click', () => {
+        const currentStepElement = steps[currentStep];
+        const requiredFields = currentStepElement.querySelectorAll('[required]');
+        let allFieldsValid = true;
+
+        requiredFields.forEach(field => {
+          if (!field.checkValidity()) {
+            allFieldsValid = false;
+            field.reportValidity(); // Show native browser validation message
+          }
+        });
+
+        if (!allFieldsValid) {
+          return; // Stop if any required field is not valid
+        }
+
         if (currentStep < steps.length - 1) {
           currentStep++;
           if (currentStep === steps.length - 1) {

@@ -39,6 +39,33 @@
                             @enderror
                         </div>
 
+                        @if ($user->guardian)
+                        <div class="mt-4">
+                            <h5 class="fw-semibold mb-3">Guardian Information</h5>
+                            <div class="mb-3">
+                                <label for="guardian_name" class="form-label">Guardian Name</label>
+                                <input id="guardian_name" name="guardian_name" type="text" class="form-control" value="{{ old('guardian_name', $user->guardian->guardian_name) }}" required autocomplete="guardian_name" />
+                                @error('guardian_name')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label for="guardian_relation" class="form-label">Guardian Relation</label>
+                                <input id="guardian_relation" name="guardian_relation" type="text" class="form-control" value="{{ old('guardian_relation', $user->guardian->guardian_relation) }}" required autocomplete="guardian_relation" />
+                                @error('guardian_relation')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label for="guardian_contact" class="form-label">Guardian Contact</label>
+                                <input id="guardian_contact" name="guardian_contact" type="tel" class="form-control" value="{{ old('guardian_contact', $user->guardian->guardian_contact) }}" required autocomplete="guardian_contact" />
+                                @error('guardian_contact')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        @endif
+
                         <div class="d-flex align-items-center gap-4 mt-3">
                             <button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
 
