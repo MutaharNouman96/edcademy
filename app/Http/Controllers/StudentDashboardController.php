@@ -150,4 +150,184 @@ class StudentDashboardController extends Controller
 
         return view('student.dashboard', compact('enrolledCourses', 'watchedTime', 'completionRate', 'totalSpent', 'courseCompletionData', 'watchTimeLabels', 'watchTimeData', 'myCourses', 'newVideosFeed', 'paymentData'));
     }
+
+    public function myCourses()
+    {
+        $user = Auth::user();
+        $enrolledCoursesData = CoursePurchase::where('student_id', $user->id)->with('course')->get();
+
+        $myCourses = [];
+        foreach ($enrolledCoursesData as $purchase) {
+            $course = $purchase->course;
+            $completedLessonsCount = ProgressTracking::where('student_id', $user->id)
+                ->where('course_id', $course->id)
+                ->distinct('lesson_id')
+                ->count();
+            $totalLessonsCount = $course->lessons->count();
+            $progress = ($totalLessonsCount > 0) ? round(($completedLessonsCount / $totalLessonsCount), 2) : 0;
+
+            $lastViewedLesson = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
+                $query->where('student_id', $user->id);
+            })
+            ->latest()
+            ->first();
+
+            $lastViewed = $lastViewedLesson ? Carbon::parse($lastViewedLesson->created_at)->diffForHumans() : 'Never';
+
+            $totalWatchTime = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
+                $query->where('student_id', $user->id);
+            })
+            ->sum('average_watch_time');
+            $hoursWatched = round($totalWatchTime / 3600, 1);
+
+            $newVideosCount = Lesson::where('course_id', $course->id)
+                ->where('created_at', '>', Carbon::now()->subDays(7))
+                ->count();
+
+            $myCourses[] = [
+                'id' => $course->id,
+                'title' => $course->title,
+                'subject' => $course->subject,
+                'progress' => $progress,
+                'hours' => $hoursWatched,
+                'last' => $lastViewed,
+                'thumb' => $course->thumbnail,
+                'newVideos' => $newVideosCount,
+            ];
+        }
+
+        return view('student.my_courses', compact('myCourses'));
+    }
+
+    public function newVideos()
+    {
+        $user = Auth::user();
+        $enrolledCourseIds = CoursePurchase::where('student_id', $user->id)->pluck('course_id');
+        $recentLessons = Lesson::whereIn('course_id', $enrolledCourseIds)
+            ->where('created_at', '>', Carbon::now()->subDays(7))
+            ->with('course')
+            ->latest()
+            ->get();
+
+        $newVideosFeed = [];
+        foreach ($recentLessons as $lesson) {
+            $newVideosFeed[] = [
+                'course' => $lesson->course->title,
+                'lesson' => $lesson->title,
+                'when' => Carbon::parse($lesson->created_at)->diffForHumans(),
+                'duration' => $lesson->duration,
+                'id' => $lesson->id,
+            ];
+        }
+
+        return view('student.new_videos', compact('newVideosFeed'));
+    }
+
+    public function analytics()
+    {
+        $user = Auth::user();
+        $totalCourses = CoursePurchase::where('student_id', $user->id)->count();
+        $completedCourses = ProgressTracking::where('student_id', $user->id)
+            ->distinct('course_id')
+            ->count();
+        $completionRate = ($totalCourses > 0) ? round(($completedCourses / $totalCourses) * 100, 2) : 0;
+
+        $totalWatchTime = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
+            $query->where('student_id', $user->id);
+        })
+        ->sum('average_watch_time');
+        $hoursWatched = round($totalWatchTime / 3600, 1);
+
+        $courseCompletionData = [];
+        $enrolledCoursesData = CoursePurchase::where('student_id', $user->id)->with('course')->get();
+
+        foreach ($enrolledCoursesData as $purchase) {
+            $completedLessonsCount = ProgressTracking::where('student_id', $user->id)
+                ->where('course_id', $purchase->course_id)
+                ->distinct('lesson_id')
+                ->count();
+            $totalLessonsCount = $purchase->course->lessons->count();
+            $completionPercentage = ($totalLessonsCount > 0) ? round(($completedLessonsCount / $totalLessonsCount) * 100, 2) : 0;
+
+            $courseCompletionData[] = [
+                'course_title' => $purchase->course->title,
+                'completion_percentage' => $completionPercentage,
+            ];
+        }
+
+        // Static data if no real data
+        if (empty($courseCompletionData)) {
+            $completionRate = 75;
+            $hoursWatched = 120;
+            $courseCompletionData = [
+                ['course_title' => 'Static Course 1', 'completion_percentage' => 80],
+                ['course_title' => 'Static Course 2', 'completion_percentage' => 60],
+            ];
+        }
+
+        return view('student.analytics', compact('completionRate', 'hoursWatched', 'courseCompletionData'));
+    }
+
+    public function certificates()
+    {
+        $user = Auth::user();
+        // Fetch certificates from the database
+        // For demonstration, using static data if no real data is found
+        $certificates = []; // Replace with actual database query for certificates
+
+        if (empty($certificates)) {
+            $certificates = [
+                ['title' => 'Static Web Development Certificate', 'issue_date' => 'October 26, 2024', 'url' => '#'],
+                ['title' => 'Static Database Management Certificate', 'issue_date' => 'September 15, 2024', 'url' => '#'],
+            ];
+        }
+
+        return view('student.certificates', compact('certificates'));
+    }
+
+    public function payments()
+    {
+        $user = Auth::user();
+        $payments = Payment::where('student_id', $user->id)
+            ->with('course')
+            ->latest()
+            ->get();
+
+        $paymentData = [];
+        foreach ($payments as $payment) {
+            $paymentData[] = [
+                'date' => Carbon::parse($payment->created_at)->format('Y-m-d'),
+                'course' => $payment->course->title ?? 'N/A',
+                'method' => $payment->payment_method ?? 'N/A',
+                'amount' => $payment->gross_amount ?? 0.00,
+            ];
+        }
+
+        // Static data if no real data
+        if (empty($paymentData)) {
+            $paymentData = [
+                ['date' => '2024-11-01', 'course' => 'Static Course 1', 'method' => 'Credit Card', 'amount' => 49.99],
+                ['date' => '2024-10-15', 'course' => 'Static Course 2', 'method' => 'PayPal', 'amount' => 29.99],
+            ];
+        }
+
+        return view('student.payments', compact('paymentData'));
+    }
+
+    public function wishlist()
+    {
+        $user = Auth::user();
+        // Fetch wishlist items from the database
+        // For demonstration, using static data if no real data is found
+        $wishlistCourses = []; // Replace with actual database query for wishlist
+
+        if (empty($wishlistCourses)) {
+            $wishlistCourses = [
+                ['id' => 3, 'title' => 'Static Course 3', 'subject' => 'Design', 'price' => 19.99, 'thumb' => 'https://via.placeholder.com/300x200'],
+                ['id' => 4, 'title' => 'Static Course 4', 'subject' => 'Marketing', 'price' => 39.99, 'thumb' => 'https://via.placeholder.com/300x200'],
+            ];
+        }
+
+        return view('student.wishlist', compact('wishlistCourses'));
+    }
 }
