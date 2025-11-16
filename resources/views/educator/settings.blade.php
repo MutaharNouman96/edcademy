@@ -1,6 +1,6 @@
 <x-educator-layout>
     <!-- Header -->
-    <header class="header py-2">
+    <div class=" py-2">
         <div class="container-fluid px-4">
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-3">
@@ -16,7 +16,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </div>
 
 
 
@@ -107,18 +107,19 @@
                         <div class="col-md-6">
                             <label class="form-label req">First name</label>
                             <input name="first_name" class="form-control" placeholder="Your name"
-                                value="{{ auth()->user()->first_name }}" required>
+                                value="{{ $user->first_name }}" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label req">last name</label>
                             <input name="last_name" class="form-control" placeholder="Your name"
-                                value="{{ auth()->user()->last_name }}" required>
+                                value="{{ $user->last_name }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label req">Public handle</label>
+                            <label class="form-label req">User name</label>
                             <div class="input-group">
                                 <span class="input-group-text">@</span>
-                                <input name="handle" class="form-control" placeholder="username" required>
+                                <input name="handle" class="form-control" placeholder="username"
+                                    value="{{ $user->username }}" required>
                             </div>
                             <div class="form-text">Used in your public profile URL.</div>
                         </div>
@@ -141,7 +142,7 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Languages</label>
-                            <select name="languages" class="form-select" multiple>
+                            <select name="languages" class="form-select select2" multiple>
                                 <option>English</option>
                                 <option>Urdu</option>
                                 <option>Arabic</option>

@@ -13,14 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('chat_messages', function (Blueprint $table) {
+        Schema::create('educator_connections', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('chat_id');
-            $table->unsignedBigInteger('sender_id');
-            $table->longText("message")->nullable();
-            $table->string("type")->default('text');
-            $table->longText("file")->nullable();
-            $table->string("read")->nullable();
+            $table->foreignId('educator_id')->constrained('users')->onDelete('cascade');
+
+            $table->boolean('google_connected')->default(false);
+            $table->boolean('zoom_connected')->default(false);
+            $table->boolean('stripe_connected')->default(false);
+
             $table->timestamps();
         });
     }
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('chat_messages');
+        Schema::dropIfExists('educator_connections');
     }
 };

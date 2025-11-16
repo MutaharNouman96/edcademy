@@ -13,14 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('chat_messages', function (Blueprint $table) {
+        Schema::create('educator_security_settings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('chat_id');
-            $table->unsignedBigInteger('sender_id');
-            $table->longText("message")->nullable();
-            $table->string("type")->default('text');
-            $table->longText("file")->nullable();
-            $table->string("read")->nullable();
+            $table->foreignId('educator_id')->constrained('users')->onDelete('cascade');
+
+            $table->boolean('twofa_enabled')->default(false);
+            $table->enum('twofa_method', ['app', 'sms'])->nullable();
+            $table->string('twofa_phone')->nullable();
+
+
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('chat_messages');
+        Schema::dropIfExists('educator_security_settings');
     }
 };

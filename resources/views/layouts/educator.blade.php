@@ -11,6 +11,8 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
         <link rel="stylesheet" href="{{ asset('assets/css/educator-style.css') }}">
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="{{ asset('assets/css/select2-addon.css') }}" />
 
         {{-- @vite(['resources/js/app.js']) --}}
         <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
@@ -43,8 +45,11 @@
                                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->first_name }}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ route('educator.profile') }}">View Public
-                                        Profile</a></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('educator.settings') }}"> View Public
+                                        Profile
+                                    </a>
+                                </li>
                                 <li><a class="dropdown-item" href="#">Account Settings</a></li>
                                 <li><a class="dropdown-item" href="#">Switch to Student View</a></li>
                                 <li>
@@ -92,13 +97,15 @@
                         <a class="nav-link @if (request()->is('educator/reviews*')) active @endif"
                             href="{{ route('educator.reviews.index') }}"><i class="bi bi-star-half me-2"></i>
                             Reviews</a>
-                        <a class="nav-link" href="#section-messages"><i class="bi bi-chat-dots me-2"></i> Messages</a>
+                        <a class="nav-link" href="{{ route('educator.chat.index') }}"><i
+                                class="bi bi-chat-dots me-2"></i> Messages</a>
                         <a class="nav-link" href="#section-resources"><i class="bi bi-folder2-open me-2"></i>
                             Resources</a>
                         <a class="nav-link" href="{{ route('educator.schedule.index') }}"><i
                                 class="bi bi-calendar-event me-2"></i>
                             Schedule</a>
-                        <a class="nav-link" href="#section-settings"><i class="bi bi-gear me-2"></i> Settings</a>
+                        <a class="nav-link" href="{{ route('educator.settings') }}"><i class="bi bi-gear me-2"></i>
+                            Settings</a>
                     </nav>
                     <hr />
                     <div class="p-3 rounded" style="background: var(--light-cyan);">
@@ -141,6 +148,7 @@
                         </div>
                     @endif
                     {{ $slot }}
+
                 </main>
                 </main>
             </div>
@@ -279,11 +287,18 @@
 
         <!-- Scripts -->
 
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
+        <script>
+            $(document).ready(function() {
+                $('.select2').select2();
+            });
+        </script>
 
         @stack('scripts')
 

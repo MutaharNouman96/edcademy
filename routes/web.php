@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\Educator\ReviewController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -10,9 +11,24 @@ use App\Http\Controllers\Educator\PayoutController;
 use App\Http\Controllers\Educator\SessionController;
 use App\Http\Controllers\Educator\VideoStatController;
 use App\Http\Controllers\EducatorController;
+
+use App\Http\Controllers\Educator\Settings\{
+    ProfileSettingController,
+    SecuritySettingController,
+    PaymentSettingController,
+    PaymentMethodController,
+    AvailabilitySettingController,
+    PrivacySettingController,
+    VerificationSettingController,
+    ConnectionController,
+    PreferenceController
+};
+use App\Http\Controllers\NotificationSettingController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\StudentDashboardController;
+use Illuminate\Support\Facades\Broadcast;
+
 //livewire routes
 
 
@@ -101,6 +117,70 @@ Route::middleware(['auth', 'role:educator', 'verified'])
         });
 
         Route::get("schudule-management", [\App\Http\Controllers\Educator\ScheduleController::class, "index"])->name("educator.schedule.index");
+
+        Route::prefix("chat")->group(function () {
+            Route::get("/", [ChatMessageController::class, "index"])->name("educator.chat.index");
+
+
+            Route::get('/messages/{chat}', [ChatMessageController::class, 'fetchMessages'])
+                ->name('chat.messages');
+
+            // Create or open chat with specific user
+            Route::get('/open/{user}', [ChatMessageController::class, 'openChat'])
+                ->name('chat.open');
+
+            // Send message
+            Route::post('/send', [ChatMessageController::class, 'sendMessage'])
+                ->name('chat.send');
+        });
+
+
+
+
+        Route::prefix('settings')->group(function () {
+            Route::get('/', [ProfileSettingController::class, 'index'])->name('educator.settings');
+
+            // Profile
+            Route::get('/profile', [ProfileSettingController::class, 'index'])->name('educator.profile.index');
+            Route::post('/profile', [ProfileSettingController::class, 'update'])->name('educator.profile.update');
+
+            // Security
+            Route::get('/security', [SecuritySettingController::class, 'index'])->name('educator.security.index');
+            Route::post('/security', [SecuritySettingController::class, 'update'])->name('educator.security.update');
+
+            // Payments
+            Route::get('/payments', [PaymentSettingController::class, 'index'])->name('educator.payments.index');
+            Route::post('/payments', [PaymentSettingController::class, 'update'])->name('educator.payments.update');
+
+            // Payment Methods (CRUD)
+            Route::resource('/payment-methods', PaymentMethodController::class)
+                ->names('educator.payment_methods')
+                ->except(['show', 'edit', 'create']);
+
+            // Availability
+            Route::get('/availability', [AvailabilitySettingController::class, 'index'])->name('educator.availability.index');
+            Route::post('/availability', [AvailabilitySettingController::class, 'update'])->name('educator.availability.update');
+
+            // Notifications
+            Route::get('/notifications', [NotificationSettingController::class, 'index'])->name('educator.notifications.index');
+            Route::post('/notifications', [NotificationSettingController::class, 'update'])->name('educator.notifications.update');
+
+            // Privacy
+            Route::get('/privacy', [PrivacySettingController::class, 'index'])->name('educator.privacy.index');
+            Route::post('/privacy', [PrivacySettingController::class, 'update'])->name('educator.privacy.update');
+
+            // Verification
+            Route::get('/verification', [VerificationSettingController::class, 'index'])->name('educator.verification.index');
+            Route::post('/verification', [VerificationSettingController::class, 'store'])->name('educator.verification.store');
+
+            // Connections (Google / Zoom / Stripe)
+            Route::get('/connections', [ConnectionController::class, 'index'])->name('educator.connections.index');
+            Route::post('/connections', [ConnectionController::class, 'update'])->name('educator.connections.update');
+
+            // Preferences
+            Route::get('/preferences', [PreferenceController::class, 'index'])->name('educator.preferences.index');
+            Route::post('/preferences', [PreferenceController::class, 'update'])->name('educator.preferences.update');
+        });
     });
 
 // Student routes
@@ -115,8 +195,11 @@ Route::middleware(['auth', 'role:student'])
 
 Route::middleware(['guest'])->group(function () {
     Route::get('student/signup', fn() => view('student.signup'))
-    ->name('student.signup');
+        ->name('student.signup');
     Route::post('student/signup', [\App\Http\Controllers\Auth\RegisteredUserController::class, 'store'])->name('student.signup.store');
 });
 
 require __DIR__ . '/auth.php';
+
+
+Broadcast::routes(['middleware' => ['auth']]);
