@@ -13,14 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('chat_messages', function (Blueprint $table) {
+        Schema::create('notification_settings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('chat_id');
-            $table->unsignedBigInteger('sender_id');
-            $table->longText("message")->nullable();
-            $table->string("type")->default('text');
-            $table->longText("file")->nullable();
-            $table->string("read")->nullable();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+
+            $table->json('channels')->nullable(); // email,sms,push,whatsapp
+            $table->json('events')->nullable();   // booking,cancel,message,review,payout,etc
+            $table->string('digest')->default('weekly');
+
             $table->timestamps();
         });
     }
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('chat_messages');
+        Schema::dropIfExists('notification_settings');
     }
 };

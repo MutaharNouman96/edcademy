@@ -13,14 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('chat_messages', function (Blueprint $table) {
+        Schema::create('educator_payment_methods', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('chat_id');
-            $table->unsignedBigInteger('sender_id');
-            $table->longText("message")->nullable();
-            $table->string("type")->default('text');
-            $table->longText("file")->nullable();
-            $table->string("read")->nullable();
+            $table->foreignId('educator_id')->constrained('users')->onDelete('cascade');
+
+            $table->enum('type', ['bank', 'paypal', 'wise', 'stripe']);
+            $table->string('label');
+            $table->text('details'); // encrypted JSON or text
+            $table->boolean('is_default')->default(false);
+
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('chat_messages');
+        Schema::dropIfExists('educator_payment_methods');
     }
 };

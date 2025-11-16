@@ -78,4 +78,106 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Session::class, 'educator_id');
     }
+
+
+    public function earnings()
+    {
+        return $this->hasMany(Earning::class, 'educator_id');
+    }
+
+
+
+
+    // educator profile settings
+    /**
+     * Profile Settings
+     */
+    public function profileSetting()
+    {
+        return $this->hasOne(\App\Models\Educator\ProfileSetting::class, 'user_id');
+    }
+
+    /**
+     * Security Settings (password/2FA)
+     */
+    public function securitySetting()
+    {
+        return $this->hasOne(\App\Models\Educator\SecuritySetting::class, 'educator_id');
+    }
+
+    /**
+     * Payment Settings
+     */
+    public function paymentSetting()
+    {
+        return $this->hasOne(\App\Models\Educator\PaymentSetting::class, 'educator_id');
+    }
+
+    /**
+     * Payment Methods (multiple)
+     */
+    public function paymentMethods()
+    {
+        return $this->hasMany(\App\Models\Educator\PaymentMethod::class, 'educator_id');
+    }
+
+    /**
+     * Availability
+     */
+    public function availability()
+    {
+        return $this->hasOne(\App\Models\Educator\AvailabilitySetting::class, 'educator_id');
+    }
+
+    /**
+     * Notification Settings
+     */
+    public function notificationSetting()
+    {
+        return $this->hasOne(\App\Models\NotificationSetting::class, 'user_id');
+    }
+
+    /**
+     * Privacy Settings
+     */
+    public function privacy()
+    {
+        return $this->hasOne(\App\Models\Educator\PrivacySetting::class, 'educator_id');
+    }
+
+    /**
+     * Verification (ID, credentials)
+     */
+    public function verification()
+    {
+        return $this->hasOne(\App\Models\Educator\VerificationSetting::class, 'educator_id');
+    }
+
+    /**
+     * Connections (Google, Zoom, Stripe)
+     */
+    public function connections()
+    {
+        return $this->hasOne(\App\Models\Educator\Connection::class, 'educator_id');
+    }
+
+    /**
+     * Preferences (language, theme, time format)
+     */
+    public function preferences()
+    {
+        return $this->hasOne(\App\Models\Educator\Preference::class, 'educator_id');
+    }
+
+
+
+    public function getnameInitialsattribute()
+    {
+        return ucfirst(substr($this->first_name, 0, 1)) . ucfirst(substr($this->last_name, 0, 1));
+    }
+
+    public function getfullNameattribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
 }

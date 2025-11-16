@@ -192,7 +192,7 @@
                     <!-- Step 3 -->
                     <div class="step hidden-step" id="step3">
                         <div class="mb-3">
-                            <label class="glass-landing--form-label">Upload Government ID *</label>
+                            <label class="glass-landing--form-label">Upload CV *</label>
                             <input name="govt_id" type="file"
                                 class="form-control glass-landing--form-input @error('govt_id') is-invalid @enderror"
                                 accept="image/*,application/pdf" required />
@@ -202,10 +202,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="glass-landing--form-label">Upload Degree / Certification Proof *</label>
+                            <label class="glass-landing--form-label">Upload Degree / Certification Proof</label>
                             <input name="degree_proof" type="file"
                                 class="form-control glass-landing--form-input @error('degree_proof') is-invalid @enderror"
-                                accept="image/*,application/pdf" required />
+                                accept="image/*,application/pdf" />
                             @error('degree_proof')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
