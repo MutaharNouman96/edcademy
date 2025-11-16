@@ -52,12 +52,12 @@
       <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
         <nav class="nav flex-column gap-1">
           <a class="nav-link active" href="{{ route('student.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
-          <a class="nav-link" href="#section-my-courses"><i class="bi bi-journal-richtext me-2"></i> My Courses</a>
-          <a class="nav-link" href="#section-new-videos"><i class="bi bi-camera-video me-2"></i> New Videos</a>
-          <a class="nav-link" href="#section-progress"><i class="bi bi-graph-up-arrow me-2"></i> Analytics</a>
-          <a class="nav-link" href="#section-certificates"><i class="bi bi-award me-2"></i> Certificates</a>
-          <a class="nav-link" href="#section-payments"><i class="bi bi-wallet2 me-2"></i> Payments</a>
-          <a class="nav-link" href="#section-wishlist"><i class="bi bi-heart me-2"></i> Wishlist</a>
+          <a class="nav-link" href="{{ route('student.my-courses') }}"><i class="bi bi-journal-richtext me-2"></i> My Courses</a>
+          <a class="nav-link" href="{{ route('student.new-videos') }}"><i class="bi bi-camera-video me-2"></i> New Videos</a>
+          <a class="nav-link" href="{{ route('student.analytics') }}"><i class="bi bi-graph-up-arrow me-2"></i> Analytics</a>
+          <a class="nav-link" href="{{ route('student.certificates') }}"><i class="bi bi-award me-2"></i> Certificates</a>
+          <a class="nav-link" href="{{ route('student.payments') }}"><i class="bi bi-wallet2 me-2"></i> Payments</a>
+          <a class="nav-link" href="{{ route('student.wishlist') }}"><i class="bi bi-heart me-2"></i> Wishlist</a>
           <a class="nav-link" href="#section-messages"><i class="bi bi-chat-dots me-2"></i> Messages</a>
           <a class="nav-link" href="{{ route('student.profile.edit') }}"><i class="bi bi-gear me-2"></i> Settings</a>
         </nav>

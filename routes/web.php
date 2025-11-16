@@ -111,6 +111,19 @@ Route::middleware(['auth', 'role:student'])
         Route::get('dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
         Route::get('profile', [StudentProfileController::class, 'edit'])->name('profile.edit');
         Route::post('profile', [StudentProfileController::class, 'update'])->name('profile.update');
+
+        Route::get('my-courses', [StudentDashboardController::class, 'myCourses'])->name('my-courses');
+
+        Route::get('new-videos', [StudentDashboardController::class, 'newVideos'])->name('new-videos');
+
+        Route::get('analytics', [StudentDashboardController::class, 'analytics'])->name('analytics');
+
+        Route::get('certificates', [StudentDashboardController::class, 'certificates'])->name('certificates');
+
+        Route::get('payments', [StudentDashboardController::class, 'payments'])->name('payments');
+
+        Route::get('wishlist', [StudentDashboardController::class, 'wishlist'])->name('wishlist');
+
     });
 
 Route::middleware(['guest'])->group(function () {
