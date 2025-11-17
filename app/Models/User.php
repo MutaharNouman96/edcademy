@@ -78,4 +78,132 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Session::class, 'educator_id');
     }
+
+
+    public function earnings()
+    {
+        return $this->hasMany(Earning::class, 'educator_id');
+    }
+
+
+
+
+    // educator profile settings
+    /**
+     * Profile Settings
+     */
+    public function profileSetting()
+    {
+        return $this->hasOne(\App\Models\Educator\ProfileSetting::class, 'user_id');
+    }
+
+    /**
+     * Security Settings (password/2FA)
+     */
+    public function securitySetting()
+    {
+        return $this->hasOne(\App\Models\Educator\SecuritySetting::class, 'educator_id');
+    }
+
+    /**
+     * Payment Settings
+     */
+    public function paymentSetting()
+    {
+        return $this->hasOne(\App\Models\Educator\PaymentSetting::class, 'educator_id');
+    }
+
+    /**
+     * Payment Methods (multiple)
+     */
+    public function paymentMethods()
+    {
+        return $this->hasMany(\App\Models\Educator\PaymentMethod::class, 'educator_id');
+    }
+
+    /**
+     * Availability
+     */
+    public function availability()
+    {
+        return $this->hasOne(\App\Models\Educator\AvailabilitySetting::class, 'educator_id');
+    }
+
+    /**
+     * Notification Settings
+     */
+    public function notificationSetting()
+    {
+        return $this->hasOne(\App\Models\NotificationSetting::class, 'user_id');
+    }
+
+    /**
+     * Privacy Settings
+     */
+    public function privacy()
+    {
+        return $this->hasOne(\App\Models\Educator\PrivacySetting::class, 'educator_id');
+    }
+
+    /**
+     * Verification (ID, credentials)
+     */
+    public function verification()
+    {
+        return $this->hasOne(\App\Models\Educator\VerificationSetting::class, 'educator_id');
+    }
+
+    /**
+     * Connections (Google, Zoom, Stripe)
+     */
+    public function connections()
+    {
+        return $this->hasOne(\App\Models\Educator\Connection::class, 'educator_id');
+    }
+
+    /**
+     * Preferences (language, theme, time format)
+     */
+    public function preferences()
+    {
+        return $this->hasOne(\App\Models\Educator\Preference::class, 'educator_id');
+    }
+
+
+
+    public function getnameInitialsattribute()
+    {
+        return ucfirst(substr($this->first_name, 0, 1)) . ucfirst(substr($this->last_name, 0, 1));
+    }
+
+    public function getfullNameattribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+
+    public function myStudents()
+    {
+        return $this->hasManyThrough(
+            User::class,           // final model (students)
+            CoursePurchase::class, // intermediate model
+            'educator_id',         // foreign key on course_purchases to educator
+            'id',                  // local key on users table for student
+            'id',                  // educator id on users table
+            'student_id'           // student id on course_purchases table
+        )->distinct();
+    }
+
+
+    public function myPurchasedCourses()
+    {
+        return $this->belongsToMany(
+            Course::class,
+            'course_purchases',
+            'student_id',   // foreign key on course_purchases pointing to student
+            'course_id'     // foreign key on course_purchases pointing to course
+        )
+            ->withPivot(['price', 'payment_status', 'purchase_date'])
+            ->withTimestamps();
+    }
 }

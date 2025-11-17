@@ -18,6 +18,31 @@ class LessonVideoViewsController extends Controller
         //
     }
 
+    public function viewsChart()
+    {
+        $days = collect(range(0, 13))->map(function ($i) {
+            return now()->subDays($i)->format('Y-m-d');
+        })->reverse()->values();
+
+        $data = [];
+
+        foreach ($days as $day) {
+            $count = LessonVideoViews::whereIn('lesson_id', function ($query) {
+                $lessons = $query->select('id')->from('lessons')->whereIn('course_id', function ($query) {
+                    $query->select('id')->from('courses')->where('user_id', auth()->user()->id);
+                });
+                return $lessons;
+            })->whereDate('created_at', $day)->count();
+            $data[] = $count;
+        }
+
+        return response()->json([
+            'labels' => $days,
+            'data' => $data
+        ]);
+    }
+
+
     /**
      * Show the form for creating a new resource.
      *

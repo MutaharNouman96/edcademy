@@ -1,6 +1,6 @@
 <x-educator-layout>
     <!-- Header -->
-    <header class="header py-2">
+    <div class=" py-2">
         <div class="container-fluid px-4">
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-3">
@@ -16,7 +16,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </div>
 
 
 
@@ -107,18 +107,19 @@
                         <div class="col-md-6">
                             <label class="form-label req">First name</label>
                             <input name="first_name" class="form-control" placeholder="Your name"
-                                value="{{ auth()->user()->first_name }}" required>
+                                value="{{ $user->first_name }}" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label req">last name</label>
                             <input name="last_name" class="form-control" placeholder="Your name"
-                                value="{{ auth()->user()->last_name }}" required>
+                                value="{{ $user->last_name }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label req">Public handle</label>
+                            <label class="form-label req">User name</label>
                             <div class="input-group">
                                 <span class="input-group-text">@</span>
-                                <input name="handle" class="form-control" placeholder="username" required>
+                                <input name="handle" class="form-control" placeholder="username"
+                                    value="{{ $user->username }}" required>
                             </div>
                             <div class="form-text">Used in your public profile URL.</div>
                         </div>
@@ -141,7 +142,7 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Languages</label>
-                            <select name="languages" class="form-select" multiple>
+                            <select name="languages" class="form-select select2" multiple>
                                 <option>English</option>
                                 <option>Urdu</option>
                                 <option>Arabic</option>
@@ -1254,6 +1255,235 @@
                     showToast('Stripe connected (demo).', 'success');
                 });
             }
+        </script>
+
+
+        <script>
+            $("#formProfile").on("submit", function(e) {
+                e.preventDefault();
+
+                let formData = new FormData(this);
+
+                $.ajax({
+                    url: "/educator/settings/profile",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+
+                    success: function(res) {
+                        toastr.success("Profile updated successfully!");
+                    },
+                    error: function(err) {
+                        toastr.error("Error updating profile.");
+                    }
+                });
+            });
+            $("#formPassword").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/security",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Password updated!");
+                    },
+                    error: function(err) {
+                        toastr.error("Incorrect current password or invalid data.");
+                    }
+                });
+            });
+
+            $("#btn2FASave").on("click", function() {
+
+                let data = {
+                    enabled: $("#twoFA").is(":checked"),
+                    method: $("#twoFAMethod").val(),
+                    phone: $("#twoFAPhone").val(),
+                    _token: $('meta[name="csrf-token"]').attr("content")
+                };
+
+                $.ajax({
+                    url: "/educator/settings/security/2fa",
+                    method: "POST",
+                    data,
+
+                    success: function(res) {
+                        toastr.success("2FA saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving 2FA.");
+                    }
+                });
+            });
+            $("#btn2FASave").on("click", function() {
+
+                let data = {
+                    enabled: $("#twoFA").is(":checked"),
+                    method: $("#twoFAMethod").val(),
+                    phone: $("#twoFAPhone").val(),
+                    _token: $('meta[name="csrf-token"]').attr("content")
+                };
+
+                $.ajax({
+                    url: "/educator/settings/security/2fa",
+                    method: "POST",
+                    data,
+
+                    success: function(res) {
+                        toastr.success("2FA saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving 2FA.");
+                    }
+                });
+            });
+            $("#saveMethodBtn").on("click", function() {
+
+                let data = {
+                    type: $("#pmType").val(),
+                    label: $("#pmLabel").val(),
+                    details: $("#pmDetails").val(),
+                    is_default: $("#pmDefault").is(":checked"),
+                    _token: $('meta[name="csrf-token"]').attr("content")
+                };
+
+                $.ajax({
+                    url: "/educator/settings/payment-methods",
+                    method: "POST",
+                    data,
+
+                    success: function(res) {
+                        $("#methodModal").modal("hide");
+                        toastr.success("Payment method added.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error adding payment method.");
+                    }
+                });
+            });
+            $("#formAvail").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/availability",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Availability saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving availability.");
+                    }
+                });
+            });
+            $("#formAvail").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/availability",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Availability saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving availability.");
+                    }
+                });
+            });
+            $("#formNotify").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/notifications",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Notification settings updated.");
+                    },
+                    error: function(err) {
+                        toastr.error("Failed to update notification settings.");
+                    }
+                });
+            });
+            $("#formPrivacy").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/privacy",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Privacy updated.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error updating privacy.");
+                    }
+                });
+            });
+            $("#formVerify").on("submit", function(e) {
+                e.preventDefault();
+
+                let formData = new FormData(this);
+
+                $.ajax({
+                    url: "/educator/settings/verification",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+
+                    success: function(res) {
+                        toastr.success("Verification submitted.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error submitting verification.");
+                    }
+                });
+            });
+            $("#formPrefs").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/preferences",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Preferences saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving preferences.");
+                    }
+                });
+            });
+            $("#btnDeleteAcc").on("click", function() {
+
+                if (!confirm("Are you sure? This cannot be undone.")) return;
+
+                $.ajax({
+                    url: "/educator/settings/security/delete-account",
+                    method: "POST",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr("content")
+                    },
+
+                    success: function(res) {
+                        toastr.success("Account deleted.");
+                        window.location.href = "/";
+                    },
+                    error: function(err) {
+                        toastr.error("Could not delete account.");
+                    }
+                });
+            });
         </script>
     @endpush
 </x-educator-layout>

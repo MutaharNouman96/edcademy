@@ -19,4 +19,8 @@ class CoursePurchase extends Model
     {
         return $this->belongsTo(Course::class);
     }
+    public function student(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    
 }
