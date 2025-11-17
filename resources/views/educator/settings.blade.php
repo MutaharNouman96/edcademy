@@ -1256,5 +1256,234 @@
                 });
             }
         </script>
+
+
+        <script>
+            $("#formProfile").on("submit", function(e) {
+                e.preventDefault();
+
+                let formData = new FormData(this);
+
+                $.ajax({
+                    url: "/educator/settings/profile",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+
+                    success: function(res) {
+                        toastr.success("Profile updated successfully!");
+                    },
+                    error: function(err) {
+                        toastr.error("Error updating profile.");
+                    }
+                });
+            });
+            $("#formPassword").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/security",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Password updated!");
+                    },
+                    error: function(err) {
+                        toastr.error("Incorrect current password or invalid data.");
+                    }
+                });
+            });
+
+            $("#btn2FASave").on("click", function() {
+
+                let data = {
+                    enabled: $("#twoFA").is(":checked"),
+                    method: $("#twoFAMethod").val(),
+                    phone: $("#twoFAPhone").val(),
+                    _token: $('meta[name="csrf-token"]').attr("content")
+                };
+
+                $.ajax({
+                    url: "/educator/settings/security/2fa",
+                    method: "POST",
+                    data,
+
+                    success: function(res) {
+                        toastr.success("2FA saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving 2FA.");
+                    }
+                });
+            });
+            $("#btn2FASave").on("click", function() {
+
+                let data = {
+                    enabled: $("#twoFA").is(":checked"),
+                    method: $("#twoFAMethod").val(),
+                    phone: $("#twoFAPhone").val(),
+                    _token: $('meta[name="csrf-token"]').attr("content")
+                };
+
+                $.ajax({
+                    url: "/educator/settings/security/2fa",
+                    method: "POST",
+                    data,
+
+                    success: function(res) {
+                        toastr.success("2FA saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving 2FA.");
+                    }
+                });
+            });
+            $("#saveMethodBtn").on("click", function() {
+
+                let data = {
+                    type: $("#pmType").val(),
+                    label: $("#pmLabel").val(),
+                    details: $("#pmDetails").val(),
+                    is_default: $("#pmDefault").is(":checked"),
+                    _token: $('meta[name="csrf-token"]').attr("content")
+                };
+
+                $.ajax({
+                    url: "/educator/settings/payment-methods",
+                    method: "POST",
+                    data,
+
+                    success: function(res) {
+                        $("#methodModal").modal("hide");
+                        toastr.success("Payment method added.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error adding payment method.");
+                    }
+                });
+            });
+            $("#formAvail").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/availability",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Availability saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving availability.");
+                    }
+                });
+            });
+            $("#formAvail").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/availability",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Availability saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving availability.");
+                    }
+                });
+            });
+            $("#formNotify").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/notifications",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Notification settings updated.");
+                    },
+                    error: function(err) {
+                        toastr.error("Failed to update notification settings.");
+                    }
+                });
+            });
+            $("#formPrivacy").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/privacy",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Privacy updated.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error updating privacy.");
+                    }
+                });
+            });
+            $("#formVerify").on("submit", function(e) {
+                e.preventDefault();
+
+                let formData = new FormData(this);
+
+                $.ajax({
+                    url: "/educator/settings/verification",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+
+                    success: function(res) {
+                        toastr.success("Verification submitted.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error submitting verification.");
+                    }
+                });
+            });
+            $("#formPrefs").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/educator/settings/preferences",
+                    method: "POST",
+                    data: $(this).serialize(),
+
+                    success: function(res) {
+                        toastr.success("Preferences saved.");
+                    },
+                    error: function(err) {
+                        toastr.error("Error saving preferences.");
+                    }
+                });
+            });
+            $("#btnDeleteAcc").on("click", function() {
+
+                if (!confirm("Are you sure? This cannot be undone.")) return;
+
+                $.ajax({
+                    url: "/educator/settings/security/delete-account",
+                    method: "POST",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr("content")
+                    },
+
+                    success: function(res) {
+                        toastr.success("Account deleted.");
+                        window.location.href = "/";
+                    },
+                    error: function(err) {
+                        toastr.error("Could not delete account.");
+                    }
+                });
+            });
+        </script>
     @endpush
 </x-educator-layout>

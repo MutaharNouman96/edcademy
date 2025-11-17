@@ -484,42 +484,63 @@
 
             // Charts
             const viewsCtx = document.getElementById('viewsChart');
-            const labels = Array.from({
-                length: 14
-            }, (_, i) => `D-${14-i}`);
-            let viewsData = labels.map(() => Math.floor(800 + Math.random() * 1200));
-            const viewsChart = new Chart(viewsCtx, {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: 'Views',
-                        data: viewsData,
-                        tension: .35,
-                        borderColor: '#006b7d',
-                        backgroundColor: 'rgba(0,107,125,.12)',
-                        fill: true,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
+
+            let viewsChart;
+
+            // Function to load chart data from API
+            async function loadViewsChartData() {
+                const response = await fetch('{{ url('/') }}/educator/lesson-views/chart');
+                const result = await response.json();
+
+                const labels = result.labels.map((d, i) => `D-${14 - i}`);
+                const viewsData = result.data;
+
+                if (viewsChart) {
+                    // Update existing chart
+                    viewsChart.data.labels = labels;
+                    viewsChart.data.datasets[0].data = viewsData;
+                    viewsChart.update();
+                } else {
+                    // Create new chart
+                    viewsChart = new Chart(viewsCtx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [{
+                                label: 'Views',
+                                data: viewsData,
+                                tension: .35,
+                                borderColor: '#006b7d',
+                                backgroundColor: 'rgba(0,107,125,.12)',
+                                fill: true,
+                                pointRadius: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
                         }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+                    });
                 }
-            });
+            }
+
+            // Initial Load
+            loadViewsChartData();
+
+            // Refresh Button
             document.getElementById('refreshViews').addEventListener('click', () => {
-                viewsChart.data.datasets[0].data = labels.map(() => Math.floor(800 + Math.random() * 1200));
-                viewsChart.update();
+                loadViewsChartData();
             });
+
 
             const revCtx = document.getElementById('revenueChart');
             new Chart(revCtx, {

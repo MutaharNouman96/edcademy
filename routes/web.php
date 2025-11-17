@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Educator\DashboardController as EducatorDashboardController;
 use App\Http\Controllers\Educator\EarningController;
+use App\Http\Controllers\Educator\LessonVideoViewsController;
 use App\Http\Controllers\Educator\PayoutController;
 use App\Http\Controllers\Educator\SessionController;
 use App\Http\Controllers\Educator\VideoStatController;
@@ -64,6 +65,7 @@ Route::middleware(['auth', 'role:admin'])
     ->name('admin.')
     ->group(function () {
         Route::get('dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+
         Route::get("payouts", [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('admin.payouts.index');
         Route::get("payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name("admin.payouts.show");
         Route::post("process/payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name("admin.payouts.process");
@@ -78,6 +80,8 @@ Route::middleware(['auth', 'role:educator', 'verified'])
     ->group(function () {
         Route::get('dashboard', [EducatorDashboardController::class, 'index'])
             ->name('educator.dashboard');
+        Route::get('/lesson-views/chart', [LessonVideoViewsController::class, 'viewsChart']);
+
         Route::get('profile', [EducatorDashboardController::class, 'profile'])
             ->name('educator.profile');
         Route::put('profile', [EducatorDashboardController::class, 'profile_update'])->name('educator.profile.update');
@@ -203,7 +207,6 @@ Route::middleware(['auth', 'role:student'])
         Route::get('payments', [StudentDashboardController::class, 'payments'])->name('payments');
 
         Route::get('wishlist', [StudentDashboardController::class, 'wishlist'])->name('wishlist');
-
     });
 
 Route::middleware(['guest'])->group(function () {
