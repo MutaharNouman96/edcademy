@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('sender_id');
             $table->longText("message")->nullable();
             $table->string("type")->default('text');
+            $table->longText("file")->nullable();
             $table->string("read")->nullable();
             $table->timestamps();
         });

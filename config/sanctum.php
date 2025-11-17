@@ -21,6 +21,15 @@ return [
         Sanctum::currentApplicationUrlWithPort()
     ))),
 
+    'spa' => [
+        'stateful' => [
+            'localhost',
+            '127.0.0.1',
+            '::1',
+            'edcademy.com',
+            '.edcademy.com', // for subdomains
+        ],
+    ],
     /*
     |--------------------------------------------------------------------------
     | Sanctum Guards

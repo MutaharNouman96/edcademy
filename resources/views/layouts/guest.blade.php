@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Teachers:wght@400;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ asset(path: 'public/assets/css/website-style.css') }}" />
-    <link rel="stylesheet" href="{{ asset(path: 'public/assets/css/glass-landing.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/website-style.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/glass-landing.css') }}" />
     @stack('styles')
 </head>
 
@@ -48,7 +48,7 @@
             </div>
         </div>
     </nav>
- 
+
     </nav>
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -70,7 +70,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    
+
     {{ $slot }}
 
     <!-- Footer -->

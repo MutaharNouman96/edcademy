@@ -30,6 +30,8 @@ class VideoStatController extends Controller
             });
         })->avg('watch_time');
 
+        $averageWatchTime = (int)($averageWatchTime / 60);
+
         $completionRate = $totalViews == 0 ? 0 : LessonVideoViews::where('completed', 1)->count() / $totalViews * 100;
 
         $myCourses = Course::where('user_id', auth()->user()->id)->get();

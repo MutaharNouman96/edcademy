@@ -31,7 +31,7 @@
             <div class="col-6 col-md-3">
                 <div class="card border-0 shadow-sm p-3">
                     <div class="fw-semibold text-secondary small">Average Watch Time</div>
-                    <div class="fs-4 fw-bold text-primary">{{ $averageWatchTime ? $averageWatchTime : '0:00' }}</div>
+                    <div class="fs-4 fw-bold text-primary">{{ $averageWatchTime ? $averageWatchTime : '0:00' }} minutes</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
@@ -74,30 +74,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Lesson 1 — Introduction</td>
-                        <td>2,130</td>
-                        <td>4m 15s</td>
-                        <td><span class="text-success">78%</span></td>
-                        <td>45</td>
-                        <td>12</td>
-                    </tr>
-                    <tr>
-                        <td>Lesson 2 — Limits & Notation</td>
-                        <td>3,780</td>
-                        <td>8m 10s</td>
-                        <td><span class="text-success">86%</span></td>
-                        <td>63</td>
-                        <td>19</td>
-                    </tr>
-                    <tr>
-                        <td>Lesson 3 — Derivatives</td>
-                        <td>6,520</td>
-                        <td>9m 02s</td>
-                        <td><span class="text-success">91%</span></td>
-                        <td>82</td>
-                        <td>26</td>
-                    </tr>
+                   
                 </tbody>
             </table>
         </div>
