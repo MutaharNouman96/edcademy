@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Earning extends Model
 {
     use HasFactory;
-
-
+    protected $casts = [
+        'earned_at' => 'datetime',
+    ];
     protected $fillable = [
         'educator_id',
         'payment_id',

@@ -180,4 +180,30 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->first_name . ' ' . $this->last_name;
     }
+
+
+    public function myStudents()
+    {
+        return $this->hasManyThrough(
+            User::class,           // final model (students)
+            CoursePurchase::class, // intermediate model
+            'educator_id',         // foreign key on course_purchases to educator
+            'id',                  // local key on users table for student
+            'id',                  // educator id on users table
+            'student_id'           // student id on course_purchases table
+        )->distinct();
+    }
+
+
+    public function myPurchasedCourses()
+    {
+        return $this->belongsToMany(
+            Course::class,
+            'course_purchases',
+            'student_id',   // foreign key on course_purchases pointing to student
+            'course_id'     // foreign key on course_purchases pointing to course
+        )
+            ->withPivot(['price', 'payment_status', 'purchase_date'])
+            ->withTimestamps();
+    }
 }

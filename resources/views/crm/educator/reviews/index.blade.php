@@ -36,7 +36,7 @@
                                     <i class="bi {{ $i <= $review->rating ? 'bi-star-fill' : 'bi-star' }}"></i>
                                 @endfor
                             </div>
-                            <small class="text-muted">By {{ $review->student->name ?? 'Unknown' }}</small>
+                            <small class="text-muted">By {{ $review->student->full_name ?? 'Unknown' }}</small>
                         </div>
                     </div>
                 @empty
