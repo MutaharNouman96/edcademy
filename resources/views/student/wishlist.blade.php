@@ -4,29 +4,33 @@
     <div class="container">
         <h1>Wishlist</h1>
         <p>This page will display your wished courses.</p>
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Static Course 3">
-                    <div class="card-body">
-                        <h5 class="card-title">Static Course 3</h5>
-                        <p class="card-text">Subject: Design</p>
-                        <p class="card-text">Price: $19.99</p>
-                        <a href="#" class="btn btn-primary">View Course</a>
-                        <button class="btn btn-danger btn-sm">Remove</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Static Course 4">
-                    <div class="card-body">
-                        <h5 class="card-title">Static Course 4</h5>
-                        <p class="card-text">Subject: Marketing</p>
-                        <p class="card-text">Price: $39.99</p>
-                        <a href="#" class="btn btn-primary">View Course</a>
-                        <button class="btn btn-danger btn-sm">Remove</button>
-                    </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Course Name</th>
+                                <th>Subject</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($wishlistCourses as $c)
+                                <tr>
+                                    <td><img src="{{ $c['thumb'] }}" class="img-fluid d-block" style="height: 50px; width: 50px;" /> </td>
+                                    <td>{{ $c['title'] }}</td>
+                                    <td>{{ $c['subject'] }}</td>
+                                    <td>${{ $c['price'] }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-primary btn-sm">View Course</a>
+                                        <button class="btn btn-danger btn-sm">Remove</button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

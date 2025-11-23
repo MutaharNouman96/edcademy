@@ -7,6 +7,7 @@
   <!-- Bootstrap & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/student_dashboard.js'])
 </head>
 <body>
@@ -51,15 +52,15 @@
       <!-- Sidebar -->
       <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
         <nav class="nav flex-column gap-1">
-          <a class="nav-link active" href="{{ route('student.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
-          <a class="nav-link" href="{{ route('student.my-courses') }}"><i class="bi bi-journal-richtext me-2"></i> My Courses</a>
-          <a class="nav-link" href="{{ route('student.new-videos') }}"><i class="bi bi-camera-video me-2"></i> New Videos</a>
-          <a class="nav-link" href="{{ route('student.analytics') }}"><i class="bi bi-graph-up-arrow me-2"></i> Analytics</a>
-          <a class="nav-link" href="{{ route('student.certificates') }}"><i class="bi bi-award me-2"></i> Certificates</a>
-          <a class="nav-link" href="{{ route('student.payments') }}"><i class="bi bi-wallet2 me-2"></i> Payments</a>
-          <a class="nav-link" href="{{ route('student.wishlist') }}"><i class="bi bi-heart me-2"></i> Wishlist</a>
+          <a class="nav-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}" href="{{ route('student.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+          <a class="nav-link {{ request()->routeIs('student.my-courses') ? 'active' : '' }}" href="{{ route('student.my-courses') }}"><i class="bi bi-journal-richtext me-2"></i> My Courses</a>
+          <a class="nav-link {{ request()->routeIs('student.new-videos') ? 'active' : '' }}" href="{{ route('student.new-videos') }}"><i class="bi bi-camera-video me-2"></i> New Videos</a>
+          <a class="nav-link {{ request()->routeIs('student.analytics') ? 'active' : '' }}" href="{{ route('student.analytics') }}"><i class="bi bi-graph-up-arrow me-2"></i> Analytics</a>
+          <a class="nav-link {{ request()->routeIs('student.certificates') ? 'active' : '' }}" href="{{ route('student.certificates') }}"><i class="bi bi-award me-2"></i> Certificates</a>
+          <a class="nav-link {{ request()->routeIs('student.payments') ? 'active' : '' }}" href="{{ route('student.payments') }}"><i class="bi bi-wallet2 me-2"></i> Payments</a>
+          <a class="nav-link {{ request()->routeIs('student.wishlist') ? 'active' : '' }}" href="{{ route('student.wishlist') }}"><i class="bi bi-heart me-2"></i> Wishlist</a>
           <a class="nav-link" href="#section-messages"><i class="bi bi-chat-dots me-2"></i> Messages</a>
-          <a class="nav-link" href="{{ route('student.profile.edit') }}"><i class="bi bi-gear me-2"></i> Settings</a>
+          <a class="nav-link {{ request()->routeIs('student.profile.edit') ? 'active' : '' }}" href="{{ route('student.profile.edit') }}"><i class="bi bi-gear me-2"></i> Settings</a>
         </nav>
         <hr/>
         <div class="p-3 rounded" style="background: var(--primary-50);">
@@ -83,7 +84,7 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  @stack('scripts')
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
 </body>
