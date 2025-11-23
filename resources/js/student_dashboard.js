@@ -19,15 +19,6 @@ const certificates = [
   { course: 'Intro to Data Literacy', date: '2025‑08‑02', id: 'cert2' }
 ];
 
-// const payments = [
-//   { date: '2025‑09‑12', course: 'IELTS Speaking Mastery', method: 'Card •••• 4242', amount: 39.00 },
-//   { date: '2025‑09‑05', course: 'Organic Chemistry Basics', method: 'PayPal', amount: 35.00 },
-//   { date: '2025‑08‑28', course: 'Essay Writing Bootcamp', method: 'Card •••• 4242', amount: 19.00 },
-//   { date: '2025‑08‑20', course: 'Calculus I — Limits & Derivatives', method: 'Card •••• 4242', amount: 49.00 },
-//   { date: '2025‑08‑15', course: 'Physics: Mechanics (GCSE)', method: 'Card •••• 4242', amount: 39.00 },
-//   { date: '2025‑08‑02', course: 'Algebra II — Functions', method: 'Card •••• 4242', amount: 25.00 }
-// ];
-
 // ---------- Populate UI ----------
 function renderCourses(list){
   const grid = document.getElementById('coursesGrid');
@@ -45,7 +36,7 @@ function renderCourses(list){
             <button class="btn btn-sm btn-outline-primary" title="Course menu"><i class="bi bi-three-dots"></i></button>
           </div>
         </div>
-        ${c.newVideos>0 ? `<span class="position-absolute top-0 end-0 m-2 badge text-bg-warning">${c.newVideos} new</span>`:''}
+        ${c.newVideos>0 ? `<span class="position-absolute top-0 end-0 m-2 badge text-bg-warning">${parseInt(c.newVideos)} new</span>`:''}
       </div>
     </div>`).join('');
 }
@@ -83,17 +74,18 @@ function renderCerts(){
     </li>`).join('');
 }
 
+
 function renderPayments(){
-  const tbody = document.querySelector('#paymentsTable tbody');
+  const tbody = document.getElementById('paymentsTable');
   tbody.innerHTML = payments.map(p => `
     <tr>
       <td>${p.date}</td>
       <td>${p.course}</td>
       <td>${p.method}</td>
-      <td class="text-end">$${p.amount.toFixed(2)}</td>
+      <td class="text-end">$${parseFloat(p.amount).toFixed(2)}</td>
     </tr>`).join('');
-  const total = payments.reduce((a,b)=>a+b.amount,0);
-  document.getElementById('kpiSpend').textContent = `$${total.toFixed(2)}`;
+  const total = payments.reduce((a,b)=>a+parseFloat(b.amount),0);
+  document.getElementById('kpiSpend').textContent = `$${parseFloat(total).toFixed(2)}`;
 }
 
 renderCourses(myCourses);
