@@ -27,3 +27,6 @@
     .progress { height: 8px; }
     .course-card:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(0,0,0,.08); }
     .pill { padding: .15rem .5rem; border-radius: 9999px; font-size: .75rem; }
+
+    .purple-half{ color: var(--primary-50);}
+    .purple-dark{ color: var(--primary-dark);}

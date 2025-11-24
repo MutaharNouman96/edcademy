@@ -151,7 +151,7 @@
             <a class="small" href="#">Download invoices</a>
           </div>
           <div class="table-responsive">
-            <table class="table align-middle" id="paymentsTable">
+            <table class="table align-middle">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -160,7 +160,7 @@
                   <th class="text-end">Amount</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody id="paymentsTable"></tbody>
             </table>
           </div>
         </div>
@@ -176,12 +176,12 @@
     </section>
 
     <!-- Settings placeholder -->
-    <section id="section-settings" class="mt-3">
+    {{-- <section id="section-settings" class="mt-3">
       <div class="card p-3"></div>
         <h3 class="h6 mb-1">Settings</h3>
         <p class="small text-muted mb-0">Profile, notifications, language, time‑zone, and privacy controls.</p>
       </div>
-    </section>
+    </section> --}}
   </main>
 
   <script>
