@@ -363,10 +363,10 @@
           <td>${p.date}</td>
           <td>${p.course}</td>
           <td>${p.method}</td>
-          <td class="text-end">$${p.amount.toFixed(2)}</td>
+          <td class="text-end">$${p.amount}</td>
         </tr>`).join('');
       const total = payments.reduce((a,b)=>a+b.amount,0);
-      document.getElementById('kpiSpend').textContent = `$${total.toFixed(2)}`;
+      document.getElementById('kpiSpend').textContent = `$${total}`;
     }
 
     renderCourses(myCourses);

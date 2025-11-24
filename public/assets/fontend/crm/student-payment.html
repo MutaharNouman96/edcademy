@@ -68,7 +68,7 @@
 
         <!-- KPI cards -->
         <div class="row g-3 mb-4">
-          
+
           <div class="col-sm-6 col-lg-3">
             <div class="card kpi-card p-3">
               <div class="d-flex justify-content-between">
@@ -167,12 +167,12 @@
         <td>${p.date}</td>
         <td>${p.item}</td>
         <td>${p.method}</td>
-        <td class="text-end">$${p.amount.toFixed(2)}</td>
+        <td class="text-end">$${p.amount}</td>
       </tr>
     `).join("");
 
     const total = payments.reduce((a,b)=>a+b.amount,0);
-    document.getElementById("kpiSpent").textContent = "$" + total.toFixed(2);
+    document.getElementById("kpiSpent").textContent = "$" + total;
   </script>
 </body>
 </html>

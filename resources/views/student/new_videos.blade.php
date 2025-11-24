@@ -1,6 +1,4 @@
-@extends('layouts.student')
-
-@section('content')
+<x-student-layout>
     <div class="container">
         <h1>New Videos</h1>
         @if (count($newVideosFeed) > 0)
@@ -23,4 +21,4 @@
             <p>No new videos have been added to your enrolled courses recently.</p>
         @endif
     </div>
-@endsection
+</x-student-layout>

@@ -201,6 +201,7 @@ Route::middleware(['auth', 'role:student'])
         Route::post('profile', [StudentProfileController::class, 'update'])->name('profile.update');
 
         Route::get('my-courses', [StudentDashboardController::class, 'myCourses'])->name('my-courses');
+        Route::get('course-details/{course_id}', [StudentDashboardController::class, 'courseDetails'])->name('course-details');
 
         Route::get('new-videos', [StudentDashboardController::class, 'newVideos'])->name('new-videos');
 
