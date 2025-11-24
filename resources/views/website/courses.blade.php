@@ -152,7 +152,7 @@
 
         <!-- Pagination -->
         <nav aria-label="Course pagination">
-            <ul class="pagination justify-content-center">
+            {{-- <ul class="pagination justify-content-center">
                 <li class="page-item disabled">
                     <a class="page-link" href="#" tabindex="-1"><i class="fas fa-chevron-left"></i></a>
                 </li>
@@ -164,7 +164,8 @@
                 <li class="page-item">
                     <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
                 </li>
-            </ul>
+            </ul> --}}
+            {{ $courses->links() }}
         </nav>
     </div>
 

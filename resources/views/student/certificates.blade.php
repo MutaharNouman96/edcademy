@@ -1,6 +1,4 @@
-@extends('layouts.student')
-
-@section('content')
+<x-student-layout>
     <div class="container">
         <h1>Certificates</h1>
         <p>This page will display your earned certificates.</p>
@@ -25,4 +23,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-student-layout>

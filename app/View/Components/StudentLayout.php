@@ -23,6 +23,6 @@ class StudentLayout extends Component
      */
     public function render()
     {
-        return view('components.student-layout');
+        return view('layouts.student');
     }
 }
