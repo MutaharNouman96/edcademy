@@ -44,9 +44,13 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Route::get('/', [WebsiteController::class, 'index']);
+Route::get('/', [WebsiteController::class, 'index'])->name("website.index");
 Route::get("become-an-educator", [WebsiteController::class, "educator_signup"])->name("web.eudcator.signup");
 Route::post("educator/signup/store", [EducatorController::class, "store"])->name("educator.signup.store");
+
+Route::get("courses", [WebsiteController::class, "courses"])->name("web.courses");
+Route::get("course/{course}", [WebsiteController::class, "course"])->name("web.course.show");
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })

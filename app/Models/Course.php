@@ -11,6 +11,7 @@ class Course extends Model
 
 
     protected $fillable = [
+        'category_id',
         'user_id',
         'title',
         'description',
@@ -26,6 +27,12 @@ class Course extends Model
         'publish_date',
         'status'
     ];
+
+
+    public function category()
+    {
+        return $this->belongsTo(CourseCategory::class);
+    }
 
     public function lessons()
     {
@@ -46,8 +53,23 @@ class Course extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function reviews(){
+        return $this->hasMany(CourseReview::class);
+    }
+
     public function coursePurchases()
     {
         return $this->hasMany(CoursePurchase::class);
+    }
+
+
+    public function scopeactive($query)
+    {
+        return $query->where('active', true);
+    }
+
+    public function scopepublished($query)
+    {
+        return $query->where('status', 'published');
     }
 }
