@@ -283,7 +283,7 @@
 
     const newVideos = [
       { course: 'IELTS Speaking Mastery', lesson: 'Band 7+ Part 2', when: '2 hours ago', duration: '9m', id: 'nv1' },
-      { course: 'Calculus I — Limits & Derivatives', lesson: 'L'Hôpital Rule Basics', when: 'Yesterday', duration: '12m', id: 'nv2' },
+      { course: 'Calculus I — Limits & Derivatives', lesson: 'L\'Hôpital Rule Basics', when: 'Yesterday', duration: '12m', id: 'nv2' },
       { course: 'Essay Writing Bootcamp', lesson: 'Upgrade your Thesis', when: '2 days ago', duration: '7m', id: 'nv3' }
     ];
 
@@ -318,7 +318,7 @@
                 <button class="btn btn-sm btn-outline-primary" title="Course menu"><i class="bi bi-three-dots"></i></button>
               </div>
             </div>
-            ${c.newVideos>0 ? `<span class="position-absolute top-0 end-0 m-2 badge text-bg-warning">${c.newVideos} new</span>`:''}
+            ${c.newVideos>0 ? `<span class="position-absolute top-0 end-0 m-2 badge text-bg-warning">${parseInt(c.newVideos)} new</span>`:''}
           </div>
         </div>`).join('');
     }
@@ -363,10 +363,10 @@
           <td>${p.date}</td>
           <td>${p.course}</td>
           <td>${p.method}</td>
-          <td class="text-end">$${p.amount.toFixed(2)}</td>
+          <td class="text-end">$${p.amount}</td>
         </tr>`).join('');
       const total = payments.reduce((a,b)=>a+b.amount,0);
-      document.getElementById('kpiSpend').textContent = `$${total.toFixed(2)}`;
+      document.getElementById('kpiSpend').textContent = `$${total}`;
     }
 
     renderCourses(myCourses);
