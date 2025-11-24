@@ -1,6 +1,4 @@
-@extends('layouts.student')
-
-@section('content')
+<x-student-layout>
     <div class="container">
         <h1>Wishlist</h1>
         <p>This page will display your wished courses.</p>
@@ -35,4 +33,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-student-layout>

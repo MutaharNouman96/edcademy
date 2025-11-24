@@ -43,6 +43,7 @@ return new class extends Migration
             $table->enum('publish_option', ['now', 'schedule', 'draft'])->default('draft');
             $table->timestamp('publish_date')->nullable();
             $table->enum('status', ['draft', 'published', 'scheduled'])->default('draft');
+            
             //drip
             $table->boolean('drip')->default(false);
             $table->string('drip_duration')->nullable();

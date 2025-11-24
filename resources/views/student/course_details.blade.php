@@ -1,6 +1,4 @@
-@extends('layouts.student')
-
-@section('content')
+<x-student-layout>
 
 
     <!-- Overlay for mobile sidebar -->
@@ -174,4 +172,4 @@
             progressBar.textContent = `${Math.round(progressPercentage)}%`;
         });
     </script>
-@endsection
+</x-student-layout>

@@ -16,7 +16,7 @@
 
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light {{ request()->is('/') ? 'fixed-top home-nav' : 'scrolled mb-5' }}"
+    <nav class="navbar navbar-expand-lg navbar-light {{ request()->routeIs('website.index') ? 'fixed-top home-nav' : 'scrolled' }}"
         id="navbar">
         <div class="container">
             <a class="navbar-brand" href="{{ url('/') }}"><i class="fas fa-graduation-cap"></i> Ed-Cademy</a>
@@ -29,7 +29,7 @@
                         <a class="nav-link" href="#features">Features</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#courses">Courses</a>
+                        <a class="nav-link" href="{{ route('web.courses') }}">Courses</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#how-it-works">How It Works</a>
@@ -198,14 +198,16 @@
                 observer.observe(el)
             })
 
-        window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('#navbar')
-            if (window.scrollY > 100) {
-                navbar.classList.add('scrolled')
-            } else {
-                navbar.classList.remove('scrolled')
-            }
-        })
+        @if (request()->routeIs('website.index'))
+            window.addEventListener('scroll', function() {
+                const navbar = document.querySelector('#navbar')
+                if (window.scrollY > 100) {
+                    navbar.classList.add('scrolled')
+                } else {
+                    navbar.classList.remove('scrolled')
+                }
+            })
+        @endif
     </script>
     @stack('scripts')
 </body>
