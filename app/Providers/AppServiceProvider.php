@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Payment;
 use App\Observers\PaymentObserver;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -28,5 +29,6 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         Payment::observe(PaymentObserver::class);
+        Paginator::useBootstrapFive();
     }
 }

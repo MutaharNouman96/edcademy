@@ -1,6 +1,4 @@
-@extends('layouts.student')
-
-@section('content')
+<x-student-layout>
     <main class="col-12 col-md-9 col-lg-12 p-4">
         <div class="d-flex align-items-center justify-content-between mb-3">
             <h2 class="h4 mb-0">My Courses</h2>
@@ -44,4 +42,4 @@
             @endif
         </div>
     </main>
-@endsection
+</x-student-layout>
