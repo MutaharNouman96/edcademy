@@ -201,7 +201,7 @@ Route::middleware(['auth', 'role:student'])
         Route::post('profile', [StudentProfileController::class, 'update'])->name('profile.update');
 
         Route::get('my-courses', [StudentDashboardController::class, 'myCourses'])->name('my-courses');
-        Route::get('course-details/{course_id}', [StudentDashboardController::class, 'courseDetails'])->name('course-details');
+        Route::get('course-details/{course_id}/{lesson_id?}', [StudentDashboardController::class, 'courseDetails'])->name('course_details');
 
         Route::get('new-videos', [StudentDashboardController::class, 'newVideos'])->name('new-videos');
 
@@ -212,6 +212,8 @@ Route::middleware(['auth', 'role:student'])
         Route::get('payments', [StudentDashboardController::class, 'payments'])->name('payments');
 
         Route::get('wishlist', [StudentDashboardController::class, 'wishlist'])->name('wishlist');
+
+        Route::post('lesson-comment', [StudentDashboardController::class, 'storeLessonComment'])->name('lesson_comment.store');
     });
 
 Route::middleware(['guest'])->group(function () {
