@@ -28,7 +28,7 @@
                                     <span>{{ round($course['progress'] * 100) }}% complete</span><span>{{ $course['hours'] }} h watched</span>
                                 </div>
                                 <div class="mt-auto d-flex gap-2">
-                                    <a class="btn btn-sm btn-primary w-100" href="{{ route('student.course-details', $course['id']) }}"><i class="bi bi-play-fill me-1"></i> Resume</a>
+                                    <a class="btn btn-sm btn-primary w-100" href="{{ route('student.course_details', ['course_id' => $course['id']]) }}"><i class="bi bi-play-fill me-1"></i> Resume</a>
                                     <button class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-three-dots"></i>
                                     </button>

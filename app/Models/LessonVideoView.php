@@ -5,14 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LessonVideoComment extends Model
+class LessonVideoView extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
         'lesson_id',
-        'comment',
+        'watch_time',
+        'completed',
+        'liked',
     ];
 
     public function user()
