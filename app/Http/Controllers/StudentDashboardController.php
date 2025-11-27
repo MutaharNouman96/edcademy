@@ -12,6 +12,9 @@ use App\Models\Course;
 use App\Models\CourseSection;
 use App\Models\Lesson;
 use App\Models\Payment;
+use App\Models\User;
+use App\Models\LessonVideoComment;
+use App\Models\LessonVideoView;
 
 class StudentDashboardController extends Controller
 {
@@ -20,11 +23,9 @@ class StudentDashboardController extends Controller
         $user = Auth::user();
         $enrolledCourses = CoursePurchase::where('student_id', $user->id)->count();
 
-        $watchedTime = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
-            $query->where('student_id', $user->id);
-        })
+        $watchedTime = LessonVideoView::where('user_id', $user->id)
         ->where('created_at', '>=', Carbon::now()->subDays(30))
-        ->sum('average_watch_time');
+        ->sum('watch_time');
 
         $totalCourses = CoursePurchase::where('student_id', $user->id)->count();
         $completedCourses = ProgressTracking::where('student_id', $user->id)
@@ -38,17 +39,25 @@ class StudentDashboardController extends Controller
             ->sum('courses.price');
 
         $courseCompletionData = [];
-        $enrolledCoursesData = CoursePurchase::where('student_id', $user->id)->with('course')->get();
+        $enrolledCoursesData = CoursePurchase::where('student_id', $user->id)->with('course.lessons')->get();
 
         foreach ($enrolledCoursesData as $purchase) {
-            $completedLessonsCount = ProgressTracking::where('student_id', $user->id)
-                ->where('course_id', $purchase->course_id)
-                ->distinct('lesson_id')
-                ->count();
+            $course = $purchase->course;
+            $totalLessonsCount = $course->lessons->count();
+            $totalCompletion = 0;
 
-            $totalLessonsCount = $purchase->course->lessons->count();
+            if ($totalLessonsCount > 0) {
+                foreach ($course->lessons as $lesson) {
+                    $lessonCompletion = LessonVideoView::where('user_id', $user->id)
+                        ->where('lesson_id', $lesson->id)
+                        ->max('completed'); // Get the highest completion percentage for the lesson
 
-            $completionPercentage = ($totalLessonsCount > 0) ? round(($completedLessonsCount / $totalLessonsCount) * 100, 2) : 0;
+                    $totalCompletion += $lessonCompletion ?? 0;
+                }
+                $completionPercentage = round(($totalCompletion / ($totalLessonsCount * 100)) * 100, 2); // Calculate overall course completion
+            } else {
+                $completionPercentage = 0;
+            }
 
             $courseCompletionData[] = [
                 'course_title' => $purchase->course->title,
@@ -56,20 +65,19 @@ class StudentDashboardController extends Controller
             ];
         }
 
-
         $watchTimeLabels = [];
         $watchTimeData = [];
         for ($i = 13; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
             $watchTimeLabels[] = $date->format('M d');
-            $dailyWatchTime = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
-                $query->where('student_id', $user->id);
-            })
-            ->whereDate('created_at', $date)
-            ->sum('average_watch_time');
+            $dailyWatchTimeQuery = LessonVideoView::where('user_id', $user->id)
+            ->whereDate('created_at', $date);
+
+            $dailyWatchTime = $dailyWatchTimeQuery->sum('watch_time');
             $watchTimeData[] = round($dailyWatchTime / 60, 1);
         }
 
+        // Debugging: Check the data before passing to the view
 
         $myCourses = [];
         foreach ($enrolledCoursesData as $purchase) {
@@ -81,18 +89,14 @@ class StudentDashboardController extends Controller
             $totalLessonsCount = $course->lessons->count();
             $progress = ($totalLessonsCount > 0) ? round(($completedLessonsCount / $totalLessonsCount), 2) : 0;
 
-            $lastViewedLesson = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
-                $query->where('student_id', $user->id);
-            })
+            $lastViewedLesson = LessonVideoView::where('user_id', $user->id)
             ->latest()
             ->first();
 
             $lastViewed = $lastViewedLesson ? Carbon::parse($lastViewedLesson->created_at)->diffForHumans() : 'Never';
 
-            $totalWatchTime = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
-                $query->where('student_id', $user->id);
-            })
-            ->sum('average_watch_time');
+            $totalWatchTime = LessonVideoView::where('user_id', $user->id)
+            ->sum('watch_time');
             $hoursWatched = round($totalWatchTime / 3600, 1);
 
             $newVideosCount = Lesson::where('course_id', $course->id)
@@ -291,11 +295,11 @@ class StudentDashboardController extends Controller
             $totalLessonsCount = $course->lessons->count();
             $progress = ($totalLessonsCount > 0) ? round(($completedLessonsCount / $totalLessonsCount), 2) : 0;
 
-            $courseWatchTime = VideoStat::whereIn('lesson_id', $lessonIds)
+            $courseWatchTime = LessonVideoView::where('user_id', $user->id)
             ->whereHas('lesson', function ($query) use ($course) {
                 $query->where('course_id', $course->id);
             })
-            ->sum('average_watch_time');
+            ->sum('watch_time');
             $hoursWatched = round($courseWatchTime / 3600, 1);
 
             if ($progress >= 1) {
@@ -318,9 +322,9 @@ class StudentDashboardController extends Controller
         for ($i = 13; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
             $watchTimeLabels[] = $date->format('M d');
-            $dailyWatchTime = VideoStat::whereIn('lesson_id', $lessonIds)
+            $dailyWatchTime = LessonVideoView::where('user_id', $user->id)
             ->whereDate('created_at', $date)
-            ->sum('average_watch_time');
+            ->sum('watch_time');
             $watchTimeData[] = round($dailyWatchTime / 60, 1);
         }
 
@@ -418,12 +422,50 @@ class StudentDashboardController extends Controller
         return view('student.wishlist', compact('wishlistCourses'));
     }
 
-    public function courseDetails($course_id)
+    public function courseDetails($course_id, $lesson_id = null)
     {
-       $data['course_name'] = Course::where('id', $course_id)->first();
-       $data['course_chapters'] = CourseSection::where('course_id', $course_id)->get();
-       $data['course_lessons'] = Lesson::where('course_id', $course_id)->get();
+        $data['course'] = Course::where('id', $course_id)->firstOrFail();
+        $data['educator'] = User::where('id', $data['course']->user_id)->first();
+        $data['course_chapters'] = CourseSection::where('course_id', $course_id)->get();
+        $data['course_lessons'] = Lesson::where('course_id', $course_id)->get();
+
+        if ($lesson_id) {
+            $data['currentLesson'] = Lesson::where('id', $lesson_id)->where('course_id', $course_id)->firstOrFail();
+        } else {
+            $data['currentLesson'] = Lesson::where('course_id', $course_id)->orderBy('id')->firstOrFail();
+        }
+
+        // Assign lesson_number for the current lesson
+        $data['currentLesson']->lesson_number = $data['course_lessons']->where('course_section_id', $data['currentLesson']->course_section_id)->sortBy('id')->search($data['currentLesson']) + 1;
+        $data['comments'] = LessonVideoComment::where('lesson_id', $data['currentLesson']->id)->with('user')->latest()->get();
 
         return view('student.course_details', $data);
+    }
+
+    public function storeLessonComment(Request $request)
+    {
+        $request->validate([
+            'lesson_id' => 'required|exists:lessons,id',
+            'comment' => 'required|string|max:255',
+        ]);
+
+        $comment = LessonVideoComment::create([
+            'user_id' => Auth::id(),
+            'lesson_id' => $request->lesson_id,
+            'comment' => $request->comment,
+        ]);
+
+        $comment->load('user'); // Eager load the user relationship for the newly created comment
+
+        return response()->json([
+            'success' => true,
+            'comment' => [
+                'id' => $comment->id,
+                'user_name' => $comment->user->first_name . ' ' . $comment->user->last_name,
+                'user_profile_picture' => $comment->user->profile_picture ?? 'https://placehold.co/40x40/E55A2B/white?text=U',
+                'comment_text' => $comment->comment,
+                'created_at_human' => $comment->created_at->diffForHumans(),
+            ]
+        ]);
     }
 }

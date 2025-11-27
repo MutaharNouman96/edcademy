@@ -107,6 +107,10 @@ function drawCompletion(sort='desc'){
   courseOrder.sort((a,b)=> sort==='asc' ? a.completion_percentage - b.completion_percentage : b.completion_percentage - a.completion_percentage);
   const labels = courseOrder.map(c=> c.course_title.split(' — ')[0]);
   const data = courseOrder.map(c=> c.completion_percentage);
+
+  // Destroy existing chart if it exists
+  Chart.getChart(compCtx)?.destroy();
+
   new Chart(compCtx, {
     type: 'bar',
     data: { labels, datasets: [{ label: 'Completion %', data, backgroundColor: 'rgba(111,66,193,.6)' }] },
