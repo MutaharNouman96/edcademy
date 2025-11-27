@@ -15,12 +15,12 @@
                         bundles - all in one place.
                     </p>
                     <div class="glass-landing--btn-group">
-                        <button class="btn glass-landing--btn-primary">
+                        <a href="{{ route('web.courses') }}" class="btn glass-landing--btn-primary">
                             Browse Content
-                        </button>
-                        <button class="btn glass-landing--btn-secondary">
+                        </a>
+                        <a href="{{ route('web.eudcator.signup') }}" class="btn glass-landing--btn-secondary">
                             Become an Educator
-                        </button>
+                        </a>
                     </div>
 
                     <!-- Why Choose Section -->
@@ -949,7 +949,7 @@
     <!-- Become a Educator Section -->
     <section
         style="
-        background-image: url('https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600');
+        background-image: url('{{ url('public/images/edcademy2.jpeg') }}');
         background-attachment: fixed;
         background-position: center;
         background-size: cover;
@@ -1003,7 +1003,7 @@
                             Access AI tools to create content faster
                         </li>
                     </ul>
-                    <a href="#" class="btn btn-lg mt-3"
+                    <a href="{{ route('web.eudcator.signup') }}" class="btn btn-lg mt-3"
                         style="
                 background: var(--accent-yellow);
                 color: var(--dark-cyan);
