@@ -7,7 +7,7 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <div class="col-lg-3 col-xl-2 sidebar p-0">
+            <div class="col-lg-3 col-xl-3 sidebar p-0">
                 <div class="p-3">
                     <h5 class="fw-bold mb-3" style="color: var(--primary-orange);">Course Content</h5>
 
@@ -22,17 +22,30 @@
                                 aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
-
                     <!-- Chapters List -->
-                    <div class="chapters-list">
+                    <div class="chapters-list accordion" id="chaptersAccordion">
                         @foreach($course_chapters as $c)
-                            <div class="chapter-item p-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-1 fw-bold">{{ $c->title }}</h6>
-                                        <p class="mb-0 small text-muted">{{ $course_lessons->where('course_section_id', $c->id)->count() }} lessons</p>
+                            <div class="accordion-item mb-2">
+                                <h2 class="accordion-header" id="heading{{ $c->id }}">
+                                    <button class="accordion-button {{ $c->id == $currentLesson->course_section_id ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapse{{ $c->id }}" aria-expanded="{{ $c->id == $currentLesson->course_section_id ? 'true' : 'false' }}" aria-controls="collapse{{ $c->id }}">
+                                        <h6 class="mb-0 fw-bold">{{ $c->title }} <span class="small text-muted">({{ $course_lessons->where('course_section_id', $c->id)->count() }} lessons)</span></h6>
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ $c->id }}" class="accordion-collapse collapse {{ $c->id == $currentLesson->course_section_id ? 'show' : '' }}" aria-labelledby="heading{{ $c->id }}" data-bs-parent="#chaptersAccordion">
+                                    <div class="accordion-body p-0">
+                                        @foreach($course_lessons->where('course_section_id', $c->id)->sortBy('id') as $lesson)
+                                            <a href="{{ route('student.course_details', ['course_id' => $course->id, 'lesson_id' => $lesson->id]) }}"
+                                               class="list-group-item list-group-item-action d-flex align-items-center ps-4 py-2 {{ $lesson->id == $currentLesson->id ? 'active-lesson' : '' }}">
+                                                <i class="bi bi-play-circle me-2"></i>
+                                                <div>
+                                                    <p class="mb-0">{{ $lesson->title }}</p>
+                                                </div>
+                                                &nbsp;&nbsp;
+                                                (<small class="text-muted">{{ gmdate("i:s", $lesson->duration) }}</small>)
+                                            </a>
+                                        @endforeach
                                     </div>
-                                    <i class="bi bi-play-circle text-primary"></i>
                                 </div>
                             </div>
                         @endforeach
@@ -41,109 +54,102 @@
             </div>
 
             <!-- Main Content -->
-            <div class="col-lg-9 col-xl-10 main-content">
+            <div class="col-lg-9 col-xl-9 main-content">
                 <!-- Current Video Section -->
                 <div class="row mb-5">
                     <div class="col-12">
                         <div class="card p-4">
                             <div class="row">
                                 <div class="col-md-8">
-                                    <h4 class="fw-bold mb-3">Current Lesson: HTML & CSS Fundamentals</h4>
+                                    <h4 class="fw-bold mb-3">Current Lesson: {{ $currentLesson->title }}</h4>
                                     <div class="video-thumbnail mb-3 position-relative">
-                                        <img src="https://placehold.co/800x450/FF6B35/white?text=Video+Thumbnail"
-                                            class="img-fluid rounded" alt="Video Thumbnail">
-                                        <div class="play-icon">
-                                            <i class="bi bi-play-fill"></i>
+                                        <iframe src="{{ $currentLesson->video_link }}" frameborder="0" allowfullscreen class="img-fluid rounded" style="width: 100%; height: 350px;"></iframe>
+                                        <div class="video-duration">{{ gmdate("i:s", $currentLesson->duration) }}</div>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <img src="{{ $educator->profile_picture ?? 'https://placehold.co/40x40/E55A2B/white?text=E' }}" class="rounded-circle me-2" alt="Profile Picture" width="40" height="40">
+                                        <div>
+                                            <h6 class="mb-0">{{ $educator->first_name.' '.$educator->last_name ?? 'Unknown Uploader' }}</h6>
+                                            <small class="text-muted">Uploaded on {{ $course->created_at->format('M d, Y') }}</small>
                                         </div>
-                                        <div class="video-duration">15:30</div>
+                                        <hr/>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div>
-                                            <span class="badge bg-primary me-2">Chapter 1</span>
-                                            <span class="badge bg-secondary">Lesson 4 of 5</span>
+                                            <span class="badge bg-secondary">Lesson {{ $currentLesson->lesson_number }} of {{ $course_lessons->where('course_section_id', $currentLesson->course_section_id)->count() }}</span>
                                         </div>
-                                        <button class="btn btn-primary">
+                                        <button class="btn btn-primary d-none">
                                             <i class="bi bi-play-fill me-2"></i>Continue Watching
                                         </button>
                                     </div>
-                                    <p class="text-muted">In this lesson, we'll explore the core concepts of HTML and
-                                        CSS, including semantic markup, CSS selectors, and responsive design principles.
+                                    <hr/>
+                                    <h3>Notes</h3>
+                                    <p class="text-muted mb-4">{{ $currentLesson->notes }}
                                     </p>
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="fw-bold mb-3">Up Next</h5>
                                     <div class="list-group">
-                                        <a href="#"
-                                            class="list-group-item list-group-item-action d-flex align-items-center">
-                                            <div class="flex-shrink-0">
-                                                <img src="https://placehold.co/80x45/FF8C5A/white?text=5"
-                                                    class="rounded me-3" alt="Thumbnail">
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1">JavaScript Basics</h6>
-                                                <small class="text-muted">12:45</small>
-                                            </div>
-                                        </a>
-                                        <a href="#"
-                                            class="list-group-item list-group-item-action d-flex align-items-center">
-                                            <div class="flex-shrink-0">
-                                                <img src="https://placehold.co/80x45/FF8C5A/white?text=6"
-                                                    class="rounded me-3" alt="Thumbnail">
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1">Chapter 1 Recap</h6>
-                                                <small class="text-muted">08:20</small>
-                                            </div>
-                                        </a>
-                                        <a href="#"
-                                            class="list-group-item list-group-item-action d-flex align-items-center">
-                                            <div class="flex-shrink-0">
-                                                <img src="https://placehold.co/80x45/E55A2B/white?text=1"
-                                                    class="rounded me-3" alt="Thumbnail">
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1">Chapter 2: Introduction</h6>
-                                                <small class="text-muted">10:15</small>
-                                            </div>
-                                        </a>
+                                        @php
+                                            $allLessonsSorted = $course_lessons->sortBy('id')->values();
+                                            $currentIndex = $allLessonsSorted->search(function ($lesson) use ($currentLesson) {
+                                                return $lesson->id === $currentLesson->id;
+                                            });
+                                            $upcomingLessons = $allLessonsSorted->slice($currentIndex + 1)->take(3);
+                                        @endphp
+                                        @foreach($upcomingLessons as $lesson)
+                                            <a href="{{ route('student.course_details', ['course_id' => $course->id, 'lesson_id' => $lesson->id]) }}"
+                                                class="list-group-item list-group-item-action d-flex align-items-center">
+                                                <div class="flex-shrink-0">
+                                                    <img src="https://placehold.co/80x45/FF8C5A/white?text={{ $loop->iteration }}"
+                                                        class="rounded me-3" alt="Thumbnail">
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">{{ $lesson->title }}</h6>
+                                                    <small class="text-muted">{{ gmdate("i:s", $lesson->duration) }}</small>
+                                                </div>
+                                            </a>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <h2 class="fw-bold mb-4">{{ $course_name->title }}</h2>
-                <!-- Chapter Lessons -->
-                @foreach($course_chapters as $section)
-                    <div class="row">
-                        <div class="col-12">
-                            <h4 class="fw-bold mb-4">{{ $section->title }}</h4>
-                            <div class="list-group">
-                                @foreach($course_lessons->where('course_section_id', $section->id) as $lesson)
-                                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center p-3">
-                                        <div class="flex-shrink-0 me-3 position-relative">
-                                            <img src="https://placehold.co/120x67/FF8C5A/white?text=1" class="rounded"
-                                                alt="Thumbnail">
-                                            <div class="video-duration text-muted mt-2"><i class="bi bi-clock-fill"></i> {{ $lesson->duration }} minutes</div>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <h5 class="mb-1">{{ $lesson->title }}</h5>
-                                                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                    <div class="col-12 mt-3">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <div class="p-2">
+                                    <div class="mt-4">
+                                        <form id="comment-form" action="{{ route('student.lesson_comment.store') }}">
+                                            @csrf
+                                            <input type="hidden" name="lesson_id" value="{{ $currentLesson->id }}">
+                                            <div class="mb-3">
+                                                <textarea class="form-control" name="comment" rows="3" placeholder="Add a comment..."></textarea>
                                             </div>
-                                            <p class="mb-1 text-muted">{{ $lesson->description }}</p>
-                                            <small>Watched 2 days ago</small>
-                                        </div>
-                                    </a>
-                                @endforeach
+                                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                                        </form>
+                                    </div>
+                                    <div class="mt-5">
+                                    <h5 class="fw-bold mb-3">Comments ({{$comments->count()}})</h5>
+                                    <div id="comments-list" class="mt-3">
+                                        @foreach($comments as $comment)
+                                            <div class="d-flex align-items-start mb-3">
+                                                <img src="{{ $comment->user->profile_picture ?? 'https://placehold.co/40x40/E55A2B/white?text=U' }}" class="rounded-circle me-2" alt="Profile Picture" width="40" height="40">
+                                                <div>
+                                                    <h6 class="mb-0">{{ $comment->user->first_name . ' ' . $comment->user->last_name }} <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small></h6>
+                                                    <p class="mb-0">{{ $comment->comment }}</p>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        </div>
                     </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
 
+                </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -171,5 +177,63 @@
             progressBar.setAttribute('aria-valuenow', progressPercentage);
             progressBar.textContent = `${Math.round(progressPercentage)}%`;
         });
+
+        // AJAX for comments
+        document.getElementById('comment-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form = this;
+            const formData = new FormData(form);
+            const commentsList = document.getElementById('comments-list');
+            const commentTextarea = form.querySelector('textarea[name="comment"]');
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const newCommentHtml = `
+                        <div class="d-flex align-items-start mb-3">
+                            <img src="${data.comment.user_profile_picture}" class="rounded-circle me-2" alt="Profile Picture" width="40" height="40">
+                            <div>
+                                <h6 class="mb-0">${data.comment.user_name} <small class="text-muted">${data.comment.created_at_human}</small></h6>
+                                <p class="mb-0">${data.comment.comment_text}</p>
+                            </div>
+                        </div>
+                    `;
+                    commentsList.insertAdjacentHTML('afterbegin', newCommentHtml); // Add new comment at the top
+                    commentTextarea.value = ''; // Clear the textarea
+                } else {
+                    alert('Error posting comment.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while posting your comment.');
+            });
+        });
     </script>
+    <style>
+        .chapter-item.active-chapter {
+            background-color: var(--primary-orange);
+            color: white;
+            border-radius: 5px;
+        }
+        .chapter-item.active-chapter h6,
+        .chapter-item.active-chapter p,
+        .chapter-item.active-chapter i {
+            color: white !important;
+        }
+        .active-lesson {
+            color: #6F42C1 !important;
+            background-color: #F3E8FF !important;
+            border-radius: 5px;
+        }
+    </style>
 </x-student-layout>
