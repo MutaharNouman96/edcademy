@@ -51,6 +51,33 @@ Route::post("educator/signup/store", [EducatorController::class, "store"])->name
 Route::get("courses", [WebsiteController::class, "courses"])->name("web.courses");
 Route::get("course/{course}", [WebsiteController::class, "course"])->name("web.course.show");
 
+Route::get("educators", [WebsiteController::class, "educators"])->name("web.eductors.index");
+Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name("web.eductor.show");
+
+Route::get("cart", [WebsiteController::class, "cart"])->name("web.cart");
+Route::get("checkout", [WebsiteController::class, "checkout"])->name("web.checkout");
+
+Route::get("how-it-works", [WebsiteController::class, "how_it_works"])->name("web.how.it.works");
+
+Route::get("about-us", [WebsiteController::class, "about_us"])->name("web.about.us");
+
+Route::get("contact-us", [WebsiteController::class, "contact_us"])->name("web.contact.us");
+
+Route::get("privacy-policy", [WebsiteController::class, "privacy_policy"])->name("web.privacy.policy");
+
+Route::get("terms-and-conditions", [WebsiteController::class, "terms_and_conditions"])->name("web.terms.and.conditions");
+
+Route::get("reviews", [WebsiteController::class, "reviews"])->name("web.reviews");
+
+Route::get("faqs", [WebsiteController::class, "faqs"])->name("web.faqs");
+
+Route::get("refund-policy", [WebsiteController::class, "refund_policy"])->name("web.refund.policy");
+
+Route::get("cancel-policy", [WebsiteController::class, "cancel_policy"])->name("web.cancel.policy");
+
+Route::get("user-agreement", [WebsiteController::class, "user_agreement"])->name("web.user.agreement");
+
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })
