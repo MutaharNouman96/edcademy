@@ -74,7 +74,7 @@
     {{ $slot }}
 
     <!-- Footer -->
-    <footer class="mt-5">
+    <footer class="">
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4">
