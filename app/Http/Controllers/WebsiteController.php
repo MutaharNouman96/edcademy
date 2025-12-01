@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Course;
 use App\Models\CourseCategory;
+use App\Models\User;
 
 class WebsiteController extends Controller
 {
@@ -35,5 +36,25 @@ class WebsiteController extends Controller
 
 
         return view("website.courses", compact("courses", "courseCategories", "firstFiveCategories", "remainingCategories"));
+    }
+
+    public function course(Course $course)
+    {
+        $course = $course->load("educator", "category", "reviews", "lessons");
+        return view("website.course", compact("course"));
+    }
+
+    public function educators()
+    {
+        return view("website.educators");
+    }
+    public function educator($id)
+    {
+        $educator = User::where("role", "educator")->where("id", $id)->firstOrFail();
+        return view("website.educator", compact("educator"));
+    }
+
+    public function cart(){
+        return view("website.cart");        
     }
 }
