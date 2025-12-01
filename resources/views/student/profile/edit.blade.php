@@ -1,5 +1,4 @@
 <x-student-layout>
-
     <div class="py-12 d-none">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
@@ -112,21 +111,14 @@
                                 role="tab">Notifications</button></li>
                         <li class="nav-item" role="presentation"><button class="nav-link" id="tab-privacy"
                                 data-bs-toggle="tab" data-bs-target="#pane-privacy" type="button"
-                                role="tab">Privacy & Data</button></li>
-                        <li class="nav-item" role="presentation"><button class="nav-link" id="tab-learning"
-                                data-bs-toggle="tab" data-bs-target="#pane-learning" type="button"
-                                role="tab">Learning Preferences</button></li>
-                        <li class="nav-item" role="presentation"><button class="nav-link" id="tab-billing"
-                                data-bs-toggle="tab" data-bs-target="#pane-billing" type="button"
-                                role="tab">Billing & Payments</button></li>
-                        <li class="nav-item" role="presentation"><button class="nav-link" id="tab-access"
-                                data-bs-toggle="tab" data-bs-target="#pane-access" type="button"
-                                role="tab">Accessibility</button></li>
+                                role="tab">Data Control</button></li>
+
+
+
                         <li class="nav-item" role="presentation"><button class="nav-link" id="tab-connections"
                                 data-bs-toggle="tab" data-bs-target="#pane-connections" type="button"
                                 role="tab">Connected Accounts</button></li>
-                        <li class="nav-item ms-auto" role="presentation"><button
-                                class="btn btn-sm btn-outline-secondary" id="saveAllBtn">Save All</button></li>
+
                     </ul>
 
                     <div class="tab-content mt-3">
@@ -137,90 +129,79 @@
                                     <div class="form-section">
                                         <div class="d-flex flex-column align-items-center text-center">
                                             <img id="avatarPreview"
-                                                src="https://www.teachhub.com/wp-content/uploads/2021/09/Aug-30-Challenges-Faced-by-a-First-Generation-College-Student_web-768x519.jpg"
-                                                alt="avatar" class="avatar-preview mb-2 img-fluid d-block mx-auto">
+                                                src="{{ old('avatar', $user->profile_picture ? $user->profile_picture : asset('images/avatars/default.png')) }}"
+                                                alt="avatar" class="avatar-preview mb-2 img-fluid d-block mx-auto rounded-circle"
+                                                width="120px" height="120px">
                                             <div class="mb-2">
-                                                <small class="text-muted d-block">Profile picture</small>
-                                                <input class="form-control form-control-sm mt-2" type="file"
-                                                    id="avatarInput" accept="image/*">
+                                                <small class="text-muted d-block">Select your avatar</small>
+
+                                                <div class="avatar-selection-grid mt-2 d-flex flex-wrap justify-content-center">
+                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=A" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=A" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 1">
+                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=B" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=B" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 2">
+                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=C" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=C" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 3">
+                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=D" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=D" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 4">
+                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=E" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=E" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 5">
+                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=F" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=F" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 6">
+                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=G" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=G" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 7">
+                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=H" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=H" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 8">
+                                                </div>
+                                                <input type="hidden" id="selectedAvatar" name="avatar"
+                                                       value="{{ old('avatar', $user->profile_picture ?? '') }}">
                                             </div>
-                                            <button class="btn btn-sm btn-outline-primary"
-                                                id="removeAvatarBtn">Remove</button>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="col-md-8">
+                                    <form id="StudentProfile" method="POST" action="javascript:void(0);">
                                     <div class="form-section">
-                                        <div class="mb-3 row">
-                                            <label class="col-sm-3 col-form-label">First name</label>
-                                            <div class="col-sm-9"><input id="fullName" class="form-control"
+                                        <div class="row">
+                                            <div class="col-md-6 col-sm-12">
+                                                <label class="col-form-label">First name</label>
+                                                <input id="fullName" class="form-control"
                                                     value="{{ old('first_name', $user->first_name) }}"></div>
+                                                    <div class="col-md-6 col-sm-12">
+                                                        <label class="col-form-label">Last name</label>
+                                                            <input id="displayName" class="form-control"
+                                                                value="{{ old('last_name', $user->last_name) }}"></div>
                                         </div>
 
-                                        <div class="mb-3 row">
-                                            <label class="col-sm-3 col-form-label">Last name</label>
-                                            <div class="col-sm-9"><input id="displayName" class="form-control"
-                                                    value="{{ old('last_name', $user->last_name) }}"></div>
-                                        </div>
+
+
+
 
                                         <div class="mb-3 row">
-                                            <label class="col-sm-3 col-form-label">Pronouns</label>
                                             <div class="col-sm-9">
-                                                <select id="pronouns" class="form-select">
-                                                    <option value="">Prefer not to say</option>
-                                                    <option value="he/him" selected>He/Him</option>
-                                                    <option value="she/her">She/Her</option>
-                                                    <option value="they/them">They/Them</option>
-                                                    <option value="other">Other</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-3 row">
-                                            <label class="col-sm-3 col-form-label">Bio</label>
-                                            <div class="col-sm-9">
-                                                <textarea id="bio" class="form-control" rows="3"
-                                                    placeholder="Short bio — what you'd like teachers & peers to know.">PhD candidate, soft robotics & web dev enthusiast.</textarea>
+                                            <label class="col-form-label">Bio</label>
+                                                <textarea id="bio" class="form-control" rows="3" maxlength="250"
+                                                    placeholder="Short bio — what you'd like teachers & peers to know.">{{ $student_profile->bio }}</textarea>
                                                 <small class="text-muted">Shown on your profile. Max 250
                                                     characters.</small>
                                             </div>
                                         </div>
 
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label small-muted">Location</label>
-                                                <input id="location" class="form-control" value="Dubai, UAE">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label small-muted">Website / Portfolio</label>
-                                                <input id="website" class="form-control" placeholder="https://">
-                                            </div>
-                                        </div>
 
-                                        <div class="row g-3 mt-3">
+                                        <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label small-muted">Education level</label>
                                                 <select id="education" class="form-select">
-                                                    <option value="university" selected>University</option>
-                                                    <option value="high">High School</option>
-                                                    <option value="professional">Professional</option>
-                                                    <option value="other">Other</option>
+                                                    <option value="university" {{ $student_profile->education_level == 'university' ? 'selected' : '' }}>University</option>
+                                                    <option value="high" {{ $student_profile->education_level == 'high' ? 'selected' : '' }}>High School</option>
+                                                    <option value="professional" {{ $student_profile->education_level == 'professional' ? 'selected' : '' }}>Professional</option>
+                                                    <option value="other" {{ $student_profile->education_level == 'other' ? 'selected' : '' }}>Other</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label small-muted">Interests</label>
                                                 <input id="interests" class="form-control"
-                                                    placeholder="e.g., calculus, robotics, IELTS">
+                                                    placeholder="e.g., calculus, robotics, IELTS" value="{{ $student_profile->interests }}">
                                             </div>
                                         </div>
-
                                         <div class="mt-3 d-flex gap-2">
-                                            <button class="btn btn-primary" data-save="profile">Save profile</button>
-                                            <button class="btn btn-outline-secondary" id="previewProfileBtn">Preview
-                                                public profile</button>
+                                            <button type="submit" class="btn btn-primary" data-save="profile">Save profile</button>
                                         </div>
                                     </div>
+                                </form>
                                 </div>
                             </div>
                         </div>
@@ -229,13 +210,14 @@
                         <div class="tab-pane fade" id="pane-account" role="tabpanel">
                             <div class="row g-3">
                                 <div class="col-md-8">
+                                    <form id="AccountProfile" method="POST" action="javascript:void(0);">
                                     <div class="form-section">
                                         <h6>Account</h6>
                                         <div class="mb-3 row">
                                             <label class="col-sm-3 col-form-label">Email</label>
                                             <div class="col-sm-9">
-                                                <input id="email" class="form-control" value="niaz@example.com"
-                                                    type="email">
+                                                <input id="email" class="form-control" value="{{ $user->email }}"
+                                                    type="email" readonly>
                                                 <small class="text-muted">Primary email used for sign in and
                                                     notifications.</small>
                                             </div>
@@ -244,9 +226,8 @@
                                         <div class="mb-3 row">
                                             <label class="col-sm-3 col-form-label">Phone</label>
                                             <div class="col-sm-9">
-                                                <input id="phone" class="form-control" value="+971 50 123 4567">
-                                                <small class="text-muted">Used for SMS notifications and
-                                                    2-factor.</small>
+                                                <input id="phone" placeholder="Enter your phone number" class="form-control" value="{{ $student_profile->phone ?? '' }}">
+                                                <small class="text-muted">Used for SMS notifications</small>
                                             </div>
                                         </div>
 
@@ -254,44 +235,32 @@
                                             <div class="col-md-6">
                                                 <label class="form-label">Language</label>
                                                 <select id="language" class="form-select">
-                                                    <option value="en" selected>English</option>
-                                                    <option value="ar">Arabic</option>
-                                                    <option value="zh">中文</option>
-                                                    <option value="fr">Français</option>
+                                                    <option value="en" {{ ($student_profile->language ?? '') == 'en' ? 'selected' : '' }}>English</option>
+                                                    <option value="ar" {{ ($student_profile->language ?? '') == 'ar' ? 'selected' : '' }}>Arabic</option>
+                                                    <option value="zh" {{ ($student_profile->language ?? '') == 'zh' ? 'selected' : '' }}>中文</option>
+                                                    <option value="fr" {{ ($student_profile->language ?? '') == 'fr' ? 'selected' : '' }}>Français</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Timezone</label>
                                                 <select id="timezone" class="form-select">
-                                                    <option value="Asia/Dubai" selected>UTC+04:00 — Asia/Dubai</option>
-                                                    <option value="Europe/London">UTC+00:00 — Europe/London</option>
-                                                    <option value="America/New_York">UTC-04:00 — America/New_York
+                                                    <option value="Asia/Dubai" {{ ($student_profile->timezone ?? '') == 'Asia/Dubai' ? 'selected' : '' }}>UTC+04:00 — Asia/Dubai</option>
+                                                    <option value="Europe/London" {{ ($student_profile->timezone ?? '') == 'Europe/London' ? 'selected' : '' }}>UTC+00:00 — Europe/London</option>
+                                                    <option value="America/New_York" {{ ($student_profile->timezone ?? '') == 'America/New_York' ? 'selected' : '' }}>UTC-04:00 — America/New_York
                                                     </option>
-                                                    <option value="Asia/Kolkata">UTC+05:30 — Asia/Kolkata</option>
+                                                    <option value="Asia/Kolkata" {{ ($student_profile->timezone ?? '') == 'Asia/Kolkata' ? 'selected' : '' }}>UTC+05:30 — Asia/Kolkata</option>
                                                 </select>
                                             </div>
                                         </div>
 
                                         <div class="mt-3 d-flex gap-2">
-                                            <button class="btn btn-primary" data-save="account">Save account</button>
-                                            <button class="btn btn-outline-secondary" id="exportDataBtn">Export my
-                                                data</button>
+                                            <button type="submit" class="btn btn-primary" data-save="account">Save account</button>
                                         </div>
                                     </div>
+                                </form>
                                 </div>
 
-                                <div class="col-md-4">
-                                    <div class="form-section">
-                                        <h6>Connected devices & sessions</h6>
-                                        <div id="sessionsList" class="small-muted">
-                                            <!-- populated by JS -->
-                                        </div>
-                                        <div class="mt-3">
-                                            <button class="btn btn-sm btn-outline-danger" id="revokeAllSessions">Sign
-                                                out all devices</button>
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
 
@@ -299,139 +268,88 @@
                         <div class="tab-pane fade" id="pane-security" role="tabpanel">
                             <div class="row g-3">
                                 <div class="col-md-7">
+                                    <form id="SecurityProfile" method="POST" action="javascript:void(0);">
                                     <div class="form-section">
-                                        <h6>Change password</h6>
+
                                         <div class="mb-2">
                                             <label class="form-label small-muted">Current password</label>
-                                            <input id="curPass" class="form-control" type="password"
+                                            <input id="curPass" name="current_password" class="form-control" type="password"
                                                 placeholder="••••••">
                                         </div>
                                         <div class="mb-2">
                                             <label class="form-label small-muted">New password</label>
-                                            <input id="newPass" class="form-control" type="password"
+                                            <input id="newPass" name="password" class="form-control" type="password"
                                                 placeholder="At least 8 characters">
                                         </div>
                                         <div class="mb-2">
                                             <label class="form-label small-muted">Confirm new</label>
-                                            <input id="confirmPass" class="form-control" type="password">
+                                            <input id="confirmPass" name="password_confirmation" class="form-control" type="password">
                                         </div>
                                         <div class="mt-2">
-                                            <button class="btn btn-primary" data-save="password">Update
+                                            <button type="submit" class="btn btn-primary" data-save="password">Update
                                                 password</button>
                                         </div>
                                     </div>
+                                    </form>
 
-                                    <div class="form-section mt-3">
-                                        <h6>Two-factor authentication (2FA)</h6>
-                                        <p class="small-muted">Add an extra layer of account security.</p>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div>
-                                                <div class="form-check form-switch">
-                                                    <input class="form-check-input" id="toggle2fa" type="checkbox">
-                                                    <label class="form-check-label" for="toggle2fa">Enable 2FA</label>
-                                                </div>
-                                                <small class="text-muted">Use an authenticator app (TOTP) or
-                                                    SMS.</small>
-                                            </div>
-                                            <div class="ms-auto">
-                                                <button id="setup2faBtn"
-                                                    class="btn btn-sm btn-outline-primary">Setup</button>
-                                            </div>
-                                        </div>
-                                        <div id="twoFaDetails" class="mt-3 small-muted" style="display:none;">
-                                            <p><strong>Recovery codes</strong>: <span
-                                                    class="pill bg-light border">XXXX-XXXX</span></p>
-                                        </div>
-                                    </div>
                                 </div>
 
-                                <div class="col-md-5">
-                                    <div class="form-section">
-                                        <h6>Active sessions</h6>
-                                        <div id="sessionCards" class="list-group small-muted">
-                                            <!-- JS will insert real sessions -->
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
                         <!-- Notifications Pane -->
                         <div class="tab-pane fade" id="pane-notifications" role="tabpanel">
-                            <div class="form-section">
-                                <h6>Notification preferences</h6>
-                                <p class="small-muted mb-3">Choose how you would like to receive platform updates,
-                                    course alerts and marketing.</p>
+                            <form id="NotificationProfile" method="POST" action="javascript:void(0);">
+                                <div class="form-section">
+                                    <h6>Notification preferences</h6>
+                                    <p class="small-muted mb-3">Choose how you would like to receive platform updates,
+                                        course alerts and marketing.</p>
 
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <h6 class="mb-2">By channel</h6>
-                                        <div class="form-check"><input class="form-check-input" id="notifyEmail"
-                                                type="checkbox" checked><label class="form-check-label"
-                                                for="notifyEmail">Email</label></div>
-                                        <div class="form-check"><input class="form-check-input" id="notifySMS"
-                                                type="checkbox"><label class="form-check-label"
-                                                for="notifySMS">SMS</label></div>
-                                        <div class="form-check"><input class="form-check-input" id="notifyPush"
-                                                type="checkbox" checked><label class="form-check-label"
-                                                for="notifyPush">Push (mobile)</label></div>
-                                        <div class="form-check"><input class="form-check-input" id="notifyInApp"
-                                                type="checkbox" checked><label class="form-check-label"
-                                                for="notifyInApp">In-app</label></div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <h6 class="mb-2">By channel</h6>
+                                            <div class="form-check"><input class="form-check-input" id="notifyEmail"
+                                                    type="checkbox" name="notify_email" value="1" checked><label class="form-check-label"
+                                                    for="notifyEmail">Email</label></div>
+                                            <div class="form-check"><input class="form-check-input" id="notifySMS"
+                                                    type="checkbox" name="notify_sms" value="1"><label class="form-check-label"
+                                                    for="notifySMS">SMS</label></div>
+                                            <div class="form-check"><input class="form-check-input" id="notifyPush"
+                                                    type="checkbox" name="notify_push" value="1" checked><label class="form-check-label"
+                                                    for="notifyPush">Push (mobile)</label></div>
+                                            <div class="form-check"><input class="form-check-input" id="notifyInApp"
+                                                    type="checkbox" name="notify_in_app" value="1" checked><label class="form-check-label"
+                                                    for="notifyInApp">In-app</label></div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <h6 class="mb-2">By event</h6>
+                                            <div class="form-check"><input class="form-check-input" id="evtCourseRelease"
+                                                    type="checkbox" name="evt_course_release" value="1" checked><label class="form-check-label"
+                                                    for="evtCourseRelease">New lesson released</label></div>
+                                            <div class="form-check"><input class="form-check-input" id="evtAssignment"
+                                                    type="checkbox" name="evt_assignment" value="1" checked><label class="form-check-label"
+                                                    for="evtAssignment">Assignment & quiz results</label></div>
+                                            <div class="form-check"><input class="form-check-input" id="evtPromos"
+                                                    type="checkbox" name="evt_promos" value="1"><label class="form-check-label"
+                                                    for="evtPromos">Promotions & offers</label></div>
+                                            <div class="form-check"><input class="form-check-input" id="evtSystem"
+                                                    type="checkbox" name="evt_system" value="1" checked><label class="form-check-label"
+                                                    for="evtSystem">System notices (billing, security)</label></div>
+                                        </div>
                                     </div>
 
-                                    <div class="col-md-6">
-                                        <h6 class="mb-2">By event</h6>
-                                        <div class="form-check"><input class="form-check-input" id="evtCourseRelease"
-                                                type="checkbox" checked><label class="form-check-label"
-                                                for="evtCourseRelease">New lesson released</label></div>
-                                        <div class="form-check"><input class="form-check-input" id="evtAssignment"
-                                                type="checkbox" checked><label class="form-check-label"
-                                                for="evtAssignment">Assignment & quiz results</label></div>
-                                        <div class="form-check"><input class="form-check-input" id="evtPromos"
-                                                type="checkbox"><label class="form-check-label"
-                                                for="evtPromos">Promotions & offers</label></div>
-                                        <div class="form-check"><input class="form-check-input" id="evtSystem"
-                                                type="checkbox" checked><label class="form-check-label"
-                                                for="evtSystem">System notices (billing, security)</label></div>
+                                    <div class="mt-3 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" data-save="notifications">Save
+                                            notifications</button>
                                     </div>
                                 </div>
-
-                                <div class="mt-3 d-flex gap-2">
-                                    <button class="btn btn-primary" data-save="notifications">Save
-                                        notifications</button>
-                                    <button class="btn btn-outline-secondary" id="muteAllBtn">Mute
-                                        non-essential</button>
-                                </div>
-                            </div>
+                            </form>
                         </div>
 
                         <!-- Privacy Pane -->
                         <div class="tab-pane fade" id="pane-privacy" role="tabpanel">
                             <div class="form-section">
-                                <h6>Privacy & Data</h6>
-                                <p class="small-muted mb-3">Control profile visibility, data export and account
-                                    deletion.</p>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Profile visibility</label>
-                                    <select id="profileVisibility" class="form-select">
-                                        <option value="public">Public — visible to others</option>
-                                        <option value="registered" selected>Registered users only</option>
-                                        <option value="private">Private — only me</option>
-                                    </select>
-                                    <small class="text-muted">Choose who can view your profile and activity.</small>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Search & discovery</label>
-                                    <div class="form-check"><input class="form-check-input" id="allowDiscovery"
-                                            type="checkbox" checked><label class="form-check-label"
-                                            for="allowDiscovery">Allow search engines to index my public
-                                            profile</label></div>
-                                </div>
-
-                                <hr />
 
                                 <h6>Data controls</h6>
                                 <div class="mb-3">
@@ -450,202 +368,38 @@
                             </div>
                         </div>
 
-                        <!-- Learning Preferences Pane -->
-                        <div class="tab-pane fade" id="pane-learning" role="tabpanel">
-                            <div class="form-section">
-                                <h6>Learning preferences</h6>
-                                <p class="small-muted">Personalize how lessons are delivered and suggested.</p>
-
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label">Default playback speed</label>
-                                        <select id="playbackSpeed" class="form-select">
-                                            <option>1x</option>
-                                            <option>1.25x</option>
-                                            <option>1.5x</option>
-                                            <option>0.75x</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label">Subtitles / CC</label>
-                                        <select id="ccPref" class="form-select">
-                                            <option>Off</option>
-                                            <option selected>On (preferred language)</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label">Autoplay next</label>
-                                        <div class="form-check form-switch mt-2"><input class="form-check-input"
-                                                id="autoplayNext" type="checkbox" checked></div>
-                                    </div>
-
-                                    <div class="col-12 mt-3">
-                                        <label class="form-label">Preferred topics (for recommendations)</label>
-                                        <input id="prefTopics" class="form-control"
-                                            placeholder="e.g., calculus, IELTS, data science">
-                                        <small class="text-muted">Comma separated — used to personalize course
-                                            suggestions.</small>
-                                    </div>
-
-                                    <div class="col-12 mt-3">
-                                        <label class="form-label">Study goals</label>
-                                        <textarea id="studyGoals" class="form-control" rows="3"
-                                            placeholder="e.g., finish Calculus I by December, 1 lesson per day"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <button class="btn btn-primary" data-save="learning">Save learning prefs</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Billing Pane -->
-                        <div class="tab-pane fade" id="pane-billing" role="tabpanel">
-                            <div class="form-section">
-                                <h6>Billing & payment methods</h6>
-                                <p class="small-muted">Manage cards, receipts and subscription status.</p>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Default payment method</label>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div>
-                                            <div class="fw-semibold">Visa •••• 4242</div>
-                                            <small class="text-muted d-block">Expires 10/2026</small>
-                                        </div>
-                                        <div class="ms-auto">
-                                            <button class="btn btn-sm btn-outline-primary"
-                                                id="editCardBtn">Edit</button>
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                id="removeCardBtn">Remove</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <button class="btn btn-sm btn-outline-primary" id="addCardBtn"><i
-                                            class="bi bi-plus-circle me-1"></i> Add new card</button>
-                                    <button class="btn btn-sm btn-outline-secondary ms-2"
-                                        id="downloadInvoicesBtn">Download invoices</button>
-                                </div>
-
-                                <hr />
-
-                                <h6>Subscriptions</h6>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div>
-                                        <div class="fw-semibold">Premium</div>
-                                        <small class="text-muted d-block">Monthly • Next billed Oct 15, 2025</small>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <button class="btn btn-outline-danger" id="cancelSubBtn">Cancel
-                                            subscription</button>
-                                        <button class="btn btn-primary ms-2" id="upgradeSubBtn">Upgrade</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Accessibility Pane -->
-                        <div class="tab-pane fade" id="pane-access" role="tabpanel">
-                            <div class="form-section">
-                                <h6>Accessibility</h6>
-                                <p class="small-muted mb-3">Adjust visual and interaction preferences.</p>
-
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" id="highContrast" type="checkbox">
-                                            <label class="form-check-label" for="highContrast">High contrast</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" id="dyslexiaFont" type="checkbox">
-                                            <label class="form-check-label" for="dyslexiaFont">Dyslexia-friendly
-                                                font</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Font size</label>
-                                        <select id="fontSize" class="form-select">
-                                            <option value="normal" selected>Normal</option>
-                                            <option value="large">Large</option>
-                                            <option value="xlarge">Extra large</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <button class="btn btn-primary" data-save="accessibility">Save
-                                        accessibility</button>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Connections Pane -->
                         <div class="tab-pane fade" id="pane-connections" role="tabpanel">
                             <div class="form-section">
                                 <h6>Connected accounts</h6>
-                                <p class="small-muted mb-3">Link social & SSO providers for quick sign-in and calendar
-                                    sync.</p>
 
                                 <div class="row g-3">
+                                    @if ($user->google_id)
                                     <div class="col-md-6">
                                         <div
                                             class="border rounded p-3 d-flex align-items-center justify-content-between">
                                             <div><i
                                                     class="bi bi-google fs-3 text-danger me-2"></i><strong>Google</strong>
-                                                <div class="small text-muted">Connected — calendar sync enabled</div>
+                                                <div class="small text-muted">Connected</div>
                                             </div>
-                                            <div><button class="btn btn-sm btn-outline-danger"
-                                                    id="unlinkGoogle">Unlink</button></div>
+
                                         </div>
                                     </div>
-
+                                    @else
                                     <div class="col-md-6">
                                         <div
                                             class="border rounded p-3 d-flex align-items-center justify-content-between">
                                             <div><i
-                                                    class="bi bi-microsoft fs-3 text-primary me-2"></i><strong>Microsoft</strong>
-                                                <div class="small text-muted">Not connected</div>
+                                                    class="bi bi-person fs-3 text-primary me-2"></i><strong>Register via email</strong>
+                                                <div class="small text-muted">Connected</div>
                                             </div>
-                                            <div><button class="btn btn-sm btn-outline-primary"
-                                                    id="linkMicrosoft">Connect</button></div>
-                                        </div>
-                                    </div>
 
-                                    <div class="col-md-6 mt-2">
-                                        <div
-                                            class="border rounded p-3 d-flex align-items-center justify-content-between">
-                                            <div><i
-                                                    class="bi bi-facebook fs-3 text-primary me-2"></i><strong>Facebook</strong>
-                                                <div class="small text-muted">Not connected</div>
-                                            </div>
-                                            <div><button class="btn btn-sm btn-outline-primary"
-                                                    id="linkFacebook">Connect</button></div>
                                         </div>
                                     </div>
+                                    @endif
 
-                                    <div class="col-md-6 mt-2">
-                                        <div
-                                            class="border rounded p-3 d-flex align-items-center justify-content-between">
-                                            <div><i class="bi bi-calendar-plus fs-3 text-success me-2"></i><strong>Calendar
-                                                    (iCal)</strong>
-                                                <div class="small text-muted">Not enabled</div>
-                                            </div>
-                                            <div><button class="btn btn-sm btn-outline-primary"
-                                                    id="enableICal">Enable</button></div>
-                                        </div>
-                                    </div>
                                 </div>
 
-                                <div class="mt-3">
-                                    <button class="btn btn-outline-secondary" id="manageOAuthBtn">Manage OAuth
-                                        apps</button>
-                                </div>
                             </div>
                         </div>
 
@@ -678,19 +432,68 @@
             }
 
             // ---------- Avatar preview ----------
-            const avatarInput = document.getElementById('avatarInput');
             const avatarPreview = document.getElementById('avatarPreview');
-            avatarInput.addEventListener('change', (e) => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => avatarPreview.src = ev.target.result;
-                reader.readAsDataURL(f);
+            const selectedAvatarInput = document.getElementById('selectedAvatar');
+            const avatarOptions = document.querySelectorAll('.avatar-option');
+
+            avatarOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Remove active class from all options
+                    avatarOptions.forEach(opt => opt.classList.remove('active'));
+
+                    // Add active class to the clicked option
+                    option.classList.add('active');
+
+                    const avatarUrl = option.dataset.avatarUrl;
+                    avatarPreview.src = avatarUrl;
+                    selectedAvatarInput.value = avatarUrl;
+                    // showToast('Avatar selected', 'info');
+
+                    // Make AJAX call to save avatar
+                    fetch('{{ route('api.student.profile.update-avatar') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ avatar: avatarUrl })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Avatar saved successfully!', 'success');
+                        } else {
+                            showToast('Failed to save avatar.', 'danger');
+                            console.error('Error saving avatar:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        showToast('An error occurred while saving avatar.', 'danger');
+                        console.error('Fetch error:', error);
+                    });
+                });
             });
-            document.getElementById('removeAvatarBtn').addEventListener('click', () => {
-                avatarPreview.src = 'https://via.placeholder.com/120x120/ffffff/6f42c1?text=N';
-                avatarInput.value = '';
-                showToast('Profile picture removed', 'info');
+
+            // Set initial active avatar based on current user avatar (prevent flicker)
+            document.addEventListener('DOMContentLoaded', () => {
+                const currentAvatar = selectedAvatarInput.value;
+
+                if (currentAvatar) {
+                    // Keep the DB avatar
+                    avatarPreview.src = currentAvatar;
+
+                    // Highlight matching option if it exists
+                    avatarOptions.forEach(option => {
+                        if (option.dataset.avatarUrl === currentAvatar) {
+                            option.classList.add('active');
+                        }
+                    });
+                } else if (avatarOptions.length > 0) {
+                    // Only use first avatar if no DB avatar exists
+                    avatarOptions[0].classList.add('active');
+                    avatarPreview.src = avatarOptions[0].dataset.avatarUrl;
+                    selectedAvatarInput.value = avatarOptions[0].dataset.avatarUrl;
+                }
             });
 
             // ---------- Sessions mock ----------
@@ -829,6 +632,143 @@
             // Set some initial UI states
             if (toggle2fa.checked) twoFaDetails.style.display = 'block';
         </script>
+        <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    $(document).on('submit', '#StudentProfile', function (e) {
+        e.preventDefault();
+
+        console.log("Form intercepted — JS working!");
+
+        let formData = {
+            first_name: $('#fullName').val(),
+            last_name: $('#displayName').val(),
+            bio: $('#bio').val(),
+            education: $('#education').val(),
+            interests: $('#interests').val(),
+            email: $('#email').val() // Added email field back
+        };
+
+        fetch("{{ route('student.UserProfile.update') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name=\"csrf-token\"]')
+                    .getAttribute("content")
+            },
+            body: JSON.stringify(formData)
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    showToast("Profile updated successfully ", "success");
+                } else {
+                    showToast("Update failed 😬", "danger");
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                showToast("Server error occurred 😭", "danger");
+            });
+    });
+
+    $(document).on('submit', '#AccountProfile', function (e) {
+        e.preventDefault();
+        let formData = {
+            phone: $('#phone').val(),
+            language: $('#language').val(),
+            timezone: $('#timezone').val(),
+        };
+        fetch("{{ route('student.profile.updateAccount') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').getAttribute("content")
+            },
+            body: JSON.stringify(formData)
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.success) {
+                showToast("Account settings updated successfully ", "success");
+            } else {
+                showToast("Update failed 😬", "danger");
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+            showToast("Server error occurred 😭", "danger");
+        });
+    });
+
+    $(document).on('submit', '#SecurityProfile', function (e) {
+        e.preventDefault();
+        let formData = {
+            current_password: $('#curPass').val(),
+            password: $('#newPass').val(),
+            password_confirmation: $('#confirmPass').val(),
+        };
+        fetch("{{ route('student.profile.updatePassword') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').getAttribute("content")
+            },
+            body: JSON.stringify(formData)
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.success) {
+                showToast("Password updated successfully ", "success");
+                $('#curPass').val('');
+                $('#newPass').val('');
+                $('#confirmPass').val('');
+            } else {
+                showToast("Password update failed", "danger");
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+            showToast("Something went wrong! Please try again.", "danger");
+        });
+    });
+
+    $(document).on('submit', '#NotificationProfile', function (e) {
+        e.preventDefault();
+        let formData = {
+            notify_email: $('#notifyEmail').is(':checked') ? 1 : 0,
+            notify_sms: $('#notifySMS').is(':checked') ? 1 : 0,
+            notify_push: $('#notifyPush').is(':checked') ? 1 : 0,
+            notify_in_app: $('#notifyInApp').is(':checked') ? 1 : 0,
+            evt_course_release: $('#evtCourseRelease').is(':checked') ? 1 : 0,
+            evt_assignment: $('#evtAssignment').is(':checked') ? 1 : 0,
+            evt_promos: $('#evtPromos').is(':checked') ? 1 : 0,
+            evt_system: $('#evtSystem').is(':checked') ? 1 : 0,
+        };
+        fetch("{{ route('student.profile.updateNotifications') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').getAttribute("content")
+            },
+            body: JSON.stringify(formData)
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.success) {
+                showToast("Notification settings updated successfully ", "success");
+            } else {
+                showToast("Update failed! Please try again.", "danger");
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+            showToast("Something went wrong! Please try again.", "danger");
+        });
+    });
+});
+</script>
     @endpush
 
 

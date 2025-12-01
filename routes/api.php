@@ -28,4 +28,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Sessions for dropdown/autofill
     Route::get('/sessions', [SessionController::class, 'index']);
+
+    Route::post('/student/profile/update-avatar', [\App\Http\Controllers\Student\ProfileController::class, 'updateAvatar'])->name('api.student.profile.update-avatar');
 });
