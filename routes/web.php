@@ -199,6 +199,11 @@ Route::middleware(['auth', 'role:student'])
         Route::get('dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
         Route::get('profile', [StudentProfileController::class, 'edit'])->name('profile.edit');
         Route::post('profile', [StudentProfileController::class, 'update'])->name('profile.update');
+        Route::post('/userprofile', [StudentProfileController::class, 'updateProfile'])
+            ->name('UserProfile.update');
+        Route::post('profile/account', [StudentProfileController::class, 'updateAccount'])->name('profile.updateAccount');
+        Route::post('profile/password', [StudentProfileController::class, 'updatePassword'])->name('profile.updatePassword');
+        Route::post('profile/notifications', [StudentProfileController::class, 'updateNotifications'])->name('profile.updateNotifications');
 
         Route::get('my-courses', [StudentDashboardController::class, 'myCourses'])->name('my-courses');
         Route::get('course-details/{course_id}/{lesson_id?}', [StudentDashboardController::class, 'courseDetails'])->name('course_details');
@@ -212,6 +217,7 @@ Route::middleware(['auth', 'role:student'])
         Route::get('payments', [StudentDashboardController::class, 'payments'])->name('payments');
 
         Route::get('wishlist', [StudentDashboardController::class, 'wishlist'])->name('wishlist');
+        Route::delete('wishlist/{course_id}', [StudentDashboardController::class, 'removeWishlistCourse'])->name('wishlist.remove');
 
         Route::post('lesson-comment', [StudentDashboardController::class, 'storeLessonComment'])->name('lesson_comment.store');
     });

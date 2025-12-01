@@ -15,6 +15,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Models\LessonVideoComment;
 use App\Models\LessonVideoView;
+use App\Models\Wishlist;
 
 class StudentDashboardController extends Controller
 {
@@ -44,26 +45,30 @@ class StudentDashboardController extends Controller
         foreach ($enrolledCoursesData as $purchase) {
             $course = $purchase->course;
             $totalLessonsCount = $course->lessons->count();
-            $totalCompletion = 0;
+            $totalLessonCompletionSum = 0;
 
             if ($totalLessonsCount > 0) {
                 foreach ($course->lessons as $lesson) {
                     $lessonCompletion = LessonVideoView::where('user_id', $user->id)
                         ->where('lesson_id', $lesson->id)
-                        ->max('completed'); // Get the highest completion percentage for the lesson
+                        ->value('completed');
 
-                    $totalCompletion += $lessonCompletion ?? 0;
+                    // $totalLessonCompletionSum += $lessonCompletion ?? 0;
                 }
-                $completionPercentage = round(($totalCompletion / ($totalLessonsCount * 100)) * 100, 2); // Calculate overall course completion
+
+                // $completionPercentage = round($totalLessonCompletionSum / $totalLessonsCount, 2);
             } else {
                 $completionPercentage = 0;
             }
 
             $courseCompletionData[] = [
                 'course_title' => $purchase->course->title,
-                'completion_percentage' => $completionPercentage,
+                'completion_percentage' => $lessonCompletion,
             ];
         }
+
+        // Debugging: Dump course completion data
+        // dd($courseCompletionData);
 
         $watchTimeLabels = [];
         $watchTimeData = [];
@@ -118,12 +123,14 @@ class StudentDashboardController extends Controller
         // New Videos Feed
         $newVideosFeed = [];
         $enrolledCourseIds = $enrolledCoursesData->pluck('course_id');
+        // dd($enrolledCourseIds);
         $recentLessons = Lesson::whereIn('course_id', $enrolledCourseIds)
-            ->where('created_at', '>', Carbon::now()->subDays(7))
             ->with('course')
             ->latest()
             ->take(5)
             ->get();
+
+            // dd($recentLessons);
 
         foreach ($recentLessons as $lesson) {
             $newVideosFeed[] = [
@@ -132,6 +139,7 @@ class StudentDashboardController extends Controller
                 'when' => Carbon::parse($lesson->created_at)->diffForHumans(),
                 'duration' => $lesson->duration,
                 'id' => $lesson->id,
+                'course_id' => $lesson->course->id,
             ];
         }
 
@@ -208,10 +216,10 @@ class StudentDashboardController extends Controller
         $user = Auth::user();
         $enrolledCourseIds = CoursePurchase::where('student_id', $user->id)->pluck('course_id');
         $recentLessons = Lesson::whereIn('course_id', $enrolledCourseIds)
-            ->where('created_at', '>', Carbon::now()->subDays(7))
-            ->with('course')
-            ->latest()
-            ->get();
+        ->with('course')
+        ->latest()
+        ->take(5)
+        ->get();
 
         $newVideosFeed = [];
         foreach ($recentLessons as $lesson) {
@@ -221,6 +229,7 @@ class StudentDashboardController extends Controller
                 'when' => Carbon::parse($lesson->created_at)->diffForHumans(),
                 'duration' => $lesson->duration,
                 'id' => $lesson->id,
+                'course_id' => $lesson->course->id,
             ];
         }
 
@@ -409,17 +418,33 @@ class StudentDashboardController extends Controller
     public function wishlist()
     {
         $user = Auth::user();
-        // dummy-data
-        $wishlistCourses = [];
 
-        if (empty($wishlistCourses)) {
-            $wishlistCourses = [
-                ['id' => 3, 'title' => 'Static Course 3', 'subject' => 'Design', 'price' => 19.99, 'thumb' => 'https://fastly.picsum.photos/id/7/367/267.jpg?hmac=7scfIEZwG08cgYCiNifF6mEOaFpXAt2N-Q7oaA37ZQk'],
-                ['id' => 4, 'title' => 'Static Course 4', 'subject' => 'Marketing', 'price' => 39.99, 'thumb' => 'https://fastly.picsum.photos/id/7/367/267.jpg?hmac=7scfIEZwG08cgYCiNifF6mEOaFpXAt2N-Q7oaA37ZQk'],
-            ];
-        }
+        $wishlistCourses = Wishlist::where('user_id', $user->id)
+            ->with('course')
+            ->get()
+            ->map(function ($wishlistItem) {
+                $course = $wishlistItem->course;
+                return [
+                    'id' => $course->id,
+                    'title' => $course->title,
+                    'subject' => $course->subject,
+                    'price' => $course->price,
+                    'thumb' => $course->thumbnail,
+                ];
+            });
 
         return view('student.wishlist', compact('wishlistCourses'));
+    }
+
+    public function removeWishlistCourse($course_id)
+    {
+        $user = Auth::user();
+
+        Wishlist::where('user_id', $user->id)
+            ->where('course_id', $course_id)
+            ->delete();
+
+        return redirect()->route('student.wishlist')->with('success', 'Course removed from wishlist.');
     }
 
     public function courseDetails($course_id, $lesson_id = null)

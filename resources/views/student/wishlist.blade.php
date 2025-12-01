@@ -8,7 +8,8 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Course Name</th>
+                                <th>Cover Img</th>
+                                <th>Course Title</th>
                                 <th>Subject</th>
                                 <th>Price</th>
                                 <th>Actions</th>
@@ -22,8 +23,12 @@
                                     <td>{{ $c['subject'] }}</td>
                                     <td>${{ $c['price'] }}</td>
                                     <td>
-                                        <a href="#" class="btn btn-primary btn-sm">View Course</a>
-                                        <button class="btn btn-danger btn-sm">Remove</button>
+                                        <a href="{{ route('student.course_details', $c['id']) }}" class="btn btn-primary btn-sm">View Course</a>
+                                        <form action="{{ route('student.wishlist.remove', $c['id']) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach
