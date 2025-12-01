@@ -4,7 +4,7 @@
     <h2 class="h4 mb-4">Payments & Billing</h2>
 
     <!-- KPI cards -->
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4 d-none">
 
         <div class="col-sm-6 col-lg-3">
             <div class="card kpi-card p-3">
@@ -69,7 +69,7 @@
     </div>
 
     <!-- Payment settings -->
-    <div class="card p-3">
+    <div class="card p-3 d-none">
         <h6 class="mb-3">Payment Settings</h6>
         <div class="row g-3">
             <div class="col-md-6">
