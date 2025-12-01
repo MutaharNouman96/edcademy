@@ -118,7 +118,6 @@
             <div class="card p-3">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <h3 class="h6 mb-0">New videos from your courses</h3>
-                    <a class="small" href="#">Manage notifications</a>
                 </div>
                 <ul class="list-group list-group-flush" id="newVideosList"></ul>
             </div>
@@ -199,6 +198,7 @@
             const newVideos = @json($newVideosFeed);
             const payments = @json($paymentData);
         </script>
-    @endpush
+        <div id="dashboard-data" data-course-details-url="{{ route('student.course_details', ['course_id' => '_COURSE_ID_']) }}"></div>
+        @endpush
 
 </x-student-layout>

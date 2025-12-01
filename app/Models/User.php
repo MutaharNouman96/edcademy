@@ -25,7 +25,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_name',
         'email',
         'password',
-        'role'
+        'role',
+        'avatar',
+        'bio',
+        'education',
+        'interests',
     ];
 
     /**
@@ -63,6 +67,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'student';
     }
 
+    // Add hasOne relationship to StudentProfile
+    public function studentProfile()
+    {
+        return $this->hasOne(StudentProfile::class);
+    }
 
     public function educatorProfile()
     {

@@ -53,8 +53,8 @@ function renderNewVideos(){
         </div>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-circle me-1"></i> Add to queue</button>
-        <a class="btn btn-sm btn-primary"><i class="bi bi-play-fill me-1"></i> Watch</a>
+
+        <a class="btn btn-sm btn-primary" href="${courseDetailsUrl.replace('_COURSE_ID_', n.course_id)}"><i class="bi bi-play-fill me-1"></i> Watch</a>
       </div>
     </li>`).join('');
 }
@@ -88,6 +88,7 @@ function renderPayments(){
   document.getElementById('kpiSpend').textContent = `$${parseFloat(total).toFixed(2)}`;
 }
 
+const courseDetailsUrl = document.getElementById('dashboard-data').dataset.courseDetailsUrl;
 renderCourses(myCourses);
 renderNewVideos();
 renderCerts();
