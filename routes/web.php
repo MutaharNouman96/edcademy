@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatMessageController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\Educator\ReviewController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +27,7 @@ use App\Http\Controllers\Educator\Settings\{
     PreferenceController
 };
 use App\Http\Controllers\NotificationSettingController;
+use App\Http\Controllers\StripeController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\StudentDashboardController;
@@ -49,13 +52,32 @@ Route::get("become-an-educator", [WebsiteController::class, "educator_signup"])-
 Route::post("educator/signup/store", [EducatorController::class, "store"])->name("educator.signup.store");
 
 Route::get("courses", [WebsiteController::class, "courses"])->name("web.courses");
-Route::get("course/{course}", [WebsiteController::class, "course"])->name("web.course.show");
+Route::get("course/{slug}", [CourseController::class, "show"])->name("web.course.show");
 
-Route::get("educators", [WebsiteController::class, "educators"])->name("web.eductors.index");
-Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name("web.eductor.show");
+Route::get("educators", [WebsiteController::class, "educators"])->name("web.educators.index");
+Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name("web.educator.show");
 
 Route::get("cart", [WebsiteController::class, "cart"])->name("web.cart");
-Route::get("checkout", [WebsiteController::class, "checkout"])->name("web.checkout");
+Route::get("cart/checkout", [CartController::class, "checkout"])->name("web.cart.checkout");
+Route::post('cart/add-to-cart', [CartController::class, 'store'])->name('web.cart.addToCart');
+Route::delete('cart/remove-from-cart', [CartController::class, 'remove'])->name('web.cart.removeFromCart');
+Route::get('cart/clear',  [CartController::class, 'clear'])->name('web.cart.clearCart');
+Route::post('/cart/login', [CartController::class, 'loginUserInCartPage'])->name('cart.login');
+
+Route::get("educator-policy", [WebsiteController::class, "educator_policy"])->name("web.educator.policy");
+Route::get("student-parent-policy", [WebsiteController::class, "student_parent_policy"])->name("web.student.parent.policy");
+Route::get("refund-policy", [WebsiteController::class, "refund_policy"])->name("web.refund.policy");
+
+
+Route::post('/stripe/checkout', [StripeController::class, 'createCheckout']);
+
+// Success callback from Stripe
+Route::get('/stripe/success', [StripeController::class, 'success']);
+
+// Cancel callback from Stripe (optional)
+Route::get('/stripe/cancel', [StripeController::class, 'cancel']);
+
+
 
 Route::get("how-it-works", [WebsiteController::class, "how_it_works"])->name("web.how.it.works");
 

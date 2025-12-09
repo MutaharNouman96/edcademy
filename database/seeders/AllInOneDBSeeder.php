@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\CourseSection;
 use App\Models\Lesson;
 use App\Models\Purchase;
+use Faker\Factory as Faker;
 
 class AllInOneDBSeeder extends Seeder
 {
@@ -31,9 +32,10 @@ class AllInOneDBSeeder extends Seeder
         // Educators
         $educators = collect();
         for ($i = 1; $i <= 20; $i++) {
+            $faker = Faker::create();
             $educators->push(User::create([
-                'first_name' => 'Educator',
-                'last_name' => $i,
+                'first_name' => $faker->firstName(),
+                'last_name' => $faker->lastName(),
                 'email' => "educator{$i}@edcademy.com",
                 'password' => Hash::make('password123'),
                 'role' => 'educator',
@@ -44,9 +46,10 @@ class AllInOneDBSeeder extends Seeder
         // Students
         $students = collect();
         for ($i = 1; $i <= 300; $i++) {
+            $faker = Faker::create();
             $students->push(User::create([
-                'first_name' => 'Student',
-                'last_name' => $i,
+                'first_name' => $faker->firstName(),
+                'last_name' => $faker->lastName(),
                 'email' => "student{$i}@edcademy.com",
                 'password' => Hash::make('password123'),
                 'role' => 'student',

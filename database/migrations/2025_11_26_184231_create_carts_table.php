@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->string('user_id' , 255)->nullable();
 
             $table->unsignedBigInteger('item_id')->nullable();
             $table->string('model')->nullable();
@@ -29,7 +29,7 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+ * Reverse the migrations
      *
      * @return void
      */

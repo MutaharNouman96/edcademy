@@ -18,6 +18,8 @@ return new class extends Migration
 
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('course_id');
+            
+
             $table->string('status')->default('pending');
             $table->string('payment_status')->default('pending');
             $table->string('payment_method')->nullable();
