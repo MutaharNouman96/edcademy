@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -14,11 +15,10 @@ class ProfileController extends Controller
      */
     public function edit(): View
     {
-        $student_profile = auth()->user()->studentProfile;
-        $user = auth()->user();
+        $user = User::where('id', auth()->user()->id)->with('studentProfile')->first();
 
         // dd($student_profile);
-        return view('student.profile.edit', compact('user', 'student_profile'));
+        return view('student.profile.edit', compact('user'));
     }
 
     /**
