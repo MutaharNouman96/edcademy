@@ -18,7 +18,7 @@ return new class extends Migration
             // Profile Fields
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
-            $table->string('pronouns')->nullable(); // He/Him, She/Her, They/Them
+            $table->string('avatar_id')->nullable(); //
             $table->string('bio', 250)->nullable();
             $table->string('location')->nullable();
             $table->string('website')->nullable();
