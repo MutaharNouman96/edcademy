@@ -110,6 +110,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+
+    Route::prefix("chat")->group(function () {
+        Route::get("/", [ChatMessageController::class, "index"])->name("chat.index");
+
+
+        Route::get('/messages/{chat}', [ChatMessageController::class, 'fetchMessages'])
+            ->name('chat.messages');
+
+        // Create or open chat with specific user
+        Route::get('/open/{user}', [ChatMessageController::class, 'openChat'])
+            ->name('chat.open');
+
+        // Send message
+        Route::post('/send', [ChatMessageController::class, 'sendMessage'])
+            ->name('chat.send');
+    });
 });
 
 // Admin routes
@@ -174,25 +192,6 @@ Route::middleware(['auth', 'role:educator', 'verified'])
         });
 
         Route::get("schudule-management", [\App\Http\Controllers\Educator\ScheduleController::class, "index"])->name("educator.schedule.index");
-
-        Route::prefix("chat")->group(function () {
-            Route::get("/", [ChatMessageController::class, "index"])->name("educator.chat.index");
-
-
-            Route::get('/messages/{chat}', [ChatMessageController::class, 'fetchMessages'])
-                ->name('chat.messages');
-
-            // Create or open chat with specific user
-            Route::get('/open/{user}', [ChatMessageController::class, 'openChat'])
-                ->name('chat.open');
-
-            // Send message
-            Route::post('/send', [ChatMessageController::class, 'sendMessage'])
-                ->name('chat.send');
-        });
-
-
-
 
         Route::prefix('settings')->group(function () {
             Route::get('/', [ProfileSettingController::class, 'index'])->name('educator.settings');
@@ -270,23 +269,12 @@ Route::middleware(['auth', 'role:student'])
         Route::delete('wishlist/{course_id}', [StudentDashboardController::class, 'removeWishlistCourse'])->name('wishlist.remove');
 
 
-        Route::prefix("chat")->group(function () {
-            Route::get("/", [ChatMessageController::class, "index"])->name("chat.index");
 
-
-            Route::get('/messages/{chat}', [ChatMessageController::class, 'fetchMessages'])
-                ->name('chat.messages');
-
-            // Create or open chat with specific user
-            Route::get('/open/{user}', [ChatMessageController::class, 'openChat'])
-                ->name('chat.open');
-
-            // Send message
-            Route::post('/send', [ChatMessageController::class, 'sendMessage'])
-                ->name('chat.send');
-        });
         Route::post('lesson-comment', [StudentDashboardController::class, 'storeLessonComment'])->name('lesson_comment.store');
     });
+
+
+
 
 Route::middleware(['guest'])->group(function () {
     Route::get('student/signup', fn() => view('student.signup'))

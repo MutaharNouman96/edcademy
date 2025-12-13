@@ -239,7 +239,7 @@
                 }
             })
 
-            fetch(`{{ url('educator') }}/chat/messages/${chatId}`)
+            fetch(`{{ url('/chat/messages') }}/${chatId}`)
                 .then(res => res.json())
                 .then(messages => {
                     let html = "";
@@ -268,7 +268,7 @@
                 form.append("type", "file");
             }
 
-            fetch(`{{ url('educator') }}/chat/send`, {
+            fetch(`{{ url('/chat/send') }}`, {
                     method: "POST",
                     headers: {
                         "X-CSRF-TOKEN": "{{ csrf_token() }}"
