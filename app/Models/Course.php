@@ -31,7 +31,7 @@ class Course extends Model
 
     public function category()
     {
-        return $this->belongsTo(CourseCategory::class);
+        return $this->belongsTo(CourseCategory::class, 'course_category_id');
     }
 
     public function lessons()
@@ -39,7 +39,8 @@ class Course extends Model
         return $this->hasMany(Lesson::class);
     }
 
-    public function sections(){
+    public function sections()
+    {
         return $this->hasMany(CourseSection::class);
     }
 
@@ -53,7 +54,8 @@ class Course extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function reviews(){
+    public function reviews()
+    {
         return $this->hasMany(CourseReview::class);
     }
 
@@ -70,6 +72,14 @@ class Course extends Model
 
     public function scopepublished($query)
     {
-        return $query->where('status', 'published');
+        return $query->where('status', 'published')->where('publish_option', '!=', 'draft')->where('active', true);
+    }
+
+    public function scopeBestReviewed($query)
+    {
+        return $query
+            ->withAvg('reviews', 'rating')   // calculates avg rating
+            ->orderBy('reviews_avg_rating', 'desc')  // sort by highest avg
+            ->withCount('reviews');          
     }
 }

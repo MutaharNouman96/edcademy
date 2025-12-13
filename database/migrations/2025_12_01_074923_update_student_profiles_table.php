@@ -14,7 +14,6 @@ return new class extends Migration
     public function up()
     {
         Schema::table('student_profiles', function (Blueprint $table) {
-            $table->dropColumn(['pronouns', 'location', 'website']);
             $table->string('phone')->nullable()->after('user_id');
             $table->string('language')->nullable()->after('phone');
             $table->string('timezone')->nullable()->after('language');

@@ -6,6 +6,8 @@ use Illuminate\View\Component;
 
 class DynamicLayout extends Component
 {
+    public string $layout;
+
     /**
      * Create a new component instance.
      *
@@ -14,6 +16,14 @@ class DynamicLayout extends Component
     public function __construct()
     {
         //
+        $user = auth()->user();
+
+        $this->layout = match ($user?->role) {
+            'educator' => 'educator-layout',
+            'student'  => 'student-layout',
+            'admin'    => 'admin-layout',
+            default    => 'app-layout',
+        };
     }
 
     /**

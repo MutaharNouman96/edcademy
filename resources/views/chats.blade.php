@@ -1,4 +1,4 @@
-<x-educator-layout>
+<x-dynamic-layout>
     <div>
         <x-slot name="header">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -8,4 +8,4 @@
 
         <x-chat :chats="$chats" :activeChatId="$chatId" />
     </div>
-</x-educator-layout>
+</x-dynamic-layout>
