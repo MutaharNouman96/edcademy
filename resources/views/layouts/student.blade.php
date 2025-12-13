@@ -77,7 +77,7 @@
                         href="{{ route('student.payments') }}"><i class="bi bi-wallet2 me-2"></i> Payments</a>
                     <a class="nav-link {{ request()->routeIs('student.wishlist') ? 'active' : '' }}"
                         href="{{ route('student.wishlist') }}"><i class="bi bi-heart me-2"></i> Wishlist</a>
-                    <a class="nav-link" href="#section-messages"><i class="bi bi-chat-dots me-2"></i> Messages</a>
+                    <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-2"></i> Messages</a>
 
                 </nav>
                 <hr />

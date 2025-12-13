@@ -42,6 +42,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
+     protected $appends = ['full_name'];
+
     /**
      * The attributes that should be cast.
      *
@@ -185,10 +187,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return ucfirst(substr($this->first_name, 0, 1)) . ucfirst(substr($this->last_name, 0, 1));
     }
 
-    public function getfullNameattribute()
-    {
-        return $this->first_name . ' ' . $this->last_name;
-    }
 
 
     public function myStudents()
@@ -203,6 +201,12 @@ class User extends Authenticatable implements MustVerifyEmail
         )->distinct();
     }
 
+    public function scopeVerifiedEducator($query)
+    {
+        return $query->where('role', 'educator')
+            ->whereNotNull('email_verified_at');
+    }
+
 
     public function myPurchasedCourses()
     {
@@ -214,5 +218,11 @@ class User extends Authenticatable implements MustVerifyEmail
         )
             ->withPivot(['price', 'payment_status', 'purchase_date'])
             ->withTimestamps();
+    }
+
+
+       public function getFullNameAttribute()
+    {
+        return trim("{$this->first_name} {$this->last_name}");
     }
 }

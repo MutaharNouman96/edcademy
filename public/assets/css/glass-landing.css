@@ -152,7 +152,7 @@
 }
 
 #glass-hero-sidebar {
-  height: 100vh;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-end; /* pushes spotlight(s) to bottom */
@@ -219,7 +219,14 @@
   background: rgba(0, 0, 0, 0.3);
   border-radius: 15px;
   padding: 30px;
-  margin-top: 30px;
+  margin-top: 10px;
+}
+
+.glass-landing--educator-profile img{
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .glass-landing--stats-title {

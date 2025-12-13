@@ -174,7 +174,7 @@
                                             <div class="col-sm-9">
                                             <label class="col-form-label">Bio</label>
                                                 <textarea id="bio" class="form-control" rows="3" maxlength="250"
-                                                    placeholder="Short bio — what you'd like teachers & peers to know.">{{ $student_profile->bio }}</textarea>
+                                                    placeholder="Short bio — what you'd like teachers & peers to know.">{{ $user->studentProfile->bio ?? '' }}</textarea>
                                                 <small class="text-muted">Shown on your profile. Max 250
                                                     characters.</small>
                                             </div>
@@ -185,16 +185,16 @@
                                             <div class="col-md-6">
                                                 <label class="form-label small-muted">Education level</label>
                                                 <select id="education" class="form-select">
-                                                    <option value="university" {{ $student_profile->education_level == 'university' ? 'selected' : '' }}>University</option>
-                                                    <option value="high" {{ $student_profile->education_level == 'high' ? 'selected' : '' }}>High School</option>
-                                                    <option value="professional" {{ $student_profile->education_level == 'professional' ? 'selected' : '' }}>Professional</option>
-                                                    <option value="other" {{ $student_profile->education_level == 'other' ? 'selected' : '' }}>Other</option>
+                                                    <option value="university" {{isset($user->studentProfile->education_level) && $user->studentProfile->education_level && $user->studentProfile->education_level == 'university' ? 'selected' : '' }}>University</option>
+                                                    <option value="high" {{ isset($user->studentProfile->education_level) && $user->studentProfile->education_level == 'high' ? 'selected' : '' }}>High School</option>
+                                                    <option value="professional" {{isset($user->studentProfile->education_level) && $user->studentProfile->education_level == 'professional' ? 'selected' : '' }}>Professional</option>
+                                                    <option value="other" {{isset($user->studentProfile->education_level) && $user->studentProfile->education_level == 'other' ? 'selected' : '' }}>Other</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label small-muted">Interests</label>
                                                 <input id="interests" class="form-control"
-                                                    placeholder="e.g., calculus, robotics, IELTS" value="{{ $student_profile->interests }}">
+                                                    placeholder="e.g., calculus, robotics, IELTS" value="{{ $user->studentProfile->interests ?? '' }}">
                                             </div>
                                         </div>
                                         <div class="mt-3 d-flex gap-2">
@@ -226,7 +226,7 @@
                                         <div class="mb-3 row">
                                             <label class="col-sm-3 col-form-label">Phone</label>
                                             <div class="col-sm-9">
-                                                <input id="phone" placeholder="Enter your phone number" class="form-control" value="{{ $student_profile->phone ?? '' }}">
+                                                <input id="phone" placeholder="Enter your phone number" class="form-control" value="{{ $user->studentProfile->phone ?? '' }}">
                                                 <small class="text-muted">Used for SMS notifications</small>
                                             </div>
                                         </div>
@@ -235,20 +235,20 @@
                                             <div class="col-md-6">
                                                 <label class="form-label">Language</label>
                                                 <select id="language" class="form-select">
-                                                    <option value="en" {{ ($student_profile->language ?? '') == 'en' ? 'selected' : '' }}>English</option>
-                                                    <option value="ar" {{ ($student_profile->language ?? '') == 'ar' ? 'selected' : '' }}>Arabic</option>
-                                                    <option value="zh" {{ ($student_profile->language ?? '') == 'zh' ? 'selected' : '' }}>中文</option>
-                                                    <option value="fr" {{ ($student_profile->language ?? '') == 'fr' ? 'selected' : '' }}>Français</option>
+                                                    <option value="en" {{ ($user->studentProfile->language ?? '') == 'en' ? 'selected' : '' }}>English</option>
+                                                    <option value="ar" {{ ($user->studentProfile->language ?? '') == 'ar' ? 'selected' : '' }}>Arabic</option>
+                                                    <option value="zh" {{ ($user->studentProfile->language ?? '') == 'zh' ? 'selected' : '' }}>中文</option>
+                                                    <option value="fr" {{ ($user->studentProfile->language ?? '') == 'fr' ? 'selected' : '' }}>Français</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Timezone</label>
                                                 <select id="timezone" class="form-select">
-                                                    <option value="Asia/Dubai" {{ ($student_profile->timezone ?? '') == 'Asia/Dubai' ? 'selected' : '' }}>UTC+04:00 — Asia/Dubai</option>
-                                                    <option value="Europe/London" {{ ($student_profile->timezone ?? '') == 'Europe/London' ? 'selected' : '' }}>UTC+00:00 — Europe/London</option>
-                                                    <option value="America/New_York" {{ ($student_profile->timezone ?? '') == 'America/New_York' ? 'selected' : '' }}>UTC-04:00 — America/New_York
+                                                    <option value="Asia/Dubai" {{ ($user->studentProfile->timezone ?? '') == 'Asia/Dubai' ? 'selected' : '' }}>UTC+04:00 — Asia/Dubai</option>
+                                                    <option value="Europe/London" {{ ($user->studentProfile->timezone ?? '') == 'Europe/London' ? 'selected' : '' }}>UTC+00:00 — Europe/London</option>
+                                                    <option value="America/New_York" {{ ($user->studentProfile->timezone ?? '') == 'America/New_York' ? 'selected' : '' }}>UTC-04:00 — America/New_York
                                                     </option>
-                                                    <option value="Asia/Kolkata" {{ ($student_profile->timezone ?? '') == 'Asia/Kolkata' ? 'selected' : '' }}>UTC+05:30 — Asia/Kolkata</option>
+                                                    <option value="Asia/Kolkata" {{ ($user->studentProfile->timezone ?? '') == 'Asia/Kolkata' ? 'selected' : '' }}>UTC+05:30 — Asia/Kolkata</option>
                                                 </select>
                                             </div>
                                         </div>

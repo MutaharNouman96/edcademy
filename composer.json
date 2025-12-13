@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.7",
         "livewire/livewire": "^2.12",
         "pusher/pusher-php-server": "^7.2",
+        "stripe/stripe-php": "^19.0",
         "vimeo/vimeo-api": "^4.0"
     },
     "require-dev": {
@@ -29,7 +30,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+          "files": [
+                "app/Helpers/helpers.php"
+            ]
     },
     "autoload-dev": {
         "psr-4": {

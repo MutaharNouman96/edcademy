@@ -9,8 +9,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Teachers:wght@400;700&display=swap" rel="stylesheet">
 
+    @if (env('APP_ENV') == 'local')
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
     <link rel="stylesheet" href="{{ asset('assets/css/website-style.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/glass-landing.css') }}" />
+
+
+
     @stack('styles')
 </head>
 
@@ -44,6 +50,36 @@
                         <a class="nav-link" href="{{ route('web.eudcator.signup') }}"
                             style="color: var(--accent-pink)">Become an Educator</a>
                     </li>
+
+
+
+                    @if (Route::has('login') && Route::has('dashboard'))
+                        @auth
+                            <li class="nav-item ms-lg-2">
+                                <a class="nav-link"
+                                    href="{{ route( 'student.dashboard') }}">Dashboard</a>
+                            </li>
+                        @else
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('login') }}">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('student.signup') }}">Register</a>
+                            </li>
+                        @endif
+                    @endauth
+
+
+                    <li class="nav-item ms-3">
+                        <a class="nav-link position-relative" href="{{ route('web.cart') }}">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger p-2"
+                                style="left: 30px;" id="cartCount">
+                                {{ cartTotalItems() }}
+                            </span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -51,24 +87,19 @@
 
     </nav>
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <x-alert type="success" :message="session('success')" />
     @endif
 
     @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <x-alert type="error" :message="session('error')" />
     @endif
 
-    @if (session('message'))
-        <div class="alert alert-info alert-dismissible fade show" role="alert">
-            {{ session('message') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+    @if (session('info'))
+        <x-alert type="info" :message="session('message')" />
+    @endif
+
+    @if (session('warning'))
+        <x-alert type="warning" :message="session('warning')" />
     @endif
 
     {{ $slot }}
@@ -155,6 +186,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script>
         // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -209,6 +241,9 @@
             })
         @endif
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert@2.1.2/dist/sweetalert.min.js"></script>
+
     @stack('scripts')
 </body>
 

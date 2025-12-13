@@ -16,7 +16,6 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreignId('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->string('status')->default('pending');
             $table->string('payment_method')->nullable();
             $table->string('transaction_id')->nullable();
