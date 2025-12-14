@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Course;
@@ -135,4 +136,38 @@ class WebsiteController extends Controller
     public function refund_policy(){
         return view("website.refund-policy");
     }
+
+    public function bookSession(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'time' => 'required|string',
+            'duration' => 'required|numeric',
+            'subject' => 'required|string',
+            'educator_id' => 'required|exists:users,id',
+            'message' => 'nullable|string',
+        ]);
+
+        // Here you would typically save the booking to a database.
+        // For now, we'll just return a success response.
+        // You'll need to create a 'Booking' model and migration for this.
+
+                if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Please log in to book a session.'], 401);
+        }
+
+        Booking::create([
+            'student_id' => Auth::id() ?? 114,
+            'educator_id' => $request->educator_id,
+            'date' => $request->date,
+            'time' => $request->time,
+            'duration' => $request->duration,
+            'subject' => $request->subject,
+            'message' => $request->message,
+            'status' => 'pending',
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Session booked successfully!']);
+    }
 }
+
