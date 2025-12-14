@@ -20,7 +20,7 @@ class ChatMessageController extends Controller
             ->with(['user1', 'user2'])
             ->get();
 
-        $chatId = request('chat') ?? $chats[0]->id;
+        $chatId = request('chat') ?? isset($chats[0]->id) ? $chats[0]->id : null;
 
         return view('chats', compact('chats', 'chatId'));
     }
