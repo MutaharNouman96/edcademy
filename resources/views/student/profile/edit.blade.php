@@ -136,14 +136,9 @@
                                                 <small class="text-muted d-block">Select your avatar</small>
 
                                                 <div class="avatar-selection-grid mt-2 d-flex flex-wrap justify-content-center">
-                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=A" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=A" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 1">
-                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=B" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=B" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 2">
-                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=C" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=C" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 3">
-                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=D" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=D" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 4">
-                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=E" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=E" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 5">
-                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=F" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=F" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 6">
-                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=G" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=G" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 7">
-                                                    <img width="50px" height="50px" src="https://placehold.co/50x50/FF8C5A/white?text=H" data-avatar-url="https://placehold.co/50x50/FF8C5A/white?text=H" class="avatar-option img-fluid rounded-circle m-1" alt="Avatar 8">
+                                                    @foreach ($avatars as $a)
+                                                        <img width="50px" height="50px" src="{{ $a->path }}" data-avatar-url="{{ $a->path }}" class="avatar-option img-fluid rounded-circle m-1" alt="{{ $a->name }}">
+                                                    @endforeach
                                                 </div>
                                                 <input type="hidden" id="selectedAvatar" name="avatar"
                                                        value="{{ old('avatar', $user->profile_picture ?? '') }}">
@@ -174,7 +169,7 @@
                                             <div class="col-sm-9">
                                             <label class="col-form-label">Bio</label>
                                                 <textarea id="bio" class="form-control" rows="3" maxlength="250"
-                                                    placeholder="Short bio — what you'd like teachers & peers to know.">{{ $student_profile->bio }}</textarea>
+                                                    placeholder="Short bio — what you'd like teachers & peers to know.">{{ $student_profile->bio ?? '' }}</textarea>
                                                 <small class="text-muted">Shown on your profile. Max 250
                                                     characters.</small>
                                             </div>
@@ -447,7 +442,7 @@
                     const avatarUrl = option.dataset.avatarUrl;
                     avatarPreview.src = avatarUrl;
                     selectedAvatarInput.value = avatarUrl;
-                    // showToast('Avatar selected', 'info');
+                     console.log('Avatar selected', 'info');
 
                     // Make AJAX call to save avatar
                     fetch('{{ route('api.student.profile.update-avatar') }}', {
