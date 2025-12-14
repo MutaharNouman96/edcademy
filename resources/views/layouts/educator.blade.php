@@ -85,9 +85,7 @@
                             href="{{ route('educator.sessions.index') }}"><i class="bi bi-calendar3 me-2"></i>
                             Sessions/Bookings</a>
                         <hr>
-                        <a class="nav-link @if (request()->is('educator/payments*')) active @endif"
-                            href="{{ route('educator.payments.index') }}"><i
-                                class="bi bi-credit-card-2-front me-2"></i> Payments</a>
+                       
                         <a class="nav-link @if (request()->is('educator/payouts')) active @endif"
                             href="{{ route('educator.payouts.index') }}"><i class="bi bi-bank me-2"></i> Payouts</a>
                         <a class="nav-link @if (request()->is('educator/earnings*')) active @endif"
