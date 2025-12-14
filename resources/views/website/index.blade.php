@@ -4,14 +4,14 @@
     <section class="glass-landing--hero">
         <div class="container glass-landing--content">
             <div class="row">
-                <div class="col-lg-7 col-md-12">
+                <div class="col-12">
                     <h1 class="glass-landing--main-title">
                         Learn.
                         Create.
                         Share.
                     </h1>
                     <p class="glass-landing--subtitle">
-                        Follow your favorite tutors, buy videos, worksheets, or complete
+                        Follow your favorite educators, buy videos, worksheets, or complete
                         bundles - all in one place.
                     </p>
                     <div class="glass-landing--btn-group">
@@ -30,129 +30,84 @@
                         <button class="btn glass-landing--tab-btn active">Videos</button>
                         <button class="btn glass-landing--tab-btn">Worksheets</button>
                         <button class="btn glass-landing--tab-btn">Bundles</button>
-                        <button class="btn glass-landing--tab-btn">Tutors</button>
+                        <button class="btn glass-landing--tab-btn">Educators</button>
                     </div>
+                </div>
+                <div class="col-lg-8 col-md-12">
+
 
                     <!-- Cards -->
                     <div class="row g-3">
-
-
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                            <div class="glass-landing--card">
-                                <div style="position: relative">
-                                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-                                        alt="Algebra" class="glass-landing--card-img" />
-                                    <div class="glass-landing--play-icon">
-                                        <i class="fas fa-play"></i>
-                                    </div>
-                                </div>
-                                <div class="glass-landing--card-body">
-                                    <h3 class="glass-landing--card-title">
-                                        Algebra Video Lesson
-                                    </h3>
-                                    <div class="glass-landing--card-price">$3.99</div>
-                                    <div class="glass-landing--card-meta">
-                                        <div>
-                                            <span class="glass-landing--stars">★</span>
-                                            <span class="glass-landing--Educator-name">Davty. L</span>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-secondary">
-                                            Follow
-                                        </button>
-                                    </div>
-                                    <div class="glass-landing--card-meta" style="border-top: none; padding-top: 5px">
-                                        <div>
-                                            <span class="glass-landing--stars">★★★</span>
-                                            <span style="color: #9ca3af">46</span>
+                        @foreach ($bestReviewedCourses as $course)
+                            <div class="col-lg-4 col-md-6 col-sm-12">
+                                <div class="glass-landing--card">
+                                    <div style="position: relative">
+                                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+                                            alt="Algebra" class="glass-landing--card-img" />
+                                        <div class="glass-landing--play-icon">
+                                            <i class="fas fa-play"></i>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                            <div class="glass-landing--card">
-                                <div style="position: relative">
-                                    <img src="https://images.unsplash.com/photo-1516534775068-ba3e7458af70?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-                                        alt="Algebra" class="glass-landing--card-img" />
-                                    <div class="glass-landing--play-icon">
-                                        <i class="fas fa-play"></i>
-                                    </div>
-                                </div>
-                                <div class="glass-landing--card-body">
-                                    <h3 class="glass-landing--card-title">
-                                        Algebra Video Lesson
-                                    </h3>
-                                    <div class="glass-landing--card-price">$3.99</div>
-                                    <div class="glass-landing--card-meta">
-                                        <div>
-                                            <span class="glass-landing--stars">★</span>
-                                            <span class="glass-landing--Educator-name">Davty. L</span>
+                                    <div class="glass-landing--card-body">
+                                        <h3 class="glass-landing--card-title">
+                                            {{ $course->title }}
+                                        </h3>
+                                        <div class="glass-landing--card-price">$ {{ $course->price }}</div>
+                                        <div class="glass-landing--card-meta">
+                                            <div>
+                                                <span class="glass-landing--stars">★</span>
+                                                <span class="glass-landing--Educator-name text-dark">
+                                                    {{ $course->educator->full_name }}
+                                                </span>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                Follow
+                                            </button>
                                         </div>
-                                        <button class="btn btn-sm btn-outline-secondary">
-                                            Follow
-                                        </button>
-                                    </div>
-                                    <div class="glass-landing--card-meta" style="border-top: none; padding-top: 5px">
-                                        <div>
-                                            <span class="glass-landing--stars">★★★</span>
-                                            <span style="color: #9ca3af">46</span>
+                                        <div class="glass-landing--card-meta"
+                                            style="border-top: none; padding-top: 5px">
+                                            <div>
+                                                <span class="glass-landing--stars">★★★</span>
+                                                <span style="color: #9ca3af">
+                                                    {{ $course->reviews->count() }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        @endforeach
 
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                            <div class="glass-landing--card">
-                                <div style="position: relative">
-                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-                                        alt="Algebra" class="glass-landing--card-img" />
-                                    <div class="glass-landing--play-icon">
-                                        <i class="fas fa-play"></i>
-                                    </div>
-                                </div>
-                                <div class="glass-landing--card-body">
-                                    <h3 class="glass-landing--card-title">
-                                        Algebra Video Lesson
-                                    </h3>
-                                    <div class="glass-landing--card-price">$3.99</div>
-                                    <div class="glass-landing--card-meta">
-                                        <div>
-                                            <span class="glass-landing--stars">★</span>
-                                            <span class="glass-landing--Educator-name">Davty. L</span>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-secondary">
-                                            Follow
-                                        </button>
-                                    </div>
-                                    <div class="glass-landing--card-meta" style="border-top: none; padding-top: 5px">
-                                        <div>
-                                            <span class="glass-landing--stars">★★★</span>
-                                            <span style="color: #9ca3af">46</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 
                 <!-- Sidebar -->
-                <div class="col-lg-5 col-md-12" id="glass-hero-sidebar">
+                <div class="col-lg-4 col-md-12" id="glass-hero-sidebar">
 
                     <div class="glass-landing--spotlight">
                         <h3 class="glass-landing--spotlight-title">Educator Spotlight</h3>
-                        <div class="glass-landing--Educator-profile">
-                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
-                                alt="Jessica R." height="100" class="glass-landing--Educator-avatar" />
-                            <div class="glass-landing--Educator-info">
-                                <h4>Jessica R.</h4>
-                                <p>Science</p>
-                                <div class="glass-landing--stars">★★★★★</div>
-                            </div>
+                        <div class="row">
+                            @foreach ($featuredEducators as $educator)
+                                <div class="glass-landing--educator-profile col-6">
+                                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
+                                        alt="Jessica R." height="100" class="glass-landing--Educator-avatar" />
+                                    <div class="glass-landing--Educator-info">
+                                        <h4>{{ $educator->full_name }}</h4>
+                                        <div>
+                                            {{ $educator->educatorProfile->primary_subject ?? '' }}
+                                        </div>
+                                        <div class="glass-landing--stars">
+                                            ★★★★★
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
-                        <button class="btn glass-landing--follow-btn">Follow</button>
+
+                        <a href="{{ route('web.educators.index') }}" class="btn glass-landing--follow-btn">
+                            Browse more
+                        </a>
                     </div>
 
 
@@ -194,7 +149,7 @@
                         </div>
                         <h3>Live Tutoring</h3>
                         <p>
-                            Book one-on-one sessions with amazing tutors! Get help exactly
+                            Book one-on-one sessions with amazing educators! Get help exactly
                             when you need it with live video sessions.
                         </p>
                     </div>
@@ -276,181 +231,40 @@
             </div>
 
             <div class="row">
-                <div class="col-md-4">
-                    <div class="course-card">
-                        <div class="course-img"
-                            style="
-                  background-image: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600');
-                ">
-                            <div class="course-badge">Popular</div>
-                        </div>
-                        <div class="course-body">
-                            <h4 class="course-title">Math Magic: Algebra Made Easy</h4>
-                            <p>
-                                Master algebra with fun examples and interactive quizzes.
-                                Perfect for grades 7-10!
-                            </p>
-                            <div class="course-meta">
-                                <span><i class="fas fa-clock"></i> 12 hours</span>
-                                <span><i class="fas fa-star"></i> 4.9 (234)</span>
+                @foreach ($trendingCourses as $course)
+                    <div class="col-md-4">
+                        <div class="course-card">
+                            <div class="course-img"
+                                style=" background-image: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600');  ">
+                                <div class="course-badge">Popular</div>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="course-price">$29</span>
-                                <a href="#" class="btn btn-sm"
-                                    style="background: var(--primary-cyan); color: white">Enroll Now</a>
+                            <div class="course-body">
+                                <h4 class="course-title">
+                                    {{ $course->title }}
+                                </h4>
+                                <p>
+                                    {{ Str::limit($course->description, 100) }}
+                                </p>
+                                <div class="course-meta">
+                                    <span><i class="fas fa-clock"></i>
+                                        {{ $course->duration ?? '–' }}</span>
+                                    <span><i class="fas fa-star"></i>
+                                        {{ $course->reviews->avg('rating') ?? '–' }}
+                                        ({{ $course->reviews->count() ?? '–' }})
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="course-price">${{ number_format($course->price, 2) }}</span>
+                                    <a href="#" class="btn btn-sm"
+                                        style="background: var(--primary-cyan); color: white">Enroll Now</a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                @endforeach
 
-                <div class="col-md-4">
-                    <div class="course-card">
-                        <div class="course-img"
-                            style="
-                  background-image: url('https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600');
-                ">
-                            <div class="course-badge" style="background: var(--accent-purple)">
-                                New
-                            </div>
-                        </div>
-                        <div class="course-body">
-                            <h4 class="course-title">Science Explorers: Chemistry Fun</h4>
-                            <p>
-                                Discover the amazing world of chemistry through cool
-                                experiments and videos!
-                            </p>
-                            <div class="course-meta">
-                                <span><i class="fas fa-clock"></i> 10 hours</span>
-                                <span><i class="fas fa-star"></i> 5.0 (189)</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="course-price">$35</span>
-                                <a href="#" class="btn btn-sm"
-                                    style="background: var(--primary-cyan); color: white">Enroll Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="col-md-4">
-                    <div class="course-card">
-                        <div class="course-img"
-                            style="
-                  background-image: url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600');
-                ">
-                            <div class="course-badge"
-                                style="
-                    background: var(--accent-yellow);
-                    color: var(--dark-cyan);
-                  ">
-                                Bestseller
-                            </div>
-                        </div>
-                        <div class="course-body">
-                            <h4 class="course-title">Creative Writing Workshop</h4>
-                            <p>
-                                Unleash your imagination! Learn to write amazing stories,
-                                poems, and essays.
-                            </p>
-                            <div class="course-meta">
-                                <span><i class="fas fa-clock"></i> 8 hours</span>
-                                <span><i class="fas fa-star"></i> 4.8 (312)</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="course-price">$25</span>
-                                <a href="#" class="btn btn-sm"
-                                    style="background: var(--primary-cyan); color: white">Enroll Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="col-md-4">
-                    <div class="course-card">
-                        <div class="course-img"
-                            style="
-                  background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600');
-                ">
-                            <div class="course-badge" style="background: #4caf50">
-                                Trending
-                            </div>
-                        </div>
-                        <div class="course-body">
-                            <h4 class="course-title">Coding for Beginners</h4>
-                            <p>
-                                Start your coding journey! Learn Python and create your own
-                                games and apps.
-                            </p>
-                            <div class="course-meta">
-                                <span><i class="fas fa-clock"></i> 15 hours</span>
-                                <span><i class="fas fa-star"></i> 4.9 (456)</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="course-price">$40</span>
-                                <a href="#" class="btn btn-sm"
-                                    style="background: var(--primary-cyan); color: white">Enroll Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="course-card">
-                        <div class="course-img"
-                            style="
-                  background-image: url('https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=600');
-                ">
-                            <div class="course-badge" style="background: #ff9800">
-                                Featured
-                            </div>
-                        </div>
-                        <div class="course-body">
-                            <h4 class="course-title">World History Adventures</h4>
-                            <p>
-                                Travel through time! Explore ancient civilizations and major
-                                historical events.
-                            </p>
-                            <div class="course-meta">
-                                <span><i class="fas fa-clock"></i> 14 hours</span>
-                                <span><i class="fas fa-star"></i> 4.7 (267)</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="course-price">$30</span>
-                                <a href="#" class="btn btn-sm"
-                                    style="background: var(--primary-cyan); color: white">Enroll Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="course-card">
-                        <div class="course-img"
-                            style="
-                  background-image: url('https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600');
-                ">
-                            <div class="course-badge" style="background: var(--accent-pink)">
-                                Hot
-                            </div>
-                        </div>
-                        <div class="course-body">
-                            <h4 class="course-title">Art & Design Masterclass</h4>
-                            <p>
-                                Express yourself through art! Learn drawing, painting, and
-                                digital design techniques.
-                            </p>
-                            <div class="course-meta">
-                                <span><i class="fas fa-clock"></i> 11 hours</span>
-                                <span><i class="fas fa-star"></i> 5.0 (198)</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="course-price">$32</span>
-                                <a href="#" class="btn btn-sm"
-                                    style="background: var(--primary-cyan); color: white">Enroll Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -514,7 +328,7 @@
                         <h4>Learn & Practice</h4>
                         <p>
                             Watch videos, take quizzes, and practice! You can even book live
-                            sessions with tutors.
+                            sessions with educators.
                         </p>
                     </div>
                 </div>
@@ -708,8 +522,10 @@
                 Join thousands of students already crushing their goals on Ed-Cademy!
             </p>
             <div class="mt-4">
-                <a href="#" class="btn btn-custom btn-primary-custom" style="margin: 10px">Sign Up Free</a>
-                <a href="#" class="btn btn-custom btn-secondary-custom" style="margin: 10px">Browse Courses</a>
+                <a href="{{ route('student.signup') }}" class="btn btn-custom btn-primary-custom"
+                    style="margin: 10px">Sign Up Free</a>
+                <a href="{{ route('web.courses') }}" class="btn btn-custom btn-secondary-custom"
+                    style="margin: 10px">Browse Courses</a>
             </div>
             <p class="mt-4" style="font-size: 0.9rem; opacity: 0.8">
                 No credit card required • Free forever • Cancel anytime
@@ -728,7 +544,7 @@
                 font-weight: 800;
                 color: var(--primary-cyan);
               ">
-                        50K+
+                        {{ $totalStudents }}+
                     </div>
                     <p style="font-size: 1.1rem; color: #666">Happy Students</p>
                 </div>
@@ -739,7 +555,7 @@
                 font-weight: 800;
                 color: var(--accent-purple);
               ">
-                        1,200+
+                        {{ $availableCourses }}+
                     </div>
                     <p style="font-size: 1.1rem; color: #666">Courses Available</p>
                 </div>
@@ -750,9 +566,9 @@
                 font-weight: 800;
                 color: var(--accent-pink);
               ">
-                        500+
+                        {{ $totalEducators }}+
                     </div>
-                    <p style="font-size: 1.1rem; color: #666">Expert Tutors</p>
+                    <p style="font-size: 1.1rem; color: #666">Expert Educators</p>
                 </div>
                 <div class="col-md-3 mb-4">
                     <div
@@ -762,7 +578,7 @@
                 color: var(--accent-yellow);
                 text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
               ">
-                        4.9★
+                        {{ number_format($averageRating, 1) }}★
                     </div>
                     <p style="font-size: 1.1rem; color: #666">Average Rating</p>
                 </div>
@@ -788,7 +604,7 @@
 
             <div class="row">
                 <div class="col-6 col-md-3 mb-4">
-                    <a href="#" style="text-decoration: none">
+                    <a href="{{ route('web.courses', ['course=mathematics']) }}" style="text-decoration: none">
                         <div class="feature-card" style="padding: 30px 20px">
                             <div class="feature-icon" style="width: 60px; height: 60px; margin-bottom: 15px">
                                 <i class="fas fa-calculator"></i>
@@ -801,7 +617,7 @@
                 </div>
 
                 <div class="col-6 col-md-3 mb-4">
-                    <a href="#" style="text-decoration: none">
+                    <a href="{{ route('web.courses', ['course=science']) }}" style="text-decoration: none">
                         <div class="feature-card" style="padding: 30px 20px">
                             <div class="feature-icon"
                                 style="
@@ -820,7 +636,8 @@
                 </div>
 
                 <div class="col-6 col-md-3 mb-4">
-                    <a href="#" style="text-decoration: none">
+                    <a href="{{ route('web.courses', parameters: ['course=language']) }}"
+                        style="text-decoration: none">
                         <div class="feature-card" style="padding: 30px 20px">
                             <div class="feature-icon"
                                 style="
@@ -839,7 +656,7 @@
                 </div>
 
                 <div class="col-6 col-md-3 mb-4">
-                    <a href="#" style="text-decoration: none">
+                    <a href="{{ route('web.courses', ['course=history']) }}" style="text-decoration: none">
                         <div class="feature-card" style="padding: 30px 20px">
                             <div class="feature-icon"
                                 style="
@@ -858,7 +675,7 @@
                 </div>
 
                 <div class="col-6 col-md-3 mb-4">
-                    <a href="#" style="text-decoration: none">
+                    <a href="{{ route('web.courses', ['course=arts']) }}" style="text-decoration: none">
                         <div class="feature-card" style="padding: 30px 20px">
                             <div class="feature-icon"
                                 style="
@@ -877,7 +694,7 @@
                 </div>
 
                 <div class="col-6 col-md-3 mb-4">
-                    <a href="#" style="text-decoration: none">
+                    <a href="{{ route('web.courses', ['course=programming']) }}" style="text-decoration: none">
                         <div class="feature-card" style="padding: 30px 20px">
                             <div class="feature-icon"
                                 style="
@@ -896,7 +713,7 @@
                 </div>
 
                 <div class="col-6 col-md-3 mb-4">
-                    <a href="#" style="text-decoration: none">
+                    <a href="{{ route('web.courses', ['course=music']) }}" style="text-decoration: none">
                         <div class="feature-card" style="padding: 30px 20px">
                             <div class="feature-icon"
                                 style="
@@ -913,7 +730,7 @@
                 </div>
 
                 <div class="col-6 col-md-3 mb-4">
-                    <a href="#" style="text-decoration: none">
+                    <a href="{{ route('web.courses', ['course=literature']) }}" style="text-decoration: none">
                         <div class="feature-card" style="padding: 30px 20px">
                             <div class="feature-icon"
                                 style="
@@ -933,7 +750,7 @@
             </div>
 
             <div class="text-center mt-4">
-                <a href="#" class="btn btn-lg"
+                <a href="{{ route('web.courses') }}" class="btn btn-lg"
                     style="
               background: var(--primary-cyan);
               color: white;
@@ -1011,8 +828,9 @@
                 border-radius: 50px;
                 font-weight: 700;
                 box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-              ">Become
-                        an Educator Today</a>
+              ">
+                        Become an Educator Today
+                    </a>
                 </div>
                 <div class="col-md-6">
                     <div
@@ -1106,7 +924,7 @@
                             </div>
                         </div>
                         <p style="color: #666; font-size: 0.95rem; margin-top: 20px">
-                            <i class="fas fa-info-circle"></i> All tutors are verified and
+                            <i class="fas fa-info-circle"></i> All educators are verified and
                             background-checked for student safety.
                         </p>
                     </div>

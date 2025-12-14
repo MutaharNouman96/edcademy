@@ -493,4 +493,10 @@ class StudentDashboardController extends Controller
             ]
         ]);
     }
+
+
+    public function messages()
+    {
+        return view('student.messages');
+    }
 }

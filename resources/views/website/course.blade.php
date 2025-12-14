@@ -2,42 +2,54 @@
     <!-- Course Hero -->
     <div class="course-hero">
         <div class="container hero-content">
-            <span class="course-category">MATHEMATICS</span>
-            <h1 class="course-title">
-                {{ $course->title }}
-            </h1>
-            <p class="lead">Master calculus from limits to integrals with comprehensive lessons, practice problems, and
-                real-world applications</p>
+
+            <span class="course-category">{{ $course->category->name }}</span>
+
+            <h1 class="course-title">{{ $course->title }}</h1>
+
+            <p class="lead">{{ $course->description }}</p>
+
             <div class="course-meta">
                 <div class="meta-item">
                     <div class="rating-stars">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= floor($course->reviews_avg_rating))
+                                <i class="fas fa-star"></i>
+                            @elseif($i - $course->reviews_avg_rating < 1)
+                                <i class="fas fa-star-half-alt"></i>
+                            @else
+                                <i class="far fa-star"></i>
+                            @endif
+                        @endfor
                     </div>
-                    <strong>4.9</strong> (145 reviews)
+
+                    <strong>{{ number_format($course->reviews_avg_rating, 1) }}</strong>
+                    ({{ $course->reviews_count }} reviews)
                 </div>
+
                 <div class="meta-item">
                     <i class="fas fa-user-graduate"></i>
-                    <span>145 students enrolled</span>
+                    <span>{{ $studentsEnrolled }} students enrolled</span>
                 </div>
+
                 <div class="meta-item">
                     <i class="fas fa-clock"></i>
-                    <span>25 hours total</span>
+                    <span>{{ $course->duration }} hrs</span>
                 </div>
+
                 <div class="meta-item">
                     <i class="fas fa-signal"></i>
-                    <span>Intermediate Level</span>
+                    <span>{{ $course->level }}</span>
                 </div>
+
                 <div class="meta-item">
                     <i class="fas fa-sync-alt"></i>
-                    <span>Updated Nov 2025</span>
+                    <span>Updated {{ $course->updated_at->format('M Y') }}</span>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Main Content -->
     <div class="container mt-4">
@@ -47,487 +59,172 @@
                 <!-- Course Curriculum -->
                 <div class="content-card">
                     <h3 class="section-title">
-                        <i class="fas fa-list"></i>
-                        Course Curriculum
+                        <i class="fas fa-list"></i> Course Curriculum
                     </h3>
-                    <p class="text-muted mb-4">8 sections • 48 lessons • 25h 30m total length</p>
 
-                    <!-- Section 1 -->
-                    <div class="course-section">
-                        <div class="section-header" onclick="toggleSection(this)">
-                            <div class="section-info">
-                                <h5>
-                                    <i class="fas fa-chevron-down"></i>
-                                    Section 1: Introduction to Calculus
-                                </h5>
-                                <div class="section-meta">
-                                    <span>6 lessons • 2h 15m</span>
+                    @foreach ($course->sections as $section)
+                        <div class="course-section">
+                            <div class="section-header {{ $loop->first ? 'active' : '' }}"
+                                onclick="toggleSection(this)">
+                                <div class="section-info">
+                                    <h5>
+                                        <i class="fas fa-chevron-down"></i>
+                                        {{ $section->title }}
+                                    </h5>
+                                    <div class="section-meta">
+                                        <span>{{ $section->lessons->count() }} lessons</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="section-price">
-                                <div class="section-total">$12.99</div>
-                                <div class="section-items">or buy individually</div>
+
+                            <div class="section-content {{ $loop->first ? 'show' : '' }}">
+
+                                @foreach ($section->lessons as $lesson)
+                                    <div class="lesson-item">
+
+                                        <div class="lesson-info">
+                                            <div
+                                                class="lesson-icon {{ $lesson->type == 'video' ? 'icon-video' : ($lesson->type == 'pdf' ? 'icon-pdf' : 'icon-sheet') }}">
+                                                @if ($lesson->type == 'video')
+                                                    <i class="fas fa-play"></i>
+                                                @elseif($lesson->type == 'pdf')
+                                                    <i class="fas fa-file-pdf"></i>
+                                                @else
+                                                    <i class="fas fa-file-alt"></i>
+                                                @endif
+                                            </div>
+
+                                            <div class="lesson-details">
+                                                <div class="lesson-title">{{ $lesson->title }}</div>
+                                                <div class="lesson-meta">
+                                                    <span>
+                                                        <i class="far fa-clock"></i> {{ $lesson->duration }}
+                                                    </span>
+
+                                                    <span>
+                                                        @if ($lesson->type == 'video')
+                                                            <i class="fas fa-video"></i> Video
+                                                        @elseif($lesson->type == 'pdf')
+                                                            <i class="fas fa-file-pdf"></i> PDF Document
+                                                        @else
+                                                            <i class="fas fa-tasks"></i> Worksheet
+                                                        @endif
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="lesson-price">
+                                            @if ($lesson->is_preview)
+                                                <span class="preview-badge">PREVIEW</span>
+                                            @elseif($lesson->price > 0)
+                                                <span class="item-price">${{ $lesson->price }}</span>
+                                            @else
+                                                <span class="free-badge">FREE</span>
+                                            @endif
+                                        </div>
+
+                                    </div>
+                                @endforeach
+
                             </div>
                         </div>
-                        <div class="section-content">
-                            <!-- Video Lesson -->
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-video">
-                                        <i class="fas fa-play"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">What is Calculus?</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="far fa-clock"></i> 12:34</span>
-                                            <span><i class="fas fa-video"></i> Video</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="preview-badge">PREVIEW</span>
-                                </div>
-                            </div>
+                    @endforeach
 
-                            <!-- PDF Lesson -->
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-pdf">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Calculus Fundamentals Guide</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="fas fa-file-pdf"></i> PDF Document</span>
-                                            <span><i class="fas fa-download"></i> Downloadable</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="item-price">$2.99</span>
-                                </div>
-                            </div>
-
-                            <!-- Worksheet -->
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-sheet">
-                                        <i class="fas fa-file-alt"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Practice Problems - Set 1</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="fas fa-tasks"></i> Worksheet</span>
-                                            <span><i class="fas fa-calculator"></i> 20 problems</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="item-price">$1.99</span>
-                                </div>
-                            </div>
-
-                            <!-- Video Lesson 2 -->
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-video">
-                                        <i class="fas fa-play"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Understanding Limits</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="far fa-clock"></i> 18:45</span>
-                                            <span><i class="fas fa-video"></i> Video</span>
-                                            <span><i class="fas fa-closed-captioning"></i> Subtitles</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="item-price">$3.99</span>
-                                </div>
-                            </div>
-
-                            <!-- Additional Materials -->
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-material">
-                                        <i class="fas fa-folder-open"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Reference Materials & Resources</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="fas fa-link"></i> External Resources</span>
-                                            <span><i class="fas fa-book"></i> Reading list</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="free-badge">FREE</span>
-                                </div>
-                            </div>
-
-                            <!-- Quiz -->
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-quiz">
-                                        <i class="fas fa-clipboard-check"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Section 1 Quiz</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="fas fa-question-circle"></i> 10 questions</span>
-                                            <span><i class="fas fa-clock"></i> 15 minutes</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="free-badge">FREE</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 2 -->
-                    <div class="course-section">
-                        <div class="section-header" onclick="toggleSection(this)">
-                            <div class="section-info">
-                                <h5>
-                                    <i class="fas fa-chevron-down"></i>
-                                    Section 2: Derivatives
-                                </h5>
-                                <div class="section-meta">
-                                    <span>8 lessons • 3h 45m</span>
-                                </div>
-                            </div>
-                            <div class="section-price">
-                                <div class="section-total">$15.99</div>
-                                <div class="section-items">or buy individually</div>
-                            </div>
-                        </div>
-                        <div class="section-content">
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-video">
-                                        <i class="fas fa-play"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Introduction to Derivatives</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="far fa-clock"></i> 22:15</span>
-                                            <span><i class="fas fa-video"></i> HD Video</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="item-price">$4.99</span>
-                                </div>
-                            </div>
-
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-video">
-                                        <i class="fas fa-play"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Power Rule & Chain Rule</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="far fa-clock"></i> 28:30</span>
-                                            <span><i class="fas fa-video"></i> HD Video</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="item-price">$4.99</span>
-                                </div>
-                            </div>
-
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-sheet">
-                                        <i class="fas fa-file-alt"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Derivative Practice Problems</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="fas fa-tasks"></i> Worksheet</span>
-                                            <span><i class="fas fa-calculator"></i> 35 problems</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="item-price">$2.99</span>
-                                </div>
-                            </div>
-
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-pdf">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Derivative Rules Cheat Sheet</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="fas fa-file-pdf"></i> PDF</span>
-                                            <span><i class="fas fa-print"></i> Printable</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="item-price">$1.99</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 3 -->
-                    <div class="course-section">
-                        <div class="section-header" onclick="toggleSection(this)">
-                            <div class="section-info">
-                                <h5>
-                                    <i class="fas fa-chevron-down"></i>
-                                    Section 3: Applications of Derivatives
-                                </h5>
-                                <div class="section-meta">
-                                    <span>7 lessons • 3h 20m</span>
-                                </div>
-                            </div>
-                            <div class="section-price">
-                                <div class="section-total">$14.99</div>
-                                <div class="section-items">or buy individually</div>
-                            </div>
-                        </div>
-                        <div class="section-content">
-                            <div class="lesson-item">
-                                <div class="lesson-info">
-                                    <div class="lesson-icon icon-video">
-                                        <i class="fas fa-play"></i>
-                                    </div>
-                                    <div class="lesson-details">
-                                        <div class="lesson-title">Optimization Problems</div>
-                                        <div class="lesson-meta">
-                                            <span><i class="far fa-clock"></i> 25:40</span>
-                                            <span><i class="fas fa-video"></i> Video</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="lesson-price">
-                                    <span class="item-price">$4.99</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 4 -->
-                    <div class="course-section">
-                        <div class="section-header" onclick="toggleSection(this)">
-                            <div class="section-info">
-                                <h5>
-                                    <i class="fas fa-chevron-down"></i>
-                                    Section 4: Integrals
-                                </h5>
-                                <div class="section-meta">
-                                    <span>9 lessons • 4h 10m</span>
-                                </div>
-                            </div>
-                            <div class="section-price">
-                                <div class="section-total">$16.99</div>
-                                <div class="section-items">or buy individually</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 5 -->
-                    <div class="course-section">
-                        <div class="section-header" onclick="toggleSection(this)">
-                            <div class="section-info">
-                                <h5>
-                                    <i class="fas fa-chevron-down"></i>
-                                    Section 5: Integration Techniques
-                                </h5>
-                                <div class="section-meta">
-                                    <span>6 lessons • 2h 50m</span>
-                                </div>
-                            </div>
-                            <div class="section-price">
-                                <div class="section-total">$13.99</div>
-                                <div class="section-items">or buy individually</div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+
 
                 <!-- Instructor Profile -->
                 <div class="educator-card">
-                    <h3 class="section-title">
-                        <i class="fas fa-user-tie"></i>
-                        About the Instructor
-                    </h3>
+                    <h3 class="section-title"><i class="fas fa-user-tie"></i> About the Instructor</h3>
+
                     <div class="educator-profile">
                         <div class="educator-avatar">
-                            <i class="fas fa-user-tie"></i>
+                            <img src="{{ $course->educator->profile_photo_url }}"
+                                style="width:70px; height:70px; border-radius:50%;">
                         </div>
+
                         <div class="educator-info">
-                            <h5>Dr. Sarah Johnson</h5>
-                            <p class="educator-subject">Mathematics & Physics Specialist</p>
+                            <h5>{{ $course->educator->name }}</h5>
+                            <p class="educator-subject">{{ $course->educator->expertise }}</p>
+
                             <div class="educator-stats">
-                                <span><i class="fas fa-star"></i> 4.9 Rating</span>
-                                <span><i class="fas fa-user-graduate"></i> 450+ Students</span>
-                                <span><i class="fas fa-play-circle"></i> 12 Courses</span>
+                                <span><i class="fas fa-star"></i> {{ number_format($course->reviews_avg_rating, 1) }}
+                                    Rating</span>
+                                <span><i class="fas fa-user-graduate"></i> {{ $studentsEnrolled }} Students</span>
+                                <span><i class="fas fa-play-circle"></i> {{ $moreCourses->count() + 1 }} Courses</span>
                             </div>
                         </div>
                     </div>
-                    <p style="color: #666; line-height: 1.8; margin-bottom: 15px;">
-                        PhD in Applied Mathematics from MIT with over 5 years of teaching experience. Passionate about
-                        making complex mathematical concepts accessible and engaging through hands-on learning and
-                        real-world applications.
+
+                    <p class="text-muted">
+                        {{ $course->educator->bio }}
                     </p>
-                    <button class="btn btn-outline-primary"
-                        style="border-color: var(--primary-cyan); color: var(--primary-cyan); padding: 10px 25px; border-radius: 10px; font-weight: 600;"
-                        onclick="viewProfile()">
-                        <i class="fas fa-user me-2"></i>View Full Profile
-                    </button>
                 </div>
+
 
                 <!-- More Courses -->
                 <div class="content-card">
-                    <h3 class="section-title">
-                        <i class="fas fa-graduation-cap"></i>
-                        More Courses by Dr. Sarah Johnson
-                    </h3>
+                    <h3 class="section-title"><i class="fas fa-graduation-cap"></i> More Courses by
+                        {{ $course->educator->name }}</h3>
+
                     <div class="row g-3">
-                        <!-- Related Course 1 -->
-                        <div class="col-md-6">
-                            <div class="related-course">
-                                <div class="related-thumb">
-                                    <i class="fas fa-atom"></i>
-                                    <span class="related-price">$79.99</span>
-                                </div>
-                                <div class="related-body">
-                                    <h6 class="related-title">Physics Fundamentals</h6>
-                                    <div class="related-meta">
-                                        <span><i class="fas fa-clock"></i> 20 hours</span>
-                                        <span><i class="fas fa-user-graduate"></i> 98 students</span>
+                        @foreach ($moreCourses as $rc)
+                            <div class="col-md-4">
+                                <a href="{{ route('web.course.show', $rc->slug) }}" class="related-course">
+                                    <div class="related-thumb rounded">
+                                        <img src="{{ asset('storage/' . $rc->thumbnail) }}" class="img-fluid">
+                                        <span class="related-price">${{ $rc->price }}</span>
                                     </div>
-                                    <div class="rating-stars" style="margin-top: 8px; font-size: 0.85rem;">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <span style="color: #666; margin-left: 5px;">5.0</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Related Course 2 -->
-                        <div class="col-md-6">
-                            <div class="related-course">
-                                <div class="related-thumb"
-                                    style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                                    <i class="fas fa-square-root-alt"></i>
-                                    <span class="related-price">$69.99</span>
-                                </div>
-                                <div class="related-body">
-                                    <h6 class="related-title">Linear Algebra Made Easy</h6>
-                                    <div class="related-meta">
-                                        <span><i class="fas fa-clock"></i> 18 hours</span>
-                                        <span><i class="fas fa-user-graduate"></i> 87 students</span>
+                                    <div class="related-body">
+                                        <h6 class="related-title">{{ $rc->title }}</h6>
+                                        <div class="related-meta">
+                                            <span><i class="fas fa-clock"></i> {{ $rc->duration }}</span>
+                                            <span><i class="fas fa-user-graduate"></i>
+                                                {{ $rc->coursePurchases->count() }}</span>
+                                        </div>
                                     </div>
-                                    <div class="rating-stars" style="margin-top: 8px; font-size: 0.85rem;">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star-half-alt"></i>
-                                        <span style="color: #666; margin-left: 5px;">4.8</span>
-                                    </div>
-                                </div>
+                                </a>
                             </div>
-                        </div>
-
-                        <!-- Related Course 3 -->
-                        <div class="col-md-6">
-                            <div class="related-course">
-                                <div class="related-thumb"
-                                    style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                                    <i class="fas fa-chart-line"></i>
-                                    <span class="related-price">$59.99</span>
-                                </div>
-                                <div class="related-body">
-                                    <h6 class="related-title">Statistics & Probability</h6>
-                                    <div class="related-meta">
-                                        <span><i class="fas fa-clock"></i> 15 hours</span>
-                                        <span><i class="fas fa-user-graduate"></i> 120 students</span>
-                                    </div>
-                                    <div class="rating-stars" style="margin-top: 8px; font-size: 0.85rem;">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star-half-alt"></i>
-                                        <span style="color: #666; margin-left: 5px;">4.7</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Related Course 4 -->
-                        <div class="col-md-6">
-                            <div class="related-course">
-                                <div class="related-thumb"
-                                    style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                                    <i class="fas fa-infinity"></i>
-                                    <span class="related-price">$74.99</span>
-                                </div>
-                                <div class="related-body">
-                                    <h6 class="related-title">Advanced Calculus II</h6>
-                                    <div class="related-meta">
-                                        <span><i class="fas fa-clock"></i> 22 hours</span>
-                                        <span><i class="fas fa-user-graduate"></i> 65 students</span>
-                                    </div>
-                                    <div class="rating-stars" style="margin-top: 8px; font-size: 0.85rem;">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <span style="color: #666; margin-left: 5px;">4.9</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
+
             </div>
 
             <!-- Right Column - Purchase Card -->
             <div class="col-lg-4">
                 <div class="purchase-card">
-                    <div class="course-preview-img">
-                        <div class="preview-play">
-                            <i class="fas fa-play"></i>
-                        </div>
+                    <div class="course-preview-img " style="cursor: pointer" data-bs-toggle="modal"
+                        data-bs-target="#previewModal">
+                        <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="">
                     </div>
 
                     <div class="price-section">
-                        <span class="current-price">$89.99</span>
-                        <span class="original-price">$179.99</span>
-                        <div>
-                            <span class="discount-badge">50% OFF - Limited Time</span>
-                        </div>
+                        <span class="current-price">${{ $course->price }}</span>
                     </div>
 
-                    <button class="buy-btn" onclick="buyNow()">
-                        <i class="fas fa-shopping-bag me-2"></i>Buy Now
-                    </button>
+                    <form action="{{ route('web.cart.addToCart') }}" method="post">
+                        @csrf
+                        <input type="hidden" name="item_id" value="{{ $course->id }}">
+                        <input type="hidden" name="model" value="App\Models\Course">
+                        <input type="hidden" name="price" value="{{ $course->price }}">
+                        <input type="hidden" name="quantity" value="{{ 1 }}">
+                    
+                        <button class="buy-btn" type="submit">
+                            <i class="fas fa-shopping-bag me-2"></i>Buy Now
+                        </button>
+                    </form>
+
+
                     <button class="cart-btn" onclick="addToCart()">
                         <i class="fas fa-cart-plus me-2"></i>Add to Cart
                     </button>
 
-                    <div style="text-align: center; margin: 15px 0; color: #666; font-size: 0.9rem;">
+                    {{-- <div style="text-align: center; margin: 15px 0; color: #666; font-size: 0.9rem;">
                         <i class="fas fa-clock me-1"></i> Sale ends in 2 days
-                    </div>
+                    </div> --}}
 
                     <ul class="includes-list">
                         <li>
@@ -536,7 +233,8 @@
                         </li>
                         <li>
                             <i class="fas fa-video"></i>
-                            <span>48 video lessons (25+ hours)</span>
+                            <span>{{ $course->lessons->where('type', 'video')->count() }} video lessons
+                                ({{ $course->duration }}+ hours)</span>
                         </li>
                         <li>
                             <i class="fas fa-file-pdf"></i>
@@ -598,7 +296,7 @@
                     <ul class="includes-list">
                         <li>
                             <i class="fas fa-signal"></i>
-                            <span><strong>Level:</strong> Intermediate</span>
+                            <span><strong>Level:</strong> {{ $course->level }}</span>
                         </li>
                         <li>
                             <i class="fas fa-language"></i>
@@ -610,7 +308,7 @@
                         </li>
                         <li>
                             <i class="fas fa-calendar-alt"></i>
-                            <span><strong>Last Updated:</strong> Nov 2025</span>
+                            <span><strong>Last Updated:</strong> {{ $course->updated_at->format('M Y') }}</span>
                         </li>
                     </ul>
                 </div>
@@ -632,6 +330,25 @@
                             <i class="fab fa-whatsapp"></i>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+        <br>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal fade " id="previewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-play-circle me-2"></i> Course Preview :
+                        {{ $course->title }}</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <video controls width="100%" height="315">
+                        <source src="{{ asset('storage/' . $freeVideo->preview_video) }}" type="video/mp4">
+                    </video>
                 </div>
             </div>
         </div>
@@ -671,17 +388,22 @@
             }
 
             // Buy now
-            function buyNow() {
-                alert(
-                    'Redirecting to checkout...\n\nComplete Calculus Mastery\nPrice: $89.99\n\nYou\'ll have instant access to all 48 lessons!'
-                    );
+            function buyNow(data) {
+
+                swal.fire({
+                    icon: 'info',
+                    title: 'Buy Now',
+                    text: 'You will be redirected to the checkout page.'
+                }).then(() => {
+                    window.location.href = '{{ route('web.cart.checkout') }}';
+                })
             }
 
             // Add to cart
             function addToCart() {
                 alert('Added to cart!\n\nComplete Calculus Mastery - $89.99\n\nView cart or continue shopping?');
 
-                window.location.href = '{{route("web.cart")}}';
+                window.location.href = '{{ route('web.cart') }}';
             }
 
             // View educator profile

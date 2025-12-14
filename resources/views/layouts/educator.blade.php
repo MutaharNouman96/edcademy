@@ -97,7 +97,7 @@
                         <a class="nav-link @if (request()->is('educator/reviews*')) active @endif"
                             href="{{ route('educator.reviews.index') }}"><i class="bi bi-star-half me-2"></i>
                             Reviews</a>
-                        <a class="nav-link" href="{{ route('educator.chat.index') }}"><i
+                        <a class="nav-link" href="{{ route('chat.index') }}"><i
                                 class="bi bi-chat-dots me-2"></i> Messages</a>
                         <a class="nav-link" href="#section-resources"><i class="bi bi-folder2-open me-2"></i>
                             Resources</a>

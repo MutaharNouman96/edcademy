@@ -17,7 +17,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="container">
+    <div class="container py-2">
         <!-- Filters Section -->
         <div class="filters-section">
             <div class="row">
@@ -139,7 +139,7 @@
                                     @endif
                                 </span>
 
-                                <a href="{{ route('web.course.show', $course->id) }}" class="enroll-btn">
+                                <a href="{{ route('web.course.show', $course->slug) }}" class="enroll-btn">
                                     Enroll Now
                                 </a>
                             </div>
@@ -197,13 +197,7 @@
             });
 
             // Enroll buttons
-            document.querySelectorAll('.enroll-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const courseTitle = this.closest('.course-body').querySelector('.course-title').textContent;
-                    alert('Enrolling in: ' + courseTitle);
-                    // Add your enrollment logic here
-                });
-            });
+          
         </script>
     @endpush
     @push('styles')
