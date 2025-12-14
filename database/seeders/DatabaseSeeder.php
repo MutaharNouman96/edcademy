@@ -22,7 +22,20 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            EducatorSeeder::class,
+            AllInOneDBSeeder::class,
+            ChatSeeder::class,
+            CourseReviewSeeder::class,
+            CoursePurchasesSeeder::class,
+            LessonVideoViewSeeder::class,
+
+            SessionAndScheduleSeeder::class,
+
+            PaymentSeeder::class,
+            // EarningSeeder::class,
+            // PayoutSeeder::class,
+
+            EarningPayoutSeeder::class,
+
         ]);
     }
 }

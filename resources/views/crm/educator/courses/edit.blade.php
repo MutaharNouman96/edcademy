@@ -638,7 +638,7 @@
             // ------- Section controls -------
             $('#btnAddSection').addEventListener('click', () => {
                 //ajax call to save course section
-                fetch("{{ url('/educator/courses/section/' . $course->id) }}", {
+                fetch("{{ url('/educator-panel/courses/section/' . $course->id) }}", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -723,7 +723,7 @@
             }
 
             function fetchSections() {
-                fetch('{{ url('/educator/course/get/sections/' . $course->id) }}', {
+                fetch('{{ url('/educator-panel/course/get/sections/' . $course->id) }}', {
                         method: "GET",
 
                         headers: {
@@ -1175,7 +1175,7 @@
 
                 // Send AJAX POST
                 try {
-                    const response = await fetch('{{ url('/educator/lessons/store') }}', {
+                    const response = await fetch('{{ url('/educator-panel/lessons/store') }}', {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1288,7 +1288,7 @@
 
                 // Send AJAX POST
                 try {
-                    const response = await fetch('{{ url('/educator/lessons/update/') }}/' + formLessonId, {
+                    const response = await fetch('{{ url('/educator-panel/lessons/update/') }}/' + formLessonId, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
