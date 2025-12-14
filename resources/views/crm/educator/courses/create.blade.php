@@ -104,7 +104,7 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
 
-                                <div class="form-check mt-2">
+                                <div class="form-check mt-2 d-none">
                                     <input class="form-check-input" type="checkbox" name="free" id="freeCourse"
                                         value="1" {{ old('free') ? 'checked' : '' }} />
                                     <label class="form-check-label" for="freeCourse">Free course</label>
@@ -114,7 +114,8 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select @error('status') is-invalid @enderror">
-                                    <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>Publish
+                                    <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>
+                                        Publish
                                         immediately</option>
                                     <option value="scheduled" {{ old('status') == 'scheduled' ? 'selected' : '' }}>
                                         Schedule publish</option>
@@ -164,7 +165,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-12">
+                            <div class="col-12 d-none">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="drip" id="drip"
                                         value="1" {{ old('drip') ? 'checked' : '' }} />
@@ -179,10 +180,9 @@
                         </form>
 
                     </div>
-                    <div @if(!isset($course))
-                        style="opacity: 0.5; pointer-events: none;"
-                        title="Save Course and add Lesson Details for each of the course sections."
-                    @endif>
+                    <div
+                        @if (!isset($course)) style="opacity: 0.5; pointer-events: none;"
+                        title="Save Course and add Lesson Details for each of the course sections." @endif>
                         <!-- Lesson Builder -->
                         <div class="card p-3">
                             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -234,7 +234,7 @@
                     width: 72px;
                     height: 48px;
                     background: #fff
-                      url('https://via.placeholder.com/72x48/ffffff/006b7d?text=TH')
+                      url('')
                       center/cover no-repeat;
                   ">
                                 </div>
@@ -244,7 +244,9 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <span class="summary-key">Price</span><strong id="sumPrice">$0.00</strong>
+                                <span class="summary-key">Price</span>
+
+                                <strong id="sumPrice">$0.00</strong>
                             </div>
                             <div class="d-flex justify-content-between">
                                 <span class="summary-key">Lessons</span><strong id="sumLessons">0</strong>
@@ -286,7 +288,7 @@
                             <h6 class="mb-2">Tips</h6>
                             <ul class="small mb-0">
                                 <li>Keep lessons 6–12 minutes for better retention.</li>
-                                <li>Use "+ Free preview" on 1–2 lessons.</li>
+                                <li>Use "+ Free preview" on 1 lesson.</li>
                                 <li>Add tags so students can discover your course.</li>
                             </ul>
                         </div>
@@ -402,7 +404,7 @@
                                     <input id="price" type="number" min="0" step="0.01"
                                         class="form-control" placeholder="49.00" />
                                 </div>
-                                <div class="form-check mt-2">
+                                <div class="form-check mt-2 d-none">
                                     <input class="form-check-input" type="checkbox" id="freeCourse" />
                                     <label class="form-check-label" for="freeCourse">Free course</label>
                                 </div>
@@ -468,4 +470,20 @@
         </div>
 
     </div>
+
+    @push('scripts')
+        <script>
+            $("#price").on("input", function() {
+
+                let value = parseFloat(this.value) || 0;
+
+                if (value < 0) {
+                    value = 0;
+                    this.value = 0;
+                }
+
+                $("#sumPrice").html("$" + value.toFixed(2));
+            });
+        </script>
+    @endpush
 </x-educator-layout>
