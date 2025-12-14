@@ -60,9 +60,9 @@
                                                     {{ $course->educator->full_name }}
                                                 </span>
                                             </div>
-                                            <button class="btn btn-sm btn-outline-secondary">
+                                            <a href="{{ route('web.course.show', $course->slug) }}" class="btn btn-sm btn-outline-secondary">
                                                 Follow
-                                            </button>
+                                            </a>
                                         </div>
                                         <div class="glass-landing--card-meta"
                                             style="border-top: none; padding-top: 5px">
@@ -249,13 +249,13 @@
                                     <span><i class="fas fa-clock"></i>
                                         {{ $course->duration ?? '–' }}</span>
                                     <span><i class="fas fa-star"></i>
-                                        {{ $course->reviews->avg('rating') ?? '–' }}
+                                        {{ round($course->reviews->avg('rating') ?? 0, 1) }}
                                         ({{ $course->reviews->count() ?? '–' }})
                                     </span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <span class="course-price">${{ number_format($course->price, 2) }}</span>
-                                    <a href="#" class="btn btn-sm"
+                                    <a href="{{ route('web.course.show', $course->slug) }}" class="btn btn-sm"
                                         style="background: var(--primary-cyan); color: white">Enroll Now</a>
                                 </div>
                             </div>

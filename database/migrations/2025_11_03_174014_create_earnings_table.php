@@ -42,9 +42,9 @@ return new class extends Migration
             $table->timestamps();
 
             // Foreign keys
-            $table->foreign('educator_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('payment_id')->references('id')->on('payments')->onDelete('set null');
-            $table->foreign('payout_id')->references('id')->on('payouts')->onDelete('set null');
+            // $table->foreign('educator_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreign('payment_id')->references('id')->on('payments')->onDelete('set null');
+            // $table->foreign('payout_id')->references('id')->on('payouts')->onDelete('set null');
         });
     }
 

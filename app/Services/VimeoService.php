@@ -2,56 +2,68 @@
 
 namespace App\Services;
 
-use Vimeo\Vimeo;
-use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Vimeo\Laravel\Facades\Vimeo; // Import the Facade
 
 class VimeoService
 {
-    protected $vimeo;
-
-    public function __construct()
+   
+    public function uploadVideo(Request $request): array
     {
-        $this->vimeo = new Vimeo(
-            env('VIMEO_CLIENT_ID'),
-            env('VIMEO_CLIENT_SECRET'),
-            env('VIMEO_ACCESS_TOKEN')
-        );
-    }
-
-    /**
-     * Upload a video to Vimeo and return details.
-     *
-     * @param string $filePath
-     * @param string|null $title
-     * @param string|null $description
-     * @return array
-     */
-    public function upload(string $filePath, ?string $title = null, ?string $description = null): array
-    {
-        // try {
-        // Upload to Vimeo
-        $uri = $this->vimeo->upload($filePath, [
-            'name' => $title ?? basename($filePath),
-            'description' => $description ?? '',
-            'privacy' => [
-                'view' => 'unlisted'
-            ]
+        // 1. Validation (Highly Recommended)
+        $validated = Validator::make($request->all(), [
+            'video_path' => 'required|file|mimes:mp4,mov,avi,wmv|max:500000', // Example rules: 500MB max
+            'title'      => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
-        // Get video details
-        $videoData = $this->vimeo->request($uri . '?fields=link,pictures');
+        if ($validated->fails()) {
+            return [
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validated->errors(),
+            ];
+        }
 
-        return [
-            'success' => true,
-            'uri' => $uri,
-            'link' => $videoData['body']['link'] ?? null,
-            'thumbnail' => $videoData['body']['pictures']['sizes'][2]['link'] ?? null,
+        // Get the uploaded file path
+        $fullPathToVideo = $request->file('video_path')->getRealPath();
+
+        // 2. Define Video Metadata
+        $videoData = [
+            'name'        => $request->input('title'),
+            'description' => $request->input('description'),
+            // Optional: Set privacy (e.g., 'nobody', 'anybody', 'password', 'unlisted')
+            'privacy'     => [
+                'view' => 'unlisted' // Common setting for videos embedded on a private site
+            ]
         ];
-        // } catch (Exception $e) {
-        //     return [
-        //         'success' => false,
-        //         'error' => $e->getMessage(),
-        //     ];
-        // }
+
+        try {
+            // 3. Upload the video using the Vimeo Facade
+            // The upload method handles the entire process: creation, upload, and finalization.
+            // The response contains the video URI (e.g., '/videos/123456789')
+            $uri = Vimeo::upload($fullPathToVideo, $videoData);
+
+            // 4. Extract Video ID (optional, but often useful)
+            // The URI is typically in the format /videos/123456789
+            $videoId = basename($uri);
+
+            // You can now store the $uri or $videoId in your database
+            // to reference the video later (e.g., for embedding or management).
+
+            return [
+                'success' => true,
+                'message' => 'Video uploaded successfully',
+                'video_id' => $videoId,
+                'video_uri' => $uri
+            ];
+        } catch (\Exception $e) {
+            // Handle Vimeo API errors or other exceptions
+            return [
+                'success' => false,
+                'message' => 'Video upload failed: ' . $e->getMessage()
+            ];
+        }
     }
 }
