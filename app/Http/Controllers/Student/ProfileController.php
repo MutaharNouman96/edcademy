@@ -17,8 +17,10 @@ class ProfileController extends Controller
         $student_profile = auth()->user()->studentProfile;
         $user = auth()->user();
 
+        $avatars = DB::table('avatars')->get();
+
         // dd($student_profile);
-        return view('student.profile.edit', compact('user', 'student_profile'));
+        return view('student.profile.edit', compact('user', 'student_profile', 'avatars'));
     }
 
     /**
