@@ -320,103 +320,39 @@ foreach ($starRatings as $star => $count) {
                                 <hr class="my-4">
 
                                 <!-- Individual Reviews -->
+                                @foreach ($educator_reviews as $r)
                                 <div class="review-item" style="padding: 20px 0; border-bottom: 1px solid #e0e0e0;">
                                     <div class="d-flex gap-3 mb-3">
-                                        <div
-                                            style="width: 50px; height: 50px; border-radius: 50%; background: var(--light-cyan); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
-                                            JD
-                                        </div>
+
                                         <div class="flex-grow-1">
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div>
-                                                    <h6 class="mb-1" style="font-weight: 700;">John Doe</h6>
+                                                    <h6 class="mb-1" style="font-weight: 700;">{{ DB::table('users')->where('id', $r->student_id)->first()->first_name }}</h6>
                                                     <div class="rating-stars"
                                                         style="color: var(--accent-yellow); font-size: 0.9rem;">
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            @if ($i <= floor($r->rating))
+                                                                <i class="fas fa-star"></i>
+                                                            @elseif ($i - 0.5 == $r->rating)
+                                                                <i class="fas fa-star-half-alt"></i>
+                                                            @else
+                                                                <i class="far fa-star"></i>
+                                                            @endif
+                                                        @endfor
                                                     </div>
                                                 </div>
-                                                <small class="text-muted">2 weeks ago</small>
+                                                <small class="text-muted">{{ \Carbon\Carbon::parse($r->created_at)->format('M d, Y') }}</small>
                                             </div>
                                             <p class="mt-3 mb-0" style="color: #666; line-height: 1.6;">
-                                                Dr. Johnson is an exceptional educator! Her teaching methods are clear
-                                                and engaging. I went from struggling with calculus to actually enjoying
-                                                it. Highly recommend her courses to anyone looking to master
-                                                mathematics.
+                                               {{ $r->comment ?? '' }}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
+                                @endforeach
 
-                                <div class="review-item" style="padding: 20px 0; border-bottom: 1px solid #e0e0e0;">
-                                    <div class="d-flex gap-3 mb-3">
-                                        <div
-                                            style="width: 50px; height: 50px; border-radius: 50%; background: var(--accent-purple); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
-                                            SM
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <h6 class="mb-1" style="font-weight: 700;">Sarah Miller</h6>
-                                                    <div class="rating-stars"
-                                                        style="color: var(--accent-yellow); font-size: 0.9rem;">
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                    </div>
-                                                </div>
-                                                <small class="text-muted">1 month ago</small>
-                                            </div>
-                                            <p class="mt-3 mb-0" style="color: #666; line-height: 1.6;">
-                                                The Physics Fundamentals course was outstanding! Dr. Johnson's
-                                                explanations are so clear and her patience is incredible. She made
-                                                difficult concepts easy to understand. Worth every penny!
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="review-item" style="padding: 20px 0; border-bottom: 1px solid #e0e0e0;">
-                                    <div class="d-flex gap-3 mb-3">
-                                        <div
-                                            style="width: 50px; height: 50px; border-radius: 50%; background: var(--accent-pink); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
-                                            MK
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <h6 class="mb-1" style="font-weight: 700;">Mike Kumar</h6>
-                                                    <div class="rating-stars"
-                                                        style="color: var(--accent-yellow); font-size: 0.9rem;">
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="fas fa-star"></i>
-                                                        <i class="far fa-star"></i>
-                                                    </div>
-                                                </div>
-                                                <small class="text-muted">2 months ago</small>
-                                            </div>
-                                            <p class="mt-3 mb-0" style="color: #666; line-height: 1.6;">
-                                                Great instructor with excellent content. The one-on-one sessions were
-                                                particularly helpful. My only suggestion would be to include more
-                                                practice problems in each lesson.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="text-center mt-4">
-                                    <button class="btn btn-outline-primary"
-                                        style="border-color: var(--primary-cyan); color: var(--primary-cyan); padding: 10px 30px; border-radius: 10px; font-weight: 600;">
-                                        Load More Reviews
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -426,23 +362,28 @@ foreach ($starRatings as $star => $count) {
                 <div class="col-lg-4">
                     <div class="booking-card">
                         <div class="price-section">
-                            <div class="hourly-rate">$85<small>/hour</small></div>
+                            <div class="hourly-rate">${{ $educator_profile->hourly_rate ?? 'N/A' }}<small>/hour</small></div>
                             <p class="rate-label">Starting rate for 1-on-1 sessions</p>
                         </div>
 
-                        <form class="booking-form">
+                        <form class="booking-form" id="booking-form">
+                            <div class="alert bg-success d-none" id="booking-alert">
+                                <div class="alert-success text-white">
+                                    Booking submitted.
+                                </div>
+                            </div>
                             <div class="mb-3">
                                 <label class="form-label">
                                     <i class="far fa-calendar me-2"></i>Select Date
                                 </label>
-                                <input type="date" class="form-control" required>
+                                <input type="date" class="form-control" name="date" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">
                                     <i class="far fa-clock me-2"></i>Select Time
                                 </label>
-                                <select class="form-select" required>
+                                <select class="form-select" name="time" required>
                                     <option value="">Choose a time slot</option>
                                     <option value="09:00">09:00 AM</option>
                                     <option value="10:00">10:00 AM</option>
@@ -459,12 +400,12 @@ foreach ($starRatings as $star => $count) {
                                 <label class="form-label">
                                     <i class="fas fa-hourglass-half me-2"></i>Duration
                                 </label>
-                                <select class="form-select" required>
+                                <select class="form-select" name="duration" required>
                                     <option value="">Choose duration</option>
-                                    <option value="1">1 hour - $85</option>
-                                    <option value="1.5">1.5 hours - $127.50</option>
-                                    <option value="2">2 hours - $170</option>
-                                    <option value="3">3 hours - $255</option>
+                                    <option value="1">1 hour - ${{ $educator_profile->hourly_rate * 1}}</option>
+                                    <option value="1.5">1.5 hours - ${{ $educator_profile->hourly_rate * 1.5}}</option>
+                                    <option value="2">2 hours - ${{ $educator_profile->hourly_rate * 2}}</option>
+                                    <option value="3">3 hours - ${{ $educator_profile->hourly_rate * 3}}</option>
                                 </select>
                             </div>
 
@@ -472,7 +413,7 @@ foreach ($starRatings as $star => $count) {
                                 <label class="form-label">
                                     <i class="fas fa-book me-2"></i>Subject
                                 </label>
-                                <select class="form-select" required>
+                                <select class="form-select" name="subject" required>
                                     <option value="">Choose subject</option>
                                     <option value="calculus">Calculus</option>
                                     <option value="physics">Physics</option>
@@ -486,10 +427,10 @@ foreach ($starRatings as $star => $count) {
                                 <label class="form-label">
                                     <i class="fas fa-comment me-2"></i>Message (Optional)
                                 </label>
-                                <textarea class="form-control" rows="3" placeholder="Tell me about your learning goals..."></textarea>
+                                <textarea class="form-control" name="message" rows="3" placeholder="Tell me about your learning goals..."></textarea>
                             </div>
 
-                            <button type="submit" class="book-btn" onclick="bookSession(event)">
+                            <button type="submit" class="btn btn-outline-secondary text-dark btn-block w-100" onclick="bookSession(event)">
                                 <i class="fas fa-check-circle me-2"></i>Book Session
                             </button>
                         </form>
@@ -572,13 +513,33 @@ foreach ($starRatings as $star => $count) {
             // Book session
             function bookSession(event) {
                 event.preventDefault();
-                const date = event.target.querySelector('input[type="date"]').value;
-                const time = event.target.querySelector('select').value;
 
-                if (date && time) {
-                    alert(
-                        `Booking session with Dr. Sarah Johnson\nDate: ${date}\nTime: ${time}\n\nYou will be redirected to payment...`);
-                }
+                const form = document.getElementById('booking-form');
+                const formData = new FormData(form);
+                const educatorId = {{ $educator->id }}; // Assuming educator ID is available in the blade
+                formData.append('educator_id', educatorId);
+
+                fetch("{{ route('book.session') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Payment part...');
+                        $('#booking-alert').removeClass('d-none');
+                    } else {
+                        alert('Error booking session: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An unexpected error occurred.');
+                });
             }
 
             // Contact educator
