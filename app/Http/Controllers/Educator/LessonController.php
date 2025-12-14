@@ -33,7 +33,7 @@ class LessonController extends Controller
             'video_link' => 'nullable|url',
             'materials.*' => 'file|mimes:pdf,ppt,pptx|max:51200',
             'worksheets.*' => 'file|mimes:pdf,doc,docx|max:51200',
-            'video_path' => 'nullable|file|mimes:mp4,mov,avi|max:2048000',
+            'video_path' => 'nullable|file|mimes:mp4,mov,avi|max:5000000',
             'resources' => 'array',
         ]);
 
@@ -51,7 +51,8 @@ class LessonController extends Controller
             if ($request->hasFile('video_path')) {
                 // $data['video_path'] = $request->file('video_path')->store('lessons/videos', 'public');
                 $vimeoService = new VimeoService();
-                $uploadResponse = $vimeoService->upload($request->file('video_path')->getPathname(), $request->title, $request->notes ?? "");
+                $uploadResponse = $vimeoService->uploadVideo($request);
+                dd($uploadResponse);
                 $data['video_path'] = $uploadResponse['link'];
             }
 
@@ -95,98 +96,107 @@ class LessonController extends Controller
     public function update(Request $request, Lesson $lesson)
     {
 
+
         $successMessage = "";
 
-        try {
-            $data = $request->validate([
-                'title' => 'sometimes|string|max:255',
-                'type' => 'required',
-                'duration' => 'nullable|integer|min:1',
-                'price' => 'nullable|numeric|min:0',
-                'free' => 'boolean',
-                'status' => 'in:Draft,Published',
-                'preview' => 'boolean',
-                'notes' => 'nullable|string',
-                'video_link' => 'nullable|url',
-                'materials.*' => 'file|mimes:pdf,ppt,pptx|max:51200',
-                'worksheets.*' => 'file|mimes:pdf,doc,docx|max:51200',
-                'video_path' => 'nullable|file|mimes:mp4,mov,avi|max:2048000',
-                'resources' => 'array',
-            ]);
+        // try {
+        $validator = Validator::make($request->all(), [
+            'title' => 'sometimes|string|max:255',
+            'type' => 'required',
+            'duration' => 'nullable|integer|min:1',
+            'price' => 'nullable|numeric|min:0',
+            'free' => 'boolean',
+            'status' => 'in:Draft,Published',
+            'preview' => 'boolean',
+            'notes' => 'nullable|string',
+            'video_link' => 'nullable|url',
+            'materials.*' => 'file|mimes:pdf,ppt,pptx|max:51200',
+            'worksheets.*' => 'file|mimes:pdf,doc,docx|max:51200',
+            'video_path' => 'nullable|file|mimes:mp4,mov,avi|max:2048000',
+            'resources' => 'array',
+        ]);
 
-            // Handle updated uploads
-
-            if ($request->hasFile('materials')) {
-                if ($lesson->materials) {
-                    foreach (json_decode($lesson->materials, true) as $path) {
-                        Storage::disk('public')->delete($path);
-                    }
-                }
-                $materials = [];
-                foreach ($request->file('materials') as $file) {
-                    $materials[] = $file->store('lessons/materials', 'public');
-                }
-                $data['materials'] = json_encode($materials);
-            }
-
-            if ($request->hasFile('worksheets')) {
-                if ($lesson->worksheets) {
-                    foreach (json_decode($lesson->worksheets, true) as $path) {
-                        Storage::disk('public')->delete($path);
-                    }
-                }
-                $worksheets = [];
-                foreach ($request->file('worksheets') as $file) {
-                    $worksheets[] = $file->store('lessons/worksheets', 'public');
-                }
-                $data['worksheets'] = json_encode($worksheets);
-            }
-
-            if ($request->filled('resources')) {
-                $data['resources'] = json_encode($request->input('resources'));
-            }
-
-            $lesson->update($data);
-            $successMessage = "Lesson updated successfully.";
-
-
-
-            //update the video after updating the lesson
-            try {
-                $videoLink = "";
-                if ($request->hasFile('video_path')) {
-                    // if ($lesson->video_path) Storage::disk('public')->delete($lesson->video_path);
-                    // $data['video_path'] = $request->file('video_path')->store('lessons/videos', 'public');
-
-                    // Upload to Vimeo
-                    $vimeoService = new VimeoService();
-                    $uploadResponse = $vimeoService->upload($request->file('video_path')->getPathname(), $request->title, $request->notes);
-                    $videoLink = $uploadResponse['link'];
-                }
-                if (!empty($videoLink)) {
-                    $lesson->video_path = $videoLink;
-                    $lesson->save();
-                }
-            } catch (\Exception $e) {
-                \Log::error('Vimeo upload error during lesson update: ' . $e->getMessage());
-                $successMessage .= " However, there was an issue uploading the video. You can try again or contact the administrator.";
-            }
-
-
-            return response()->json([
-                'message' => $successMessage,
-                'lesson' => $lesson
-            ]);
-        } catch (\Exception $e) {
-            // 🧩 Catch all unexpected errors
-            \Log::error('Lesson update error: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'An unexpected error occurred while updating the lesson.',
-                'error' => $e->getMessage(),
-            ], 500);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 422);
         }
+        $data = $validator->validated();
+
+        // Handle updated uploads
+
+        if ($request->hasFile('materials')) {
+            if ($lesson->materials) {
+                foreach (json_decode($lesson->materials, true) as $path) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
+            $materials = [];
+            foreach ($request->file('materials') as $file) {
+                $materials[] = $file->store('lessons/materials', 'public');
+            }
+            $data['materials'] = json_encode($materials);
+        }
+
+        if ($request->hasFile('worksheets')) {
+            if ($lesson->worksheets) {
+                foreach (json_decode($lesson->worksheets, true) as $path) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
+            $worksheets = [];
+            foreach ($request->file('worksheets') as $file) {
+                $worksheets[] = $file->store('lessons/worksheets', 'public');
+            }
+            $data['worksheets'] = json_encode($worksheets);
+        }
+
+        if ($request->filled('resources')) {
+            $data['resources'] = json_encode($request->input('resources'));
+        }
+
+        $lesson->update($data);
+        $successMessage = "Lesson updated successfully.";
+
+
+
+        //update the video after updating the lesson
+        // try {
+        $videoLink = "";
+        if ($request->hasFile('video_path')) {
+            // if ($lesson->video_path) Storage::disk('public')->delete($lesson->video_path);
+            // $data['video_path'] = $request->file('video_path')->store('lessons/videos', 'public');
+
+            // Upload to Vimeo
+            $vimeoService = new VimeoService();
+            $uploadResponse = $vimeoService->uploadVideo($request);
+            if (isset($uploadResponse['success']) && $uploadResponse['success'] === false) {
+                dd($uploadResponse);
+            }
+            $vivars: deoLink = $uploadResponse['video_uri'];
+        }
+        if (!empty($videoLink)) {
+            $lesson->video_path = $videoLink;
+            $lesson->save();
+        }
+        // } catch (\Exception $e) {
+        //     \Log::error('Vimeo upload error during lesson update: ' . $e->getMessage());
+        //     $successMessage .= " However, there was an issue uploading the video. You can try again or contact the administrator.";
+        // }
+
+
+        return response()->json([
+            'message' => $successMessage,
+            'lesson' => $lesson
+        ]);
+        // } catch (\Exception $e) {
+        //     // 🧩 Catch all unexpected errors
+        //     \Log::error('Lesson update error: ' . $e->getMessage());
+
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'An unexpected error occurred while updating the lesson.',
+        //         'error' => $e->getMessage(),
+        //     ], 500);
+        // }
     }
 
     /**
