@@ -1,32 +1,34 @@
 <x-guest-layout>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+/>
     <div>
         <!-- Profile Header -->
         <div class="profile-header">
             <div class="container profile-content">
                 <div class="educator-main-info">
                     <div style="position: relative;">
-                        <div class="educator-avatar">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                        <div class="online-badge"></div>
+                            <img src="{{ $educator->profile_picture }}" style="border-radius: 50%" class="img-fluid d-block mx-auto shadow" />
+                        {{-- <div class="online-badge"></div> --}}
                     </div>
                     <div class="educator-info">
-                        <h1>
+                        <h1 class="text-dark">
                             {{ $educator->full_name }}
                         </h1>
-                        <p class="educator-subject">Mathematics & Physics Specialist</p>
+                        <p class="educator-subject text-dark">{{ $educator_profile->primary_subject }}</p>
                         <div class="educator-meta">
                             <span class="rating-badge">
-                                <i class="fas fa-star"></i> 4.9 (127 reviews)
+                                <i class="fas fa-star"></i> {{ $educatorAverageRating }} ({{ $educator_reviews->count() }} reviews)
                             </span>
                             <div class="meta-item">
                                 <i class="fas fa-user-graduate"></i>
-                                <span>450+ Students</span>
+                                <span>{{ $studentCount }} Students</span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-clock"></i>
-                                <span>5 Years Experience</span>
+                                <span></span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-map-marker-alt"></i>
@@ -80,21 +82,18 @@
                                 </h3>
                                 <div class="stats-grid">
                                     <div class="stat-box">
-                                        <div class="stat-number">450+</div>
+                                        <div class="stat-number">{{$studentCount}}</div>
                                         <div class="stat-label">Total Students</div>
                                     </div>
                                     <div class="stat-box">
-                                        <div class="stat-number">12</div>
+                                        <div class="stat-number">{{ $courses->count() }}</div>
                                         <div class="stat-label">Courses</div>
                                     </div>
                                     <div class="stat-box">
-                                        <div class="stat-number">4.9</div>
+                                        <div class="stat-number">{{ $educatorAverageRating }}</div>
                                         <div class="stat-label">Avg Rating</div>
                                     </div>
-                                    <div class="stat-box">
-                                        <div class="stat-number">98%</div>
-                                        <div class="stat-label">Response Rate</div>
-                                    </div>
+
                                 </div>
                             </div>
 
@@ -105,18 +104,9 @@
                                     About Me
                                 </h3>
                                 <p style="line-height: 1.8; color: #666;">
-                                    Hello! I'm Dr. Sarah Johnson, a passionate educator with a PhD in Applied
-                                    Mathematics from MIT. With over 5 years of teaching experience, I've had the
-                                    privilege of helping 450+ students achieve their academic goals. My teaching
-                                    philosophy centers on making complex concepts accessible and engaging through
-                                    hands-on learning and real-world applications.
+                                   {{ $educator_profile->bio ?? '' }}
                                 </p>
-                                <p style="line-height: 1.8; color: #666;">
-                                    I specialize in Mathematics and Physics, covering everything from basic algebra to
-                                    advanced calculus and quantum mechanics. Whether you're struggling with homework or
-                                    preparing for important exams, I'm here to guide you every step of the way with
-                                    personalized attention and proven teaching methods.
-                                </p>
+
                             </div>
 
                             <!-- Teaching Style -->
@@ -126,21 +116,15 @@
                                     Teaching Style
                                 </h3>
                                 <div class="mb-3">
-                                    <span class="teaching-style-tag">
-                                        <i class="fas fa-hands-helping me-2"></i>Hands-on Learning
-                                    </span>
-                                    <span class="teaching-style-tag">
-                                        <i class="fas fa-users me-2"></i>Interactive Sessions
-                                    </span>
-                                    <span class="teaching-style-tag">
-                                        <i class="fas fa-lightbulb me-2"></i>Problem-solving Focus
-                                    </span>
+                                    @php
+                                        $teachingStyles = explode(' \\/ ', $educator_profile->preferred_teaching_style ?? '');
+                                    @endphp
+                                    @foreach ($teachingStyles as $style)
+                                        <span class="teaching-style-tag text-dark mb-2">
+                                            <i class="bi bi-arrow-right me-2 text-dark"></i>{{ trim(str_replace('"', '', $style)) }}
+                                        </span>
+                                    @endforeach
                                 </div>
-                                <p style="color: #666;">
-                                    I believe in learning by doing. My sessions are highly interactive with plenty of
-                                    practice problems, real-world examples, and immediate feedback. I adapt my teaching
-                                    style to match each student's learning pace and preferences.
-                                </p>
                             </div>
 
                             <!-- Certifications -->
@@ -151,17 +135,9 @@
                                 </h3>
                                 <div class="certification-badge">
                                     <i class="fas fa-graduation-cap"></i>
-                                    <strong>PhD in Applied Mathematics</strong> - Massachusetts Institute of Technology
-                                    (MIT)
+                                    {{ $educator_profile->certifications ?? '' }}
                                 </div>
-                                <div class="certification-badge">
-                                    <i class="fas fa-certificate"></i>
-                                    <strong>Professional Teaching License</strong> - State Board of Education
-                                </div>
-                                <div class="certification-badge">
-                                    <i class="fas fa-award"></i>
-                                    <strong>Advanced Physics Certificate</strong> - American Physical Society
-                                </div>
+
                             </div>
                         </div>
 
@@ -170,107 +146,51 @@
                             <div class="content-card">
                                 <h3 class="section-title">
                                     <i class="fas fa-book"></i>
-                                    Available Courses (12)
+                                    Available Courses ({{ $courses->count() }})
                                 </h3>
                                 <div class="row g-4">
-                                    <!-- Course 1 -->
+                                    <!-- Courses -->
+                                    @foreach ($courses as $c)
                                     <div class="col-md-6">
                                         <div class="course-card">
-                                            <div class="course-thumbnail">
+                                            <div class="course-thumbnail" style="background-image: url('{{ asset($c->thumbnail) }}')">
+
                                                 <i class="fas fa-calculator"></i>
-                                                <span class="course-price-badge">$89.99</span>
+                                                <span class="course-price-badge bg-white">${{ $c->price ?? '' }}</span>
                                             </div>
                                             <div class="course-body">
-                                                <h5 class="course-title">Complete Calculus Mastery</h5>
-                                                <div class="course-meta">
-                                                    <span><i class="fas fa-clock"></i> 25 hours</span>
-                                                    <span><i class="fas fa-user-graduate"></i> 145 students</span>
-                                                </div>
-                                                <p class="course-desc">Master calculus from limits to integrals with
-                                                    step-by-step guidance and practice problems.</p>
-                                                <div class="course-footer">
-                                                    <span class="lessons-count"><i class="fas fa-play-circle"></i> 48
-                                                        lessons</span>
-                                                    <button class="view-btn">View Course</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                                <h5 class="course-title">{{ $c->title ?? '' }}</h5>
+                                                <?php
+                                                $course_students = DB::table('course_purchases')
+                                                ->where('course_id', $c->id)
+                                                ->distinct('course_purchases.student_id')
+                                                ->count();
 
-                                    <!-- Course 2 -->
-                                    <div class="col-md-6">
-                                        <div class="course-card">
-                                            <div class="course-thumbnail"
-                                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                                <i class="fas fa-atom"></i>
-                                                <span class="course-price-badge">$79.99</span>
-                                            </div>
-                                            <div class="course-body">
-                                                <h5 class="course-title">Physics Fundamentals</h5>
-                                                <div class="course-meta">
-                                                    <span><i class="fas fa-clock"></i> 20 hours</span>
-                                                    <span><i class="fas fa-user-graduate"></i> 98 students</span>
-                                                </div>
-                                                <p class="course-desc">Learn mechanics, thermodynamics, and
-                                                    electromagnetism through engaging experiments.</p>
-                                                <div class="course-footer">
-                                                    <span class="lessons-count"><i class="fas fa-play-circle"></i> 35
-                                                        lessons</span>
-                                                    <button class="view-btn">View Course</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                                $course_lessons = DB::table('lessons')
+                                                ->where('course_id', $c->id)
+                                                ->where('status', 'Published')
+                                                ->count();
 
-                                    <!-- Course 3 -->
-                                    <div class="col-md-6">
-                                        <div class="course-card">
-                                            <div class="course-thumbnail"
-                                                style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                                                <i class="fas fa-square-root-alt"></i>
-                                                <span class="course-price-badge">$69.99</span>
-                                            </div>
-                                            <div class="course-body">
-                                                <h5 class="course-title">Linear Algebra Made Easy</h5>
+                                                $course_duration = DB::table('lessons')
+                                                ->where('course_id', $c->id)
+                                                ->where('status', 'Published')
+                                                ->sum('duration');
+                                                ?>
                                                 <div class="course-meta">
-                                                    <span><i class="fas fa-clock"></i> 18 hours</span>
-                                                    <span><i class="fas fa-user-graduate"></i> 87 students</span>
+                                                    <span><i class="fas fa-clock"></i> <?php echo $course_duration ?> hours</span>
+                                                    <span><i class="fas fa-user-graduate"></i> <?php echo $course_students ?> students</span>
                                                 </div>
-                                                <p class="course-desc">Understand vectors, matrices, and
-                                                    transformations with practical applications.</p>
+                                                <p class="course-desc">{{ $c->description ?? '' }}</p>
                                                 <div class="course-footer">
-                                                    <span class="lessons-count"><i class="fas fa-play-circle"></i> 30
+                                                    <span class="lessons-count"><i class="fas fa-play-circle"></i> <?php echo $course_lessons ?>
                                                         lessons</span>
                                                     <button class="view-btn">View Course</button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                    @endforeach
 
-                                    <!-- Course 4 -->
-                                    <div class="col-md-6">
-                                        <div class="course-card">
-                                            <div class="course-thumbnail"
-                                                style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                                                <i class="fas fa-chart-line"></i>
-                                                <span class="course-price-badge">$59.99</span>
-                                            </div>
-                                            <div class="course-body">
-                                                <h5 class="course-title">Statistics & Probability</h5>
-                                                <div class="course-meta">
-                                                    <span><i class="fas fa-clock"></i> 15 hours</span>
-                                                    <span><i class="fas fa-user-graduate"></i> 120 students</span>
-                                                </div>
-                                                <p class="course-desc">Learn data analysis, distributions, and
-                                                    hypothesis testing with real examples.</p>
-                                                <div class="course-footer">
-                                                    <span class="lessons-count"><i class="fas fa-play-circle"></i> 28
-                                                        lessons</span>
-                                                    <button class="view-btn">View Course</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -287,93 +207,20 @@
 
                                 <div class="video-scroll-container">
                                     <!-- Video 1 -->
-                                    <div class="video-card">
+                                    @foreach ($recent_videos as $v)
+                                    <div class="video-card" data-video-url="{{ $v->video_link ?? '' }}">
                                         <div class="video-thumbnail">
                                             <div class="play-overlay">
                                                 <i class="fas fa-play"></i>
                                             </div>
-                                            <span class="video-duration">12:34</span>
+                                            <span class="video-duration">{{ $v->duration ?? '' }} mint</span>
                                         </div>
                                         <div class="video-info">
-                                            <h6 class="video-title">Introduction to Derivatives</h6>
-                                            <p class="video-lesson">Calculus Mastery • Lesson 5</p>
+                                            <h6 class="video-title">{{ $v->lesson_title ?? '' }}</h6>
+                                            <p class="video-lesson">{{ $v->course_title }} • {{ DB::table('course_sections')->where('id', $v->course_section_id)->first()->title }}</p>
                                         </div>
                                     </div>
-
-                                    <!-- Video 2 -->
-                                    <div class="video-card">
-                                        <div class="video-thumbnail"
-                                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
-                                            </div>
-                                            <span class="video-duration">18:22</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">Newton's Laws Explained</h6>
-                                            <p class="video-lesson">Physics Fundamentals • Lesson 3</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Video 3 -->
-                                    <div class="video-card">
-                                        <div class="video-thumbnail"
-                                            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
-                                            </div>
-                                            <span class="video-duration">15:47</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">Matrix Multiplication</h6>
-                                            <p class="video-lesson">Linear Algebra • Lesson 8</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Video 4 -->
-                                    <div class="video-card">
-                                        <div class="video-thumbnail"
-                                            style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
-                                            </div>
-                                            <span class="video-duration">21:15</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">Probability Distributions</h6>
-                                            <p class="video-lesson">Statistics • Lesson 12</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Video 5 -->
-                                    <div class="video-card">
-                                        <div class="video-thumbnail"
-                                            style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
-                                            </div>
-                                            <span class="video-duration">14:30</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">Solving Quadratic Equations</h6>
-                                            <p class="video-lesson">Algebra Basics • Lesson 6</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Video 6 -->
-                                    <div class="video-card">
-                                        <div class="video-thumbnail"
-                                            style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
-                                            </div>
-                                            <span class="video-duration">19:45</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">Quantum Mechanics Intro</h6>
-                                            <p class="video-lesson">Advanced Physics • Lesson 1</p>
-                                        </div>
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
 
@@ -384,65 +231,21 @@
                                     Popular Lessons
                                 </h3>
                                 <div class="video-scroll-container">
-                                    <!-- Video 7 -->
-                                    <div class="video-card">
-                                        <div class="video-thumbnail"
-                                            style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                                    <!-- Popular -->
+                                    @foreach ($popular_videos as $v)
+                                    <div class="video-card" data-video-url="{{ $v->video_link ?? '' }}">
+                                        <div class="video-thumbnail">
                                             <div class="play-overlay">
                                                 <i class="fas fa-play"></i>
                                             </div>
-                                            <span class="video-duration">16:20</span>
+                                            <span class="video-duration">{{ $v->duration ?? '' }} mint</span>
                                         </div>
                                         <div class="video-info">
-                                            <h6 class="video-title">Trigonometry Essentials</h6>
-                                            <p class="video-lesson">Pre-Calculus • Lesson 4</p>
+                                            <h6 class="video-title">{{ $v->lesson_title ?? '' }}</h6>
+                                            <p class="video-lesson">{{ $v->course_title }} • {{ DB::table('course_sections')->where('id', $v->course_section_id)->first()->title }}</p>
                                         </div>
                                     </div>
-
-                                    <!-- Video 8 -->
-                                    <div class="video-card">
-                                        <div class="video-thumbnail"
-                                            style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
-                                            </div>
-                                            <span class="video-duration">22:10</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">Electromagnetic Waves</h6>
-                                            <p class="video-lesson">Physics Advanced • Lesson 7</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Video 9 -->
-                                    <div class="video-card">
-                                        <div class="video-thumbnail"
-                                            style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
-                                            </div>
-                                            <span class="video-duration">13:55</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">Integration Techniques</h6>
-                                            <p class="video-lesson">Calculus II • Lesson 15</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Video 10 -->
-                                    <div class="video-card">
-                                        <div class="video-thumbnail"
-                                            style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
-                                            </div>
-                                            <span class="video-duration">17:40</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">Vectors and Forces</h6>
-                                            <p class="video-lesson">Mechanics • Lesson 9</p>
-                                        </div>
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
@@ -452,75 +255,65 @@
                             <div class="content-card">
                                 <h3 class="section-title">
                                     <i class="fas fa-star"></i>
-                                    Student Reviews (127)
+                                    Student Reviews ({{ $educator_reviews->count() }})
                                 </h3>
 
                                 <!-- Review Summary -->
+<?php
+// Calculate review counts for each star rating
+$starRatings = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+
+foreach ($educator_reviews as $review) {
+    // Convert rating to integer here ↓↓↓ THIS is where you add it
+    $rating = intval($review->rating);
+
+    if (isset($starRatings[$rating])) {
+        $starRatings[$rating]++;
+    }
+}
+
+$totalReviews = $educator_reviews->count();
+
+// Calculate percentages
+$starPercentages = [];
+foreach ($starRatings as $star => $count) {
+    $starPercentages[$star] = $totalReviews > 0 ? round(($count / $totalReviews) * 100) : 0;
+}
+
+?>
                                 <div class="row mb-4">
                                     <div class="col-md-4 text-center">
-                                        <div style="font-size: 3rem; font-weight: 700; color: var(--primary-cyan);">4.9
+                                        <div style="font-size: 3rem; font-weight: 700; color: var(--primary-cyan);">{{ number_format($educatorAverageRating, 1) }}
                                         </div>
                                         <div class="rating-stars"
                                             style="font-size: 1.5rem; color: var(--accent-yellow); margin: 10px 0;">
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star-half-alt"></i>
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($educatorAverageRating >= $i)
+                                                    <i class="fas fa-star"></i>
+                                                @elseif ($educatorAverageRating > ($i - 1) && $educatorAverageRating < $i)
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                @else
+                                                    <i class="far fa-star"></i>
+                                                @endif
+                                            @endfor
                                         </div>
-                                        <div class="text-muted">Based on 127 reviews</div>
+                                        <div class="text-muted">Based on {{ $educator_reviews->count() }} reviews</div>
                                     </div>
                                     <div class="col-md-8">
-                                        <div class="mb-2">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span style="width: 60px;">5 stars</span>
-                                                <div class="progress flex-grow-1" style="height: 10px;">
-                                                    <div class="progress-bar"
-                                                        style="width: 85%; background: var(--accent-yellow);"></div>
+
+                                        @foreach ([5, 4, 3, 2, 1] as $star)
+                                            <div class="mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span style="width: 60px;">{{ $star }} stars</span>
+                                                    <div class="progress flex-grow-1" style="height: 10px;">
+                                                        <div class="progress">
+                                                            <div class="progress-bar" role="progressbar" style="width: {{ $starPercentages[$star] ?? 0 }}%;" aria-valuenow="{{ $starPercentages[$star] ?? 0 }}" aria-valuemin="0" aria-valuemax="100">{{ $starPercentages[$star] ?? 0 }}%</div>
+                                                          </div>
+                                                    </div>
+                                                    <span style="width: 40px;">{{ $starPercentages[$star] }}%</span>
                                                 </div>
-                                                <span style="width: 40px;">85%</span>
                                             </div>
-                                        </div>
-                                        <div class="mb-2">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span style="width: 60px;">4 stars</span>
-                                                <div class="progress flex-grow-1" style="height: 10px;">
-                                                    <div class="progress-bar"
-                                                        style="width: 12%; background: var(--accent-yellow);"></div>
-                                                </div>
-                                                <span style="width: 40px;">12%</span>
-                                            </div>
-                                        </div>
-                                        <div class="mb-2">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span style="width: 60px;">3 stars</span>
-                                                <div class="progress flex-grow-1" style="height: 10px;">
-                                                    <div class="progress-bar"
-                                                        style="width: 2%; background: var(--accent-yellow);"></div>
-                                                </div>
-                                                <span style="width: 40px;">2%</span>
-                                            </div>
-                                        </div>
-                                        <div class="mb-2">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span style="width: 60px;">2 stars</span>
-                                                <div class="progress flex-grow-1" style="height: 10px;">
-                                                    <div class="progress-bar"
-                                                        style="width: 1%; background: var(--accent-yellow);"></div>
-                                                </div>
-                                                <span style="width: 40px;">1%</span>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span style="width: 60px;">1 star</span>
-                                                <div class="progress flex-grow-1" style="height: 10px;">
-                                                    <div class="progress-bar"
-                                                        style="width: 0%; background: var(--accent-yellow);"></div>
-                                                </div>
-                                                <span style="width: 40px;">0%</span>
-                                            </div>
-                                        </div>
+                                        @endforeach
                                     </div>
                                 </div>
 
@@ -758,6 +551,22 @@
 
     </div>
 
+
+<div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="videoModalLabel">Video Playback</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ratio ratio-16x9">
+                    <iframe id="videoFrame" src="" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     @push('scripts')
         <script>
             // Book session
@@ -788,9 +597,28 @@
             // Video play buttons
             document.querySelectorAll('.play-overlay').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const videoTitle = this.closest('.video-card').querySelector('.video-title').textContent;
-                    alert(`Playing video: ${videoTitle}`);
+                    const videoCard = this.closest('.video-card');
+                    const videoTitle = videoCard.querySelector('.video-title').textContent;
+                    const videoUrl = videoCard.dataset.videoUrl;
+
+                    if (videoUrl) {
+                        const videoFrame = document.getElementById('videoFrame');
+                        videoFrame.src = videoUrl;
+                        const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+                        videoModal.show();
+
+                        // Optional: Update modal title with video title
+                        document.getElementById('videoModalLabel').textContent = `Playing: ${videoTitle}`;
+                    } else {
+                        alert(`Video URL not found for: ${videoTitle}`);
+                    }
                 });
+            });
+
+            // Clear video src when modal is closed
+            document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+                const videoFrame = document.getElementById('videoFrame');
+                videoFrame.src = '';
             });
         </script>
     @endpush
