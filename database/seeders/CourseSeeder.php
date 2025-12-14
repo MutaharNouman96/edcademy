@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
 
 class CourseSeeder extends Seeder
 {
@@ -26,9 +27,13 @@ class CourseSeeder extends Seeder
         }
 
         for ($i = 0; $i < 20; $i++) { // Create 20 courses
+                        $title = $faker->sentence(3);
+
             Course::create([
+                
                 'user_id' => $faker->randomElement($educatorUsers),
-                'title' => $faker->sentence(rand(3, 7)),
+                'title' => $title,
+                'slug' => Str::slug($title),
                 'description' => $faker->paragraph(rand(5, 15)),
                 'subject' => $faker->word(),
                 'level' => $faker->randomElement(['Beginner', 'Intermediate', 'Advanced']),
