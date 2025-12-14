@@ -271,10 +271,12 @@ Route::middleware(['auth', 'role:student'])
 
 
         Route::post('lesson-comment', [StudentDashboardController::class, 'storeLessonComment'])->name('lesson_comment.store');
+
+
     });
 
 
-
+    Route::post('book-session', [WebsiteController::class, 'bookSession'])->name('book.session');
 
 Route::middleware(['guest'])->group(function () {
     Route::get('student/signup', fn() => view('student.signup'))
