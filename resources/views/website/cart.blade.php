@@ -4,171 +4,172 @@
         <div class="checkout-header text-center">
             <h1><i class="fas fa-shopping-cart me-3"></i>Checkout</h1>
         </div>
+        @if ($myCart->count() > 0)
+            <div class="row">
+                <!-- Left Column - Cart Items -->
+                <div class="col-lg-8">
+                    <!-- Cart Items -->
+                    <div class="checkout-card">
+                        <h3 class="section-title">
+                            <i class="fas fa-list"></i>
+                            Your Cart (<span id="itemCount">{{ $myCart->count() }}</span> items)
+                        </h3>
 
-        <div class="row">
-            <!-- Left Column - Cart Items -->
-            <div class="col-lg-8">
-                <!-- Cart Items -->
-                <div class="checkout-card">
-                    <h3 class="section-title">
-                        <i class="fas fa-list"></i>
-                        Your Cart (<span id="itemCount">3</span> items)
-                    </h3>
+                        <div id="cartItems">
+                            <!-- Cart Item 1 -->
+                            @foreach ($myCart as $cart)
+                                @if ($cart->model == 'App\Models\Course')
+                                    <div class="cart-item" data-price="{{ $cart->price }}">
+                                        <div class="item-thumbnail">
+                                            <i class="fas fa-calculator"></i>
+                                        </div>
+                                        <div class="item-details">
+                                            <h5 class="item-title">
+                                                {{ $cart->item_details->title }}
+                                            </h5>
+                                            <p class="item-educator">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ $cart->item_details->educator->full_name }}
+                                            </p>
+                                            <div class="item-meta">
+                                                <span><i class="fas fa-clock"></i> {{ $cart->item_details->duration }}
+                                                    hours</span>
+                                                <span><i class="fas fa-play-circle"></i>
+                                                    {{ $cart->item_details->lessons->count() }} lessons</span>
+                                                <span><i class="fas fa-star text-warning"></i>
+                                                    {{ $cart->item_details->reviews->avg('rating') }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="item-price">
+                                            <div class="current-price">${{ $cart->price }}</div>
+                                            {{-- <div class="original-price">$179.99</div> --}}
+                                        </div>
+                                        <button class="remove-btn" onclick="removeItem(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endif
+                                @if ($cart->model == 'App\Models\Lesson')
+                                    <div class="cart-item" data-price="{{ $cart->price }}">
+                                        <div class="item-thumbnail">
+                                            <i class="fas fa-calculator"></i>
+                                        </div>
+                                        <div class="item-details">
+                                            <h5 class="item-title">
+                                                {{ $cart->item_details->title }}
+                                            </h5>
+                                            <p class="item-educator">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ $cart->item_details->course->educator->full_name }}
+                                            </p>
+                                            <div class="item-meta">
 
-                    <div id="cartItems">
-                        <!-- Cart Item 1 -->
-                        <div class="cart-item" data-price="89.99">
-                            <div class="item-thumbnail">
-                                <i class="fas fa-calculator"></i>
-                            </div>
-                            <div class="item-details">
-                                <h5 class="item-title">Complete Calculus Mastery</h5>
-                                <p class="item-educator">
-                                    <i class="fas fa-user me-1"></i>Dr. Sarah Johnson
-                                </p>
-                                <div class="item-meta">
-                                    <span><i class="fas fa-clock"></i> 25 hours</span>
-                                    <span><i class="fas fa-play-circle"></i> 48 lessons</span>
-                                    <span><i class="fas fa-star text-warning"></i> 4.9</span>
-                                </div>
-                            </div>
-                            <div class="item-price">
-                                <div class="current-price">$89.99</div>
-                                <div class="original-price">$179.99</div>
-                            </div>
-                            <button class="remove-btn" onclick="removeItem(this)">
-                                <i class="fas fa-times"></i>
-                            </button>
+                                                <span><i class="fas fa-play-circle"></i>
+                                                    {{ $cart->item_details->lessons->count() }} lessons</span>
+                                                <span><i class="fas fa-star text-warning"></i>
+                                                    {{ $cart->item_details->reviews->avg('rating') }}
+                                                </span>
+
+                                            </div>
+                                        </div>
+                                        <div class="item-price">
+                                            <div class="current-price">${{ $cart->price }}</div>
+                                            {{-- <div class="original-price">$179.99</div> --}}
+                                        </div>
+                                        <button class="remove-btn" onclick="removeItem(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endif
+                            @endforeach
+
+
                         </div>
 
-                        <!-- Cart Item 2 -->
-                        <div class="cart-item" data-price="79.99">
-                            <div class="item-thumbnail"
-                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                <i class="fas fa-atom"></i>
+                        <!-- Empty Cart State -->
+                        <div id="emptyCart" style="display: none;">
+                            <div class="empty-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <h3>Your cart is empty</h3>
+                                <p class="text-muted mb-4">Add some courses to get started!</p>
+                                <button class="browse-btn" onclick="browseCourses()">
+                                    <i class="fas fa-search me-2"></i>Browse Courses
+                                </button>
                             </div>
-                            <div class="item-details">
-                                <h5 class="item-title">Physics Fundamentals</h5>
-                                <p class="item-educator">
-                                    <i class="fas fa-user me-1"></i>Dr. Sarah Johnson
-                                </p>
-                                <div class="item-meta">
-                                    <span><i class="fas fa-clock"></i> 20 hours</span>
-                                    <span><i class="fas fa-play-circle"></i> 35 lessons</span>
-                                    <span><i class="fas fa-star text-warning"></i> 4.8</span>
-                                </div>
-                            </div>
-                            <div class="item-price">
-                                <div class="current-price">$79.99</div>
-                                <div class="original-price">$159.99</div>
-                            </div>
-                            <button class="remove-btn" onclick="removeItem(this)">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-
-                        <!-- Cart Item 3 -->
-                        <div class="cart-item" data-price="69.99">
-                            <div class="item-thumbnail"
-                                style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                                <i class="fas fa-square-root-alt"></i>
-                            </div>
-                            <div class="item-details">
-                                <h5 class="item-title">Linear Algebra Made Easy</h5>
-                                <p class="item-educator">
-                                    <i class="fas fa-user me-1"></i>Dr. Sarah Johnson
-                                </p>
-                                <div class="item-meta">
-                                    <span><i class="fas fa-clock"></i> 18 hours</span>
-                                    <span><i class="fas fa-play-circle"></i> 30 lessons</span>
-                                    <span><i class="fas fa-star text-warning"></i> 4.9</span>
-                                </div>
-                            </div>
-                            <div class="item-price">
-                                <div class="current-price">$69.99</div>
-                                <div class="original-price">$139.99</div>
-                            </div>
-                            <button class="remove-btn" onclick="removeItem(this)">
-                                <i class="fas fa-times"></i>
-                            </button>
                         </div>
                     </div>
 
-                    <!-- Empty Cart State -->
-                    <div id="emptyCart" style="display: none;">
-                        <div class="empty-cart">
-                            <i class="fas fa-shopping-cart"></i>
-                            <h3>Your cart is empty</h3>
-                            <p class="text-muted mb-4">Add some courses to get started!</p>
-                            <button class="browse-btn" onclick="browseCourses()">
-                                <i class="fas fa-search me-2"></i>Browse Courses
-                            </button>
+                    <!-- Payment Method -->
+                    <div class="checkout-card" id="paymentSection">
+                        <h3 class="section-title">
+                            <i class="fas fa-credit-card"></i>
+                            Choose Payment Method
+                        </h3>
+
+                        <div class="payment-methods">
+                            <!-- Stripe Option -->
+                            <div class="payment-option selected" onclick="selectPayment('stripe')" id="stripeOption">
+                                <div class="payment-logo stripe-logo">
+                                    <i class="fab fa-cc-stripe"></i>
+                                </div>
+                                <div class="payment-name">Credit / Debit Card</div>
+                                <p class="payment-desc">Secure payment via Stripe</p>
+                            </div>
+
+                            <!-- PayPal Option -->
+                            <div class="payment-option" onclick="selectPayment('paypal')" id="paypalOption">
+                                <div class="payment-logo paypal-logo">
+                                    <i class="fab fa-paypal"></i>
+                                </div>
+                                <div class="payment-name">PayPal</div>
+                                <p class="payment-desc">Fast & secure checkout</p>
+                            </div>
+                        </div>
+
+                        <div class="security-note">
+                            <i class="fas fa-shield-alt"></i>
+                            Your payment information is encrypted and secure
                         </div>
                     </div>
                 </div>
 
-                <!-- Payment Method -->
-                <div class="checkout-card" id="paymentSection">
-                    <h3 class="section-title">
-                        <i class="fas fa-credit-card"></i>
-                        Choose Payment Method
-                    </h3>
+                <!-- Right Column - Order Summary -->
+                <div class="col-lg-4">
+                    <div class="checkout-card" style="position: sticky; top: 20px;">
+                        <h3 class="section-title">
+                            <i class="fas fa-receipt"></i>
+                            Order Summary
+                        </h3>
 
-                    <div class="payment-methods">
-                        <!-- Stripe Option -->
-                        <div class="payment-option selected" onclick="selectPayment('stripe')" id="stripeOption">
-                            <div class="payment-logo stripe-logo">
-                                <i class="fab fa-cc-stripe"></i>
+                        <!-- Promo Code -->
+                        <div class="promo-section">
+                            <input type="text" class="promo-input" placeholder="Enter promo code" id="promoInput">
+                            <button class="promo-btn" onclick="applyPromo()">Apply</button>
+                        </div>
+
+                        <div id="promoSuccess" style="display: none;">
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Promo code applied successfully!
                             </div>
-                            <div class="payment-name">Credit / Debit Card</div>
-                            <p class="payment-desc">Secure payment via Stripe</p>
                         </div>
-
-                        <!-- PayPal Option -->
-                        <div class="payment-option" onclick="selectPayment('paypal')" id="paypalOption">
-                            <div class="payment-logo paypal-logo">
-                                <i class="fab fa-paypal"></i>
+                        @php
+                            $totalPrice = cartTotal();
+                            $totalTaxAmount = taxAmountOfPrice($totalPrice, env('APP_TAX', 5));
+                            $finalAmount = $totalPrice + $totalTaxAmount;
+                        @endphp
+                        <!-- Order Summary -->
+                        <div class="order-summary">
+                            <div class="summary-row">
+                                <span>Total Price</span>
+                                <span id="originalTotal">$ {{ $totalPrice }}</span>
                             </div>
-                            <div class="payment-name">PayPal</div>
-                            <p class="payment-desc">Fast & secure checkout</p>
-                        </div>
-                    </div>
-
-                    <div class="security-note">
-                        <i class="fas fa-shield-alt"></i>
-                        Your payment information is encrypted and secure
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column - Order Summary -->
-            <div class="col-lg-4">
-                <div class="checkout-card" style="position: sticky; top: 20px;">
-                    <h3 class="section-title">
-                        <i class="fas fa-receipt"></i>
-                        Order Summary
-                    </h3>
-
-                    <!-- Promo Code -->
-                    <div class="promo-section">
-                        <input type="text" class="promo-input" placeholder="Enter promo code" id="promoInput">
-                        <button class="promo-btn" onclick="applyPromo()">Apply</button>
-                    </div>
-
-                    <div id="promoSuccess" style="display: none;">
-                        <div class="alert alert-success">
-                            <i class="fas fa-check-circle me-2"></i>
-                            Promo code applied successfully!
-                        </div>
-                    </div>
-
-                    <!-- Order Summary -->
-                    <div class="order-summary">
-                        <div class="summary-row">
-                            <span>Original Price</span>
-                            <span id="originalTotal">$479.97</span>
-                        </div>
-                        <div class="summary-row">
+                            <div class="summary-row">
+                                <span>Tax</span>
+                                <span id="taxAmount">$ {{ $totalTaxAmount }}</span>
+                            </div>
+                            {{-- <div class="summary-row">
                             <span>
                                 Discount
                                 <span class="discount-badge">50% OFF</span>
@@ -178,70 +179,188 @@
                         <div class="summary-row" id="promoRow" style="display: none;">
                             <span>Promo Code</span>
                             <span style="color: var(--accent-pink);" id="promoAmount">-$20.00</span>
+                        </div> --}}
+                            <div class="summary-row total">
+                                <span>Total</span>
+                                <span class="amount" id="finalTotal">$ {{ $finalAmount }}</span>
+                            </div>
                         </div>
-                        <div class="summary-row total">
-                            <span>Total</span>
-                            <span class="amount" id="finalTotal">$239.97</span>
+
+                        <!-- Checkout Button -->
+                        <button class="checkout-btn" onclick="proceedCheckout()" id="checkoutBtn">
+                            <i class="fas fa-lock me-2"></i>
+                            Complete Purchase
+                        </button>
+
+                        <a href="{{ route('web.courses') }}" class="btn btn-outline-primary mt-3 w-100"
+                            id="continueShopping" class="href">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Continue Shopping
+                        </a>
+
+                        <!-- Guarantee -->
+                        <div class="guarantee-box">
+                            <h6><i class="fas fa-undo me-2"></i>30-Day Money-Back Guarantee</h6>
+                            <p>Full refund if you're not satisfied</p>
                         </div>
-                    </div>
 
-                    <!-- Checkout Button -->
-                    <button class="checkout-btn" onclick="proceedCheckout()" id="checkoutBtn">
-                        <i class="fas fa-lock me-2"></i>
-                        Complete Purchase
-                    </button>
-
-                    <!-- Guarantee -->
-                    <div class="guarantee-box">
-                        <h6><i class="fas fa-undo me-2"></i>30-Day Money-Back Guarantee</h6>
-                        <p>Full refund if you're not satisfied</p>
-                    </div>
-
-                    <!-- What You Get -->
-                    <div class="mt-4">
-                        <h6 style="font-weight: 700; margin-bottom: 15px;">What you'll get:</h6>
-                        <ul style="list-style: none; padding: 0;">
-                            <li style="padding: 8px 0; color: #666;">
-                                <i class="fas fa-check-circle me-2" style="color: var(--primary-cyan);"></i>
-                                Lifetime access to all courses
-                            </li>
-                            <li style="padding: 8px 0; color: #666;">
-                                <i class="fas fa-check-circle me-2" style="color: var(--primary-cyan);"></i>
-                                Downloadable resources & materials
-                            </li>
-                            <li style="padding: 8px 0; color: #666;">
+                        <!-- What You Get -->
+                        <div class="mt-4">
+                            <h6 style="font-weight: 700; margin-bottom: 15px;">What you'll get:</h6>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="padding: 8px 0; color: #666;">
+                                    <i class="fas fa-check-circle me-2" style="color: var(--primary-cyan);"></i>
+                                    Lifetime access to all courses
+                                </li>
+                                <li style="padding: 8px 0; color: #666;">
+                                    <i class="fas fa-check-circle me-2" style="color: var(--primary-cyan);"></i>
+                                    Downloadable resources & materials
+                                </li>
+                                {{-- <li style="padding: 8px 0; color: #666;">
                                 <i class="fas fa-check-circle me-2" style="color: var(--primary-cyan);"></i>
                                 Certificate of completion
-                            </li>
-                            <li style="padding: 8px 0; color: #666;">
-                                <i class="fas fa-check-circle me-2" style="color: var(--primary-cyan);"></i>
-                                Access on mobile and desktop
-                            </li>
-                        </ul>
+                            </li> --}}
+                                <li style="padding: 8px 0; color: #666;">
+                                    <i class="fas fa-check-circle me-2" style="color: var(--primary-cyan);"></i>
+                                    Access on mobile and desktop
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
+            </div>
+        @else
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <h3>Your cart is empty</h3>
+                <p class="text-muted mb-4">Add some courses to get started!</p>
+                <a class="btn btn-lg browse-btn" href="{{ route('web.courses') }}">
+                    <i class="fas fa-search"></i>Browse Courses
+                </a>
+            </div>
+        @endif
+    </div>
+
+
+    <form id="stripeCheckoutForm" method="POST" action="{{ url('/stripe/checkout') }}" style="display:none;">
+        @csrf
+        <input type="hidden" name="cart_user_id" value="{{ $myCart[0]->user_id ?? '' }}">
+    </form>
+
+
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="cartLoginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Login to Continue</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="loginError" class="alert alert-danger d-none"></div>
+
+                    <form id="cartLoginForm">
+                        @csrf
+
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Password</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </form>
+                </div>
+
             </div>
         </div>
     </div>
 
 
+
+
     @push('scripts')
         <script>
-            let selectedPaymentMethod = 'stripe';
+            let selectedPayment = "stripe"; // Default
 
-            // Select payment method
+            let loginStatus = {{ Auth::check() ? 1 : 0 }};
+
             function selectPayment(method) {
-                selectedPaymentMethod = method;
+                selectedPayment = method;
 
-                document.getElementById('stripeOption').classList.remove('selected');
-                document.getElementById('paypalOption').classList.remove('selected');
+                document.getElementById("stripeOption").classList.remove("selected");
+                document.getElementById("paypalOption").classList.remove("selected");
 
-                if (method === 'stripe') {
-                    document.getElementById('stripeOption').classList.add('selected');
+                if (method === "stripe") {
+                    document.getElementById("stripeOption").classList.add("selected");
                 } else {
-                    document.getElementById('paypalOption').classList.add('selected');
+                    document.getElementById("paypalOption").classList.add("selected");
                 }
             }
+
+            function proceedCheckout() {
+                if (!loginStatus) {
+                    let modal = new bootstrap.Modal(document.getElementById('cartLoginModal'));
+                    modal.show();
+                    return;
+                }
+
+                if (selectedPayment === "stripe") {
+                    // Submit hidden form for Stripe
+                    document.getElementById("stripeCheckoutForm").submit();
+                } else if (selectedPayment === "paypal") {
+                    // You can define PayPal logic later
+                    startPayPalPayment();
+                }
+            }
+
+
+
+            $("#cartLoginForm").on("submit", function(e) {
+                e.preventDefault();
+
+                let formData = $(this).serialize();
+
+                $.ajax({
+                    url: "{{ route('cart.login') }}", // <-- define this route
+                    type: "POST",
+                    data: formData,
+                    success: function(response) {
+                        $("#loginError").addClass("d-none");
+
+                        // Close modal
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('cartLoginModal'));
+                        modal.hide();
+
+                        // Show success message (optional)
+                        Swal.fire({
+                            icon: "success",
+                            title: "Logged in!",
+                            text: "You can now continue checkout",
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                        // Optional: refresh the page (so that cart changes reflect)
+                        location.reload();
+                    },
+
+                    error: function(xhr) {
+                        // Show error message
+                        $("#loginError").removeClass("d-none").text(xhr.responseJSON.message);
+                    }
+                });
+            });
+
 
             // Remove item from cart
             function removeItem(button) {
@@ -312,44 +431,7 @@
                 }
             }
 
-            // Proceed to checkout
-            function proceedCheckout() {
-                const items = document.querySelectorAll('.cart-item').length;
 
-                if (items === 0) {
-                    alert('Your cart is empty!');
-                    return;
-                }
-
-                const btn = document.getElementById('checkoutBtn');
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-                btn.disabled = true;
-
-                setTimeout(() => {
-                    if (selectedPaymentMethod === 'stripe') {
-                        // Redirect to Stripe Checkout
-                        alert(
-                            'Redirecting to Stripe Checkout...\n\nIn production, this would redirect to:\nhttps://checkout.stripe.com/...'
-                        );
-
-                        // In real implementation:
-                        // window.location.href = 'https://checkout.stripe.com/c/pay/...';
-                        // OR use Stripe.js to create a checkout session
-                    } else {
-                        // Redirect to PayPal
-                        alert(
-                            'Redirecting to PayPal...\n\nIn production, this would redirect to:\nhttps://www.paypal.com/checkoutnow...'
-                        );
-
-                        // In real implementation:
-                        // window.location.href = 'https://www.paypal.com/checkoutnow?token=...';
-                    }
-
-                    // Reset button
-                    btn.innerHTML = '<i class="fas fa-lock me-2"></i>Complete Purchase';
-                    btn.disabled = false;
-                }, 2000);
-            }
 
             // Browse courses
             function browseCourses() {
@@ -358,15 +440,91 @@
             }
 
             // Initialize
-            updateCart();
+            // updateCart();
+        </script>
+
+
+
+        <script>
+            $("#cartLoginForm").on("submit", function(e) {
+                e.preventDefault();
+
+                let formData = $(this).serialize();
+
+                $.ajax({
+                    url: "{{ route('cart.login') }}", // <-- define this route
+                    type: "POST",
+                    data: formData,
+                    success: function(response) {
+                        $("#loginError").addClass("d-none");
+
+                        // Close modal
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('cartLoginModal'));
+                        modal.hide();
+
+                        // Show success message (optional)
+                        Swal.fire({
+                            icon: "success",
+                            title: "Logged in!",
+                            text: "You can now continue checkout",
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                        // Optional: refresh the page (so that cart changes reflect)
+                        location.reload();
+                    },
+
+                    error: function(xhr) {
+                        // Show error message
+                        $("#loginError").removeClass("d-none").text(xhr.responseJSON.message);
+                    }
+                });
+            });
+        </script>
+
+        <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_CLIENT_ID') }}&currency=USD"></script>
+
+
+        <script>
+            function startPayPalPayment() {
+                // Replace checkout button with PayPal button container
+                document.getElementById("checkoutBtn").style.display = "none";
+
+                // Create container dynamically
+                const container = document.createElement("div");
+                container.id = "paypal-button-container";
+                document.getElementById("paymentSection").appendChild(container);
+
+                paypal.Buttons({
+                    createOrder: function() {
+                        return fetch("{{ url('/paypal/create') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (!data.approval_url) {
+                                    alert("Error creating PayPal transaction");
+                                }
+                                window.location = data.approval_url;
+                            });
+                    }
+                }).render("#paypal-button-container");
+                window.scrollTo({
+                    top: document.getElementById("paymentSection").offsetTop,
+                    behavior: "smooth"
+                });
+            }
         </script>
     @endpush
 
 
     @push('styles')
         <style>
-           
-
             .checkout-header {
                 background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--dark-cyan) 100%);
                 color: white;
@@ -707,7 +865,7 @@
                 padding: 60px 20px;
             }
 
-            .empty-cart i {
+            .empty-cart i.fa-shopping-cart {
                 font-size: 5rem;
                 color: #ccc;
                 margin-bottom: 20px;
@@ -718,18 +876,21 @@
                 margin-bottom: 15px;
             }
 
-            .browse-btn {
+            .browse-btn{
                 background: var(--primary-cyan);
                 color: white;
                 border: none;
-                padding: 12px 30px;
                 border-radius: 10px;
                 font-weight: 600;
                 transition: all 0.3s;
+                font-size: 1rem !important;
             }
 
             .browse-btn:hover {
                 background: var(--dark-cyan);
+            }
+            .browse-btn i{
+                margin-right: 5px;
             }
 
             .alert-success {

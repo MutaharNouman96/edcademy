@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatMessageController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\Educator\ReviewController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +27,7 @@ use App\Http\Controllers\Educator\Settings\{
     PreferenceController
 };
 use App\Http\Controllers\NotificationSettingController;
+use App\Http\Controllers\StripeController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\StudentDashboardController;
@@ -49,13 +52,32 @@ Route::get("become-an-educator", [WebsiteController::class, "educator_signup"])-
 Route::post("educator/signup/store", [EducatorController::class, "store"])->name("educator.signup.store");
 
 Route::get("courses", [WebsiteController::class, "courses"])->name("web.courses");
-Route::get("course/{course}", [WebsiteController::class, "course"])->name("web.course.show");
+Route::get("course/{slug}", [CourseController::class, "show"])->name("web.course.show");
 
-Route::get("educators", [WebsiteController::class, "educators"])->name("web.eductors.index");
-Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name("web.eductor.show");
+Route::get("educators", [WebsiteController::class, "educators"])->name("web.educators.index");
+Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name("web.educator.show");
 
 Route::get("cart", [WebsiteController::class, "cart"])->name("web.cart");
-Route::get("checkout", [WebsiteController::class, "checkout"])->name("web.checkout");
+Route::get("cart/checkout", [CartController::class, "checkout"])->name("web.cart.checkout");
+Route::post('cart/add-to-cart', [CartController::class, 'store'])->name('web.cart.addToCart');
+Route::delete('cart/remove-from-cart', [CartController::class, 'remove'])->name('web.cart.removeFromCart');
+Route::get('cart/clear',  [CartController::class, 'clear'])->name('web.cart.clearCart');
+Route::post('/cart/login', [CartController::class, 'loginUserInCartPage'])->name('cart.login');
+
+Route::get("educator-policy", [WebsiteController::class, "educator_policy"])->name("web.educator.policy");
+Route::get("student-parent-policy", [WebsiteController::class, "student_parent_policy"])->name("web.student.parent.policy");
+Route::get("refund-policy", [WebsiteController::class, "refund_policy"])->name("web.refund.policy");
+
+
+Route::post('/stripe/checkout', [StripeController::class, 'createCheckout']);
+
+// Success callback from Stripe
+Route::get('/stripe/success', [StripeController::class, 'success']);
+
+// Cancel callback from Stripe (optional)
+Route::get('/stripe/cancel', [StripeController::class, 'cancel']);
+
+
 
 Route::get("how-it-works", [WebsiteController::class, "how_it_works"])->name("web.how.it.works");
 
@@ -88,6 +110,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+
+    Route::prefix("chat")->group(function () {
+        Route::get("/", [ChatMessageController::class, "index"])->name("chat.index");
+
+
+        Route::get('/messages/{chat}', [ChatMessageController::class, 'fetchMessages'])
+            ->name('chat.messages');
+
+        // Create or open chat with specific user
+        Route::get('/open/{user}', [ChatMessageController::class, 'openChat'])
+            ->name('chat.open');
+
+        // Send message
+        Route::post('/send', [ChatMessageController::class, 'sendMessage'])
+            ->name('chat.send');
+    });
 });
 
 // Admin routes
@@ -107,7 +147,7 @@ Route::middleware(['auth', 'role:admin'])
 // Educator routes
 
 Route::middleware(['auth', 'role:educator', 'verified'])
-    ->prefix('educator')
+    ->prefix('educator-panel')
     ->group(function () {
         Route::get('dashboard', [EducatorDashboardController::class, 'index'])
             ->name('educator.dashboard');
@@ -152,25 +192,6 @@ Route::middleware(['auth', 'role:educator', 'verified'])
         });
 
         Route::get("schudule-management", [\App\Http\Controllers\Educator\ScheduleController::class, "index"])->name("educator.schedule.index");
-
-        Route::prefix("chat")->group(function () {
-            Route::get("/", [ChatMessageController::class, "index"])->name("educator.chat.index");
-
-
-            Route::get('/messages/{chat}', [ChatMessageController::class, 'fetchMessages'])
-                ->name('chat.messages');
-
-            // Create or open chat with specific user
-            Route::get('/open/{user}', [ChatMessageController::class, 'openChat'])
-                ->name('chat.open');
-
-            // Send message
-            Route::post('/send', [ChatMessageController::class, 'sendMessage'])
-                ->name('chat.send');
-        });
-
-
-
 
         Route::prefix('settings')->group(function () {
             Route::get('/', [ProfileSettingController::class, 'index'])->name('educator.settings');
@@ -233,6 +254,7 @@ Route::middleware(['auth', 'role:student'])
         Route::post('profile/notifications', [StudentProfileController::class, 'updateNotifications'])->name('profile.updateNotifications');
 
         Route::get('my-courses', [StudentDashboardController::class, 'myCourses'])->name('my-courses');
+
         Route::get('course-details/{course_id}/{lesson_id?}', [StudentDashboardController::class, 'courseDetails'])->name('course_details');
 
         Route::get('new-videos', [StudentDashboardController::class, 'newVideos'])->name('new-videos');
@@ -246,8 +268,13 @@ Route::middleware(['auth', 'role:student'])
         Route::get('wishlist', [StudentDashboardController::class, 'wishlist'])->name('wishlist');
         Route::delete('wishlist/{course_id}', [StudentDashboardController::class, 'removeWishlistCourse'])->name('wishlist.remove');
 
+
+
         Route::post('lesson-comment', [StudentDashboardController::class, 'storeLessonComment'])->name('lesson_comment.store');
     });
+
+
+
 
 Route::middleware(['guest'])->group(function () {
     Route::get('student/signup', fn() => view('student.signup'))
