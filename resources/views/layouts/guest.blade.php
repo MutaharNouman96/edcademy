@@ -54,7 +54,7 @@
 
 
                     @if (Route::has('login') && Route::has('dashboard'))
-                        @auth
+                        @if(auth()->check() && auth()->user()->role == 'student')
                             <li class="nav-item ms-lg-2">
                                 <a class="nav-link"
                                     href="{{ route( 'student.dashboard') }}">Dashboard</a>
