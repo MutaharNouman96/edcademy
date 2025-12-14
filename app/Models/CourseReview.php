@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class CourseReview extends Model
 {
@@ -24,5 +25,13 @@ class CourseReview extends Model
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id');
+    }
+
+
+    protected function rating(): Attribute{
+        return Attribute::make(
+            get: fn ($value) => round($value, 1),
+            set: fn ($value) => round($value, 1)
+        );
     }
 }

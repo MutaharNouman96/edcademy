@@ -69,9 +69,12 @@ class AllInOneDBSeeder extends Seeder
         foreach ($educators as $educator) {
             $numCourses = rand(3, 6);
             for ($i = 1; $i <= $numCourses; $i++) {
+                $title = fake()->sentence(3);
+                $slug = Str::slug($title);
                 $course = Course::create([
                     'user_id' => $educator->id,
-                    'title' => ucfirst(fake()->sentence(3)),
+                    'title' => $title,
+                    'slug' => $slug,
                     'description' => fake()->paragraph(),
                     'subject' => fake()->randomElement($subjects),
                     'level' => fake()->randomElement($levels),

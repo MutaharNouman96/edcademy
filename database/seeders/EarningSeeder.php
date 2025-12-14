@@ -58,12 +58,12 @@ class EarningSeeder extends Seeder
 
             // Payment & payout linking (optional)
             $paymentId = collect([null, $payments[array_rand($payments)] ?? null])->random();
-            $payoutId = collect([null, $payouts[array_rand($payouts)] ?? null])->random();
+            // $payoutId = collect([null, $payouts[array_rand($payouts)] ?? null])->random();
 
             Earning::create([
                 'educator_id'       => $educatorId,
                 'payment_id'        => $paymentId,
-                'payout_id'         => $payoutId,
+                'payout_id'         => 1,
 
                 'session_id'        => $sessionId,
                 'course_id'         => $courseId,
