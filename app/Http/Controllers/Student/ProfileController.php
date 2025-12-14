@@ -17,8 +17,10 @@ class ProfileController extends Controller
     {
         $user = User::where('id', auth()->user()->id)->with('studentProfile')->first();
 
+        $avatars = DB::table('avatars')->get();
+
         // dd($student_profile);
-        return view('student.profile.edit', compact('user'));
+        return view('student.profile.edit', compact('user', 'avatars'));
     }
 
     /**

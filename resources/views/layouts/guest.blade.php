@@ -76,7 +76,7 @@
                             <span
                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger p-2"
                                 style="left: 30px;" id="cartCount">
-                                {{ cartTotalItems() }}
+                                {{ cartTotalItems()}}
                             </span>
                         </a>
                     </li>
