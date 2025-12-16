@@ -29,6 +29,6 @@ if (! function_exists('cartTotal')) {
 if (! function_exists('taxAmountOfPrice')) {
     function taxAmountOfPrice($price , $tax)
     {
-        return ($price * $tax) / 100;
+        return round(($price * $tax) / 100 , 2);
     }
 }

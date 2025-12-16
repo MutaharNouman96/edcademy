@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             AllInOneDBSeeder::class,
+            EducatorProfileSeeder::class,
             ChatSeeder::class,
             CourseReviewSeeder::class,
             CoursePurchasesSeeder::class,
