@@ -35,10 +35,15 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($user->isEducator()) {
-            return redirect()->intended(route('educator.dashboard'));
+            return redirect()->intended(route('educator-panel.dashboard'));
         }
 
-        return redirect()->intended(route('student.dashboard'));
+        if ($user->isStudent()) {
+            if ($request->has('redirect_url')) {
+                return redirect($request->redirect_url);
+            }
+            return redirect()->intended(route('student.dashboard'));
+        }
     }
 
     /**

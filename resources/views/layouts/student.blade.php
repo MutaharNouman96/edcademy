@@ -28,9 +28,9 @@
                     <span class="text-muted d-none d-md-inline">Student Dashboard</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a class="btn btn-sm btn-outline-primary" href="#"><i class="bi bi-search me-1"></i>
-                        Browse</a>
-                    <a class="btn btn-sm btn-outline-primary" href="#"><i class="bi bi-chat-dots me-1"></i>
+                    <a class="btn btn-sm btn-outline-primary" href="{{ route('website.index') }}"><i class="bi bi-globe me-1"></i>
+                        Website</a>
+                    <a class="btn btn-sm btn-outline-primary" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-1"></i>
                         Messages</a>
                     <div class="dropdown">
                         <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown">
