@@ -217,9 +217,9 @@
                                     <span class="rate-label">Starting at</span>
                                     <span class="rate-amount">$85<small>/hr</small></span>
                                 </div>
-                                <button class="action-btn">
+                                <a href="{{ route('web.educator.show' , ['educator' => 101]) }}" class="action-btn">
                                     <i class="fas fa-calendar-check me-1"></i>Book
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
