@@ -27,6 +27,7 @@ use App\Http\Controllers\Educator\Settings\{
     PreferenceController
 };
 use App\Http\Controllers\NotificationSettingController;
+use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\WebsiteController;
@@ -77,7 +78,9 @@ Route::get('/stripe/success', [StripeController::class, 'success']);
 // Cancel callback from Stripe (optional)
 Route::get('/stripe/cancel', [StripeController::class, 'cancel']);
 
-
+Route::post('paypal/create', [PaypalController::class, 'create'])->name('web.paypal.create');
+Route::post('/paypal/capture', [PayPalController::class, 'capture'])
+    ->name('paypal.capture');
 
 Route::get("how-it-works", [WebsiteController::class, "how_it_works"])->name("web.how.it.works");
 
@@ -271,12 +274,10 @@ Route::middleware(['auth', 'role:student'])
 
 
         Route::post('lesson-comment', [StudentDashboardController::class, 'storeLessonComment'])->name('lesson_comment.store');
-
-
     });
 
 
-    Route::post('book-session', [WebsiteController::class, 'bookSession'])->name('book.session');
+Route::post('book-session', [WebsiteController::class, 'bookSession'])->name('book.session');
 
 Route::middleware(['guest'])->group(function () {
     Route::get('student/signup', fn() => view('student.signup'))

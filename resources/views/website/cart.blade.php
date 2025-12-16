@@ -187,7 +187,7 @@
                         </div>
 
                         <!-- Checkout Button -->
-                        <button class="checkout-btn" onclick="proceedCheckout()" id="checkoutBtn">
+                        <button type="button" class="checkout-btn" onclick="proceedCheckout()" id="checkoutBtn">
                             <i class="fas fa-lock me-2"></i>
                             Complete Purchase
                         </button>
@@ -198,11 +198,7 @@
                             Continue Shopping
                         </a>
 
-                        <!-- Guarantee -->
-                        <div class="guarantee-box">
-                            <h6><i class="fas fa-undo me-2"></i>30-Day Money-Back Guarantee</h6>
-                            <p>Full refund if you're not satisfied</p>
-                        </div>
+
 
                         <!-- What You Get -->
                         <div class="mt-4">
@@ -295,6 +291,7 @@
             let loginStatus = {{ Auth::check() ? 1 : 0 }};
 
             function selectPayment(method) {
+                document.getElementById("checkoutBtn").style.display = "block";
                 selectedPayment = method;
 
                 document.getElementById("stripeOption").classList.remove("selected");
@@ -309,17 +306,16 @@
 
             function proceedCheckout() {
                 if (!loginStatus) {
-                    let modal = new bootstrap.Modal(document.getElementById('cartLoginModal'));
-                    modal.show();
-                    return;
-                }
+                    window.location.href = "{{ route('login', ['redirect_url' => route('web.cart')]) }}";
+                } else {
 
-                if (selectedPayment === "stripe") {
-                    // Submit hidden form for Stripe
-                    document.getElementById("stripeCheckoutForm").submit();
-                } else if (selectedPayment === "paypal") {
-                    // You can define PayPal logic later
-                    startPayPalPayment();
+                    if (selectedPayment === "stripe") {
+                        // Submit hidden form for Stripe
+                        document.getElementById("stripeCheckoutForm").submit();
+                    } else if (selectedPayment === "paypal") {
+                        // You can define PayPal logic later
+                        startPayPalPayment();
+                    }
                 }
             }
 
@@ -482,16 +478,17 @@
                 });
             });
         </script>
-
-        <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_CLIENT_ID') }}&currency=USD"></script>
+        @if (env('PAYPAL_MODE') == 'live')
+            <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_CLIENT_ID') }}&currency=USD"></script>
+        @else
+            <script src="https://www.sandbox.paypal.com/sdk/js?client-id={{ env('PAYPAL_CLIENT_ID') }}&currency=USD"></script>
+        @endif
 
 
         <script>
             function startPayPalPayment() {
-                // Replace checkout button with PayPal button container
                 document.getElementById("checkoutBtn").style.display = "none";
 
-                // Create container dynamically
                 const container = document.createElement("div");
                 container.id = "paypal-button-container";
                 document.getElementById("paymentSection").appendChild(container);
@@ -500,6 +497,10 @@
                     createOrder: function() {
                         return fetch("{{ url('/paypal/create') }}", {
                                 method: "POST",
+                                body: JSON.stringify({
+                                    amount: document.getElementById("finalTotal").textContent.replace(
+                                        '$', '')
+                                })
                                 headers: {
                                     "Content-Type": "application/json",
                                     "X-CSRF-TOKEN": "{{ csrf_token() }}",
@@ -507,19 +508,37 @@
                             })
                             .then(res => res.json())
                             .then(data => {
-                                if (!data.approval_url) {
-                                    alert("Error creating PayPal transaction");
+                                if (!data.id) {
+                                    throw new Error("Order ID not returned");
                                 }
-                                window.location = data.approval_url;
+                                return data.id; //
+                            });
+                    },
+
+                    onApprove: function(data) {
+                        return fetch("{{ url('/paypal/capture') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                },
+                                body: JSON.stringify({
+                                    orderID: data.orderID
+                                })
+                            }).then(res => res.json())
+                            .then(details => {
+                                console.log("Payment successful", details);
                             });
                     }
                 }).render("#paypal-button-container");
+
                 window.scrollTo({
                     top: document.getElementById("paymentSection").offsetTop,
                     behavior: "smooth"
                 });
             }
         </script>
+
     @endpush
 
 
@@ -876,7 +895,7 @@
                 margin-bottom: 15px;
             }
 
-            .browse-btn{
+            .browse-btn {
                 background: var(--primary-cyan);
                 color: white;
                 border: none;
@@ -889,7 +908,8 @@
             .browse-btn:hover {
                 background: var(--dark-cyan);
             }
-            .browse-btn i{
+
+            .browse-btn i {
                 margin-right: 5px;
             }
 

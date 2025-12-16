@@ -81,6 +81,7 @@
 
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
+                        <input type="hidden" hidden name="redirect_url" value="{{ request('redirect_url') }}">
 
                         <!-- Email Address -->
                         <div class="mb-3">
