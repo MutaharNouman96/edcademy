@@ -96,6 +96,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Earning::class, 'educator_id');
     }
 
+    public function educatorReviews()
+    {
+        return $this->hasMany(\App\Models\EducatorReview::class, 'educator_id');
+    }
+
 
 
 
