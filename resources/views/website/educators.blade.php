@@ -228,6 +228,9 @@
                                         <i class="fas fa-calendar-check me-1"></i>Book
                                     </a>
                                 </div>
+                                {{-- <a href="{{ route('web.educator.show' , ['educator' => $educator->id]) }}" class="action-btn">
+                                    <i class="fas fa-calendar-check me-1"></i>Book
+                                </a> --}}
                             </div>
                         </div>
                     </div>

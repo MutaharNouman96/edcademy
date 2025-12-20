@@ -54,10 +54,9 @@
 
 
                     @if (Route::has('login') && Route::has('dashboard'))
-                        @if(auth()->check() && auth()->user()->role == 'student')
+                        @if (auth()->check() && auth()->user()->role == 'student')
                             <li class="nav-item ms-lg-2">
-                                <a class="nav-link"
-                                    href="{{ route( 'student.dashboard') }}">Dashboard</a>
+                                <a class="nav-link" href="{{ route('student.dashboard') }}">Dashboard</a>
                             </li>
                         @else
                             <li class="nav-item">
@@ -76,175 +75,178 @@
                             <span
                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger p-2"
                                 style="left: 30px;" id="cartCount">
-                                {{ cartTotalItems()}}
+                                {{ cartTotalItems() }}
                             </span>
                         </a>
                     </li>
-                </ul>
-            </div>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
-    </nav>
-    @if (session('success'))
-        <x-alert type="success" :message="session('success')" />
-    @endif
+</nav>
+@if (session('success'))
+    <x-alert type="success" :message="session('success')" />
+@endif
 
-    @if (session('error'))
-        <x-alert type="error" :message="session('error')" />
-    @endif
+@if (session('error'))
+    <x-alert type="error" :message="session('error')" />
+@endif
 
-    @if (session('info'))
-        <x-alert type="info" :message="session('message')" />
-    @endif
+@if (session('info'))
+    <x-alert type="info" :message="session('message')" />
+@endif
 
-    @if (session('warning'))
-        <x-alert type="warning" :message="session('warning')" />
-    @endif
+@if (session('warning'))
+    <x-alert type="warning" :message="session('warning')" />
+@endif
 
-    {{ $slot }}
+{{ $slot }}
 
-    <!-- Footer -->
-    <footer class="">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <h4 style="color: var(--light-cyan); margin-bottom: 20px">
-                        <i class="fas fa-graduation-cap"></i> Ed-Cademy
-                    </h4>
-                    <p style="color: #ccc">
-                        Making learning fun, accessible, and rewarding for students
-                        everywhere. Join the future of education today!
-                    </p>
-                    <div class="social-icons mt-3">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-tiktok"></i></a>
-                    </div>
-                </div>
-
-                <div class="col-md-2 mb-4">
-                    <h5 style="color: var(--light-cyan); margin-bottom: 20px">Learn</h5>
-                    <div class="footer-links">
-                        <a href="#">Browse Courses</a>
-                        <a href="#">Find an Educator</a>
-                        <a href="#">Free Resources</a>
-                        <a href="#">Certificates</a>
-                        <a href="#">Student Blog</a>
-                    </div>
-                </div>
-
-                <div class="col-md-2 mb-4">
-                    <h5 style="color: var(--light-cyan); margin-bottom: 20px">Teach</h5>
-                    <div class="footer-links">
-                        <a href="#">Become an Educator</a>
-                        <a href="#">Create Courses</a>
-                        <a href="#">Educator Resources</a>
-                        <a href="#">Pricing Plans</a>
-                        <a href="#">Success Stories</a>
-                    </div>
-                </div>
-
-                <div class="col-md-2 mb-4">
-                    <h5 style="color: var(--light-cyan); margin-bottom: 20px">
-                        Support
-                    </h5>
-                    <div class="footer-links">
-                        <a href="#">Help Center</a>
-                        <a href="#">Contact Us</a>
-                        <a href="#">Safety & Trust</a>
-                        <a href="#">Community Guidelines</a>
-                        <a href="#">FAQs</a>
-                    </div>
-                </div>
-
-                <div class="col-md-2 mb-4">
-                    <h5 style="color: var(--light-cyan); margin-bottom: 20px">
-                        Company
-                    </h5>
-                    <div class="footer-links">
-                        <a href="#">About Us</a>
-                        <a href="#">Careers</a>
-                        <a href="#">Press</a>
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Terms of Service</a>
-                    </div>
-                </div>
-            </div>
-
-            <hr style="border-color: #444; margin: 30px 0" />
-
-            <div class="text-center" style="color: #888">
-                <p>
-                    &copy; 2025 Ed-Cademy. All rights reserved. Made with ❤️ for
-                    students everywhere.
+<!-- Footer -->
+<footer class="">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h4 style="color: var(--light-cyan); margin-bottom: 20px">
+                    <i class="fas fa-graduation-cap"></i> Ed-Cademy
+                </h4>
+                <p style="color: #ccc">
+                    Making learning fun, accessible, and rewarding for students
+                    everywhere. Join the future of education today!
                 </p>
+                <div class="social-icons mt-3">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="col-md-2 mb-4">
+                <h5 style="color: var(--light-cyan); margin-bottom: 20px">Learn</h5>
+                <div class="footer-links">
+                    <a href="{{ route('web.courses') }}">Browse Courses</a>
+                    <a href="{{ route('web.educators.index') }}">Find an Educator</a>
+                    <a href="#">Free Resources</a>
+                    <a href="#">Certificates</a>
+                    <a href="#">Student Blog</a>
+                </div>
+            </div>
+
+            <div class="col-md-2 mb-4">
+                <h5 style="color: var(--light-cyan); margin-bottom: 20px">Teach</h5>
+                <div class="footer-links">
+                    <a href="{{ route('web.eudcator.signup') }}">Become an Educator</a>
+                    <a href="#">Create Courses</a>
+                    <a href="#">Educator Resources</a>
+                    <a href="#">Pricing Plans</a>
+                    <a href="#">Success Stories</a>
+                </div>
+            </div>
+
+            <div class="col-md-2 mb-4">
+                <h5 style="color: var(--light-cyan); margin-bottom: 20px">
+                    Support
+                </h5>
+                <div class="footer-links">
+                    <a href="#">Help Center</a>
+                    <a href="{{ route('web.contact.us') }}">Contact Us</a>
+                    <a href="#">Safety & Trust</a>
+                    <a href="#">Community Guidelines</a>
+                    <a href="#">FAQs</a>
+                </div>
+            </div>
+
+            <div class="col-md-2 mb-4">
+                <h5 style="color: var(--light-cyan); margin-bottom: 20px">
+                    Company
+                </h5>
+                <div class="footer-links">
+                    <a href="{{ route('web.about.us') }}">About Us</a>
+                    <a href="{{ route('web.educator.policy') }}">Educator Policy</a>
+                    <a href="{{ route('web.student.parent.policy') }}">Student Policy</a>
+                    <a href="{{ route('web.refund.policy') }}">Refund Policy</a>
+                    <a href="{{ route('web.privacy.policy') }}">Privacy Policy</a>
+                    <a href="{{  route('web.terms.and.conditions') }}"> Terms & Conditions</a>
+
+                </div>
             </div>
         </div>
-    </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <script>
-        // Smooth scrolling
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault()
-                const target = document.querySelector(this.getAttribute('href'))
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    })
-                }
-            })
+        <hr style="border-color: #444; margin: 30px 0" />
+
+        <div class="text-center" style="color: #888">
+            <p>
+                &copy; 2025 Ed-Cademy. All rights reserved. Made with ❤️ for
+                students everywhere.
+            </p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    // Smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault()
+            const target = document.querySelector(this.getAttribute('href'))
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                })
+            }
+        })
+    })
+
+
+
+    // Animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    }
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1'
+                entry.target.style.transform = 'translateY(0)'
+            }
+        })
+    }, observerOptions)
+
+    document
+        .querySelectorAll(
+            '.feature-card, .course-card, .testimonial-card, .step-card'
+        )
+        .forEach(el => {
+            el.style.opacity = '0'
+            el.style.transform = 'translateY(30px)'
+            el.style.transition = 'all 0.6s ease'
+            observer.observe(el)
         })
 
+    @if (request()->routeIs('website.index'))
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('#navbar')
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled')
+            } else {
+                navbar.classList.remove('scrolled')
+            }
+        })
+    @endif
+</script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert@2.1.2/dist/sweetalert.min.js"></script>
 
-        // Animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        }
-
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1'
-                    entry.target.style.transform = 'translateY(0)'
-                }
-            })
-        }, observerOptions)
-
-        document
-            .querySelectorAll(
-                '.feature-card, .course-card, .testimonial-card, .step-card'
-            )
-            .forEach(el => {
-                el.style.opacity = '0'
-                el.style.transform = 'translateY(30px)'
-                el.style.transition = 'all 0.6s ease'
-                observer.observe(el)
-            })
-
-        @if (request()->routeIs('website.index'))
-            window.addEventListener('scroll', function() {
-                const navbar = document.querySelector('#navbar')
-                if (window.scrollY > 100) {
-                    navbar.classList.add('scrolled')
-                } else {
-                    navbar.classList.remove('scrolled')
-                }
-            })
-        @endif
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert@2.1.2/dist/sweetalert.min.js"></script>
-
-    @stack('scripts')
+@stack('scripts')
 </body>
 
 </html>

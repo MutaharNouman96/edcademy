@@ -7,9 +7,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Course;
+use App\Models\CourseCategory;
 use App\Models\CourseSection;
 use App\Models\Lesson;
 use App\Models\Purchase;
+use App\Models\Subject;
 use Faker\Factory as Faker;
 
 class AllInOneDBSeeder extends Seeder
@@ -57,10 +59,33 @@ class AllInOneDBSeeder extends Seeder
             ]));
         }
 
+
+
         // --- COURSES ---
         echo "Seeding courses...\n";
 
         $subjects = ['Math', 'Physics', 'Chemistry', 'Biology', 'English', 'Computer Science', 'Economics', 'Art', 'Geography', 'History', 'Sociology'];
+
+        foreach ($subjects as $subject) {
+            Subject::create([
+                'name' => $subject,
+                'slug' => Str::slug($subject)
+            ]);
+        }
+
+        $categories = ['Science', 'Business', 'Arts', 'Languages', 'Test Preparation'];
+
+        foreach ($categories as $category) {
+            CourseCategory::create([
+                'name' => $category,
+                'slug' => Str::slug($category),
+                'parent_id' => null
+            ]);
+        }
+
+        $categoriesIds = CourseCategory::all()->pluck('id')->toArray();
+
+
         $levels = ['Beginner', 'Intermediate', 'Advanced'];
         $languages = ['English', 'Latin', 'German', 'Spanish', 'French'];
 
@@ -86,6 +111,8 @@ class AllInOneDBSeeder extends Seeder
                     'type' => fake()->randomElement(['module', 'video', 'live']),
                     'status' => 'published',
                     'publish_option' => 'now',
+                    'schedule_date' => now()->addDays(rand(1, 7)),
+                    'course_category_id' => fake()->randomElement($categoriesIds)
                 ]);
 
                 // --- SECTIONS & LESSONS ---
