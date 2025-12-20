@@ -171,7 +171,7 @@ class LessonController extends Controller
             if (isset($uploadResponse['success']) && $uploadResponse['success'] === false) {
                 dd($uploadResponse);
             }
-            $vivars: deoLink = $uploadResponse['video_uri'];
+            $videoLink = $uploadResponse['video_uri'];
         }
         if (!empty($videoLink)) {
             $lesson->video_path = $videoLink;
