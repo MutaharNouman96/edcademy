@@ -57,6 +57,9 @@ Route::get("course/{slug}", [CourseController::class, "show"])->name("web.course
 Route::get("educators", [WebsiteController::class, "educators"])->name("web.educators.index");
 Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name("web.educator.show");
 
+// API route for fetching educators dynamically
+Route::get("api/educators", [WebsiteController::class, "educators"])->name("api.educators.index");
+
 Route::get("cart", [WebsiteController::class, "cart"])->name("web.cart");
 Route::get("cart/checkout", [CartController::class, "checkout"])->name("web.cart.checkout");
 Route::post('cart/add-to-cart', [CartController::class, 'store'])->name('web.cart.addToCart');

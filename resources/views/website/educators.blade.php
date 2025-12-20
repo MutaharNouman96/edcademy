@@ -3,8 +3,8 @@
         <!-- Hero Section -->
         <div class="hero-section">
             <div class="container hero-content">
-                <h1>Find Your Perfect Educator</h1>
-                <p>
+                <h1 class="text-dark">Find Your Perfect Educator</h1>
+                <p class="text-dark">
                     Connect with expert educators tailored to your learning
                     needs
                 </p>
@@ -24,73 +24,73 @@
                     <!-- Keyword Search -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Search by Name or Keyword</label>
-                        <div class="search-input-group">
-                            <i class="fas fa-search"></i>
-                            <input type="text" class="search-input"
-                                placeholder="e.g., Math, Physics, Dr. Smith..." />
-                        </div>
+<div class="search-input-group">
+    <i class="fas fa-search"></i>
+    <input type="text" class="search-input" id="keywordSearch"
+        placeholder="e.g., Math, Physics, Dr. Smith..." />
+</div>
                     </div>
 
                     <!-- Primary Subject -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Primary Subject</label>
-                        <div class="search-input-group">
-                            <i class="fas fa-book"></i>
-                            <select class="form-select search-input">
-                                <option value="">All Subjects</option>
-                                <option value="mathematics">Mathematics</option>
-                                <option value="science">Science</option>
-                                <option value="programming">Programming</option>
-                                <option value="languages">Languages</option>
-                                <option value="arts">Arts & Design</option>
-                                <option value="business">Business</option>
-                                <option value="music">Music</option>
-                            </select>
-                        </div>
+<div class="search-input-group">
+    <i class="fas fa-book"></i>
+    <select class="form-select search-input" id="subjectFilter">
+        <option value="">All Subjects</option>
+        <option value="mathematics">Mathematics</option>
+        <option value="science">Science</option>
+        <option value="programming">Programming</option>
+        <option value="languages">Languages</option>
+        <option value="arts">Arts & Design</option>
+        <option value="business">Business</option>
+        <option value="music">Music</option>
+    </select>
+</div>
                     </div>
 
                     <!-- Teaching Levels -->
                     <div class="col-12 mb-3">
                         <label class="form-label">Teaching Levels</label>
-                        <div class="filter-chips">
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Elementary
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Middle School
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                High School
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                College
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Professional
-                            </div>
-                        </div>
+<div class="filter-chips" id="levelFilters">
+    <div class="filter-chip" data-filter="Elementary">
+        Elementary
+    </div>
+    <div class="filter-chip" data-filter="Middle School">
+        Middle School
+    </div>
+    <div class="filter-chip" data-filter="High School">
+        High School
+    </div>
+    <div class="filter-chip" data-filter="College">
+        College
+    </div>
+    <div class="filter-chip" data-filter="Professional">
+        Professional
+    </div>
+</div>
                     </div>
 
                     <!-- Teaching Style -->
                     <div class="col-12 mb-3">
                         <label class="form-label">Preferred Teaching Style</label>
-                        <div class="filter-chips">
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Hands-on
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Interactive
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Project-based
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Lecture-based
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Visual Learning
-                            </div>
-                        </div>
+<div class="filter-chips" id="styleFilters">
+    <div class="filter-chip" data-filter="Hands-on">
+        Hands-on
+    </div>
+    <div class="filter-chip" data-filter="Interactive">
+        Interactive
+    </div>
+    <div class="filter-chip" data-filter="Project-based">
+        Project-based
+    </div>
+    <div class="filter-chip" data-filter="Lecture-based">
+        Lecture-based
+    </div>
+    <div class="filter-chip" data-filter="Visual Learning">
+        Visual Learning
+    </div>
+</div>
                     </div>
 
                     <!-- Hourly Rate Range -->
@@ -109,402 +109,420 @@
                     <!-- Additional Filters -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Additional Filters</label>
-                        <div class="filter-chips">
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Certified
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Top Rated
-                            </div>
-                            <div class="filter-chip" onclick="toggleChip(this)">
-                                Available Now
-                            </div>
-                        </div>
+<div class="filter-chips" id="additionalFilters">
+    <div class="filter-chip" data-filter="certified">
+        Certified
+    </div>
+    <div class="filter-chip" data-filter="top_rated">
+        Top Rated
+    </div>
+</div>
                     </div>
 
-                    <!-- Search Button -->
-                    <div class="col-12">
-                        <button class="search-btn" onclick="searchEducators()">
-                            <i class="fas fa-search me-2"></i>Search Educators
-                        </button>
-                    </div>
+
                 </div>
             </div>
 
             <!-- Results Header -->
             <div class="results-header">
-                <div class="results-count">
-                    <strong>42</strong> educators found
-                </div>
-                <select class="sort-dropdown">
-                    <option>Highest Rated</option>
-                    <option>Lowest Price</option>
-                    <option>Highest Price</option>
-                    <option>Most Students</option>
-                    <option>Most Experience</option>
-                </select>
+<div class="results-count">
+    <strong id="educatorCount">{{ $educators->total() }}</strong> educators found
+</div>
+<select class="sort-dropdown" id="sortDropdown">
+    <option value="highest_rated">Highest Rated</option>
+    <option value="lowest_price">Lowest Price</option>
+    <option value="highest_price">Highest Price</option>
+    <option value="most_students">Most Students</option>
+    <option value="most_experience">Most Experience</option>
+</select>
             </div>
 
-            <!-- Educator Grid -->
-            <div class="row g-4 mb-5">
-                <!-- Educator 1 -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="educator-card">
-                        <div class="educator-avatar-section"
-                            style="
-                                background: linear-gradient(
-                                    135deg,
-                                    #667eea 0%,
-                                    #764ba2 100%
-                                );
-                            ">
-                            <i class="fas fa-user-tie"></i>
-                            <span class="featured-badge">FEATURED</span>
-                            <div class="online-indicator"></div>
-                        </div>
-                        <div class="educator-body">
-                            <h3 class="educator-name">Dr. Sarah Johnson</h3>
-                            <p class="educator-subject">
-                                Mathematics & Physics
-                            </p>
+                        <div class="row g-4 mb-5" id="educatorGrid">
+                @foreach ($educators as $educator)
+                    <div class="col-lg-4 col-md-6">
+                        <div class="educator-card">
+                            <div class="educator-avatar-section"
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="fas fa-user-tie"></i>
+                                @if ($educator->educatorProfile && $educator->educatorProfile->is_featured)
+                                    <span class="featured-badge">FEATURED</span>
+                                @endif
+                                @if ($educator->is_online) {{-- Assuming 'is_online' attribute exists for user --}}
+                                    <div class="online-indicator"></div>
+                                @endif
+                            </div>
+                            <div class="educator-body">
+                                <h3 class="educator-name">{{ $educator->first_name .' '. $educator->last_name }}</h3>
+                                <p class="educator-subject">
+                                    {{ $educator->educatorProfile->primary_subject ?? 'N/A' }}
+                                </p>
 
-                            <div class="rating-section">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <div class="rating-section">
+                                    <div class="rating-stars">
+                                        @php
+                                            $avgRating = $educator->educatorReviews->avg('rating');
+                                            $fullStars = floor($avgRating);
+                                            $halfStar = ceil($avgRating - $fullStars);
+                                            $emptyStars = 5 - $fullStars - $halfStar;
+                                        @endphp
+                                        @for ($i = 0; $i < $fullStars; $i++)
+
+                                            <i class="fas fa-star"></i>
+                                        @endfor
+                                        @if ($halfStar)
+                                            <i class="fas fa-star-half-alt"></i>
+                                        @endif
+                                        @for ($i = 0; $i < $emptyStars; $i++)
+                                            <i class="far fa-star"></i> {{-- Assuming 'far fa-star' for empty stars --}}
+                                        @endfor
+                                    </div>
+                                    <span class="rating-text">
+                                        {{ number_format($avgRating, 1) }}
+                                        ({{ $educator->educatorReviews->count() }} reviews)
+                                    </span>
                                 </div>
-                                <span class="rating-text">4.9 (127 reviews)</span>
-                            </div>
 
-                            <div class="teaching-style-badge">
-                                <i class="fas fa-hands-helping"></i>
-                                Hands-on Learning
-                            </div>
+                                @if ($educator->educatorProfile && $educator->educatorProfile->teaching_style)
+                                    <div class="teaching-style-badge">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                        {{ $educator->educatorProfile->teaching_style }}
+                                    </div>
+                                @endif
 
-                            <div class="educator-stats">
-                                <span class="stat-item">
-                                    <i class="fas fa-user-graduate"></i>
-                                    450+ Students
-                                </span>
-                                <span class="stat-item">
-                                    <i class="fas fa-clock"></i>
-                                    5 years
-                                </span>
-                            </div>
-
-                            <div class="teaching-levels">
-                                <span class="level-badge">High School</span>
-                                <span class="level-badge">College</span>
-                                <span class="level-badge">Professional</span>
-                            </div>
-
-                            <p class="educator-bio">
-                                PhD in Applied Mathematics from MIT. Passionate
-                                about making complex concepts simple and
-                                engaging.
-                            </p>
-
-                            <div class="certifications-badge">
-                                <i class="fas fa-certificate"></i>
-                                PhD Mathematics (MIT), Teaching License
-                            </div>
-
-                            <div class="educator-footer">
-                                <div class="hourly-rate">
-                                    <span class="rate-label">Starting at</span>
-                                    <span class="rate-amount">$85<small>/hr</small></span>
+                                <div class="educator-stats">
+                                    <span class="stat-item">
+                                        <i class="fas fa-user-graduate"></i>
+                                        {{ $educator->students_count ?? '0' }}+ Students
+                                    </span>
+                                    <span class="stat-item">
+                                        <i class="fas fa-clock"></i>
+                                        {{ $educator->educatorProfile->years_experience ?? '0' }} years
+                                    </span>
                                 </div>
-                                <button class="action-btn">
-                                    <i class="fas fa-calendar-check me-1"></i>Book
-                                </button>
+
+                                <div class="teaching-levels">
+                                    @if ($educator->educatorProfile && $educator->educatorProfile->teaching_levels)
+                                        @foreach (json_decode($educator->educatorProfile->teaching_levels) as $level)
+                                            <span class="level-badge">{{ $level }}</span>
+                                        @endforeach
+                                    @endif
+                                </div>
+
+                                <p class="educator-bio">
+                                    {{ $educator->educatorProfile->bio ?? 'No bio available.' }}
+                                </p>
+
+                                @if ($educator->educatorProfile && $educator->educatorProfile->certifications)
+                                    <div class="certifications-badge">
+                                        <i class="fas fa-certificate"></i>
+                                        {{ $educator->educatorProfile->certifications }}
+                                    </div>
+                                @endif
+
+                                <div class="educator-footer">
+                                    <div class="hourly-rate">
+                                        <span class="rate-label">Starting at</span>
+                                        <span class="rate-amount">${{ $educator->educatorProfile->hourly_rate ?? '0' }}<small>/hr</small></span>
+                                    </div>
+                                    <a href="{{ route('web.educator.show', $educator->id) }}" class="action-btn">
+                                        <i class="fas fa-calendar-check me-1"></i>Book
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                @endforeach
+            </div>
 
-                <!-- Educator 2 -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="educator-card">
-                        <div class="educator-avatar-section"
-                            style="
-                                background: linear-gradient(
-                                    135deg,
-                                    #f093fb 0%,
-                                    #f5576c 100%
-                                );
-                            ">
-                            <i class="fas fa-user"></i>
-                            <div class="online-indicator"></div>
-                        </div>
-                        <div class="educator-body">
-                            <h3 class="educator-name">Prof. Michael Chen</h3>
-                            <p class="educator-subject">Computer Science</p>
-
-                            <div class="rating-section">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <span class="rating-text">4.8 (203 reviews)</span>
-                            </div>
-
-                            <div class="teaching-style-badge">
-                                <i class="fas fa-project-diagram"></i>
-                                Project-based
-                            </div>
-
-                            <div class="educator-stats">
-                                <span class="stat-item">
-                                    <i class="fas fa-user-graduate"></i>
-                                    680+ Students
-                                </span>
-                                <span class="stat-item">
-                                    <i class="fas fa-clock"></i>
-                                    8 years
-                                </span>
-                            </div>
-
-                            <div class="teaching-levels">
-                                <span class="level-badge">Middle School</span>
-                                <span class="level-badge">High School</span>
-                                <span class="level-badge">College</span>
-                            </div>
-
-                            <p class="educator-bio">
-                                Former Google engineer. Expert in Python,
-                                JavaScript, and web development with real-world
-                                projects.
-                            </p>
-
-                            <div class="certifications-badge">
-                                <i class="fas fa-certificate"></i>
-                                MSc CS (Stanford), AWS Certified
-                            </div>
-
-                            <div class="educator-footer">
-                                <div class="hourly-rate">
-                                    <span class="rate-label">Starting at</span>
-                                    <span class="rate-amount">$95<small>/hr</small></span>
-                                </div>
-                                <button class="action-btn">
-                                    <i class="fas fa-calendar-check me-1"></i>Book
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Educator 3 -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="educator-card">
-                        <div class="educator-avatar-section"
-                            style="
-                                background: linear-gradient(
-                                    135deg,
-                                    #4facfe 0%,
-                                    #00f2fe 100%
-                                );
-                            ">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <div class="educator-body">
-                            <h3 class="educator-name">Emma Rodriguez</h3>
-                            <p class="educator-subject">English & Literature</p>
-
-                            <div class="rating-section">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <span class="rating-text">5.0 (89 reviews)</span>
-                            </div>
-
-                            <div class="teaching-style-badge">
-                                <i class="fas fa-users"></i>
-                                Interactive
-                            </div>
-
-                            <div class="educator-stats">
-                                <span class="stat-item">
-                                    <i class="fas fa-user-graduate"></i>
-                                    320+ Students
-                                </span>
-                                <span class="stat-item">
-                                    <i class="fas fa-clock"></i>
-                                    4 years
-                                </span>
-                            </div>
-
-                            <div class="teaching-levels">
-                                <span class="level-badge">Elementary</span>
-                                <span class="level-badge">Middle School</span>
-                                <span class="level-badge">High School</span>
-                            </div>
-
-                            <p class="educator-bio">
-                                Published author specializing in creative
-                                writing. Focus on building confidence and
-                                fostering love for reading.
-                            </p>
-
-                            <div class="certifications-badge">
-                                <i class="fas fa-certificate"></i>
-                                MA English (Oxford), TESOL Certified
-                            </div>
-
-                            <div class="educator-footer">
-                                <div class="hourly-rate">
-                                    <span class="rate-label">Starting at</span>
-                                    <span class="rate-amount">$65<small>/hr</small></span>
-                                </div>
-                                <button class="action-btn">
-                                    <i class="fas fa-calendar-check me-1"></i>Book
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Educator 4 -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="educator-card">
-                        <div class="educator-avatar-section"
-                            style="
-                                background: linear-gradient(
-                                    135deg,
-                                    #fa709a 0%,
-                                    #fee140 100%
-                                );
-                            ">
-                            <i class="fas fa-user-md"></i>
-                            <span class="featured-badge">TOP RATED</span>
-                        </div>
-                        <div class="educator-body">
-                            <h3 class="educator-name">Dr. James Patterson</h3>
-                            <p class="educator-subject">Chemistry & Biology</p>
-
-                            <div class="rating-section">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                                <span class="rating-text">4.9 (156 reviews)</span>
-                            </div>
-
-                            <div class="teaching-style-badge">
-                                <i class="fas fa-flask"></i>
-                                Experimental
-                            </div>
-
-                            <div class="educator-stats">
-                                <span class="stat-item">
-                                    <i class="fas fa-user-graduate"></i>
-                                    590+ Students
-                                </span>
-                                <span class="stat-item">
-                                    <i class="fas fa-clock"></i>
-                                    12 years
-                                </span>
-                            </div>
-
-                            <div class="teaching-levels">
-                                <span class="level-badge">High School</span>
-                                <span class="level-badge">College</span>
-                                <span class="level-badge">Professional</span>
-                            </div>
-
-                            <p class="educator-bio">
-                                Award-winning professor. Specializing in organic
-                                chemistry and biochemistry with engaging lab
-                                demos.
-                            </p>
-
-                            <div class="certifications-badge">
-                                <i class="fas fa-certificate"></i>
-                                PhD Chemistry (Harvard), Research Fellow
-                            </div>
-
-                            <div class="educator-footer">
-                                <div class="hourly-rate">
-                                    <span class="rate-label">Starting at</span>
-                                    <span class="rate-amount">$110<small>/hr</small></span>
-                                </div>
-                                <button class="action-btn">
-                                    <i class="fas fa-calendar-check me-1"></i>Book
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Educator 5 -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="educator-card">
-                        <div class="educator-avatar-section"
-                            style="
-                                background: linear-gradient(
-                                    135deg,
-                                    #30cfd0 0%,
-                                    #330867 100%
-                                );
-                            ">
-                            <i class="fas fa-user-astronaut"></i>
-                            <div class="online-indicator"></div>
-                        </div>
-                        <div class="educator-body">
-                            <h3 class="educator-name">Maria Garcia</h3>
-                            <p class="educator-subject">Spanish & French</p>
-
-                            <div class="rating-section">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                                <span class="rating-text">4.7 (94 reviews)</span>
-                            </div>
-
-                            <div class="teaching-style-badge">
-                                <i class="fas fa-comments"></i>
-                                Conversational
-                            </div>
-
-                            <div class="educator-stats">
-                                <span class="stat-item">
-                                    <i class="fas fa-user-graduate"></i>
-                                    280+ Students
-                                </span>
-                                <span class="stat-item">
-                                    <i class="fas fa-clock"></i>
-                                    6 years
-                                </span>
-                            </div>
-
-                            <div class="teaching-levels">
-                                <span class="level-badge">All Levels</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center mt-4">
+                {{ $educators->links() }}
             </div>
         </div>
     </div>
 
     @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const keywordSearch = document.getElementById('keywordSearch');
+            const subjectFilter = document.getElementById('subjectFilter');
+            const levelFilters = document.getElementById('levelFilters');
+            const styleFilters = document.getElementById('styleFilters');
+            const priceRange = document.getElementById('priceRange');
+            const maxPriceSpan = document.getElementById('maxPrice');
+            const additionalFilters = document.getElementById('additionalFilters');
+            const sortDropdown = document.getElementById('sortDropdown');
+            const educatorGrid = document.getElementById('educatorGrid');
+            const educatorCount = document.getElementById('educatorCount');
+            const paginationContainer = document.querySelector('.d-flex.justify-content-center.mt-4');
+
+            // Function to update price display
+            window.updatePrice = function(value) {
+                maxPriceSpan.textContent = '$' + value;
+            };
+
+            // Function to toggle chip active state
+            window.toggleChip = function(element) {
+                element.classList.toggle('active');
+            };
+
+            // Function to collect all filter parameters
+            function collectFilterParams() {
+                const params = {};
+
+                if (keywordSearch.value) {
+                    params.search = keywordSearch.value;
+                }
+                if (subjectFilter.value) {
+                    params.subject = subjectFilter.value;
+                }
+
+                const selectedLevels = Array.from(levelFilters.children)
+                    .filter(chip => chip.classList.contains('active'))
+                    .map(chip => chip.dataset.filter);
+                if (selectedLevels.length > 0) {
+                    params.levels = selectedLevels;
+                }
+
+                const selectedStyles = Array.from(styleFilters.children)
+                    .filter(chip => chip.classList.contains('active'))
+                    .map(chip => chip.dataset.filter);
+                if (selectedStyles.length > 0) {
+                    params.styles = selectedStyles;
+                }
+
+                params.max_rate = priceRange.value;
+
+                const selectedAdditionalFilters = Array.from(additionalFilters.children)
+                    .filter(chip => chip.classList.contains('active'))
+                    .map(chip => chip.dataset.filter);
+                if (selectedAdditionalFilters.length > 0) {
+                    params.additional_filters = selectedAdditionalFilters;
+                }
+
+                if (sortDropdown.value) {
+                    params.sort_by = sortDropdown.value;
+                }
+
+                return params;
+            }
+
+            // Function to fetch and render educators
+            async function fetchEducators(page = 1) {
+                const params = collectFilterParams();
+                const queryString = new URLSearchParams(params).toString();
+                const url = `{{ route('api.educators.index') }}?page=${page}&${queryString}`;
+
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest' // Important for Laravel's AJAX detection
+                        }
+                    });
+                    const data = await response.json(); // Assuming JSON response
+
+                    // Clear existing educators
+                    educatorGrid.innerHTML = '';
+
+                    // Update educator count
+                    educatorCount.textContent = data.total;
+
+                    // Render new educators
+                    data.data.forEach(educator => {
+                        const educatorCardHtml = `
+                            <div class="col-lg-4 col-md-6">
+                                <div class="educator-card">
+                                    <div class="educator-avatar-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                        <i class="fas fa-user-tie"></i>
+                                        ${educator.educator_profile && educator.educator_profile.is_featured ? '<span class="featured-badge">FEATURED</span>' : ''}
+                                        ${educator.is_online ? '<div class="online-indicator"></div>' : ''}
+                                    </div>
+                                    <div class="educator-body">
+                                        <h3 class="educator-name">${educator.name}</h3>
+                                        <p class="educator-subject">
+                                            ${educator.educator_profile ? educator.educator_profile.main_subject : 'N/A'}
+                                        </p>
+                                        <div class="rating-section">
+                                            <div class="rating-stars">
+                                                ${generateStarRating(educator.avg_rating)}
+                                            </div>
+                                            <span class="rating-text">
+                                                ${educator.avg_rating ? parseFloat(educator.avg_rating).toFixed(1) : '0.0'}
+                                                (${educator.educator_reviews_count} reviews)
+                                            </span>
+                                        </div>
+                                        ${educator.educator_profile && educator.educator_profile.teaching_style ? `
+                                            <div class="teaching-style-badge">
+                                                <i class="fas fa-chalkboard-teacher"></i>
+                                                ${educator.educator_profile.teaching_style}
+                                            </div>
+                                        ` : ''}
+                                        <div class="educator-stats">
+                                            <span class="stat-item">
+                                                <i class="fas fa-user-graduate"></i>
+                                                ${educator.students_count ?? '0'}+ Students
+                                            </span>
+                                            <span class="stat-item">
+                                                <i class="fas fa-clock"></i>
+                                                ${educator.educator_profile ? educator.educator_profile.years_experience : '0'} years
+                                            </span>
+                                        </div>
+                                        <div class="teaching-levels">
+                                            ${educator.educator_profile && educator.educator_profile.teaching_levels ?
+                                                JSON.parse(educator.educator_profile.teaching_levels).map(level => `<span class="level-badge">${level}</span>`).join('')
+                                                : ''}
+                                        </div>
+                                        <p class="educator-bio">
+                                            ${educator.educator_profile ? educator.educator_profile.bio : 'No bio available.'}
+                                        </p>
+                                        ${educator.educator_profile && educator.educator_profile.certifications ? `
+                                            <div class="certifications-badge">
+                                                <i class="fas fa-certificate"></i>
+                                                ${educator.educator_profile.certifications}
+                                            </div>
+                                        ` : ''}
+                                        <div class="educator-footer">
+                                            <div class="hourly-rate">
+                                                <span class="rate-label">Starting at</span>
+                                                <span class="rate-amount">$${educator.educator_profile ? educator.educator_profile.hourly_rate : '0'}<small>/hr</small></span>
+                                            </div>
+                                            <a href="/educator/${educator.id}" class="action-btn">
+                                                <i class="fas fa-calendar-check me-1"></i>Book
+                                            </a>
+                                        </div>
+                                </div>
+                            </div>
+                        `;
+                        educatorGrid.insertAdjacentHTML('beforeend', educatorCardHtml);
+                    });
+
+                    // Update pagination links
+                    renderPagination(data);
+
+                } catch (error) {
+                    console.error('Error fetching educators:', error);
+                }
+            }
+
+            // Helper function to generate star ratings HTML
+            function generateStarRating(avgRating) {
+                let starsHtml = '';
+                const fullStars = Math.floor(avgRating);
+                const halfStar = Math.ceil(avgRating - fullStars);
+                const emptyStars = 5 - fullStars - halfStar;
+
+                for (let i = 0; i < fullStars; i++) {
+                    starsHtml += '<i class="fas fa-star"></i>';
+                }
+                if (halfStar) {
+                    starsHtml += '<i class="fas fa-star-half-alt"></i>';
+                }
+                for (let i = 0; i < emptyStars; i++) {
+                    starsHtml += '<i class="far fa-star"></i>';
+                }
+                return starsHtml;
+            }
+
+            // Function to render pagination links
+            function renderPagination(data) {
+                paginationContainer.innerHTML = ''; // Clear existing pagination
+
+                const ul = document.createElement('ul');
+                ul.classList.add('pagination');
+
+                // Previous Button
+                if (data.prev_page_url) {
+                    const li = document.createElement('li');
+                    li.classList.add('page-item');
+                    const a = document.createElement('a');
+                    a.classList.add('page-link');
+                    a.href = '#';
+                    a.textContent = 'Previous';
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        fetchEducators(data.current_page - 1);
+                    });
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                }
+
+                // Page Numbers
+                data.links.forEach(link => {
+                    if (link.url && link.label.match(/^[0-9]+$/)) {
+                        const li = document.createElement('li');
+                        li.classList.add('page-item');
+                        if (link.active) {
+                            li.classList.add('active');
+                        }
+                        const a = document.createElement('a');
+                        a.classList.add('page-link');
+                        a.href = '#';
+                        a.textContent = link.label;
+                        a.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            fetchEducators(link.label);
+                        });
+                        li.appendChild(a);
+                        ul.appendChild(li);
+                    }
+                });
+
+                // Next Button
+                if (data.next_page_url) {
+                    const li = document.createElement('li');
+                    li.classList.add('page-item');
+                    const a = document.createElement('a');
+                    a.classList.add('page-link');
+                    a.href = '#';
+                    a.textContent = 'Next';
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        fetchEducators(data.current_page + 1);
+                    });
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                }
+
+                if (ul.children.length > 0) {
+                    paginationContainer.appendChild(ul);
+                }
+            }
+
+
+            // Event Listeners for filters and search
+            keywordSearch.addEventListener('input', () => fetchEducators(1));
+            subjectFilter.addEventListener('change', () => fetchEducators(1));
+            priceRange.addEventListener('input', () => {
+                updatePrice(priceRange.value);
+                fetchEducators(1);
+            });
+            sortDropdown.addEventListener('change', () => fetchEducators(1));
+
+            levelFilters.addEventListener('click', (event) => {
+                if (event.target.classList.contains('filter-chip')) {
+                    toggleChip(event.target);
+                    fetchEducators(1);
+                }
+            });
+
+            styleFilters.addEventListener('click', (event) => {
+                if (event.target.classList.contains('filter-chip')) {
+                    toggleChip(event.target);
+                    fetchEducators(1);
+                }
+            });
+
+            additionalFilters.addEventListener('click', (event) => {
+                if (event.target.classList.contains('filter-chip')) {
+                    toggleChip(event.target);
+                    fetchEducators(1);
+                }
+            });
+
+            // Initial fetch of educators when the page loads
+            fetchEducators();
+        });
+    </script>
     @endpush
     @push('styles')
         <style>
@@ -623,8 +641,10 @@
             }
 
             .filter-chip.active {
-                border-color: var(--primary-cyan);
-                background: var(--primary-cyan);
+                /* border-color: var(--primary-cyan); */
+                /* background: var(--primary-cyan); */
+                border-color: #999;
+                background: #999
                 color: white;
             }
 

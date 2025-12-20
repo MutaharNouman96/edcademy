@@ -13,6 +13,7 @@ use App\Models\StudentTestimonial;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class WebsiteController extends Controller
 {
@@ -73,9 +74,103 @@ class WebsiteController extends Controller
         return view("website.course", compact("course"));
     }
 
-    public function educators()
+    public function educators(Request $request)
     {
-        return view("website.educators");
+        $query = User::verifiedEducator()->with("EducatorProfile", "educatorReviews");
+
+        // Search by Name or Keyword
+        if ($request->has("search") && $request->search != "") {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where("name", "like", "%" . $search . "%")
+                    ->orWhereHas("educatorProfile", function ($q2) use ($search) {
+                        $q2->where("bio", "like", "%" . $search . "%")
+                           ->orWhere("skills", "like", "%" . $search . "%");
+                    });
+            });
+        }
+
+        // Primary Subject filter
+        if ($request->has("subject") && $request->subject != "") {
+            Log::info('Subject filter applied: ' . $request->subject);
+            $query->whereHas("educatorProfile", function ($q) use ($request) {
+                $q->where("primary_subject", $request->subject);
+            });
+        }
+
+        // Teaching Levels filter (assuming 'teaching_levels' is a comma-separated string or JSON array in educatorProfile)
+        if ($request->has("levels") && is_array($request->levels) && count($request->levels) > 0) {
+            $query->whereHas("educatorProfile", function ($q) use ($request) {
+                foreach ($request->levels as $level) {
+                    $q->orWhere("teaching_levels", "like", "%{$level}%");
+                }
+            });
+        }
+
+        // Teaching Style filter
+        if ($request->has("styles") && is_array($request->styles) && count($request->styles) > 0) {
+            $query->whereHas("educatorProfile", function ($q) use ($request) {
+                foreach ($request->styles as $style) {
+                    $q->orWhere("teaching_style", "like", "%{$style}%");
+                }
+            });
+        }
+
+        // Maximum Hourly Rate filter
+        if ($request->has("max_rate") && is_numeric($request->max_rate)) {
+            $query->whereHas("educatorProfile", function ($q) use ($request) {
+                $q->where("hourly_rate", "<=", $request->max_rate);
+            });
+        }
+
+        // Additional Filters
+        if ($request->has("additional_filters") && is_array($request->additional_filters)) {
+            foreach ($request->additional_filters as $filter) {
+                if ($filter == "certified") {
+                    $query->whereHas("educatorProfile", function ($q) {
+                        $q->where("is_certified", true);
+                    });
+                }
+                if ($filter == "top_rated") {
+                    $query->withAvg("educatorReviews", "rating")->having("educator_reviews_avg_rating", ">=", 4.5);
+                }
+            }
+        }
+
+
+        if ($request->has("sort_by")) {
+            switch ($request->sort_by) {
+                case "highest_rated":
+                    $query->withAvg("educatorReviews", "rating")->orderByDesc("educator_reviews_avg_rating");
+                    break;
+                case "lowest_price":
+                    $query->whereHas("educatorProfile")->orderBy("hourly_rate");
+                    break;
+                case "highest_price":
+                    $query->whereHas("educatorProfile")->orderByDesc("hourly_rate");
+                    break;
+                case "most_students":
+                    $query->leftJoin('courses', 'users.id', '=', 'courses.user_id')
+                          ->leftJoin('course_purchases', 'courses.id', '=', 'course_purchases.course_id')
+                          ->selectRaw('users.*, COUNT(DISTINCT course_purchases.student_id) as students_count')
+                          ->groupBy('users.id')
+                          ->orderByDesc('students_count');
+                    break;
+                case "most_experience":
+                    $query->whereHas("educatorProfile")->orderByDesc("years_experience");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        $educators = $query->paginate(10);
+
+
+
+        // dd($educators);
+
+        return view("website.educators", compact("educators")); //asim
     }
     public function educator($id)
     {
