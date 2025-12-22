@@ -169,7 +169,7 @@
                     <a href="{{ route('web.student.parent.policy') }}">Student Policy</a>
                     <a href="{{ route('web.refund.policy') }}">Refund Policy</a>
                     <a href="{{ route('web.privacy.policy') }}">Privacy Policy</a>
-                    <a href="{{  route('web.terms.and.conditions') }}"> Terms & Conditions</a>
+                    <a href="{{ route('web.terms.and.conditions') }}"> Terms & Conditions</a>
 
                 </div>
             </div>
@@ -244,8 +244,57 @@
     @endif
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert@2.1.2/dist/sweetalert.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function() {
+        $('.add-to-cart-form').on('submit', function(e) {
+            e.preventDefault(); // Stop page reload
 
+            const form = $(this);
+            const btn = form.find('.cart-btn');
+
+            $.ajax({
+                url: form.attr('action'),
+                method: 'POST',
+                data: form.serialize(),
+                success: function(res) {
+                    if (res.status === true) {
+                        btn.text('Added to cart');
+                        btn.prop('disabled', true);
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Added to cart!',
+                            text: 'Item added successfully',
+                            timer: 1000,
+                            showConfirmButton: true
+                        })
+                    }else{
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to add to cart : ' + res.message,
+                            timer: 1000,
+                            showConfirmButton: true
+                        })
+                    }
+
+                    console.log('Added:', res);
+                },
+                error: function(err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to add to cart : ' + err.responseJSON.message,
+                        timer: 1000,
+                        showConfirmButton: true
+                    })
+                    console.error('Failed:', err);
+                }
+            });
+        });
+    });
+</script>
 @stack('scripts')
 </body>
 

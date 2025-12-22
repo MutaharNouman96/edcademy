@@ -123,6 +123,31 @@
                                                 <span class="free-badge">FREE</span>
                                             @endif
                                         </div>
+                                        <div class="ms-4 d-flex gap-2">
+                                            <form action="{{ route('order.addToOrderCart') }}" method="post"
+                                                class="add-to-cart-form">
+                                                @csrf
+
+                                                <input type="hidden" name="item_id" value="{{ $lesson->id }}">
+                                                <input type="hidden" name="model" value="App\Models\Lesson">
+                                                <input type="hidden" name="responseType" value="json">
+                                                <button type="submit" class="btn btn-outline-primary"
+                                                    title="Add to Cart">
+                                                    <i class="fas fa-cart-plus "></i>
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('order.addToOrderCart') }}" method="post"
+                                                class="add-to-cart-form">
+                                                @csrf
+
+                                                <input type="hidden" name="item_id" value="{{ $lesson->id }}">
+                                                <input type="hidden" name="model" value="App\Models\Lesson">
+                                                <button type="submit" class="btn btn-primary" title="Buy Now">
+                                                    <i class="fas fa-shopping-bag "></i>
+                                                </button>
+                                            </form>
+                                        </div>
+
 
                                     </div>
                                 @endforeach
@@ -205,22 +230,25 @@
                         <span class="current-price">${{ $course->price }}</span>
                     </div>
 
-                    <form action="{{ route('web.cart.addToCart') }}" method="post">
+                    <form action="{{ route('order.addToOrderCart') }}" method="post">
                         @csrf
                         <input type="hidden" name="item_id" value="{{ $course->id }}">
                         <input type="hidden" name="model" value="App\Models\Course">
-                        <input type="hidden" name="price" value="{{ $course->price }}">
-                        <input type="hidden" name="quantity" value="{{ 1 }}">
-                    
+
                         <button class="buy-btn" type="submit">
                             <i class="fas fa-shopping-bag me-2"></i>Buy Now
                         </button>
                     </form>
 
-
-                    <button class="cart-btn" onclick="addToCart()">
-                        <i class="fas fa-cart-plus me-2"></i>Add to Cart
-                    </button>
+                    <form action="{{ route('order.addToOrderCart') }}" method="post" class="add-to-cart-form">
+                        @csrf
+                        <input type="hidden" name="item_id" value="{{ $course->id }}">
+                        <input type="hidden" name="model" value="App\Models\Course">
+                        <input type="hidden" name="responseType" value="json">
+                        <button class="cart-btn"  >
+                            <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                        </button>
+                    </form>
 
                     {{-- <div style="text-align: center; margin: 15px 0; color: #666; font-size: 0.9rem;">
                         <i class="fas fa-clock me-1"></i> Sale ends in 2 days
@@ -337,22 +365,24 @@
     </div>
 
     <!-- Preview Modal -->
-    <div class="modal fade " id="previewModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-play-circle me-2"></i> Course Preview :
-                        {{ $course->title }}</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <video controls width="100%" height="315">
-                        <source src="{{ asset('storage/' . $freeVideo->preview_video) }}" type="video/mp4">
-                    </video>
+    @if ($freeVideo)
+        <div class="modal fade " id="previewModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-play-circle me-2"></i> Course Preview :
+                            {{ $course->title }}</h5>
+                        <button class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <video controls width="100%" height="315">
+                            <source src="{{ asset('storage/' . $freeVideo->preview_video) }}" type="video/mp4">
+                        </video>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
     @push('scripts')
         <script>
@@ -400,11 +430,7 @@
             }
 
             // Add to cart
-            function addToCart() {
-                alert('Added to cart!\n\nComplete Calculus Mastery - $89.99\n\nView cart or continue shopping?');
-
-                window.location.href = '{{ route('web.cart') }}';
-            }
+       
 
             // View educator profile
             function viewProfile() {

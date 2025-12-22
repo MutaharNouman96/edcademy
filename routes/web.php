@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\CourseController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\Educator\Settings\{
     PreferenceController
 };
 use App\Http\Controllers\NotificationSettingController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
@@ -61,12 +63,19 @@ Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name(
 // API route for fetching educators dynamically
 Route::get("api/educators", [WebsiteController::class, "educators"])->name("api.educators.index");
 
+Route::post("loginOrRegister", [LoginController::class, "loginOrRegister"])->name("web.loginOrRegister");
+
 Route::get("cart", [WebsiteController::class, "cart"])->name("web.cart");
 Route::get("cart/checkout", [CartController::class, "checkout"])->name("web.cart.checkout");
 Route::post('cart/add-to-cart', [CartController::class, 'store'])->name('web.cart.addToCart');
 Route::delete('cart/remove-from-cart', [CartController::class, 'remove'])->name('web.cart.removeFromCart');
 Route::get('cart/clear',  [CartController::class, 'clear'])->name('web.cart.clearCart');
 Route::post('/cart/login', [CartController::class, 'loginUserInCartPage'])->name('cart.login');
+
+
+Route::post('order/add-to-cart', [OrderController::class, 'addToOrderCart'])->name('order.addToOrderCart');
+Route::post('order/buy-now', [OrderController::class, 'buyNow'])->name('order.buyNow');
+Route::delete('order/remove-from-cart', [OrderController::class, 'removeFromOrderCart'])->name('order.removeFromOrderCart');
 
 Route::get("educator-policy", [WebsiteController::class, "educator_policy"])->name("web.educator.policy");
 Route::get("student-parent-policy", [WebsiteController::class, "student_parent_policy"])->name("web.student.parent.policy");

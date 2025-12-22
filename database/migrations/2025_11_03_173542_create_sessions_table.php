@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('sessions', function (Blueprint $table) {
+        Schema::create('session_calls', function (Blueprint $table) {
             $table->id();
             $table->foreignId('educator_id')->constrained('users');
             $table->dateTime('start_time');

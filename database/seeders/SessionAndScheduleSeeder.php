@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Session;
+use App\Models\SessionCall;
 use App\Models\SessionUsers;
 use App\Models\Schedule;
 use App\Models\CoursePurchase; // Ensure this model exists
@@ -41,7 +41,7 @@ class SessionAndScheduleSeeder extends Seeder
                     $end = (clone $start)->addHour();
 
                     // CREATE SESSION
-                    $session = Session::create([
+                    $session = SessionCall::create([
                         'title'        => "Demo Session $i for " . $educator->name,
                         'educator_id'  => $educator->id,
                         'start_time'   => $start,

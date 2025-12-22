@@ -5,6 +5,7 @@
             'error' => 'alert alert-danger alert-dismissible fade show',
             'warning' => 'alert alert-warning alert-dismissible fade show',
             'info' => 'alert alert-info alert-dismissible fade show',
+            'message' => 'alert alert-info alert-dismissible fade show',
         ];
     @endphp
 

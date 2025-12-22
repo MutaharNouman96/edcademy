@@ -40,10 +40,12 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->isStudent()) {
             if ($request->has('redirect_url')) {
-                return redirect($request->redirect_url);
+                return redirect()->intended($request->redirect_url);
             }
             return redirect()->intended(route('student.dashboard'));
         }
+
+        return redirect()->intended(RouteServiceProvider::HOME);
     }
 
     /**
