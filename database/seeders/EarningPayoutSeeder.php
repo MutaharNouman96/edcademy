@@ -8,7 +8,7 @@ use App\Models\Payout;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Lesson;
-use App\Models\Session;
+use App\Models\SessionCall;
 use App\Models\Payment;
 use Illuminate\Support\Str;
 
@@ -22,7 +22,7 @@ class EarningPayoutSeeder extends Seeder
         $educators = User::where('role', 'educator')->pluck('id')->toArray();
         $courses   = Course::pluck('id')->toArray();
         $lessons   = Lesson::pluck('id')->toArray();
-        $sessions  = Session::pluck('id')->toArray();
+        $sessions  = SessionCall::pluck('id')->toArray();
         $payments  = Payment::pluck('id')->toArray();
 
         if (empty($educators)) {

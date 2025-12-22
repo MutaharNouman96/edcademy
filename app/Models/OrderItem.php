@@ -17,11 +17,23 @@ class OrderItem extends Model
         'price',
         'tax',
         'total',
-        'status'        
+        'status'
     ];
+    protected $appends = ['item_details'];
+
 
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function getItemDetailsAttribute()
+    {
+        return $this->item;
+    }
+
+    public function item()
+    {
+        return $this->morphTo(__FUNCTION__, 'model', 'item_id');
     }
 }

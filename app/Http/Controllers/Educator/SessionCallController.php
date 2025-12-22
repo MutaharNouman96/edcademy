@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Educator;
 
 use App\Http\Controllers\Controller;
-use App\Models\Session;
+use App\Models\SessionCall;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -14,7 +14,7 @@ use App\Models\Schedule;
 use App\Models\SessionUsers;
 use Illuminate\Http\JsonResponse;
 
-class SessionController extends Controller
+class SessionCallController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -74,7 +74,7 @@ class SessionController extends Controller
 
 
             // Create Session
-            $session = Session::create([
+            $session = SessionCall::create([
                 'title' => $request->title,
                 'educator_id' => $educatorId,
                 'start_time' => $request->start_time,
