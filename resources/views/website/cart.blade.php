@@ -17,7 +17,7 @@
 
                         <div id="cartItems">
                             <!-- Cart Item 1 -->
-                            @foreach ($myCart as $cart)
+                            @foreach ($myCart->items as $cart)
                                 @if ($cart->model == 'App\Models\Course')
                                     <div class="cart-item" data-price="{{ $cart->price }}">
                                         <div class="item-thumbnail">
@@ -34,8 +34,11 @@
                                             <div class="item-meta">
                                                 <span><i class="fas fa-clock"></i> {{ $cart->item_details->duration }}
                                                     hours</span>
-                                                <span><i class="fas fa-play-circle"></i>
-                                                    {{ $cart->item_details->lessons->count() }} lessons</span>
+                                                @if ($cart->item_details->lessons->count())
+                                                    <span><i class="fas fa-play-circle"></i>
+                                                        {{ $cart->item_details->lessons->count() }} lessons</span>
+                                                @endif
+
                                                 <span><i class="fas fa-star text-warning"></i>
                                                     {{ $cart->item_details->reviews->avg('rating') }}
                                                 </span>
@@ -65,11 +68,14 @@
                                             </p>
                                             <div class="item-meta">
 
-                                                <span><i class="fas fa-play-circle"></i>
-                                                    {{ $cart->item_details->lessons->count() }} lessons</span>
-                                                <span><i class="fas fa-star text-warning"></i>
-                                                    {{ $cart->item_details->reviews->avg('rating') }}
+                                                <span><i class="fas fa-book"></i>
+                                                    <a href="{{ route('web.course.show', $cart->item_details->course->slug) }}">
+                                                        {{ $cart->item_details->course->title }}
+                                                    </a>
                                                 </span>
+                                                {{-- <span><i class="fas fa-star text-warning"></i>
+                                                    {{ $cart->item_details->reviews->avg('rating') }}
+                                                </span> --}}
 
                                             </div>
                                         </div>

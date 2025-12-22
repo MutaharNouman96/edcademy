@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Course;
 use App\Models\CourseCategory;
 use App\Models\CourseReview;
+use App\Models\Order;
 use App\Models\StudentTestimonial;
 use App\Models\Subject;
 use App\Models\User;
@@ -216,7 +217,7 @@ class WebsiteController extends Controller
 
     public function cart()
     {
-        $myCart = Cart::where("user_id", Auth::check() ? Auth::id() : session()->getId())->get();
+        $myCart = Order::where('user_id', get_cart_identifier())->where('status', 'cart')->with('items')->first();
 
         return view("website.cart" , compact("myCart"));
     }

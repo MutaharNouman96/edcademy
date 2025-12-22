@@ -132,7 +132,7 @@ class AllInOneDBSeeder extends Seeder
                             'type' => 'video',
                             'title' => 'Lesson ' . $l,
                             'duration' => rand(5, 20),
-                            'price' => 0,
+                            'price' => rand(5, 20),
                             'free' => fake()->boolean(30),
                             'status' => 'Published',
                             'preview' => fake()->boolean(20),

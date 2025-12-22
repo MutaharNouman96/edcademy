@@ -7,7 +7,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Lesson;
-use App\Models\Session;
+use App\Models\SessionCall;
 use Illuminate\Support\Str;
 
 class PaymentSeeder extends Seeder
@@ -19,7 +19,7 @@ class PaymentSeeder extends Seeder
 
         $courses  = Course::pluck('id')->toArray();
         $lessons  = Lesson::pluck('id')->toArray();
-        $sessions = Session::pluck('id')->toArray();
+        $sessions = SessionCall::pluck('id')->toArray();
 
         if (empty($students) || empty($educators)) {
             dd("Please seed users first (students & educators required).");
