@@ -7,6 +7,9 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
+use Illuminate\Auth\Events\Login;
+use App\Services\OrderService;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -31,6 +34,14 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         //
+
+        Event::listen(Login::class, function (Login $event) {
+            app(OrderService::class)->migrateSessionCartToUser();
+        });
+
+        Event::listen(Registered::class, function (Registered $event) {
+            app(OrderService::class)->migrateSessionCartToUser();
+        });
     }
 
     /**

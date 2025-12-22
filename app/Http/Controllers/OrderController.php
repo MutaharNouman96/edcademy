@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
+use App\Services\OrderService;
 
 class OrderController extends Controller
 {
@@ -82,4 +84,26 @@ class OrderController extends Controller
     {
         //
     }
+
+
+    public function addToOrderCart(Request $request)
+    {
+        $request->validate([
+            'item_id' => 'required',
+            'model' => 'required',
+        ]);
+        $response = app(OrderService::class)->addOrderItemToLatestCartOrder($request->all());
+        if ($request->has('responseType') && $request->responseType == 'json') {
+            return response()->json([
+                'status' => $response,
+                'message' => Session::get('message'),
+            ]);
+        }
+
+        return back();
+    }
+
+    public function buyNow() {}
+
+    public function removeFromOrderCart() {}
 }
