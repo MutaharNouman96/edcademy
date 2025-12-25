@@ -15,6 +15,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Models\LessonVideoComment;
 use App\Models\LessonVideoView;
+use App\Models\UserPurchasedItem;
 use App\Models\Wishlist;
 
 class StudentDashboardController extends Controller
@@ -25,8 +26,8 @@ class StudentDashboardController extends Controller
         $enrolledCourses = CoursePurchase::where('student_id', $user->id)->count();
 
         $watchedTime = LessonVideoView::where('user_id', $user->id)
-        ->where('created_at', '>=', Carbon::now()->subDays(30))
-        ->sum('watch_time');
+            ->where('created_at', '>=', Carbon::now()->subDays(30))
+            ->sum('watch_time');
 
         $totalCourses = CoursePurchase::where('student_id', $user->id)->count();
         $completedCourses = ProgressTracking::where('student_id', $user->id)
@@ -76,7 +77,7 @@ class StudentDashboardController extends Controller
             $date = Carbon::now()->subDays($i);
             $watchTimeLabels[] = $date->format('M d');
             $dailyWatchTimeQuery = LessonVideoView::where('user_id', $user->id)
-            ->whereDate('created_at', $date);
+                ->whereDate('created_at', $date);
 
             $dailyWatchTime = $dailyWatchTimeQuery->sum('watch_time');
             $watchTimeData[] = round($dailyWatchTime / 60, 1);
@@ -95,13 +96,13 @@ class StudentDashboardController extends Controller
             $progress = ($totalLessonsCount > 0) ? round(($completedLessonsCount / $totalLessonsCount), 2) : 0;
 
             $lastViewedLesson = LessonVideoView::where('user_id', $user->id)
-            ->latest()
-            ->first();
+                ->latest()
+                ->first();
 
             $lastViewed = $lastViewedLesson ? Carbon::parse($lastViewedLesson->created_at)->diffForHumans() : 'Never';
 
             $totalWatchTime = LessonVideoView::where('user_id', $user->id)
-            ->sum('watch_time');
+                ->sum('watch_time');
             $hoursWatched = round($totalWatchTime / 3600, 1);
 
             $newVideosCount = Lesson::where('course_id', $course->id)
@@ -130,7 +131,7 @@ class StudentDashboardController extends Controller
             ->take(5)
             ->get();
 
-            // dd($recentLessons);
+        // dd($recentLessons);
 
         foreach ($recentLessons as $lesson) {
             $newVideosFeed[] = [
@@ -163,52 +164,84 @@ class StudentDashboardController extends Controller
         return view('student.dashboard', compact('enrolledCourses', 'watchedTime', 'completionRate', 'totalSpent', 'courseCompletionData', 'watchTimeLabels', 'watchTimeData', 'myCourses', 'newVideosFeed', 'paymentData'));
     }
 
+    // public function myCourses()
+    // {
+    //     $user = Auth::user();
+    //     $enrolledCoursesData = CoursePurchase::where('student_id', $user->id)->with('course')->get();
+
+    //     $myCourses = [];
+    //     foreach ($enrolledCoursesData as $purchase) {
+    //         $course = $purchase->course;
+    //         $completedLessonsCount = ProgressTracking::where('student_id', $user->id)
+    //             ->where('course_id', $course->id)
+    //             ->distinct('lesson_id')
+    //             ->count();
+    //         $totalLessonsCount = $course->lessons->count();
+    //         $progress = ($totalLessonsCount > 0) ? round(($completedLessonsCount / $totalLessonsCount), 2) : 0;
+
+    //         $lastViewedLesson = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
+    //             $query->where('student_id', $user->id);
+    //         })
+    //         ->latest()
+    //         ->first();
+
+    //         $lastViewed = $lastViewedLesson ? Carbon::parse($lastViewedLesson->created_at)->diffForHumans() : 'Never';
+
+    //         $totalWatchTime = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
+    //             $query->where('student_id', $user->id);
+    //         })
+    //         ->sum('average_watch_time');
+    //         $hoursWatched = round($totalWatchTime / 3600, 1);
+
+    //         $newVideosCount = Lesson::where('course_id', $course->id)
+    //             ->where('created_at', '>', Carbon::now()->subDays(7))
+    //             ->count();
+
+    //         $myCourses[] = [
+    //             'id' => $course->id,
+    //             'title' => $course->title,
+    //             'subject' => $course->subject,
+    //             'progress' => $progress,
+    //             'hours' => $hoursWatched,
+    //             'last' => $lastViewed,
+    //             'thumb' => $course->thumbnail,
+    //             'newVideos' => $newVideosCount,
+    //         ];
+    //     }
+
+    //     return view('student.my_courses', compact('myCourses'));
+    // }
+
+
     public function myCourses()
     {
         $user = Auth::user();
-        $enrolledCoursesData = CoursePurchase::where('student_id', $user->id)->with('course')->get();
+        $purchases = $user->purchases()
+            ->where('active', true)
+            ->with('purchasable')
+            ->get();
+        $courses = $purchases
+            ->where('purchasable_type', Course::class)
+            ->pluck('purchasable');
 
-        $myCourses = [];
-        foreach ($enrolledCoursesData as $purchase) {
-            $course = $purchase->course;
-            $completedLessonsCount = ProgressTracking::where('student_id', $user->id)
-                ->where('course_id', $course->id)
-                ->distinct('lesson_id')
-                ->count();
-            $totalLessonsCount = $course->lessons->count();
-            $progress = ($totalLessonsCount > 0) ? round(($completedLessonsCount / $totalLessonsCount), 2) : 0;
+        $lessons = $purchases
+            ->where('purchasable_type', Lesson::class)
+            ->pluck('purchasable');
 
-            $lastViewedLesson = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
-                $query->where('student_id', $user->id);
-            })
-            ->latest()
-            ->first();
+        $videoLessons = $lessons->where('type', 'video');
+        $worksheetLessons = $lessons->where('type', 'worksheet');
 
-            $lastViewed = $lastViewedLesson ? Carbon::parse($lastViewedLesson->created_at)->diffForHumans() : 'Never';
-
-            $totalWatchTime = VideoStat::whereHas('lesson.course.coursePurchases', function ($query) use ($user) {
-                $query->where('student_id', $user->id);
-            })
-            ->sum('average_watch_time');
-            $hoursWatched = round($totalWatchTime / 3600, 1);
-
-            $newVideosCount = Lesson::where('course_id', $course->id)
-                ->where('created_at', '>', Carbon::now()->subDays(7))
-                ->count();
-
-            $myCourses[] = [
-                'id' => $course->id,
-                'title' => $course->title,
-                'subject' => $course->subject,
-                'progress' => $progress,
-                'hours' => $hoursWatched,
-                'last' => $lastViewed,
-                'thumb' => $course->thumbnail,
-                'newVideos' => $newVideosCount,
-            ];
-        }
-
-        return view('student.my_courses', compact('myCourses'));
+        return view('student.my_courses', [
+            'courses' => $courses,
+            'videoLessons' => $videoLessons,
+            'worksheetLessons' => $worksheetLessons,
+            'lessons' => $lessons,
+            'stats' => [
+                'courses' => $courses->count(),
+                'videos' => $videoLessons->count(),
+                'worksheets' => $worksheetLessons->count(),
+            ]
+        ]);
     }
 
     public function newVideos()
@@ -216,10 +249,10 @@ class StudentDashboardController extends Controller
         $user = Auth::user();
         $enrolledCourseIds = CoursePurchase::where('student_id', $user->id)->pluck('course_id');
         $recentLessons = Lesson::whereIn('course_id', $enrolledCourseIds)
-        ->with('course')
-        ->latest()
-        ->take(5)
-        ->get();
+            ->with('course')
+            ->latest()
+            ->take(5)
+            ->get();
 
         $newVideosFeed = [];
         foreach ($recentLessons as $lesson) {
@@ -305,10 +338,10 @@ class StudentDashboardController extends Controller
             $progress = ($totalLessonsCount > 0) ? round(($completedLessonsCount / $totalLessonsCount), 2) : 0;
 
             $courseWatchTime = LessonVideoView::where('user_id', $user->id)
-            ->whereHas('lesson', function ($query) use ($course) {
-                $query->where('course_id', $course->id);
-            })
-            ->sum('watch_time');
+                ->whereHas('lesson', function ($query) use ($course) {
+                    $query->where('course_id', $course->id);
+                })
+                ->sum('watch_time');
             $hoursWatched = round($courseWatchTime / 3600, 1);
 
             if ($progress >= 1) {
@@ -332,8 +365,8 @@ class StudentDashboardController extends Controller
             $date = Carbon::now()->subDays($i);
             $watchTimeLabels[] = $date->format('M d');
             $dailyWatchTime = LessonVideoView::where('user_id', $user->id)
-            ->whereDate('created_at', $date)
-            ->sum('watch_time');
+                ->whereDate('created_at', $date)
+                ->sum('watch_time');
             $watchTimeData[] = round($dailyWatchTime / 60, 1);
         }
 
@@ -449,6 +482,7 @@ class StudentDashboardController extends Controller
 
     public function courseDetails($course_id, $lesson_id = null)
     {
+         $user = auth()->user();
         $data['course'] = Course::where('id', $course_id)->firstOrFail();
         $data['educator'] = User::where('id', $data['course']->user_id)->first();
         $data['course_chapters'] = CourseSection::where('course_id', $course_id)->get();
@@ -462,6 +496,24 @@ class StudentDashboardController extends Controller
 
         // Assign lesson_number for the current lesson
         $data['currentLesson']->lesson_number = $data['course_lessons']->where('course_section_id', $data['currentLesson']->course_section_id)->sortBy('id')->search($data['currentLesson']) + 1;
+
+        $lesson = $data['currentLesson'];
+
+        $hasAccess = UserPurchasedItem::where('user_id', $user->id)
+            ->where('active', true)
+            ->where(function ($q) use ($lesson) {
+                $q->where(function ($q) use ($lesson) {
+                    $q->where('purchasable_type', Lesson::class)
+                        ->where('purchasable_id', $lesson->id);
+                })
+                    ->orWhere(function ($q) use ($lesson) {
+                        $q->where('purchasable_type', Course::class)
+                            ->where('purchasable_id', $lesson->course_id);
+                    });
+            })
+            ->exists();
+
+        abort_if(! $hasAccess, 403, 'You do not have access to this lesson. Please purchase the course or the lesson first.');
         $data['comments'] = LessonVideoComment::where('lesson_id', $data['currentLesson']->id)->with('user')->latest()->get();
 
         return view('student.course_details', $data);
@@ -498,5 +550,32 @@ class StudentDashboardController extends Controller
     public function messages()
     {
         return view('student.messages');
+    }
+
+
+
+
+    public function lessonDetails(Course $course, Lesson $lesson)
+    {
+        $user = auth()->user();
+
+        // Access check: lesson OR parent course purchased
+        $hasAccess = UserPurchasedItem::where('user_id', $user->id)
+            ->where('active', true)
+            ->where(function ($q) use ($lesson) {
+                $q->where(function ($q) use ($lesson) {
+                    $q->where('purchasable_type', Lesson::class)
+                        ->where('purchasable_id', $lesson->id);
+                })
+                    ->orWhere(function ($q) use ($lesson) {
+                        $q->where('purchasable_type', Course::class)
+                            ->where('purchasable_id', $lesson->course_id);
+                    });
+            })
+            ->exists();
+
+        abort_if(! $hasAccess, 403, 'You do not have access to this lesson. Please purchase the course or the lesson first.');
+
+        return view('student.lesson_details', compact('lesson'));
     }
 }

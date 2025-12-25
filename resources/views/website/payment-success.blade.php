@@ -112,7 +112,7 @@
                     <thead>
                         <tr>
                             <th>Item</th>
-                            <th>Model</th>
+                            <th>Type</th>
                             <th>Qty</th>
                             <th style="width:140px;">Price</th>
                             <th style="width:140px;">Total</th>
@@ -124,14 +124,22 @@
                         @foreach ($order->items as $item)
                             @php
                                 $grandTotal += $item->total;
-                                $modelClass = 'App\\Models\\' . $item->model;
+                                $modelClass = $item->model;
                                 $product = $modelClass::find($item->item_id);
+                                $type = str_replace('App\\Models\\', '', $item->model);
                             @endphp
                             <tr>
                                 <td>
                                     {{ $product ? $product->title ?? ($product->name ?? 'Product #' . $item->item_id) : 'Item #' . $item->item_id }}
+                                    @if ($type == 'Lesson')
+                                        <div>
+                                            <small>
+                                                {{ $product->course->title }}
+                                            </small>
+                                        </div>
+                                    @endif
                                 </td>
-                                <td>{{ $item->model }}</td>
+                                <td>{{ $type }}</td>
                                 <td>{{ $item->quantity }}</td>
                                 <td>${{ number_format($item->price, 2) }}</td>
                                 <td>${{ number_format($item->total, 2) }}</td>

@@ -42,7 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-     protected $appends = ['full_name'];
+    protected $appends = ['full_name'];
 
     /**
      * The attributes that should be cast.
@@ -226,8 +226,28 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
 
-       public function getFullNameAttribute()
+    public function getFullNameAttribute()
     {
         return trim("{$this->first_name} {$this->last_name}");
+    }
+
+
+
+
+
+    public function purchases()
+    {
+        return $this->hasMany(UserPurchasedItem::class);
+    }
+    public function purchasedCourses()
+    {
+        return $this->purchases()
+            ->where('purchasable_type', Course::class);
+    }
+
+    public function purchasedLessons()
+    {
+        return $this->purchases()
+            ->where('purchasable_type', Lesson::class);
     }
 }
