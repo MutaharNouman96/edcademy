@@ -12,7 +12,7 @@ use App\Http\Controllers\Educator\DashboardController as EducatorDashboardContro
 use App\Http\Controllers\Educator\EarningController;
 use App\Http\Controllers\Educator\LessonVideoViewsController;
 use App\Http\Controllers\Educator\PayoutController;
-use App\Http\Controllers\Educator\SessionController;
+use App\Http\Controllers\Educator\SessionCallController;
 use App\Http\Controllers\Educator\VideoStatController;
 use App\Http\Controllers\EducatorController;
 
@@ -34,6 +34,8 @@ use App\Http\Controllers\StripeController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\StudentDashboardController;
+use App\Mail\OrderInvoiceMail;
+use App\Models\Order;
 use Illuminate\Support\Facades\Broadcast;
 
 //livewire routes
@@ -75,7 +77,7 @@ Route::post('/cart/login', [CartController::class, 'loginUserInCartPage'])->name
 
 Route::post('order/add-to-cart', [OrderController::class, 'addToOrderCart'])->name('order.addToOrderCart');
 Route::post('order/buy-now', [OrderController::class, 'buyNow'])->name('order.buyNow');
-Route::delete('order/remove-from-cart', [OrderController::class, 'removeFromOrderCart'])->name('order.removeFromOrderCart');
+Route::post('order/remove-order-item/', [OrderController::class, 'removeOrderItem'])->name('order.removeOrderItem');
 
 Route::get("educator-policy", [WebsiteController::class, "educator_policy"])->name("web.educator.policy");
 Route::get("student-parent-policy", [WebsiteController::class, "student_parent_policy"])->name("web.student.parent.policy");
@@ -83,6 +85,9 @@ Route::get("refund-policy", [WebsiteController::class, "refund_policy"])->name("
 
 
 Route::post('/stripe/checkout', [StripeController::class, 'createCheckout']);
+
+Route::get('/payment/success/{order}', [OrderController::class, 'success'])
+    ->name('payment.success');
 
 // Success callback from Stripe
 Route::get('/stripe/success', [StripeController::class, 'success']);
@@ -177,9 +182,9 @@ Route::middleware(['auth', 'role:educator', 'verified'])
 
         Route::get("video-stats/{video}", [VideoStatController::class, 'show']);
 
-        Route::get("sessions", [SessionController::class, 'index'])->name('educator.sessions.index');
-        Route::get("sessions/create", [SessionController::class, 'create'])->name('educator.sessions.create');
-        Route::post("sessions/store", [SessionController::class, 'store'])->name('educator.sessions.store');
+        Route::get("sessions", [SessionCallController::class, 'index'])->name('educator.sessions.index');
+        Route::get("sessions/create", [SessionCallController::class, 'create'])->name('educator.sessions.create');
+        Route::post("sessions/store", [SessionCallController::class, 'store'])->name('educator.sessions.store');
 
         Route::get('payments', [\App\Http\Controllers\Educator\PaymentController::class, 'index'])->name('educator.payments.index');
         Route::get("payment/{payment}", [\App\Http\Controllers\Educator\PaymentController::class, 'show'])->name("educator.payments.show");
@@ -271,6 +276,7 @@ Route::middleware(['auth', 'role:student'])
         Route::get('my-courses', [StudentDashboardController::class, 'myCourses'])->name('my-courses');
 
         Route::get('course-details/{course_id}/{lesson_id?}', [StudentDashboardController::class, 'courseDetails'])->name('course_details');
+        Route::get('lesson/{course}/{lesson}', [StudentDashboardController::class, 'lessonDetails'])->name('lesson-details');
 
         Route::get('new-videos', [StudentDashboardController::class, 'newVideos'])->name('new-videos');
 
@@ -297,7 +303,21 @@ Route::middleware(['guest'])->group(function () {
     Route::post('student/signup', [\App\Http\Controllers\Auth\RegisteredUserController::class, 'store'])->name('student.signup.store');
 });
 
+
+
+
+
 require __DIR__ . '/auth.php';
 
 
 Broadcast::routes(['middleware' => ['auth']]);
+
+
+
+if (app()->environment('local')) {
+    Route::get('/mail/preview/invoice', function () {
+        $order = Order::find(1991);
+
+        return new OrderInvoiceMail($order);
+    });
+}

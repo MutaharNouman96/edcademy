@@ -59,6 +59,8 @@ class Course extends Model
         return $this->hasMany(CourseReview::class);
     }
 
+
+
     public function coursePurchases()
     {
         return $this->hasMany(CoursePurchase::class);
@@ -80,6 +82,19 @@ class Course extends Model
         return $query
             ->withAvg('reviews', 'rating')   // calculates avg rating
             ->orderBy('reviews_avg_rating', 'desc')  // sort by highest avg
-            ->withCount('reviews');          
+            ->withCount('reviews');
     }
+
+
+    public function purchasers()
+    {
+        return $this->morphToMany(
+            User::class,
+            'purchasable',
+            'user_purchased_items'
+        )->withPivot('active')->withTimestamps();
+    }
+
+
+   
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Order extends Model
 {
@@ -19,6 +20,7 @@ class Order extends Model
         'is_active',
 
     ];
+    
 
     public function user()
     {
@@ -27,5 +29,19 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+    public function getTotalAttribute()
+    {
+        return $this->items->sum('total');
+    }
+
+    protected function getTotal(): Attribute
+    {
+        return Attribute::make(
+            'total',
+            function () {
+                return $this->getTotalAttribute();
+            }
+        );
     }
 }
