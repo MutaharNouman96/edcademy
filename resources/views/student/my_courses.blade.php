@@ -52,8 +52,14 @@
                         @forelse($courses as $course)
                             <div class="col-sm-6 col-lg-4">
                                 <div class="card course-card border-0 h-100">
-                                    <img src="{{ $course->thumbnail_url }}" class="card-img-top rounded-top"
-                                        alt="{{ $course->title }}">
+                                    @if ($course->thumbnail)
+                                        <img src="{{ $course->thumbnail }}" class="card-img-top rounded-top"
+                                            alt="{{ $course->title }}">
+                                    @else
+                                        <div class="placeholder-item d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-book fs-1 text-muted"></i>
+                                        </div>
+                                    @endif
 
                                     <div class="card-body d-flex flex-column">
                                         <h6 class="mb-1">{{ $course->title }}</h6>
@@ -95,7 +101,6 @@
 
                     <div class="row g-4">
                         @forelse($lessons as $lesson)
-                        
                             <div class="col-md-4">
                                 <div class="card h-100 shadow-sm">
                                     <div class="card-body d-flex flex-column">
@@ -104,56 +109,73 @@
                                             class="badge bg-{{ $lesson->type === 'video' ? 'primary' : 'secondary' }} mb-2">
                                             {{ ucfirst($lesson->type) }}
                                         </span>
-
-                                        {{-- Lesson title --}}
-                                        <h6 class="card-title">{{ $lesson->title }}</h6>
-
-                                        {{-- Course info --}}
-                                        @if ($lesson->course)
-                                            <p class="text-muted mb-2">
-                                                Course: <strong>{{ $lesson->course->title }}</strong>
-                                            </p>
-                                        @endif
-
-                                        {{-- Duration & Price --}}
-                                        <p class="mb-2">
-                                            @if ($lesson->duration)
-                                                <span>⏱ {{ $lesson->duration }} min</span>
-                                            @endif
-                                            @if ($lesson->price && !$lesson->free)
-                                                <span class="ms-2"> ${{ number_format($lesson->price, 2) }}</span>
-                                            @elseif($lesson->free)
-                                                <span class="ms-2 badge bg-success">Free</span>
-                                            @endif
-                                        </p>
-
-                                        {{-- Action buttons --}}
-                                        <div class="mt-auto">
+                                        <div>
                                             @if ($lesson->type === 'video')
-                                                @php
-                                                    $videoUrl =
-                                                        $lesson->video_link ?? asset('storage/' . $lesson->video_path);
-                                                @endphp
-                                                <a href="{{ route('student.course_details', ['course_id' => $lesson->course->id, 'lesson_id'=> $lesson->id]) }}"
-                                                    class="btn btn-sm btn-primary w-100 mb-1">
-                                                    Watch Video
-                                                </a>
-                                            @elseif($lesson->type === 'worksheet')
-                                                @php
-                                                    $worksheetFile = isset($lesson->worksheets)
-                                                        ? asset('storage/' . $lesson->worksheets)
-                                                        : '#';
-                                                @endphp
-                                                <a href="{{ $worksheetFile }}" class="btn btn-sm btn-secondary w-100"
-                                                    download>
-                                                    Download Worksheet
-                                                </a>
+                                                <div
+                                                    class="placeholder-item d-flex align-items-center justify-content-center">
+                                                    <i class="bi bi-play-circle-fill fs-1 text-muted"></i>
+                                                </div>
+                                            @else
+                                                <div
+                                                    class="placeholder-item d-flex align-items-center justify-content-center">
+                                                    <i class="bi bi-file-earmark-fill fs-1 text-muted"></i>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <div class="mt-2">
+                                            {{-- Lesson title --}}
+                                            <h6 class="card-title">{{ $lesson->title }}</h6>
+
+                                            {{-- Course info --}}
+                                            @if ($lesson->course)
+                                                <p class="text-muted mb-2">
+                                                    Course: <strong>{{ $lesson->course->title }}</strong>
+                                                </p>
                                             @endif
 
-                                            {{-- Preview note --}}
-                                            @if ($lesson->preview)
-                                                <small class="text-info mt-1 d-block">Preview available</small>
-                                            @endif
+                                            {{-- Duration & Price --}}
+                                            <p class="mb-2">
+                                                @if ($lesson->duration)
+                                                    <span>⏱ {{ $lesson->duration }} min</span>
+                                                @endif
+                                                @if ($lesson->price && !$lesson->free)
+                                                    <span class="ms-2">
+                                                        ${{ number_format($lesson->price, 2) }}</span>
+                                                @elseif($lesson->free)
+                                                    <span class="ms-2 badge bg-success">Free</span>
+                                                @endif
+                                            </p>
+
+                                            {{-- Action buttons --}}
+                                            <div class="mt-auto">
+                                                @if ($lesson->type === 'video')
+                                                    @php
+                                                        $videoUrl =
+                                                            $lesson->video_link ??
+                                                            asset('storage/' . $lesson->video_path);
+                                                    @endphp
+                                                    <a href="{{ route('student.course_details', ['course_id' => $lesson->course->id, 'lesson_id' => $lesson->id]) }}"
+                                                        class="btn btn-sm btn-primary w-100 mb-1">
+                                                        Watch Video
+                                                    </a>
+                                                @elseif($lesson->type === 'worksheet')
+                                                    @php
+                                                        $worksheetFile = isset($lesson->worksheets)
+                                                            ? asset('storage/' . $lesson->worksheets)
+                                                            : '#';
+                                                    @endphp
+                                                    <a href="{{ $worksheetFile }}"
+                                                        class="btn btn-sm btn-secondary w-100" download>
+                                                        Download Worksheet
+                                                    </a>
+                                                @endif
+
+                                                {{-- Preview note --}}
+                                                @if ($lesson->preview)
+                                                    <small class="text-info mt-1 d-block">Preview available</small>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -171,4 +193,26 @@
             </div>
         </div>
     </main>
+    @push('styles')
+        <style>
+            .card-img-top {
+                height: 200px;
+                object-fit: cover;
+            }
+
+            .placeholder-item {
+                height: 200px;
+                /* fixed height */
+                background-color: #e9e9e9fe;
+                /* light gray background */
+                border-bottom: 1px solid #dee2e6;
+                text-align: center;
+                font-size: 3rem;
+                /* bigger icon */
+                color: #adb5bd;
+                /* muted gray */
+                border-radius: 12px 12px 0 0;
+            }
+        </style>
+    @endpush
 </x-student-layout>
