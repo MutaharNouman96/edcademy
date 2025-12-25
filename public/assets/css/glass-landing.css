@@ -157,7 +157,6 @@
   flex-direction: column;
   justify-content: flex-end; /* pushes spotlight(s) to bottom */
   gap: 1.5rem; /* spacing between multiple spotlights */
-  padding: 20px;
 }
 
 .glass-landing--spotlight {
