@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('user_id', 255)->nullable();
             $table->string('status')->default('pending');
-            $table->string('payment_method')->nullable();
+            $table->string('payment_method')->nullable(); // paypal , stripe:card
             $table->string('transaction_id')->nullable();
             $table->longText("payment_details")->nullable();
             $table->string("note")->nullable(); 

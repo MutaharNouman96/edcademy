@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\Order;
+use App\Models\UserPurchasedItem;
+use Illuminate\Support\Facades\Validator;
 
 class PaypalController extends Controller
 {
@@ -21,14 +23,49 @@ class PaypalController extends Controller
     {
         // 1. --- CRITICAL: THE TRY-CATCH BLOCK FOR JSON RESPONSE ---
         try {
+            $validated = Validator::make($request->all(), [
+                'order_id' => 'required',
+                'description' => 'nullable|string',
+
+            ]);
+
+            if ($validated->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validated->errors(),
+                ]);
+            }
+
+            // 2. --- CRITICAL: PAYPAL ORDER CREATION ---
             // Get the access token
             $accessToken = $this->getAccessToken();
+            $cartOrder = Order::where('id', $request->order_id)->first();
+
+            if (!$cartOrder) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order not found',
+                ]);
+            }
+            //get the order amount
+            $amount = $cartOrder->total;
 
             // Create the order on PayPal's server
-            $order = $this->requestPayPalOrder($accessToken, $request->input('amount', '10.00'));
+            $order = $this->requestPayPalOrder($accessToken, $amount);
+
+            //update the order transaction id and other details
+            $cartOrder->transaction_id = $order['id'];
+
+            $cartOrder->payment_method = 'paypal';
+            $cartOrder->note = $request->description;
+
+            $cartOrder->save();
+
 
             // 4. SUCCESS: Return the Order ID and other data as JSON
             return response()->json([
+                'success' => true,
                 'id' => $order['id']
             ], 201);
         } catch (\Throwable $e) {
@@ -40,6 +77,7 @@ class PaypalController extends Controller
             ]);
 
             return response()->json([
+                'success' => false,
                 'error' => 'Could not process payment request.',
                 'message' => $e->getMessage(),
             ], 500);
@@ -128,10 +166,10 @@ class PaypalController extends Controller
 
             $paypalData = $response->json();
 
-            // ✅ Payment Status
+            //  Payment Status
             $status = $paypalData['status'] ?? 'FAILED';
 
-            // 🧾 Save Order
+            //  Save Order
             $order = Order::where('transaction_id', $request->orderID)->first();
 
             if (! $order) {
@@ -148,6 +186,15 @@ class PaypalController extends Controller
                 'payment_details' => json_encode($paypalData),
                 'is_active'       => $status === 'COMPLETED',
             ]);
+
+            foreach ($order->items as $item) {
+                UserPurchasedItem::firstOrCreate([
+                    'user_id' => auth()->id(),
+                    'purchasable_id' => $item->id,
+                    'purchasable_type' => $item->model,
+                    'active' => true,
+                ]);
+            }
 
             return response()->json([
                 'success' => true,

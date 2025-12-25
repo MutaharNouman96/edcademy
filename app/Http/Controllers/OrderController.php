@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use App\Services\OrderService;
@@ -105,5 +106,33 @@ class OrderController extends Controller
 
     public function buyNow() {}
 
-    public function removeFromOrderCart() {}
+    public function removeOrderItem(Request $request) {
+        $orderItem = OrderItem::find($request->item_id);
+        if (!$orderItem) {
+            return back()->with('error', 'Order item not found.');
+        }
+        if($orderItem->order->user_id != auth()->id()) {
+            return back()->with('error', 'You are not authorized to remove this order item.');
+        }
+
+        $response = app(OrderService::class)->removeOrderItem($orderItem);
+        if ($request->has('responseType') && $request->responseType == 'json') {
+            return response()->json([
+                'status' => $response,
+                'message' => Session::get('message'),
+            ]);
+        }
+        return back();
+    }
+
+
+    public function success(Order $order)
+    {
+        // Security: only owner can view
+        abort_if(auth()->id() != $order->user_id, 403);
+
+        $order->load('items'); // adjust relation names
+
+        return view('website.payment-success', compact('order'));
+    }
 }

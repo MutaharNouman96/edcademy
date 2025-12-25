@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->unsignedBigInteger('item_id')->nullable();
-            $table->string('model')->nullable();
+            $table->unsignedBigInteger('item_id')->nullable(); // course , lesson ids
+            $table->string('model')->nullable(); // course , lesson
             $table->integer('quantity')->default(1);
             $table->double('price')->default(0);
             $table->double('tax')->default(0);
