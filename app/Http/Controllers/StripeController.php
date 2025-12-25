@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderInvoiceMail;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Cart;
+use App\Models\UserPurchasedItem;
+use App\Services\EmailService;
 use Illuminate\Support\Facades\Auth;
+
 
 class StripeController extends Controller
 {
@@ -19,40 +23,31 @@ class StripeController extends Controller
     public function createCheckout(Request $request)
     {
         $user = Auth::user();
-        $cartItems = Cart::where('user_id', $user->id)->get();
+        $request->validate([
+            'order_id' => 'required',
+        ]);
+        $order = Order::find($request->order_id);
+        // dd($order, $user);
 
-        if ($cartItems->isEmpty()) {
+        if ($order->user_id != $user->id) {
+            return back()->with('error', 'You are not authorized to make this payment.');
+        }
+
+        $orderItems = $order->items()->get();
+
+        if ($orderItems->isEmpty()) {
             return back()->with('error', 'Your cart is empty.');
         }
 
-        $amount = $cartItems->sum('total');
+        $amount = $orderItems->sum('total');
 
-        // 1. Create order with pending state
-        $order = Order::create([
-            'user_id' => $user->id,
-            'payment_method' => 'stripe',
-            'status' => 'pending',
-        ]);
-          
 
-        // 2. Store items
-        foreach ($cartItems as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'item_id' => $item->item_id,
-                'model' => $item->model,
-                'quantity' => $item->quantity,
-                'price' => $item->price,
-                'tax' => $item->tax,
-                'total' => $item->total,
-            ]);
-        }
 
         // 3. Create stripe session
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
         $lineItems = [];
-        foreach ($cartItems as $ci) {
+        foreach ($orderItems as $ci) {
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'usd',
@@ -107,12 +102,24 @@ class StripeController extends Controller
             'status' => 'paid',
             'transaction_id' => $session->payment_intent,
             'payment_details' => json_encode($session),
+            'payment_method' => "stripe:" . ($session->payment_method_types[0] ?? null),
         ]);
+        foreach ($order->items as $item) {
+            UserPurchasedItem::firstOrCreate([
+                'user_id' => auth()->id(),
+                'purchasable_id' => $item->id,
+                'purchasable_type' => $item->model,
+                'active' => true,
+            ]);
+        }
+        EmailService::send(
+            $order->user->email,
+            new OrderInvoiceMail($order),
+            'emails'
+        );
 
-        // Clear cart
-        Cart::where('user_id', $order->user_id)->delete();
 
-        return view('payment.success', compact('order'));
+        return redirect()->route('payment.success', $order->id);
     }
 
 

@@ -31,5 +31,14 @@ class Lesson extends Model
     {
         return $this->belongsTo(CourseSection::class);
     }
-    
+
+    public function purchasers()
+    {
+        return $this->morphToMany(
+            User::class,
+            'purchasable',
+            'user_purchased_items'
+        )->withPivot('active')->withTimestamps();
+    }
+
 }

@@ -4,7 +4,7 @@
         <div class="checkout-header text-center">
             <h1><i class="fas fa-shopping-cart me-3"></i>Checkout</h1>
         </div>
-        @if ($myCart->count() > 0)
+        @if ($myCart && $myCart->items->count() > 0)
             <div class="row">
                 <!-- Left Column - Cart Items -->
                 <div class="col-lg-8">
@@ -12,7 +12,7 @@
                     <div class="checkout-card">
                         <h3 class="section-title">
                             <i class="fas fa-list"></i>
-                            Your Cart (<span id="itemCount">{{ $myCart->count() }}</span> items)
+                            Your Cart (<span id="itemCount">{{ $myCart->items->count() }}</span> items)
                         </h3>
 
                         <div id="cartItems">
@@ -48,7 +48,7 @@
                                             <div class="current-price">${{ $cart->price }}</div>
                                             {{-- <div class="original-price">$179.99</div> --}}
                                         </div>
-                                        <button class="remove-btn" onclick="removeItem(this)">
+                                        <button class="remove-btn" onclick="removeItem('{{ $cart->id }}')">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
@@ -69,7 +69,8 @@
                                             <div class="item-meta">
 
                                                 <span><i class="fas fa-book"></i>
-                                                    <a href="{{ route('web.course.show', $cart->item_details->course->slug) }}">
+                                                    <a
+                                                        href="{{ route('web.course.show', $cart->item_details->course->slug) }}">
                                                         {{ $cart->item_details->course->title }}
                                                     </a>
                                                 </span>
@@ -83,7 +84,7 @@
                                             <div class="current-price">${{ $cart->price }}</div>
                                             {{-- <div class="original-price">$179.99</div> --}}
                                         </div>
-                                        <button class="remove-btn" onclick="removeItem(this)">
+                                        <button class="remove-btn" onclick="removeItem('{{ $cart->id }}')">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
@@ -164,6 +165,7 @@
                             $totalPrice = cartTotal();
                             $totalTaxAmount = taxAmountOfPrice($totalPrice, env('APP_TAX', 5));
                             $finalAmount = $totalPrice + $totalTaxAmount;
+                            $finalAmount = number_format($finalAmount, 2, '.', '');
                         @endphp
                         <!-- Order Summary -->
                         <div class="order-summary">
@@ -246,7 +248,8 @@
 
     <form id="stripeCheckoutForm" method="POST" action="{{ url('/stripe/checkout') }}" style="display:none;">
         @csrf
-        <input type="hidden" name="cart_user_id" value="{{ $myCart[0]->user_id ?? '' }}">
+        <input type="hidden" name="order_user_id" value="{{ $myCart->user_id ?? '' }}">
+        <input type="hidden" name="order_id" value="{{ $myCart->id ?? '' }}">
     </form>
 
 
@@ -365,15 +368,27 @@
 
 
             // Remove item from cart
-            function removeItem(button) {
-                const item = button.closest('.cart-item');
-                item.style.opacity = '0';
-                item.style.transform = 'translateX(-20px)';
+            function removeItem(item_id) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{{ route('order.removeOrderItem') }}";
+                form.style.display = 'none';
 
-                setTimeout(() => {
-                    item.remove();
-                    updateCart();
-                }, 300);
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'item_id';
+                input.value = item_id;
+
+                const csrfToken = "{{ csrf_token() }}";
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken;
+
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
             }
 
             // Update cart totals
@@ -489,61 +504,79 @@
         @else
             <script src="https://www.sandbox.paypal.com/sdk/js?client-id={{ env('PAYPAL_CLIENT_ID') }}&currency=USD"></script>
         @endif
+        @if ($myCart)
+            <script>
+                function startPayPalPayment() {
+                    document.getElementById("checkoutBtn").style.display = "none";
 
+                    const container = document.createElement("div");
+                    container.id = "paypal-button-container";
+                    document.getElementById("paymentSection").appendChild(container);
 
-        <script>
-            function startPayPalPayment() {
-                document.getElementById("checkoutBtn").style.display = "none";
-
-                const container = document.createElement("div");
-                container.id = "paypal-button-container";
-                document.getElementById("paymentSection").appendChild(container);
-
-                paypal.Buttons({
-                    createOrder: function() {
-                        return fetch("{{ url('/paypal/create') }}", {
-                                method: "POST",
-                                body: JSON.stringify({
-                                    amount: document.getElementById("finalTotal").textContent.replace(
-                                        '$', '')
+                    paypal.Buttons({
+                        createOrder: function() {
+                            return fetch("{{ url('/paypal/create') }}", {
+                                    method: "POST",
+                                    body: JSON.stringify({
+                                        note: "Order ID {{ $myCart->id }}",
+                                        status: "capture",
+                                        order_id: "{{ $myCart->id }}"
+                                    }),
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                    }
                                 })
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (!data.id) {
-                                    throw new Error("Order ID not returned");
-                                }
-                                return data.id; //
-                            });
-                    },
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (!data.success) {
+                                        throw new Error(data.message);
+                                        Swal.fire({
+                                            title: "Error",
+                                            text: data.message +
+                                                " Unable to process the payment. Please try again.",
+                                            icon: "error",
+                                            confirmButtonColor: "#d33"
+                                        })
+                                    }
+                                    if (!data.id) {
+                                        throw new Error("Order ID not returned");
+                                        Swal.fire({
+                                            title: "Error",
+                                            text: "Unable to process the payment. Please try again.",
+                                            icon: "error",
+                                            confirmButtonColor: "#d33"
+                                        });
+                                    }
+                                    return data.id; //
+                                });
+                        },
 
-                    onApprove: function(data) {
-                        return fetch("{{ url('/paypal/capture') }}", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                                },
-                                body: JSON.stringify({
-                                    orderID: data.orderID
-                                })
-                            }).then(res => res.json())
-                            .then(details => {
-                                console.log("Payment successful", details);
-                            });
-                    }
-                }).render("#paypal-button-container");
+                        onApprove: function(data) {
+                            return fetch("{{ url('/paypal/capture') }}", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                    },
+                                    body: JSON.stringify({
+                                        orderID: data.orderID
+                                    })
+                                }).then(res => res.json())
+                                .then(details => {
+                                    console.log("Payment successful", details);
+                                });
+                        }
+                    }).render("#paypal-button-container");
 
-                window.scrollTo({
-                    top: document.getElementById("paymentSection").offsetTop,
-                    behavior: "smooth"
-                });
-            }
-        </script>
+                    window.scrollTo({
+                        top: document.getElementById("paymentSection").offsetTop,
+                        behavior: "smooth"
+                    });
+                }
+            </script>
+        @endif
+
 
     @endpush
 

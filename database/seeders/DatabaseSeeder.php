@@ -26,7 +26,6 @@ class DatabaseSeeder extends Seeder
             EducatorProfileSeeder::class,
             ChatSeeder::class,
             CourseReviewSeeder::class,
-            CoursePurchasesSeeder::class,
             LessonVideoViewSeeder::class,
 
             SessionAndScheduleSeeder::class,
@@ -36,6 +35,8 @@ class DatabaseSeeder extends Seeder
             // PayoutSeeder::class,
 
             EarningPayoutSeeder::class,
+
+            OrdersSeeder::class,
 
         ]);
     }
