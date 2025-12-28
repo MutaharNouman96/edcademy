@@ -145,19 +145,27 @@ class StudentDashboardController extends Controller
         }
 
 
-        $payments = Payment::where('student_id', $user->id)
-            ->with('course')
+        $user = Auth::user();
+        $purchasedItems = UserPurchasedItem::where('user_id', $user->id)
+            ->with('purchasable')
             ->latest()
-            ->take(5)
-            ->get();
+            ->take(5)->get();
 
         $paymentData = [];
-        foreach ($payments as $payment) {
+        foreach ($purchasedItems as $item) {
+            $purchasable = $item->purchasable;
+            $title = 'N/A';
+            if ($purchasable instanceof \App\Models\Course) {
+                $title = $purchasable->title;
+            } elseif ($purchasable instanceof \App\Models\Lesson) {
+                $title = $purchasable->title;
+            }
+
             $paymentData[] = [
-                'date' => Carbon::parse($payment->created_at)->format('Y-m-d'),
-                'course' => $payment->course->title ?? 'N/A',
-                'method' => $payment->payment_method ?? 'N/A',
-                'amount' => $payment->gross_amount ?? 0.00,
+                'date' => Carbon::parse($item->created_at)->format('Y-m-d'),
+                'item_title' => $title,
+                'type' => class_basename($purchasable),
+                'amount' => 'N/A',
             ];
         }
 
@@ -222,7 +230,8 @@ class StudentDashboardController extends Controller
             ->get();
         $courses = $purchases
             ->where('purchasable_type', Course::class)
-            ->pluck('purchasable');
+            ->pluck('purchasable')
+            ->filter(); // Filter out any null courses
 
         $lessons = $purchases
             ->where('purchasable_type', Lesson::class)
@@ -422,29 +431,28 @@ class StudentDashboardController extends Controller
     public function payments()
     {
         $user = Auth::user();
-        $payments = Payment::where('student_id', $user->id)
-            ->with('course')
+        $purchasedItems = UserPurchasedItem::where('user_id', $user->id)
+            ->with('purchasable')
             ->latest()
             ->get();
 
         $paymentData = [];
-        foreach ($payments as $payment) {
+        foreach ($purchasedItems as $item) {
+            $purchasable = $item->purchasable;
+            $title = 'N/A';
+            if ($purchasable instanceof \App\Models\Course) {
+                $title = $purchasable->title;
+            } elseif ($purchasable instanceof \App\Models\Lesson) {
+                $title = $purchasable->title;
+            }
+
             $paymentData[] = [
-                'date' => Carbon::parse($payment->created_at)->format('Y-m-d'),
-                'course' => $payment->course->title ?? 'N/A',
-                'method' => $payment->payment_method ?? 'N/A',
-                'amount' => $payment->gross_amount ?? 0.00,
+                'date' => Carbon::parse($item->created_at)->format('Y-m-d'),
+                'item_title' => $title,
+                'type' => class_basename($purchasable),
+                'amount' => 'N/A',
             ];
         }
-
-        // Static data if no real data
-        if (empty($paymentData)) {
-            $paymentData = [
-                ['date' => '2024-11-01', 'course' => 'Static Course 1', 'method' => 'Credit Card', 'amount' => 49.99],
-                ['date' => '2024-10-15', 'course' => 'Static Course 2', 'method' => 'PayPal', 'amount' => 29.99],
-            ];
-        }
-
         return view('student.payments', compact('paymentData'));
     }
 
