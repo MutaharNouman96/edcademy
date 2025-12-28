@@ -5,23 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Escrow extends Model
+class EducatorBank extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'educator_id',
-        'amount',
-        'status',
-        'processed_at',
-        'processed_by',
-        'description',
-        'payment_id',
+        'bank_name',
+        'account_name',
+        'iban',
+        'approval_status',
+        'approved_at'
     ];
 
     public function educator()
     {
-        return $this->belongsTo(User::class, 'educator_id');
+        return $this->belongsTo(User::class);
     }
-    
 }

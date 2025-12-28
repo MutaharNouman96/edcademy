@@ -2,7 +2,7 @@
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold text-dark-cyan"><i class="bi bi-credit-card-2-front me-2"></i>Payments</h4>
-           
+
         </div>
 
         @if (session('success'))
@@ -37,51 +37,69 @@
             </div>
         </div>
 
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <table class="table table-hover align-middle">
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>#</th>
-                            <th>Gross</th>
-                            <th>Tax</th>
-                            <th>Commission</th>
-                            <th>Net</th>
-                            <th>Method</th>
-                            <th>Status</th>
                             <th>Date</th>
-                            <th width="120">Action</th>
+                            <th>Item</th>
+                            <th>Gross</th>
+                            <th>Commission</th>
+                            <th>Tax</th>
+                            <th>Net</th>
+                            <th>Status</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($payments as $payment)
+                        @forelse ($payments as $payment)
+                            @php
+                                $item = $payment->orderItem?->item;
+                            @endphp
                             <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>${{ number_format($payment->gross_amount, 2) }}</td>
-                                <td>${{ number_format($payment->tax_amount, 2) }}</td>
-                                <td>${{ number_format($payment->platform_commission, 2) }}</td>
-                                <td class="fw-bold text-success">${{ number_format($payment->net_amount, 2) }}</td>
-                                <td>{{ ucfirst($payment->payment_method) }}</td>
+                                <td>{{ $payment->created_at->format('d M Y') }}</td>
+
                                 <td>
-                                    <span
-                                        class="badge 
-                                    @if ($payment->status == 'completed') bg-success 
-                                    @elseif($payment->status == 'pending') bg-warning 
-                                    @elseif($payment->status == 'refunded') bg-secondary 
-                                    @else bg-danger @endif">
+                                    <strong>{{ $item->title ?? 'N/A' }}</strong><br>
+                                    <small class="text-muted">
+                                        {{ class_basename($payment->orderItem?->model) }}
+                                    </small>
+                                </td>
+
+                                <td>${{ number_format($payment->gross_amount, 2) }}</td>
+                                <td>${{ number_format($payment->platform_commission, 2) }}</td>
+                                <td>${{ number_format($payment->tax_amount, 2) }}</td>
+
+                                <td class="fw-semibold text-success">
+                                    ${{ number_format($payment->net_amount, 2) }}
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-{{ $payment->status === 'paid' ? 'success' : 'warning' }}">
                                         {{ ucfirst($payment->status) }}
                                     </span>
                                 </td>
-                                <td>{{ $payment->created_at->format('d M Y') }}</td>
-                             
+
+                                <td class="text-end">
+                                    <a href="{{ route('educator.payments.show', $payment) }}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted">No payments found.</td>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    No payments found
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="card-footer">
                 {{ $payments->links() }}
             </div>
         </div>

@@ -2,20 +2,150 @@
 
 namespace App\Http\Controllers\Educator;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\Course;
+use App\Models\UserPurchasedItem;
+use App\Models\VideoStat;
+use App\Models\Earning;
+use App\Models\Lesson;
+use App\Models\LessonVideoView;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     //
     public function index()
     {
-        return view('educator.dashboard');
+        $educatorId = Auth::id();
+
+        /**
+         * ======================
+         * COURSES
+         * ======================
+         */
+
+
+        $totalCourses = Course::where('user_id', $educatorId)->count();
+
+        $draftCourses = Course::where('user_id', $educatorId)
+            ->where('status', 'Draft')
+            ->count();
+
+        $publishedCourses = Course::where('user_id', $educatorId)
+            ->where('status', 'Published')
+            ->count();
+
+        /**
+         * ======================
+         * STUDENTS
+         * ======================
+         * Count distinct users who purchased:
+         *  - educator courses
+         *  - educator lessons
+         */
+        $courseIds = Course::where('user_id', $educatorId)->pluck('id');
+
+        $lessonIds = Lesson::whereIn('course_id', $courseIds)->pluck('id');
+
+        $totalStudents = UserPurchasedItem::where(function ($q) use ($courseIds, $lessonIds) {
+            $q->where(function ($q) use ($courseIds) {
+                $q->where('purchasable_type', Course::class)
+                    ->whereIn('purchasable_id', $courseIds);
+            })
+                ->orWhere(function ($q) use ($lessonIds) {
+                    $q->where('purchasable_type', Lesson::class)
+                        ->whereIn('purchasable_id', $lessonIds);
+                });
+        })
+            ->distinct('user_id')
+            ->count('user_id');
+
+        /**
+         * New students this week
+         */
+        $newStudentsThisWeek = UserPurchasedItem::where(function ($q) use ($courseIds, $lessonIds) {
+            $q->where(function ($q) use ($courseIds) {
+                $q->where('purchasable_type', Course::class)
+                    ->whereIn('purchasable_id', $courseIds);
+            })
+                ->orWhere(function ($q) use ($lessonIds) {
+                    $q->where('purchasable_type', Lesson::class)
+                        ->whereIn('purchasable_id', $lessonIds);
+                });
+        })
+            ->whereBetween('created_at', [
+                Carbon::now()->startOfWeek(),
+                Carbon::now()->endOfWeek()
+            ])
+            ->distinct('user_id')
+            ->count('user_id');
+
+        /**
+         * ======================
+         * VIDEO STATS (7 DAYS)
+         * ======================
+         */
+        $_30DaysAgo = Carbon::now()->subDays(30);
+
+        $videoStats = LessonVideoView::whereIn('lesson_id', $lessonIds)
+            ->where('created_at', '>=', $_30DaysAgo)
+            ->selectRaw('
+                COUNT(id) as total_views,
+                AVG(watch_time) as avg_watch_time
+            ')
+            ->first();
+
+        $totalViews7Days = (int) ($videoStats->total_views ?? 0);
+
+        $avgWatchSeconds = (int) ($videoStats->avg_watch_time ?? 0);
+
+        $avgWatchFormatted = gmdate(
+            floor($avgWatchSeconds / 3600) > 0 ? 'H:i:s' : 'i:s',
+            $avgWatchSeconds
+        );
+
+        /**
+         * ======================
+         * EARNINGS
+         * ======================
+         */
+        $escrowBalance = Earning::where('educator_id', $educatorId)
+            ->where('status', 'pending')
+            ->sum('net_amount');
+
+        $earnedTotal = Earning::where('educator_id', $educatorId)
+            ->where('status', 'paid')
+            ->sum('net_amount');
+
+
+        $latestCourses = Course::where('user_id', $educatorId)->active()->published()->orderByDesc("publish_date")->with("educator", "category", "reviews", "lessons")->limit(4)->get();
+        $latestVideos = Lesson::where('type', 'video')->whereIn('course_id', $courseIds)->published()->with("course", "lesson_video_views", "lesson_video_comments")->limit(4)->get();
+
+        
+
+
+        return view('educator.dashboard', compact(
+            'totalCourses',
+            'draftCourses',
+            'publishedCourses',
+            'totalStudents',
+            'newStudentsThisWeek',
+            'totalViews7Days',
+            'avgWatchFormatted',
+            'escrowBalance',
+            'earnedTotal',
+            'latestCourses',
+            'latestVideos'
+        ));
     }
 
-    public function profile(){
+    public function profile()
+    {
         $educator = auth()->user()->educatorProfile;
-        return view('educator.profile' , compact('educator'));
+        return view('educator.profile', compact('educator'));
     }
 
 

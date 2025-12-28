@@ -137,6 +137,8 @@ class AllInOneDBSeeder extends Seeder
                             'status' => 'Published',
                             'preview' => fake()->boolean(20),
                             'notes' => fake()->sentence(),
+                            'published_at' => now()->subDays(rand(1, 30))->format('Y-m-d H:i:s'),
+                            'created_at' => now()->subDays(rand(1, 30))->format('Y-m-d H:i:s'),
                         ]);
                     }
                 }
