@@ -204,4 +204,237 @@
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" id="bankModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="bankForm" class="modal-content">
+                @csrf
+                <input type="hidden" id="bankId">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Bank Account</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label">Bank Name</label>
+                        <input class="form-control" id="bankName" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Account Name</label>
+                        <input class="form-control" id="accountName" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">IBAN</label>
+                        <input class="form-control" id="iban" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    @push('scripts')
+        <script>
+            const csrf = document.querySelector('meta[name="csrf-token"]').content;
+
+            /* -------------------------
+               KPIs
+            --------------------------*/
+            function loadKPIs() {
+                fetch('{{ url('/') }}/educator-panel/payouts/kpis')
+                    .then(r => r.json())
+                    .then(d => {
+                        kpiEscrow.innerText = `$${d.escrow}`;
+                        kpiAvailable.innerText = `$${d.available}`;
+                        kpiPaidMonth.innerText = `$${d.paid_month}`;
+                        kpiPaidMonthCount.innerText = `${d.paid_count} payouts`;
+                        kpiLifetime.innerText = `$${d.lifetime}`;
+                    });
+            }
+
+            /* -------------------------
+               Upcoming Payments
+            --------------------------*/
+            function loadUpcoming() {
+                const from = upcomingFrom.value;
+                const to = upcomingTo.value;
+
+                fetch(`{{ url('/') }}/educator-panel/payouts/upcoming?from=${from}&to=${to}`)
+                    .then(r => r.json())
+                    .then(rows => {
+                        const tbody = document.querySelector('#upcomingTable tbody');
+                        tbody.innerHTML = '';
+
+                        if (!rows.length) {
+                            tbody.innerHTML =
+                                `<tr><td colspan="5" class="text-center text-muted">No upcoming releases</td></tr>`;
+                            return;
+                        }
+
+                        rows.forEach(r => {
+                            tbody.innerHTML += `
+                    <tr>
+                        <td>${r.release_date}</td>
+                        <td>${r.source}</td>
+                        <td>$${r.amount}</td>
+                        <td><span class="badge bg-warning">${r.status}</span></td>
+                        <td class="text-end">—</td>
+                    </tr>`;
+                        });
+                    });
+            }
+
+            /* -------------------------
+               Payout History
+            --------------------------*/
+            function loadHistory() {
+                const status = historyStatus.value;
+                const search = historySearch.value;
+
+                fetch(`{{ url('/') }}/educator-panel/payouts/history?status=${status}&search=${search}`)
+                    .then(r => r.json())
+                    .then(rows => {
+                        const tbody = document.querySelector('#historyTable tbody');
+                        tbody.innerHTML = '';
+
+                        if (!rows.length) {
+                            tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">No payouts</td></tr>`;
+                            return;
+                        }
+
+                        rows.forEach(r => {
+                            tbody.innerHTML += `
+                    <tr>
+                        <td>${r.date}</td>
+                        <td>${r.ref}</td>
+                        <td>${r.method}</td>
+                        <td>$${r.amount}</td>
+                        <td>${r.fees}</td>
+                        <td>$${r.net}</td>
+                        <td><span class="badge bg-success">${r.status}</span></td>
+                        <td>${r.note ?? ''}</td>
+                        <td class="text-end">—</td>
+                    </tr>`;
+                        });
+                    });
+            }
+
+            /* -------------------------
+               Banks
+            --------------------------*/
+            const bankModal = new bootstrap.Modal(document.getElementById('bankModal'));
+
+            function loadBanks() {
+                fetch('{{ url('/') }}/educator-panel/payouts/banks')
+                    .then(r => r.json())
+                    .then(banks => {
+                        const list = document.getElementById('methodList');
+                        list.innerHTML = '';
+
+                        if (!banks.length) {
+                            list.innerHTML = `<li class="list-group-item text-muted text-center">No bank accounts</li>`;
+                            return;
+                        }
+
+                        banks.forEach(b => {
+                            let bankApprovalStatus = b.approval_status == 1 ? 'Approved' : 'Pending';
+                            let bankApprovalClass = bankApprovalStatus == 'Approved' ? 'bg-success' : 'bg-warning';
+                            list.innerHTML += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Bank: ${b.bank_name}</strong><br>
+                            <strong>Account Holder: ${b.account_name}</strong><br>
+                            <small>IBAN: ${b.iban}</small> <span class='ms-2  badge  ${bankApprovalClass}'>${bankApprovalStatus}</span>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="editBank(${JSON.stringify(b).replace(/"/g, '&quot;')})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteBank(${b.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </li>`;
+                        });
+                    });
+            }
+
+            function editBank(b) {
+                bankId.value = b.id;
+                bankName.value = b.bank_name;
+                accountName.value = b.account_name;
+                iban.value = b.iban;
+                bankModal.show();
+            }
+
+            function deleteBank(id) {
+                if (!confirm('Delete this bank account?')) return;
+
+                fetch(`{{ url('/') }}/educator-panel/payouts/banks/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrf
+                    }
+                }).then(() => loadBanks());
+            }
+
+            /* -------------------------
+               Save Bank
+            --------------------------*/
+            document.getElementById('bankForm').addEventListener('submit', e => {
+                e.preventDefault();
+
+                fetch('{{ url('/') }}/educator-panel/payouts/banks/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrf
+                    },
+                    body: JSON.stringify({
+                        id: bankId.value,
+                        bank_name: bankName.value,
+                        account_name: accountName.value,
+                        iban: iban.value
+                    })
+                }).then(() => {
+                    bankModal.hide();
+                    loadBanks();
+                });
+            });
+
+            /* -------------------------
+               Events
+            --------------------------*/
+            upcomingApply.onclick = loadUpcoming;
+            historyStatus.onchange = loadHistory;
+            historySearch.onkeyup = loadHistory;
+            historyReset.onclick = () => {
+                historyStatus.value = '';
+                historySearch.value = '';
+                loadHistory();
+            };
+
+            btnAddMethod.onclick = () => {
+                bankId.value = '';
+                bankForm.reset();
+                bankModal.show();
+            };
+
+            /* -------------------------
+               Init
+            --------------------------*/
+            loadKPIs();
+            loadUpcoming();
+            loadHistory();
+            loadBanks();
+        </script>
+    @endpush
 </x-educator-layout>

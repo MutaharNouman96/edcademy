@@ -27,6 +27,7 @@ use App\Http\Controllers\Educator\Settings\{
     ConnectionController,
     PreferenceController
 };
+use App\Http\Controllers\EducatorPaymentController;
 use App\Http\Controllers\NotificationSettingController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaypalController;
@@ -173,6 +174,7 @@ Route::middleware(['auth', 'role:educator', 'verified'])
             ->name('educator.dashboard');
         Route::get('/lesson-views/chart', [LessonVideoViewsController::class, 'viewsChart']);
 
+
         Route::get('profile', [EducatorDashboardController::class, 'profile'])
             ->name('educator.profile');
         Route::put('profile', [EducatorDashboardController::class, 'profile_update'])->name('educator.profile.update');
@@ -186,13 +188,26 @@ Route::middleware(['auth', 'role:educator', 'verified'])
         Route::get("sessions/create", [SessionCallController::class, 'create'])->name('educator.sessions.create');
         Route::post("sessions/store", [SessionCallController::class, 'store'])->name('educator.sessions.store');
 
-        Route::get('payments', [\App\Http\Controllers\Educator\PaymentController::class, 'index'])->name('educator.payments.index');
-        Route::get("payment/{payment}", [\App\Http\Controllers\Educator\PaymentController::class, 'show'])->name("educator.payments.show");
 
         Route::resource('earnings', EarningController::class)->only(['index', 'show'])->names('educator.earnings');
 
+        Route::get('/payments', [EducatorPaymentController::class, 'index'])->name('educator.payments.index');
+        Route::get('/payments/{payment}', [EducatorPaymentController::class, 'show'])->name('educator.payments.show');
+
+
 
         Route::get("payouts", [PayoutController::class, 'index'])->name('educator.payouts.index');
+
+        Route::prefix('payouts')->group(function () {
+
+            Route::get('/kpis', [PayoutController::class, 'kpis']);
+            Route::get('/upcoming', [PayoutController::class, 'upcoming']);
+            Route::get('/history', [PayoutController::class, 'history']);
+
+            Route::get('/banks', [PayoutController::class, 'banks']);
+            Route::post('/banks/save', [PayoutController::class, 'saveBank']);
+            Route::delete('/banks/{id}', [PayoutController::class, 'deleteBank']);
+        });
 
         Route::resource('courses', \App\Http\Controllers\Educator\CoursesController::class)->names('educator.courses');
 
@@ -225,7 +240,7 @@ Route::middleware(['auth', 'role:educator', 'verified'])
             Route::post('/security', [SecuritySettingController::class, 'update'])->name('educator.security.update');
 
             // Payments
-            Route::get('/payments', [PaymentSettingController::class, 'index'])->name('educator.payments.index');
+            Route::get('/payments', [PaymentSettingController::class, 'index'])->name('educator.settings.payments.index');
             Route::post('/payments', [PaymentSettingController::class, 'update'])->name('educator.payments.update');
 
             // Payment Methods (CRUD)

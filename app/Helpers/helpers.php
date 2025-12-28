@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+use App\Services\ApplicationSettingsService;
 
 if (! function_exists('cartTotalItems')) {
     function cartTotalItems()
@@ -87,5 +88,57 @@ if (!function_exists('get_cart_identifier')) {
         }
 
         return $guestId;
+    }
+
+
+
+    if (! function_exists('format_seconds')) {
+        /**
+         * Convert seconds to human readable time.
+         *
+         * Examples:
+         *  - 45        → 45s
+         *  - 125       → 02m 05s
+         *  - 3723      → 01h 02m 03s
+         *
+         * @param  int|float|null  $seconds
+         * @return string
+         */
+        function format_seconds($seconds): string
+        {
+            $seconds = (int) floor($seconds);
+
+            if ($seconds <= 0) {
+                return '0s';
+            }
+
+            $hours   = intdiv($seconds, 3600);
+            $minutes = intdiv($seconds % 3600, 60);
+            $secs    = $seconds % 60;
+
+            if ($hours > 0) {
+                return sprintf('%02dh %02dm %02ds', $hours, $minutes, $secs);
+            }
+
+            if ($minutes > 0) {
+                return sprintf('%02dm %02ds', $minutes, $secs);
+            }
+
+            return sprintf('%02ds', $secs);
+        }
+    }
+
+    if (!function_exists('setting')) {
+        function setting(string $key, $default = null)
+        {
+            return ApplicationSettingsService::get($key, $default);
+        }
+    }
+
+    if (!function_exists('money')) {
+        function money($value)
+        {
+            return round((float) $value, 2);
+        }
     }
 }

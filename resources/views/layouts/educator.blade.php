@@ -70,29 +70,29 @@
                 <!-- Sidebar -->
                 <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
                     <nav class="nav flex-column gap-1">
-                        <a class="nav-link @if (request()->is('educator/dashboard')) active @endif"
+                        <a class="nav-link @if (request()->is('educator-panel/dashboard')) active @endif"
                             href="{{ route('educator.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>
                             Overview</a>
-                        <a class="nav-link @if (request()->is('educator/courses', 'educator/courses/*')) active @endif"
+                        <a class="nav-link @if (request()->is('educator-panel/courses', 'educator/courses/*')) active @endif"
                             href="{{ route('educator.courses.index') }}"><i class="bi bi-journal-code me-2"></i> My
                             Courses</a>
-                        <a class="nav-link @if (request()->is('educator/video-stats')) active @endif"
+                        <a class="nav-link @if (request()->is('educator-panel/video-stats')) active @endif"
                             href="{{ route('educator.video-stats.index') }}"><i class="bi bi-camera-video me-2"></i>
                             Videos &
                             Stats
                         </a>
-                        <a class="nav-link @if (request()->is('educator/sessions*')) active @endif"
+                        <a class="nav-link @if (request()->is('educator-panel/sessions*')) active @endif"
                             href="{{ route('educator.sessions.index') }}"><i class="bi bi-calendar3 me-2"></i>
                             Sessions/Bookings</a>
                         <hr>
                        
-                        <a class="nav-link @if (request()->is('educator/payouts')) active @endif"
+                        <a class="nav-link @if (request()->is('educator-panel/payouts')) active @endif"
                             href="{{ route('educator.payouts.index') }}"><i class="bi bi-bank me-2"></i> Payouts</a>
-                        <a class="nav-link @if (request()->is('educator/earnings*')) active @endif"
-                            href="{{ route('educator.earnings.index') }}"><i class="bi bi-cash-coin me-2"></i>
-                            Earnings</a>
+                        <a class="nav-link @if (request()->is('educator-panel/payments*')) active @endif"
+                            href="{{ route('educator.payments.index') }}"><i class="bi bi-cash-coin me-2"></i>
+                            Earned Payments</a>
                         <hr>
-                        <a class="nav-link @if (request()->is('educator/reviews*')) active @endif"
+                        <a class="nav-link @if (request()->is('educator-panel/reviews*')) active @endif"
                             href="{{ route('educator.reviews.index') }}"><i class="bi bi-star-half me-2"></i>
                             Reviews</a>
                         <a class="nav-link" href="{{ route('chat.index') }}"><i
