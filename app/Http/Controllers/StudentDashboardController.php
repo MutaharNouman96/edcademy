@@ -147,16 +147,21 @@ class StudentDashboardController extends Controller
 
         $user = Auth::user();
         $purchasedItems = UserPurchasedItem::where('user_id', $user->id)
-            ->with('purchasable')
-            ->latest()
-            ->take(5)->get();
+        ->where('purchasable_type', \App\Models\Course::class)
+        ->with('purchasable')
+        ->latest()
+        ->get();
 
         $paymentData = [];
         foreach ($purchasedItems as $item) {
             $purchasable = $item->purchasable;
+
             $title = 'N/A';
+            $price = null; // or 0 if you prefer
+
             if ($purchasable instanceof \App\Models\Course) {
                 $title = $purchasable->title;
+                $price = $purchasable->price;
             } elseif ($purchasable instanceof \App\Models\Lesson) {
                 $title = $purchasable->title;
             }
@@ -165,7 +170,7 @@ class StudentDashboardController extends Controller
                 'date' => Carbon::parse($item->created_at)->format('Y-m-d'),
                 'item_title' => $title,
                 'type' => class_basename($purchasable),
-                'amount' => 'N/A',
+                'amount' => $price,
             ];
         }
 
@@ -432,16 +437,21 @@ class StudentDashboardController extends Controller
     {
         $user = Auth::user();
         $purchasedItems = UserPurchasedItem::where('user_id', $user->id)
-            ->with('purchasable')
-            ->latest()
-            ->get();
+        ->where('purchasable_type', \App\Models\Course::class)
+        ->with('purchasable')
+        ->latest()
+        ->get();
 
         $paymentData = [];
         foreach ($purchasedItems as $item) {
             $purchasable = $item->purchasable;
+
             $title = 'N/A';
+            $price = null; // or 0 if you prefer
+
             if ($purchasable instanceof \App\Models\Course) {
                 $title = $purchasable->title;
+                $price = $purchasable->price;
             } elseif ($purchasable instanceof \App\Models\Lesson) {
                 $title = $purchasable->title;
             }
@@ -450,7 +460,7 @@ class StudentDashboardController extends Controller
                 'date' => Carbon::parse($item->created_at)->format('Y-m-d'),
                 'item_title' => $title,
                 'type' => class_basename($purchasable),
-                'amount' => 'N/A',
+                'amount' => $price,
             ];
         }
         return view('student.payments', compact('paymentData'));
