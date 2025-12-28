@@ -7,7 +7,8 @@ use App\Observers\PaymentObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
-
+use App\Services\ApplicationSettings;
+use App\Services\ApplicationSettingsService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,7 +32,6 @@ class AppServiceProvider extends ServiceProvider
         //
         Payment::observe(PaymentObserver::class);
         Paginator::useBootstrapFive();
-
-
+        ApplicationSettingsService::load();
     }
 }

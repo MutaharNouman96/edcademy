@@ -20,7 +20,7 @@ class LessonVideoViewsController extends Controller
 
     public function viewsChart()
     {
-        $days = collect(range(0, 13))->map(function ($i) {
+        $days = collect(range(0, 29))->map(function ($i) {
             return now()->subDays($i)->format('Y-m-d');
         })->reverse()->values();
 

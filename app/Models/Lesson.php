@@ -21,6 +21,9 @@ class Lesson extends Model
         'is_preview',
         'order'
     ];
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
 
     public function course()
     {
@@ -39,6 +42,20 @@ class Lesson extends Model
             'purchasable',
             'user_purchased_items'
         )->withPivot('active')->withTimestamps();
+    }
+
+    public function scopepublished($query)
+    {
+        return $query->where('status', 'Published');
+    }
+
+    public function lesson_video_views()
+    {
+        return $this->hasMany(LessonVideoViews::class);
+    }
+
+    public function lesson_video_comments(){
+        return $this->hasMany(LessonVideoComment::class);
     }
 
 }

@@ -9,10 +9,13 @@ use Stripe\Checkout\Session as StripeSession;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Cart;
+use App\Models\Course;
+use App\Models\EducatorPayment;
+use App\Models\Lesson;
 use App\Models\UserPurchasedItem;
 use App\Services\EmailService;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Str;
 
 class StripeController extends Controller
 {
@@ -104,12 +107,29 @@ class StripeController extends Controller
             'payment_details' => json_encode($session),
             'payment_method' => "stripe:" . ($session->payment_method_types[0] ?? null),
         ]);
+
+        $paymentId = $order->id . (Str::uuid());
         foreach ($order->items as $item) {
+            $commission = money(
+                $item->total * setting('platform_commission', 0) / 100
+            );
+            $itemEducatorId = $item->model == "App\Models\Lesson" ? Lesson::find($item->item_id)->with('course')->first()->course->user_id : Course::find($item->item_id)->user_id;
             UserPurchasedItem::firstOrCreate([
                 'user_id' => auth()->id(),
                 'purchasable_id' => $item->id,
                 'purchasable_type' => $item->model,
                 'active' => true,
+            ]);
+            EducatorPayment::firstOrCreate([
+                'educator_id' => $itemEducatorId,
+                'order_id' => $order->id,
+                'order_item_id' => $item->id,
+                'gross_amount' => $item->total,
+                'currency' => setting('currency', 'USD'),
+                'platform_commission' => $commission,
+                'net_total' => $item->total - $commission,
+                'payment_id' => $paymentId,
+                'status' => 'completed',
             ]);
         }
         EmailService::send(
