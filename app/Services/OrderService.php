@@ -60,7 +60,12 @@ class OrderService
                 $orderItemsData['order_id'] = $order->id;
                 $orderItemsData['price'] = $this->getItemPrice($orderItemsData['item_id'], $orderItemsData['model']);
                 $orderItemsData['quantity'] = 1;
-                $orderItemsData['total'] = $orderItemsData['price'] * $orderItemsData['quantity'];
+                $orderItemdsData['tax'] = setting('tax' , 0);
+
+                $total = $orderItemsData['price'] * $orderItemsData['quantity'];
+                $totalWithTax = $total + ($total * ($orderItemdsData['tax'] / 100));
+                $orderItemsData['total'] = $totalWithTax;
+                
                 $order->items()->create($orderItemsData);
                 Session::flash('message', 'Item added to cart successfully.');
             }

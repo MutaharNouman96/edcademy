@@ -46,7 +46,7 @@ class Earning extends Model
 
     public function session()
     {
-        return $this->belongsTo(Session::class);
+        return $this->belongsTo(SessionCall::class);
     }
 
     public function course()

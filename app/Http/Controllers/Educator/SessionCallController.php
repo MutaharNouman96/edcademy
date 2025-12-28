@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Course;
 use App\Models\CoursePurchase;
-use App\Models\SessionUser;
 use App\Models\Schedule;
 use App\Models\SessionUsers;
 use Illuminate\Http\JsonResponse;
@@ -26,7 +25,7 @@ class SessionCallController extends Controller
         //
         $educatorId = auth()->user()->id;
 
-        $sessions = Session::with(['students', 'educator'])
+        $sessions = SessionCall::with(['students', 'educator'])
             ->where('educator_id', $educatorId)
             ->orderBy('start_time', 'desc')
             ->get();

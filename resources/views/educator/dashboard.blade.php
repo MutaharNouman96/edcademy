@@ -16,8 +16,10 @@
                         <span class="pill badge-soft">Courses</span>
                     </div>
                     <div class="mt-3">
-                        <div class="h3 mb-0" id="kpiCourses">8</div>
-                        <small class="text-muted">2 drafts • 6 published</small>
+                        <div class="h3 mb-0" id="kpiCourses">{{ $totalCourses }}</div>
+                        <small class="text-muted">
+                            {{ $draftCourses }} drafts • {{ $publishedCourses }} published
+                        </small>
                     </div>
                 </div>
             </div>
@@ -28,8 +30,9 @@
                         <span class="pill badge-soft">Students</span>
                     </div>
                     <div class="mt-3">
-                        <div class="h3 mb-0" id="kpiStudents">1,246</div>
-                        <small class="text-muted">+38 this week</small>
+                        <div class="h3 mb-0" id="kpiStudents">{{ number_format($totalStudents) }}</div>
+                        <small class="text-muted">+{{ $newStudentsThisWeek }} this week</small>
+
                     </div>
                 </div>
             </div>
@@ -37,11 +40,12 @@
                 <div class="card kpi-card p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="kpi-icon"><i class="bi bi-bar-chart"></i></span>
-                        <span class="pill badge-soft">7‑day views</span>
+                        <span class="pill badge-soft">last 30 days views</span>
                     </div>
                     <div class="mt-3">
-                        <div class="h3 mb-0" id="kpiViews">18,420</div>
-                        <small class="text-muted">Avg watch 7m 12s</small>
+                        <div class="h3 mb-0" id="kpiViews">{{ number_format($totalViews7Days) }}</div>
+                        <small class="text-muted">Avg watch {{ $avgWatchFormatted }}</small>
+
                     </div>
                 </div>
             </div>
@@ -53,10 +57,13 @@
                     </div>
                     <div class="mt-3">
                         <div>
-                            <div class="d-flex justify-content-between"><span class="text-muted">Escrow</span> <strong
-                                    id="escrowBalance">$742.00</strong></div>
-                            <div class="d-flex justify-content-between"><span class="text-muted">Earned</span> <strong
-                                    id="earnedTotal">$12,904.50</strong></div>
+                            <div class="d-flex justify-content-between"><span class="text-muted">Escrow</span>
+                                <strong id="escrowBalance">${{ number_format($escrowBalance, 2) }}</strong>
+
+                            </div>
+                            <div class="d-flex justify-content-between"><span class="text-muted">Earned</span>
+                                <strong id="earnedTotal">${{ number_format($earnedTotal, 2) }}</strong>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -70,13 +77,13 @@
             <div class="col-lg-8">
                 <div class="card p-3">
                     <div class="d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">Video views (last 14 days)</h5>
+                        <h5 class="mb-0">Video views (last 30 days)</h5>
                         <div>
                             <button class="btn btn-sm btn-outline-primary" id="refreshViews"><i
                                     class="bi bi-arrow-clockwise"></i></button>
                         </div>
                     </div>
-                    <canvas id="viewsChart" height="500" class="mt-3"></canvas>
+                    <canvas id="viewsChart" height="200" class="mt-3"></canvas>
                 </div>
             </div>
             <div class="col-lg-4">
@@ -117,7 +124,38 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Rows injected by JS -->
+                    @foreach ($latestCourses as $course)
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <img class="avatar avatar-sm" src="{{ asset($course->thumbnail) }}"
+                                            alt="{{ $course->title }}" />
+                                    </div>
+                                    <div class="flex-grow-1 ms-2">
+                                        <a
+                                            href="{{ route('educator.courses.show', $course) }}">{{ $course->title }}</a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ $course->subject }}</td>
+                            <td>{{ $course->status }}</td>
+                            <td>${{ $course->price }}</td>
+                            <td>{{ $course->enrollments_count }}</td>
+                            <td>{{ $course->rating }}</td>
+                            <td>{{ $course->updated_at->diffForHumans() }}</td>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="Actions">
+                                    <a href="{{ route('educator.courses.show', $course) }}"
+                                        class="btn btn-sm btn-primary"><i class="bi bi-box-arrow-up-right"></i></a>
+                                    <a href="{{ route('educator.courses.edit', $course) }}"
+                                        class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <button wire:click="confirmDelete({{ $course->id }})"
+                                        class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -127,8 +165,8 @@
     <section id="section-videos" class="mb-4">
         <div class="d-flex align-items-center justify-content-between mb-2">
             <h3 class="h5 mb-0">Recent Videos</h3>
-            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#uploadVideoModal"><i
-                    class="bi bi-cloud-upload me-1"></i> Upload</button>
+            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                data-bs-target="#uploadVideoModal"><i class="bi bi-cloud-upload me-1"></i> Upload</button>
         </div>
         <div class="table-responsive">
             <table class="table align-middle" id="videosTable">
@@ -140,21 +178,38 @@
                         <th>Watch Time</th>
                         <th>Likes</th>
                         <th>Comments</th>
-                        <th>Published</th>
+                        <th>Published At</th>
+                        <th></th>
                     </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                    @foreach ($latestVideos as $video)
+                        <tr>
+                            <td>{{ $video->title }}</td>
+                            <td>{{ $video->course->title }}</td>
+                            <td>{{ $video->lesson_video_views->count() }}</td>
+                            <td>{{ format_seconds($video->lesson_video_views->avg('watch_time')) }}</td>
+                            <td>{{ $video->lesson_video_views->where('liked', 1)->count() }}</td>
+                            <td>{{ $video->lesson_video_comments->count() }}</td>
+                            <td>{{ $video->published_at ? $video->published_at->diffForHumans() : '' }}</td>
+                            <td>
+                                <a href="{{ route('educator.courses.show', $video->course) }}"
+                                    class="btn btn-sm btn-primary"><i class="bi bi-box-arrow-up-right"></i></a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
             </table>
         </div>
     </section>
 
-    <!-- Earnings & Escrow split -->
+    {{-- <!-- Earnings & Escrow split -->
     <div class="row g-3">
         <section id="section-earnings" class="col-lg-6">
             <div class="card p-3 h-100">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <h3 class="h6 mb-0">Earnings</h3>
-                    <a href="#" class="small">View all</a>
+                    <a href="{{ route('educator.earnings') }}" class="small">View all</a>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -241,7 +296,7 @@
                     Messages</button>
             </div>
         </section>
-    </div>
+    </div> --}}
 
     <!-- Resources -->
     <section id="section-resources" class="mt-4">
@@ -277,211 +332,16 @@
     </section>
 
     <!-- Settings anchor (placeholder) -->
-    <section id="section-settings" class="mt-4">
+    {{-- <section id="section-settings" class="mt-4">
         <div class="card p-3">
             <h3 class="h6 mb-1">Settings</h3>
             <p class="small text-muted mb-0">Profile, availability, subjects, verification, notifications.</p>
         </div>
-    </section>
+    </section> --}}
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
         <script>
-            // Sample data (replace with API responses later)
-            const courses = [{
-                    id: 1,
-                    title: 'Calculus I — Limits & Derivatives',
-                    subject: 'Math',
-                    status: 'Published',
-                    price: 49,
-                    enroll: 412,
-                    rating: 4.8,
-                    updated: '2025-09-12'
-                },
-                {
-                    id: 2,
-                    title: 'Physics: Mechanics (GCSE)',
-                    subject: 'Physics',
-                    status: 'Published',
-                    price: 39,
-                    enroll: 288,
-                    rating: 4.7,
-                    updated: '2025-09-10'
-                },
-                {
-                    id: 3,
-                    title: 'IELTS Speaking Mastery',
-                    subject: 'English',
-                    status: 'Draft',
-                    price: 29,
-                    enroll: 0,
-                    rating: null,
-                    updated: '2025-09-15'
-                },
-                {
-                    id: 4,
-                    title: 'Organic Chemistry Basics',
-                    subject: 'Chemistry',
-                    status: 'Published',
-                    price: 35,
-                    enroll: 156,
-                    rating: 4.5,
-                    updated: '2025-09-05'
-                },
-                {
-                    id: 5,
-                    title: 'Algebra II — Functions',
-                    subject: 'Math',
-                    status: 'Published',
-                    price: 25,
-                    enroll: 501,
-                    rating: 4.6,
-                    updated: '2025-09-08'
-                },
-                {
-                    id: 6,
-                    title: 'Essay Writing Bootcamp',
-                    subject: 'English',
-                    status: 'Published',
-                    price: 19,
-                    enroll: 321,
-                    rating: 4.4,
-                    updated: '2025-09-01'
-                },
-                {
-                    id: 7,
-                    title: 'SAT Math Crash Course',
-                    subject: 'Math',
-                    status: 'Draft',
-                    price: 59,
-                    enroll: 0,
-                    rating: null,
-                    updated: '2025-09-13'
-                },
-                {
-                    id: 8,
-                    title: 'AP Physics 1: Waves',
-                    subject: 'Physics',
-                    status: 'Published',
-                    price: 45,
-                    enroll: 118,
-                    rating: 4.6,
-                    updated: '2025-09-03'
-                },
-            ];
-
-            const videos = [{
-                    title: 'Chain Rule Explained',
-                    course: 'Calculus I — Limits & Derivatives',
-                    views: 4200,
-                    watch: '7h 15m',
-                    likes: 298,
-                    comments: 32,
-                    published: '2025-09-11'
-                },
-                {
-                    title: 'Free‑Body Diagrams',
-                    course: 'Physics: Mechanics (GCSE)',
-                    views: 2850,
-                    watch: '5h 02m',
-                    likes: 188,
-                    comments: 14,
-                    published: '2025-09-10'
-                },
-                {
-                    title: 'Quadratic Functions',
-                    course: 'Algebra II — Functions',
-                    views: 5100,
-                    watch: '8h 41m',
-                    likes: 332,
-                    comments: 29,
-                    published: '2025-09-07'
-                },
-                {
-                    title: 'Essay Openings that Hook',
-                    course: 'Essay Writing Bootcamp',
-                    views: 1630,
-                    watch: '2h 40m',
-                    likes: 120,
-                    comments: 6,
-                    published: '2025-09-05'
-                },
-            ];
-
-            // Populate Courses table
-            const tbody = document.querySelector('#coursesTable tbody');
-
-            function renderCourses(list) {
-                tbody.innerHTML = list.map(c => `
-        <tr>
-          <td>
-            <div class="d-flex align-items-start gap-2">
-              <img src="https://via.placeholder.com/64x40/ffffff/006b7d?text=${encodeURIComponent(c.subject[0] || 'C')}" class="rounded border" width="64" height="40" alt="" />
-              <div>
-                <div class="fw-semibold">${c.title}</div>
-                <div class="small text-muted">ID #${c.id}</div>
-              </div>
-            </div>
-          </td>
-          <td>${c.subject}</td>
-          <td>${c.status === 'Published' ? '<span class="badge text-bg-success">Published</span>' : '<span class="badge text-bg-secondary">Draft</span>'}</td>
-          <td>$${c.price.toFixed(2)}</td>
-          <td>${c.enroll}</td>
-          <td>${c.rating ? `<span class="text-warning"><i class="bi bi-star-fill"></i></span> ${c.rating.toFixed(1)}` : '-'}</td>
-          <td>${c.updated}</td>
-          <td class="text-end">
-            <div class="btn-group btn-group-sm">
-              <a href="#" class="btn btn-outline-primary"><i class="bi bi-bar-chart"></i></a>
-              <a href="#" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
-              <a href="#" class="btn btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i></a>
-            </div>
-          </td>
-        </tr>`).join('');
-            }
-            renderCourses(courses);
-
-            // Populate Videos table
-            const vbody = document.querySelector('#videosTable tbody');
-
-            function renderVideos(list) {
-                vbody.innerHTML = list.map(v => `
-        <tr>
-          <td>${v.title}</td>
-          <td>${v.course}</td>
-          <td>${v.views.toLocaleString()}</td>
-          <td>${v.watch}</td>
-          <td>${v.likes}</td>
-          <td>${v.comments}</td>
-          <td>${v.published}</td>
-        </tr>`).join('');
-            }
-            renderVideos(videos);
-
-            // Fill video course select
-            const videoCourseSelect = document.getElementById('videoCourseSelect');
-            courses.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = c.title;
-                videoCourseSelect.appendChild(opt);
-            });
-
-            // Simple search/filter
-            document.getElementById('courseSearch').addEventListener('input', (e) => {
-                const q = e.target.value.toLowerCase();
-                renderCourses(courses.filter(c => c.title.toLowerCase().includes(q) || c.subject.toLowerCase().includes(
-                    q)));
-            });
-
-            // Global search (demo: just highlights Courses section)
-            document.getElementById('globalSearch').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    document.getElementById('section-courses').scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            });
-
             // Charts
             const viewsCtx = document.getElementById('viewsChart');
 
@@ -489,10 +349,10 @@
 
             // Function to load chart data from API
             async function loadViewsChartData() {
-                const response = await fetch('{{ url('/') }}/educator/lesson-views/chart');
+                const response = await fetch('{{ url('/') }}/educator-panel/lesson-views/chart');
                 const result = await response.json();
 
-                const labels = result.labels.map((d, i) => `D-${14 - i}`);
+                const labels = result.labels.map((d, i) => `D-${30 - i}`);
                 const viewsData = result.data;
 
                 if (viewsChart) {
@@ -503,7 +363,7 @@
                 } else {
                     // Create new chart
                     viewsChart = new Chart(viewsCtx, {
-                        type: 'line',
+                        type: 'bar',
                         data: {
                             labels,
                             datasets: [{
@@ -511,7 +371,7 @@
                                 data: viewsData,
                                 tension: .35,
                                 borderColor: '#006b7d',
-                                backgroundColor: 'rgba(0,107,125,.12)',
+                                backgroundColor: '#006b7d90',
                                 fill: true,
                                 pointRadius: 0
                             }]
