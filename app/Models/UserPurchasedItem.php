@@ -22,6 +22,6 @@ class UserPurchasedItem extends MorphPivot
 
     public function purchasable()
     {
-        return $this->morphTo(); // to course or lesson 
+        return $this->morphTo(); // to course or lesson
     }
 }

@@ -59,40 +59,43 @@ function renderNewVideos(){
     </li>`).join('');
 }
 
-function renderCerts(){
-  const ul = document.getElementById('certList');
-  ul.innerHTML = certificates.map(c => `
-    <li class="list-group-item d-flex align-items-center justify-content-between">
-      <div>
-        <div class="fw-semibold">${c.course}</div>
-        <div class="small text-muted">Issued ${c.date}</div>
-      </div>
-      <div class="btn-group btn-group-sm">
-        <button class="btn btn-outline-primary"><i class="bi bi-download"></i></button>
-        <button class="btn btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i></button>
-      </div>
-    </li>`).join('');
-}
+// function renderCerts(){
+//   const ul = document.getElementById('certList');
+//   ul.innerHTML = certificates.map(c => `
+//     <li class="list-group-item d-flex align-items-center justify-content-between">
+//       <div>
+//         <div class="fw-semibold">${c.course}</div>
+//         <div class="small text-muted">Issued ${c.date}</div>
+//       </div>
+//       <div class="btn-group btn-group-sm">
+//         <button class="btn btn-outline-primary"><i class="bi bi-download"></i></button>
+//         <button class="btn btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i></button>
+//       </div>
+//     </li>`).join('');
+// }
 
 
-function renderPayments(){
-  const tbody = document.getElementById('paymentsTable');
-  tbody.innerHTML = payments.map(p => `
-    <tr>
-      <td>${p.date}</td>
-      <td>${p.course}</td>
-      <td>${p.method}</td>
-      <td class="text-end">$${parseFloat(p.amount).toFixed(2)}</td>
-    </tr>`).join('');
-  const total = payments.reduce((a,b)=>a+parseFloat(b.amount),0);
-  document.getElementById('kpiSpend').textContent = `$${parseFloat(total).toFixed(2)}`;
-}
+// function renderPayments(){
+//   const tbody = document.getElementById('paymentsTable');
+//   console.log('====================================');
+//   console.log('Payments on dashboard', payments);
+//   console.log('====================================');
+//   tbody.innerHTML = payments.map(p => `
+//     <tr>
+//       <td>${p.date}</td>
+//       <td>${p.course}</td>
+//       <td>${p.method}</td>
+//       <td class="text-end">$${parseFloat(p.amount).toFixed(2)}</td>
+//     </tr>`).join('');
+//   const total = payments.reduce((a,b)=>a+parseFloat(b.amount),0);
+//   document.getElementById('kpiSpend').textContent = `$${parseFloat(total).toFixed(2)}`;
+// }
 
 const courseDetailsUrl = document.getElementById('dashboard-data').dataset.courseDetailsUrl;
 renderCourses(myCourses);
 renderNewVideos();
-renderCerts();
-renderPayments();
+// renderCerts();
+// renderPayments();
 
 // Search courses
 document.getElementById('courseSearch').addEventListener('input', (e)=>{

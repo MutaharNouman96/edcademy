@@ -49,18 +49,19 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Item</th>
-                        <th>Method</th>
-                        <th class="text-end">Amount</th>
+                        <th>Purchased Item</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+
                     </tr>
                 </thead>
                 <tbody id="paymentTable">
                     @foreach ($paymentData as $payment)
                         <tr>
                             <td>{{ \Carbon\Carbon::parse($payment['date'])->format('M d, Y') }}</td>
-                            <td>{{ $payment['course'] }}</td>
-                            <td>{{ $payment['method'] }}</td>
-                            <td class="text-end">${{ number_format($payment['amount'], 2) }}</td>
+                            <td>{{ $payment['item_title'] }}</td>
+                            <td>{{ $payment['type'] }}</td>
+                            <td>@if ($payment['amount']) $ @endif {{ $payment['amount'] }}</td>
                         </tr>
                     @endforeach
                 </tbody>
