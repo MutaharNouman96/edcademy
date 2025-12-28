@@ -136,19 +136,9 @@
         </section>
 
         <!-- Certificates / Payments Row -->
-        <div class="row g-3">
-            <section id="section-certificates" class="col-lg-5">
-                <div class="card p-3 h-100">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h3 class="h6 mb-0">Certificates</h3>
-                        <a class="small" href="#">View all</a>
-                    </div>
-                    <ul class="list-group list-group-flush" id="certList">
-                        <!-- injected by JS -->
-                    </ul>
-                </div>
-            </section>
-            <section id="section-payments" class="col-lg-7">
+        <div class="row">
+
+            <section id="section-payments" class="col-lg-12">
                 <div class="card p-3 h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <h3 class="h6 mb-0">Payments</h3>
@@ -164,7 +154,15 @@
                                     <th class="text-end">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody id="paymentsTable"></tbody>
+                            <tbody id="paymentTable">
+                                @foreach ($paymentData as $payment)
+                                    <tr>
+                                        <td>{{ \Carbon\Carbon::parse($payment['date'])->format('M d, Y') }}</td>
+                                        <td>{{ $payment['item_title'] }}</td>
+                                        <td>{{ $payment['type'] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
                         </table>
                     </div>
                 </div>
