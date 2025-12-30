@@ -14,8 +14,15 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="{{ asset('assets/css/select2-addon.css') }}" />
 
+        <link rel="stylesheet"
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.3.6/css/dataTables.bootstrap5.css">
+
+
+
+
         {{-- @vite(['resources/js/app.js']) --}}
         <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+
 
 
         @stack('styles')
@@ -36,10 +43,9 @@
                         <a class="btn btn-sm btn-outline-primary" href="{{ route('educator.courses.create') }}">
                             <i class="bi bi-plus-lg me-1"></i> New Course
                         </a>
-                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                            data-bs-target="#uploadVideoModal">
-                            <i class="bi bi-cloud-upload me-1"></i> Upload Video
-                        </button>
+                        <a class="btn btn-sm btn-outline-primary" href="{{ route('website.index') }}">
+                            <i class="bi bi-globe me-1"></i> Go to website
+                        </a>
                         <div class="dropdown">
                             <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->first_name }}
@@ -85,7 +91,7 @@
                             href="{{ route('educator.sessions.index') }}"><i class="bi bi-calendar3 me-2"></i>
                             Sessions/Bookings</a>
                         <hr>
-                       
+
                         <a class="nav-link @if (request()->is('educator-panel/payouts')) active @endif"
                             href="{{ route('educator.payouts.index') }}"><i class="bi bi-bank me-2"></i> Payouts</a>
                         <a class="nav-link @if (request()->is('educator-panel/payments*')) active @endif"
@@ -95,8 +101,8 @@
                         <a class="nav-link @if (request()->is('educator-panel/reviews*')) active @endif"
                             href="{{ route('educator.reviews.index') }}"><i class="bi bi-star-half me-2"></i>
                             Reviews</a>
-                        <a class="nav-link" href="{{ route('chat.index') }}"><i
-                                class="bi bi-chat-dots me-2"></i> Messages</a>
+                        <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-2"></i>
+                            Messages</a>
                         <a class="nav-link" href="#section-resources"><i class="bi bi-folder2-open me-2"></i>
                             Resources</a>
                         <a class="nav-link" href="{{ route('educator.schedule.index') }}"><i
@@ -233,55 +239,7 @@
             </div>
         </div>
 
-        <!-- Upload Video Modal -->
-        <div class="modal fade" id="uploadVideoModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title"><i class="bi bi-cloud-upload me-2"></i>Upload Video</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="uploadVideoForm" class="row g-3">
-                            <div class="col-12 col-md-8">
-                                <label class="form-label">Video Title</label>
-                                <input required class="form-control" placeholder="e.g., Chain Rule Explained" />
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <label class="form-label">Course</label>
-                                <select class="form-select" id="videoCourseSelect"></select>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Upload File</label>
-                                <input type="file" class="form-control" />
-                                <div class="form-text">MP4/MOV, up to 2 GB. Auto‑captions enabled.</div>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Visibility</label>
-                                <select class="form-select">
-                                    <option>Published</option>
-                                    <option>Unlisted</option>
-                                    <option>Draft</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Release date</label>
-                                <input type="date" class="form-control" />
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Description</label>
-                                <textarea class="form-control" rows="3" placeholder="Add chapter markers, resources, links..."></textarea>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline-primary" data-bs-dismiss="modal">Close</button>
-                        <button class="btn btn-primary"><i class="bi bi-upload me-1"></i> Upload</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Scripts -->
 
@@ -295,6 +253,19 @@
         <script>
             $(document).ready(function() {
                 $('.select2').select2();
+            });
+        </script>
+
+        <script src="https://cdn.datatables.net/2.3.6/js/dataTables.js"></script>
+        <script src="https://cdn.datatables.net/2.3.6/js/dataTables.bootstrap5.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('.data-table').DataTable({
+                    "paging": true,
+                    "info": true,
+                    "searching": true,
+                    pageLength: 10
+                });
             });
         </script>
 
