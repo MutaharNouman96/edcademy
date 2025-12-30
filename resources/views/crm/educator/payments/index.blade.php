@@ -48,7 +48,8 @@
                             <th>Commission</th>
                             <th>Tax</th>
                             <th>Net</th>
-                            <th>Status</th>
+                            <th>Payment Status</th>
+                            <th>Payout Status</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -76,8 +77,14 @@
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-{{ $payment->status === 'paid' ? 'success' : 'warning' }}">
+                                    <span class="badge bg-{{ $payment->status === 'paid' ? 'success' : 'info' }}">
                                         {{ ucfirst($payment->status) }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-{{ $payment->payout_status === 'paid' ? 'success' : 'warning' }}">
+                                        {{ ucfirst($payment->payout_status) }}
                                     </span>
                                 </td>
 

@@ -139,7 +139,7 @@
                                     @endif
                                 </span>
 
-                                <a href="{{ route('web.course.show', $course->slug) }}" class="enroll-btn">
+                                <a href="{{ route('web.course.show', ['slug'=>$course->slug  , 'id' => $course->id]) }}" class="enroll-btn">
                                     Enroll Now
                                 </a>
                             </div>

@@ -40,7 +40,7 @@ class ApplicationSettingsSeeder extends Seeder
             // PLATFORM COMMISSION
             // =========================
             [
-                'key' => 'platform_commission_default',
+                'key' => 'platform_commission',
                 'value' => '15',
                 'type' => 'float',
                 'group' => 'commission',

@@ -142,6 +142,7 @@
 
                                                 <input type="hidden" name="item_id" value="{{ $lesson->id }}">
                                                 <input type="hidden" name="model" value="App\Models\Lesson">
+                                                <input type="hidden" name="action" value="buy_now">
                                                 <button type="submit" class="btn btn-primary" title="Buy Now">
                                                     <i class="fas fa-shopping-bag "></i>
                                                 </button>
@@ -196,7 +197,8 @@
                     <div class="row g-3">
                         @foreach ($moreCourses as $rc)
                             <div class="col-md-4">
-                                <a href="{{ route('web.course.show', $rc->slug) }}" class="related-course">
+                                <a href="{{ route('web.course.show', ['slug' => $rc->slug, 'id' => $rc->id]) }}"
+                                    class="related-course">
                                     <div class="related-thumb rounded">
                                         <img src="{{ asset('storage/' . $rc->thumbnail) }}" class="img-fluid">
                                         <span class="related-price">${{ $rc->price }}</span>
@@ -234,6 +236,7 @@
                         @csrf
                         <input type="hidden" name="item_id" value="{{ $course->id }}">
                         <input type="hidden" name="model" value="App\Models\Course">
+                        <input type="hidden" name="action" value="buy_now">
 
                         <button class="buy-btn" type="submit">
                             <i class="fas fa-shopping-bag me-2"></i>Buy Now
@@ -245,7 +248,7 @@
                         <input type="hidden" name="item_id" value="{{ $course->id }}">
                         <input type="hidden" name="model" value="App\Models\Course">
                         <input type="hidden" name="responseType" value="json">
-                        <button class="cart-btn"  >
+                        <button class="cart-btn">
                             <i class="fas fa-cart-plus me-2"></i>Add to Cart
                         </button>
                     </form>
@@ -430,7 +433,7 @@
             }
 
             // Add to cart
-       
+
 
             // View educator profile
             function viewProfile() {
