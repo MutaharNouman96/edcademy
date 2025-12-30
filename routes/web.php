@@ -58,7 +58,7 @@ Route::get("become-an-educator", [WebsiteController::class, "educator_signup"])-
 Route::post("educator/signup/store", [EducatorController::class, "store"])->name("educator.signup.store");
 
 Route::get("courses", [WebsiteController::class, "courses"])->name("web.courses");
-Route::get("course/{slug}", [CourseController::class, "show"])->name("web.course.show");
+Route::get("course/{slug}/{id}", [CourseController::class, "show"])->name("web.course.show");
 
 Route::get("educators", [WebsiteController::class, "educators"])->name("web.educators.index");
 Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name("web.educator.show");
@@ -79,10 +79,6 @@ Route::post('order/add-to-cart', [OrderController::class, 'addToOrderCart'])->na
 Route::post('order/buy-now', [OrderController::class, 'buyNow'])->name('order.buyNow');
 Route::post('order/remove-order-item/', [OrderController::class, 'removeOrderItem'])->name('order.removeOrderItem');
 
-Route::get("educator-policy", [WebsiteController::class, "educator_policy"])->name("web.educator.policy");
-Route::get("student-parent-policy", [WebsiteController::class, "student_parent_policy"])->name("web.student.parent.policy");
-Route::get("refund-policy", [WebsiteController::class, "refund_policy"])->name("web.refund.policy");
-
 
 Route::post('/stripe/checkout', [StripeController::class, 'createCheckout']);
 
@@ -101,7 +97,6 @@ Route::post('/paypal/capture', [PayPalController::class, 'capture'])
 
 Route::get("how-it-works", [WebsiteController::class, "how_it_works"])->name("web.how.it.works");
 
-Route::get("about-us", [WebsiteController::class, "about_us"])->name("web.about.us");
 
 Route::get("contact-us", [WebsiteController::class, "contact_us"])->name("web.contact.us");
 
@@ -112,11 +107,15 @@ Route::get("terms-and-conditions", [WebsiteController::class, "terms_and_conditi
 Route::get("reviews", [WebsiteController::class, "reviews"])->name("web.reviews");
 
 Route::get("faqs", [WebsiteController::class, "faqs"])->name("web.faqs");
-
-Route::get("refund-policy", [WebsiteController::class, "refund_policy"])->name("web.refund.policy");
-
+Route::view('community-guidelines', 'website.community-guidelines')->name('web.community.guidelines');
+Route::view('safety-and-trust-policy', 'website.safety-and-trust-policy')->name('web.safety.and.trust.policy');
+Route::view('student-parent-policy', 'website.student-parent-policy')->name('web.student.parent.policy');
+Route::view('about-us', 'website.about-us')->name('web.about-us');
+Route::view('privacy-policy', 'website.privacy-policy')->name('web.privacy-policy');
+Route::view('terms-and-conditions', 'website.terms-and-conditions')->name('web.terms-and-conditions');
+Route::get("educator-policy", [WebsiteController::class, "educator_policy"])->name("web.educator-policy");
+Route::get("refund-policy", [WebsiteController::class, "refund_policy"])->name("web.refund-policy");
 Route::get("cancel-policy", [WebsiteController::class, "cancel_policy"])->name("web.cancel.policy");
-
 Route::get("user-agreement", [WebsiteController::class, "user_agreement"])->name("web.user.agreement");
 
 

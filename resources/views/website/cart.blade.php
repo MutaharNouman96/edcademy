@@ -70,7 +70,7 @@
 
                                                 <span><i class="fas fa-book"></i>
                                                     <a
-                                                        href="{{ route('web.course.show', $cart->item_details->course->slug) }}">
+                                                        href="{{ route('web.course.show', ['slug'=>$cart->item_details->course->slug  , 'id' => $cart->item_details->course->id] ) }}">
                                                         {{ $cart->item_details->course->title }}
                                                     </a>
                                                 </span>

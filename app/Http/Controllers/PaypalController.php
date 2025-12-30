@@ -212,7 +212,7 @@ class PaypalController extends Controller
                     'gross_amount' => $item->total,
                     'currency' => setting('currency', 'USD'),
                     'platform_commission' => $commission,
-                    'net_total' => $item->total - $commission,
+                    'net_amount' => $item->total - $commission,
                     'payment_id' => $paymentId,
                     'status' => 'completed',
                 ]);
