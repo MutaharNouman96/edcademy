@@ -100,18 +100,21 @@ class OrderController extends Controller
                 'message' => Session::get('message'),
             ]);
         }
-
+        if ($request->get('action') == 'buy_now') {
+            return redirect(route('web.cart'));
+        }
         return back();
     }
 
     public function buyNow() {}
 
-    public function removeOrderItem(Request $request) {
+    public function removeOrderItem(Request $request)
+    {
         $orderItem = OrderItem::find($request->item_id);
         if (!$orderItem) {
             return back()->with('error', 'Order item not found.');
         }
-        if($orderItem->order->user_id != auth()->id()) {
+        if ($orderItem->order->user_id != auth()->id()) {
             return back()->with('error', 'You are not authorized to remove this order item.');
         }
 

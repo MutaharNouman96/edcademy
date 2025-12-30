@@ -64,7 +64,7 @@ class PayoutController extends Controller
         $educatorId = Auth::id();
 
         $query = EducatorPayment::where('educator_id', $educatorId)
-            ->where('status', 'processing');
+            ->whereIn('payout_status', ['processing', 'pending']);
 
         if ($request->filled('from')) {
             $query->whereDate('created_at', '>=', $request->from);

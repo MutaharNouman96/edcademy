@@ -8,7 +8,7 @@
                             class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy</a>
                     <span class="text-muted d-none d-md-inline">Update Course</span>
                 </div>
-                <div class="d-flex align-items-center gap-2">
+                {{-- <div class="d-flex align-items-center gap-2">
                     <button class="btn btn-sm btn-outline-primary" id="btnExport">
                         <i class="bi bi-download me-1"></i> Export JSON
                     </button>
@@ -18,7 +18,7 @@
                     <input type="file" id="importJson" accept="application/json" hidden />
                     <a class="btn btn-sm btn-outline-primary" href="edcademy-educator-dashboard.html"><i
                             class="bi bi-speedometer2 me-1"></i> Dashboard</a>
-                </div>
+                </div> --}}
             </div>
         </header>
 
@@ -121,19 +121,17 @@
                             </div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label">Release</label>
-                                <select name="release" class="form-select @error('release') is-invalid @enderror">
+                                <label class="form-label">Publish Status</label>
+                                <select name="status" class="form-select @error('status') is-invalid @enderror">
                                     <option value="publish"
-                                        {{ old('release', $course->release) == 'publish' ? 'selected' : '' }}>Publish
-                                        immediately</option>
-                                    <option value="schedule"
-                                        {{ old('release', $course->release) == 'schedule' ? 'selected' : '' }}>Schedule
-                                        publish</option>
+                                        {{ old('status', $course->status) == 'publish' ? 'selected' : '' }}>Publish 
+                                        </option>
+                                     
                                     <option value="draft"
-                                        {{ old('release', $course->release) == 'draft' ? 'selected' : '' }}>Draft only
+                                        {{ old('status', $course->status) == 'draft' ? 'selected' : '' }}>Draft only
                                     </option>
                                 </select>
-                                @error('release')
+                                @error('status')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -159,7 +157,7 @@
 
                                 @if ($course->thumbnail)
                                     <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="Thumbnail"
+                                        <img src="{{ asset($course->thumbnail) }}" alt="Thumbnail"
                                             class="img-thumbnail" width="120">
                                     </div>
                                 @endif
@@ -184,14 +182,14 @@
                                 @enderror
                             </div>
 
-                            <div class="col-12">
+                            {{-- <div class="col-12">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="drip" id="drip"
                                         value="1" {{ old('drip', $course->drip) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="drip">Enable drip release by
                                         lesson</label>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary">Update Course</button>
@@ -232,11 +230,12 @@
                                 <i class="bi bi-save me-1"></i> Save Draft
                             </button>
                             <button class="btn btn-primary" id="btnPublish">
-                                <i class="bi bi-rocket-takeoff me-1"></i> Publish Course
+                                <i class="bi bi-rocket-takeoff me-1"></i>Submit For Publish Course
                             </button>
-                            <button class="btn btn-light ms-auto" id="btnPreview">
+                            <a href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}"
+                                target="_blank" class="btn btn-light ms-auto" id="btnPreview">
                                 <i class="bi bi-box-arrow-up-right me-1"></i> Preview Listing
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -244,17 +243,11 @@
                 <!-- Summary (right) -->
                 <div class="col-lg-4">
                     <div class="sticky-col">
-                        <div class="card p-3 mb-3">
+                        {{-- <div class="card p-3 mb-3">
                             <h6 class="mb-2">Course Summary</h6>
                             <div class="d-flex align-items-center gap-2 mb-2">
                                 <div id="thumbPreview" class="rounded border"
-                                    style="
-                    width: 72px;
-                    height: 48px;
-                    background: #fff
-                      url('')
-                      center/cover no-repeat;
-                  ">
+                                    style=" width: 72px; height: 48px; background: #fff url('') center/cover no-repeat; ">
                                 </div>
                                 <div>
                                     <div class="fw-semibold" id="sumTitle">Untitled course</div>
@@ -273,7 +266,7 @@
                             <div class="d-flex justify-content-between">
                                 <span class="summary-key">Release</span><strong id="sumRelease">Draft</strong>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <div class="card p-3 mb-3">
                             <h6 class="mb-2">Checklist</h6>
@@ -786,17 +779,17 @@
                                         <div class="col-12">
                                                 <!-- Video Content -->
                                                 ${response.type == 'video' ? ` <div class="" id="videoContent" role="tabpanel" aria-labelledby="video-tab">
-                                                  <label class="form-label">Video</label>
-                                                  <input id="lfVideo" type="file" class="form-control mb-2" accept="video/*" />
-                                                  <input id="lfVideoLink" type="url" class="form-control mb-2" placeholder="Or paste a video link (YouTube, Vimeo)" />
-                                                  <div class="form-text">
-                                                    MP4/MOV up to 2 GB, or provide an external link.
-                                                  </div>
-                                                  <div id="videoPreview" class="border rounded mt-2 p-3 text-center bg-white">
-                                                    <i class="bi bi-camera-video fs-1 text-muted"></i>
-                                                    <p class="mb-0 small text-muted">No video selected</p>
-                                                  </div>
-                                                </div>` : ''}
+                                                          <label class="form-label">Video</label>
+                                                          <input id="lfVideo" type="file" class="form-control mb-2" accept="video/*" />
+                                                          <input id="lfVideoLink" type="url" class="form-control mb-2" placeholder="Or paste a video link (YouTube, Vimeo)" />
+                                                          <div class="form-text">
+                                                            MP4/MOV up to 2 GB, or provide an external link.
+                                                          </div>
+                                                          <div id="videoPreview" class="border rounded mt-2 p-3 text-center bg-white">
+                                                            <i class="bi bi-camera-video fs-1 text-muted"></i>
+                                                            <p class="mb-0 small text-muted">No video selected</p>
+                                                          </div>
+                                                        </div>` : ''}
 
                                                 <!-- Learning Materials -->
                                                 ${response.type == 'materials' ? `<div class=""id="materialsContent"role="tabpanel"aria-labelledby="materials-tab"><labelclass="form-label">UploadLearningMaterials(PDF,PPT)</label><inputid="lfMaterials"type="file"class="form-control"accept=".pdf,.ppt,.pptx"multiple/><divid="lfMatList"class="rowg-2mt-2"><divclass="col-12text-centertext-mutedsmall"><iclass="bibi-file-earmark-pptfs-4"></i><br/>Nomaterialsuploaded</div></div></div>` : '' }
@@ -897,11 +890,9 @@
                 if ($('#btnPublish').disabled) return
                 // pretend POST to API
                 console.log('PUBLISH_PAYLOAD', JSON.stringify(course, null, 2))
-                showToast('Course published!')
+                showToast('Course submited for publishing!')
             })
-            $('#btnPreview').addEventListener('click', () => {
-                alert('Preview would open the public listing in a new tab.')
-            })
+
 
             // Export / Import
             $('#btnExport').addEventListener('click', () => {
@@ -1030,7 +1021,7 @@
                                     <i class="bi bi-grip-vertical lesson-handle"></i>
                                     <div>
                                         <div class="fw-semibold">${response.title ?? "New Section"}</div>
-                                        <div class="small text-muted">Draft</div>
+                                        
                                     </div>
                                 </div>
                                 <div class="btn-group btn-group-sm">

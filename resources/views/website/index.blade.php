@@ -40,7 +40,8 @@
                     <div class="row g-3">
                         @foreach ($bestReviewedCourses as $course)
                             <div class="col-lg-4 col-md-6 col-sm-12">
-                                <a class="text-decoration-none" href="{{ route('web.course.show', $course->slug) }}">
+                                <a class="text-decoration-none"
+                                    href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}">
                                     <div class="glass-landing--card cursor-pointer">
                                         <div style="position: relative" class="">
                                             @if ($course->thumbnail)
@@ -101,14 +102,14 @@
                         <div class="row">
                             @foreach ($featuredEducators as $educator)
                                 <div class="glass-landing--educator-profile mt-3 col-6">
-                                    @if($educator->profile_picture)
-                                    <img src="{{ $educator->profile_picture }}"
-                                        alt="Jessica R." height="100" class="glass-landing--Educator-avatar" />
-                                        @else
+                                    @if ($educator->profile_picture)
+                                        <img src="{{ $educator->profile_picture }}" alt="Jessica R." height="100"
+                                            class="glass-landing--Educator-avatar" />
+                                    @else
                                         <div class="educator-profile-placeholder">
                                             <i class="bi bi-person fs-1 text-muted"></i>
                                         </div>
-                                        @endif
+                                    @endif
                                     <div class="glass-landing--Educator-info mt-2">
                                         <h4>{{ $educator->full_name }}</h4>
                                         <div>
@@ -274,7 +275,8 @@
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <span class="course-price">${{ number_format($course->price, 2) }}</span>
-                                    <a href="{{ route('web.course.show', $course->slug) }}" class="btn btn-sm"
+                                    <a href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}"
+                                        class="btn btn-sm"
                                         style="background: var(--primary-cyan); color: white">Enroll Now</a>
                                 </div>
                             </div>

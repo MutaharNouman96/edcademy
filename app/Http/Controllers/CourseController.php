@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    public function show($slug)
+    public function show($slug, $id)
     {
         $course = Course::with([
             'category',
@@ -16,10 +16,15 @@ class CourseController extends Controller
             'sections.lessons',
             'reviews',
         ])
-        ->withAvg('reviews', 'rating')
-        ->withCount('reviews')
-        ->where('slug', $slug)
-        ->firstOrFail();
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->where('slug', $slug)
+            ->where('id', $id)
+            ->firstOrFail();
+
+            if($course->status == 'draft' && $course->user_id != (auth()->user()->id ?? '')){ 
+                abort(404);
+            }
 
         // Instructor’s more courses
         $moreCourses = Course::where('user_id', $course->user_id)
@@ -28,7 +33,7 @@ class CourseController extends Controller
             ->take(4)
             ->get();
 
-            $freeVideo = Lesson::where("course_id", $course->id)->where("free", true)->first();
+        $freeVideo = Lesson::where("course_id", $course->id)->where("free", true)->first();
 
         // Students enrolled count
         $studentsEnrolled = $course->coursePurchases()->count();
