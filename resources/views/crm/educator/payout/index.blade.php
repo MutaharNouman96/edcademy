@@ -285,7 +285,7 @@
                         <td>${r.release_date}</td>
                         <td>${r.source}</td>
                         <td>$${r.amount}</td>
-                        <td><span class="badge bg-warning">${r.status}</span></td>
+                        <td><span class="badge bg-warning">${r.payout_status}</span></td>
                         <td class="text-end">—</td>
                     </tr>`;
                         });

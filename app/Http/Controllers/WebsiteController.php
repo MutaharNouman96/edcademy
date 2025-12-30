@@ -265,5 +265,10 @@ class WebsiteController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Session booked successfully!']);
     }
+
+
+    public function faqs(){
+        return view("website.faq");
+    }
 }
 

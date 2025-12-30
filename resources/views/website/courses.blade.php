@@ -145,32 +145,9 @@
                                     @endif
                                 </div>
 
-                                <!-- Description -->
-                                <p class="course-description">
-                                    {{ \Illuminate\Support\Str::limit($course->description, 120) }}
-                                </p>
-
-                                <!-- Educator Info -->
-                                <div class="educator-info">
-                                    <small class="text-muted">
-                                        By {{ $course->educator ? trim($course->educator->first_name . ' ' . $course->educator->last_name) : 'Unknown' }}
-                                    </small>
-                                </div>
-
-                                <!-- Footer -->
-                                <div class="course-footer">
-                                    <span class="course-price">
-                                        @if ($course->is_free)
-                                            Free
-                                        @else
-                                            ${{ number_format($course->price, 2) }}
-                                        @endif
-                                    </span>
-
-                                    <a href="{{ route('web.course.show', $course->slug) }}" class="enroll-btn">
-                                        Enroll Now
-                                    </a>
-                                </div>
+                                <a href="{{ route('web.course.show', ['slug'=>$course->slug  , 'id' => $course->id]) }}" class="enroll-btn">
+                                    Enroll Now
+                                </a>
                             </div>
                         </div>
                     </div>

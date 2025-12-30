@@ -4,31 +4,7 @@
             <div class="d-flex align-items-center justify-content-between">
                 <h2 class="section-title"><i class="bi bi-collection"></i> Courses</h2>
 
-                <div class="toolbar d-flex flex-wrap gap-2">
-                    <input name.debounce.500ms="search" type="text" class="form-control form-control-sm"
-                        placeholder="Search title or subject...">
-
-                    <select name="filterStatus" class="form-select form-select-sm">
-                        <option value="">All Statuses</option>
-                        <option value="published">Published</option>
-                        <option value="draft">Draft</option>
-                        <option value="scheduled">Scheduled</option>
-                    </select>
-
-                    <select name="filterType" class="form-select form-select-sm">
-                        <option value="">All Types</option>
-                        <option value="module">Online Module</option>
-                        <option value="video">Video Pack</option>
-                        <option value="live">Live Cohort</option>
-                    </select>
-
-                    <input name.debounce.500ms="filterSubject" class="form-control form-control-sm"
-                        placeholder="Filter by subject…" />
-
-                    <button wire:click="resetFilters" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-                    </button>
-                </div>
+               
             </div>
         </div>
 
@@ -40,7 +16,7 @@
             @endif
 
             <div class="table-responsive">
-                <table class="table table-striped align-middle w-100">
+                <table class="table table-striped align-middle w-100 data-table">
                     <thead>
                         <tr>
                             <th>Thumb</th>
@@ -61,7 +37,7 @@
                             <tr>
                                 <td>
                                     @if ($course->thumbnail)
-                                        <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="thumb"
+                                        <img src="{{ asset( $course->thumbnail) }}" alt="thumb"
                                             class="rounded" style="width:50px;height:50px;object-fit:cover;">
                                     @else
                                         <span class="text-muted">—</span>
@@ -79,9 +55,14 @@
                                     </span>
                                 </td>
                                 <td>{{ $course->lessons()->count() }}</td>
-                                <td>—</td> <!-- TODO: link enrolled count -->
+                                <td>
+                                    {{ $course->purchasers->count() }}
+                                    </td> <!-- TODO: link enrolled count -->
                                 <td>{{ $course->created_at->format('d M Y') }}</td>
                                 <td class="text-end">
+                                   <a class="btn btn-outline-primary btn-sm" href="{{ route('web.course.show', ['slug'=>$course->slug  , 'id' => $course->id]) }}" target="_blank">
+                                       <i class="bi bi-file-earmark"></i>
+                                    </a>
                                     <a href="{{ route('educator.courses.edit', $course->id) }}"
                                         class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-pencil"></i>

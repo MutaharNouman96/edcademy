@@ -181,12 +181,12 @@
                     Company
                 </h5>
                 <div class="footer-links">
-                    <a href="{{ route('web.about.us') }}">About Us</a>
-                    <a href="{{ route('web.educator.policy') }}">Educator Policy</a>
-                    <a href="{{ route('web.student.parent.policy') }}">Student Policy</a>
-                    <a href="{{ route('web.refund.policy') }}">Refund Policy</a>
-                    <a href="{{ route('web.privacy.policy') }}">Privacy Policy</a>
-                    <a href="{{ route('web.terms.and.conditions') }}"> Terms & Conditions</a>
+                    <a href="{{ route("web.about-us") }}">About Us</a>
+                    <a href="{{ route("web.educator-policy") }}">Educator Policy</a>
+                    <a href="{{ route("web.student.parent.policy") }}">Student Policy</a>
+                    <a href="{{ route('web.refund-policy') }}">Refund Policy</a>
+                    <a href="{{ route("web.privacy-policy") }}">Privacy Policy</a>
+                    <a href="{{ route("web.terms-and-conditions") }}"> Terms & Conditions</a>
 
                 </div>
             </div>
