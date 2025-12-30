@@ -8,7 +8,7 @@
                             class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy</a>
                     <span class="text-muted d-none d-md-inline">Create Course</span>
                 </div>
-                <div class="d-flex align-items-center gap-2">
+                {{-- <div class="d-flex align-items-center gap-2">
                     <button class="btn btn-sm btn-outline-primary" id="btnExport">
                         <i class="bi bi-download me-1"></i> Export JSON
                     </button>
@@ -18,7 +18,7 @@
                     <input type="file" id="importJson" accept="application/json" hidden />
                     <a class="btn btn-sm btn-outline-primary" href="edcademy-educator-dashboard.html"><i
                             class="bi bi-speedometer2 me-1"></i> Dashboard</a>
-                </div>
+                </div> --}}
             </div>
         </header>
 
@@ -115,10 +115,8 @@
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select @error('status') is-invalid @enderror">
                                     <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>
-                                        Publish
-                                        immediately</option>
-                                    <option value="scheduled" {{ old('status') == 'scheduled' ? 'selected' : '' }}>
-                                        Schedule publish</option>
+                                        Publish</option>
+                                   
                                     <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>Draft only
                                     </option>
                                 </select>
@@ -127,7 +125,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-12 col-md-6" id="scheduleWrap"
+                            {{-- <div class="col-12 col-md-6" id="scheduleWrap"
                                 style="{{ old('status') == 'schedule' ? '' : 'display: none' }}">
                                 <label class="form-label">Publish date</label>
                                 <input type="date" name="schedule_date" value="{{ old('schedule_date') }}"
@@ -135,7 +133,7 @@
                                 @error('schedule_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                            </div>
+                            </div> --}}
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Thumbnail</label>

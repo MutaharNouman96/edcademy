@@ -78,11 +78,10 @@ class CoursesController extends Controller
         $course->language = $request->language ?? 'English';
         $course->price = $request->free ? 0 : $request->price ?? 0;
         $course->schedule_date = $request->schedule_date;
-        $course->tags = $request->tags;
         $course->description = $request->description;
         $course->drip = $request->boolean('drip');
         $course->thumbnail = $thumbnailPath;
-
+        $course->tags = $request->tags;
         $course->status = $request->status ?? 'draft';
 
         $course->save();
@@ -124,6 +123,54 @@ class CoursesController extends Controller
     public function update(Request $request, $id)
     {
         //
+        // Validate input
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'subject' => 'required|string|max:255',
+            'level' => 'nullable|string|max:255',
+            'language' => 'nullable|string|max:255',
+            'price' => 'nullable|numeric|min:0',
+            'free' => 'boolean',
+            'release' => 'nullable|string|in:publish,schedule,draft',
+            'schedule_date' => 'nullable|date',
+            'tags' => 'nullable|string',
+            'description' => 'required|string',
+            'drip' => 'boolean',
+            'thumbnail' => 'nullable|file|image|max:2048',
+        ]);
+
+        // Handle file upload
+
+
+        // Create new course
+        $course = Course::findOrFail($id);
+        $course->user_id = auth()->id() ?? 1; // fallback for testing
+        $course->title = $request->title;
+        $course->subject = $request->subject;
+        $course->level = $request->level ?? 'School';
+        $course->language = $request->language ?? 'English';
+        $course->price = $request->free ? 0 : $request->price ?? 0;
+        $course->schedule_date = $request->schedule_date;
+        $course->description = $request->description;
+        $course->drip = $request->boolean('drip');
+
+
+
+        if ($request->hasFile('thumbnail')) {
+            $file = $request->file('thumbnail');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $destinationPath = public_path('storage/thumbnails');
+            $file->move($destinationPath, $fileName);
+            $thumbnailPath = 'storage/thumbnails/' . $fileName;
+            $course->thumbnail = $thumbnailPath;
+        }
+        $course->tags = $request->tags;
+
+        $course->status = $request->status ?? 'draft';
+
+        $course->save();
+
+        return redirect()->route('educator.courses.edit', $course)->with('success', 'Course created successfully. Proceed for next steps');
     }
 
     /**

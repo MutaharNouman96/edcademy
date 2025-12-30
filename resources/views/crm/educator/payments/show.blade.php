@@ -20,22 +20,46 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="border rounded p-3 bg-light">
-                            <div class="text-muted small">Status</div>
-                            <span
-                                class="badge 
+                        <div class="border rounded p-3 bg-light d-flex gap-3">
+                            <div class="text-muted small">
+
+                                <div> Payment Status </div>
+
+                                <span
+                                    class="badge 
                             @if ($payment->status == 'completed') bg-success 
                             @elseif($payment->status == 'pending') bg-warning 
                             @elseif($payment->status == 'refunded') bg-secondary 
                             @else bg-danger @endif">
-                                {{ ucfirst($payment->status) }}
-                            </span>
+                                    {{ ucfirst($payment->status) }}
+                                </span>
+
+
+                            </div>
+
+
+                            <div class="text-muted small">
+
+                                <div> Payout Status </div>
+
+                                <span
+                                    class="badge 
+                            @if ($payment->payout_status == 'completed') bg-success 
+                            @elseif($payment->payout_status == 'pending') bg-warning 
+                            @elseif($payment->payout_status == 'refunded') bg-secondary 
+                            @else bg-danger @endif">
+                                    {{ ucfirst($payment->payout_status) }}
+                                </span>
+
+
+                            </div>
+
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="border rounded p-3 bg-light">
                             <div class="text-muted small">Payment Method</div>
-                            <div class="fw-bold">{{ $payment->payment_method ?? 'N/A' }}</div>
+                            <div class="fw-bold">{{ $payment->order->payment_method ?? 'N/A' }}</div>
                         </div>
                     </div>
                 </div>
@@ -79,15 +103,15 @@
                     <div class="col-md-4">
                         <div class="border rounded p-3">
                             <div class="text-muted small">Educator</div>
-                            <div class="fw-bold">{{ $payment->educator->name ?? 'N/A' }}</div>
+                            <div class="fw-bold">{{ $payment->educator->full_name ?? 'N/A' }}</div>
                             <div class="small text-muted">{{ $payment->educator->email ?? '' }}</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="border rounded p-3">
                             <div class="text-muted small">Student</div>
-                            <div class="fw-bold">{{ $payment->student->name ?? 'N/A' }}</div>
-                            <div class="small text-muted">{{ $payment->student->email ?? '' }}</div>
+                            <div class="fw-bold">{{ $payment->order->user->full_name ?? 'N/A' }}</div>
+                            <div class="small text-muted">{{ $payment->order->user->email ?? '' }}</div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -105,24 +129,12 @@
                     <div class="col-md-6">
                         <div class="border rounded p-3">
                             <div class="text-muted small">Course</div>
-                            <div class="fw-bold">{{ $payment->course->title ?? 'N/A' }}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="border rounded p-3">
-                            <div class="text-muted small">Session</div>
-                            <div class="fw-bold">{{ $payment->session->title ?? 'N/A' }}</div>
+                            <div class="fw-bold">{{ $payment->orderItem->item_details->title ?? 'N/A' }}</div>
                         </div>
                     </div>
 
-                    @if ($payment->courseResource)
-                        <div class="col-md-12">
-                            <div class="border rounded p-3">
-                                <div class="text-muted small">Course Resource (Lesson)</div>
-                                <div class="fw-bold">{{ $payment->courseResource->title ?? 'N/A' }}</div>
-                            </div>
-                        </div>
-                    @endif
+
+
                 </div>
 
                 @if ($payment->notes)

@@ -149,8 +149,7 @@ class StudentDashboardController extends Controller
         $purchasedItems = UserPurchasedItem::where('user_id', $user->id)
         ->where('purchasable_type', \App\Models\Course::class)
         ->with('purchasable')
-        ->latest()
-        ->take('3')->get();
+        ->latest()->get();
 
         $paymentData = [];
         foreach ($purchasedItems as $item) {
