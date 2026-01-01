@@ -64,7 +64,6 @@ Route::get("educators", [WebsiteController::class, "educators"])->name("web.educ
 Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name("web.educator.show");
 
 // API route for fetching educators dynamically
-Route::get("api/educators", [WebsiteController::class, "educators"])->name("api.educators.index");
 
 Route::post("loginOrRegister", [LoginController::class, "loginOrRegister"])->name("web.loginOrRegister");
 

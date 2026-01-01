@@ -119,6 +119,12 @@
 </div>
                     </div>
 
+                    <!-- Search Button -->
+                    <div class="col-12 mt-3">
+                        <button type="button" class="search-btn text-dark" id="searchBtn">
+                            <i class="fas fa-search me-2 text-dark"></i>Search Educators
+                        </button>
+                    </div>
 
                 </div>
             </div>
@@ -314,7 +320,7 @@
             async function fetchEducators(page = 1) {
                 const params = collectFilterParams();
                 const queryString = new URLSearchParams(params).toString();
-                const url = `{{ route('api.educators.index') }}?page=${page}&${queryString}`;
+                const url = `{{ url('/api/educators') }}?page=${page}&${queryString}`;
 
                 try {
                     const response = await fetch(url, {
@@ -322,6 +328,11 @@
                             'X-Requested-With': 'XMLHttpRequest' // Important for Laravel's AJAX detection
                         }
                     });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const data = await response.json(); // Assuming JSON response
 
                     // Clear existing educators
@@ -371,8 +382,8 @@
                                             </span>
                                         </div>
                                         <div class="teaching-levels">
-                                            ${educator.educator_profile && educator.educator_profile.teaching_levels ?
-                                                JSON.parse(educator.educator_profile.teaching_levels).map(level => `<span class="level-badge">${level}</span>`).join('')
+                                            ${educator.educator_profile && educator.educator_profile.teaching_levels && Array.isArray(educator.educator_profile.teaching_levels) ?
+                                                educator.educator_profile.teaching_levels.map(level => `<span class="level-badge">${level}</span>`).join('')
                                                 : ''}
                                         </div>
                                         <p class="educator-bio">
@@ -493,32 +504,37 @@
 
 
             // Event Listeners for filters and search
-            keywordSearch.addEventListener('input', () => fetchEducators(1));
-            subjectFilter.addEventListener('change', () => fetchEducators(1));
+            // Note: Search is now triggered only by button click, not on input change
+
+            // Update price display on range input (but don't search)
             priceRange.addEventListener('input', () => {
                 updatePrice(priceRange.value);
-                fetchEducators(1);
             });
+
+            // Search button click handler
+            document.getElementById('searchBtn').addEventListener('click', () => fetchEducators(1));
+
+            // Sort dropdown can trigger search immediately as it's a common UX pattern
             sortDropdown.addEventListener('change', () => fetchEducators(1));
 
             levelFilters.addEventListener('click', (event) => {
                 if (event.target.classList.contains('filter-chip')) {
                     toggleChip(event.target);
-                    fetchEducators(1);
+                    // Note: Search is now triggered only by button click
                 }
             });
 
             styleFilters.addEventListener('click', (event) => {
                 if (event.target.classList.contains('filter-chip')) {
                     toggleChip(event.target);
-                    fetchEducators(1);
+                    // Note: Search is now triggered only by button click
                 }
             });
 
             additionalFilters.addEventListener('click', (event) => {
                 if (event.target.classList.contains('filter-chip')) {
                     toggleChip(event.target);
-                    fetchEducators(1);
+                    // Note: Search is now triggered only by button click
                 }
             });
 
