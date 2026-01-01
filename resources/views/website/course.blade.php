@@ -166,13 +166,13 @@
 
                     <div class="educator-profile">
                         <div class="educator-avatar">
-                            <img src="{{ $course->educator->profile_photo_url }}"
+                            <img src="{{ $course->educator->profile_picture_url }}"
                                 style="width:70px; height:70px; border-radius:50%;">
                         </div>
 
                         <div class="educator-info">
-                            <h5>{{ $course->educator->name }}</h5>
-                            <p class="educator-subject">{{ $course->educator->expertise }}</p>
+                            <a href="{{ route("web.educator.show", $course->educator->id) }}">{{ $course->educator->full_name }}</a>
+                            <p class="educator-subject">{{ $course->educator->educatorProfile->primary_subject }}</p>
 
                             <div class="educator-stats">
                                 <span><i class="fas fa-star"></i> {{ number_format($course->reviews_avg_rating, 1) }}

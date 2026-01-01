@@ -10,7 +10,7 @@
             <div class="container profile-content">
                 <div class="educator-main-info">
                     <div style="position: relative;">
-                            <img src="{{ $educator->profile_picture }}" style="border-radius: 50%" class="img-fluid d-block mx-auto shadow" />
+                            <img src="{{ $educator->profile_picture_url }}" style="border-radius: 50%;width:200px;height:200px;object-fit:cover" class="img-fluid d-block mx-auto shadow" />
                         {{-- <div class="online-badge"></div> --}}
                     </div>
                     <div class="educator-info">

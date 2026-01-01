@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="container">
-        <div class="mb-2 text-muted small">
+        <div class="my-3 text-muted ">
             {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
         </div>
 

@@ -88,7 +88,7 @@
                 <div class="tab-pane fade show active" id="tab-profile" role="tabpanel">
                     <form id="formProfile" class="row g-3">
                         <div class="col-12 d-flex align-items-center gap-3">
-                            <img id="avatarPreview" class="avatar" src="https://i.pravatar.cc/120?img=10"
+                            <img id="avatarPreview" class="avatar" src="{{ url('public/'.$user->profile_picture)}}"
                                 alt="Avatar">
                             <div>
                                 <div class="btn-group">
@@ -114,6 +114,7 @@
                             <input name="last_name" class="form-control" placeholder="Your name"
                                 value="{{ $user->last_name }}" required>
                         </div>
+                        
                         <div class="col-md-6">
                             <label class="form-label req">User name</label>
                             <div class="input-group">
@@ -1264,21 +1265,53 @@
 
                 let formData = new FormData(this);
 
+                // attach avatar manually
+                if ($("#avatarInput")[0].files.length > 0) {
+                    formData.append('avatar', $("#avatarInput")[0].files[0]);
+                }
+
                 $.ajax({
-                    url: "/educator/settings/profile",
+                    url: "{{ route('educator.profile.update') }}",
                     method: "POST",
                     data: formData,
                     processData: false,
                     contentType: false,
 
-                    success: function(res) {
-                        toastr.success("Profile updated successfully!");
+                    beforeSend: function() {
+                        Swal.fire({
+                            title: 'Saving...',
+                            text: 'Updating your profile',
+                            allowOutsideClick: false,
+                            didOpen: () => Swal.showLoading()
+                        });
                     },
-                    error: function(err) {
-                        toastr.error("Error updating profile.");
+
+                    success: function(res) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: res.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    },
+
+                    error: function(xhr) {
+                        let msg = 'Something went wrong';
+
+                        if (xhr.status === 422) {
+                            msg = Object.values(xhr.responseJSON.errors)[0][0];
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: msg
+                        });
                     }
                 });
             });
+
             $("#formPassword").on("submit", function(e) {
                 e.preventDefault();
 
@@ -1483,6 +1516,76 @@
                         toastr.error("Could not delete account.");
                     }
                 });
+            });
+        </script>
+
+        <script>
+            $(document).ready(function() {
+
+                const defaultAvatar = "https://i.pravatar.cc/120?img=10";
+
+                // Preview selected image
+                $("#avatarInput").on("change", function() {
+                    const file = this.files[0];
+
+                    if (!file) return;
+
+                    // Validate image type
+                    if (!file.type.startsWith("image/")) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Invalid file",
+                            text: "Please select an image file"
+                        });
+                        this.value = "";
+                        return;
+                    }
+
+                    // Validate size (2MB max)
+                    if (file.size > 2 * 1024 * 1024) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "File too large",
+                            text: "Image must be less than 2MB"
+                        });
+                        this.value = "";
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $("#avatarPreview").attr("src", e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                // Remove avatar preview
+                $("#btnRemoveAvatar").on("click", function() {
+
+                    Swal.fire({
+                        title: "Remove photo?",
+                        text: "Your current avatar will be removed",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, remove",
+                        cancelButtonText: "Cancel"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $("#avatarPreview").attr("src", defaultAvatar);
+                            $("#avatarInput").val("");
+
+                            // Optional: mark avatar for removal on backend
+                            $("<input>")
+                                .attr({
+                                    type: "hidden",
+                                    name: "remove_avatar",
+                                    value: 1
+                                })
+                                .appendTo("#formProfile");
+                        }
+                    });
+                });
+
             });
         </script>
     @endpush
