@@ -1,204 +1,432 @@
 <x-guest-layout>
-    <div class="hero-section">
+    <div>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="container hero-content">
+                <h1 class="text-dark">Discover Your Next Course</h1>
+                <p class="text-dark">
+                    Explore thousands of courses from expert educators
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
         <div class="container">
-            <div class="text-center mb-4">
-                <h1>Discover Your Next Course</h1>
-                <p>Explore thousands of courses from expert educators</p>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="search-box">
-                        <input type="text" placeholder="What do you want to learn today?">
-                        <button><i class="fas fa-search me-2"></i>Search</button>
+            <!-- Advanced Search Card -->
+            <div class="advanced-search-card">
+                <h4 class="search-title">
+                    <i class="fas fa-search"></i>
+                    Search Courses
+                </h4>
+
+                <div class="row">
+                    <!-- Keyword Search -->
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Search by Title or Subject</label>
+                        <div class="search-input-group">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="search-input" id="keywordSearch"
+                                placeholder="e.g., Python, Math, Web Development..." />
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="container py-2">
-        <!-- Filters Section -->
-        <div class="filters-section">
-            <div class="row">
-                <div class="col-md-3 mb-3">
-                    <h6 class="mb-2 text-muted">Category</h6>
-                    <button class="filter-btn active">All</button>
-                    @foreach ($firstFiveCategories as $category)
-                        <button class="filter-btn">{{ $category->name }}</button>
-                    @endforeach
-                    @if ($remainingCategories->count() > 0)
-                        <div class="dropdown d-inline-block">
-                            <button class="filter-btn dropdown-toggle" data-bs-toggle="dropdown">
-                                More
-                            </button>
-                            <ul class="dropdown-menu">
-                                @foreach ($remainingCategories as $category)
-                                    <li><a class="dropdown-item" href="#">{{ $category->name }}</a></li>
-                                @endforeach
-                            </ul>
+                    <!-- Difficulty -->
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Difficulty Level</label>
+                        <div class="filter-chips" id="difficultyFilters">
+                            <div class="filter-chip" data-filter="Beginner">
+                                Beginner
+                            </div>
+                            <div class="filter-chip" data-filter="Intermediate">
+                                Intermediate
+                            </div>
+                            <div class="filter-chip" data-filter="Advanced">
+                                Advanced
+                            </div>
                         </div>
-                    @endif
+                    </div>
 
-                </div>
-                <div class="col-md-3 mb-3">
-                    <h6 class="mb-2 text-muted">Difficulty</h6>
-                    <button class="filter-btn">Beginner</button>
-                    <button class="filter-btn">Intermediate</button>
-                    <button class="filter-btn">Advanced</button>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <h6 class="mb-2 text-muted">Price</h6>
-                    <button class="filter-btn">Free</button>
-                    <button class="filter-btn">Paid</button>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <h6 class="mb-2 text-muted">Type</h6>
-                    <button class="filter-btn">Video</button>
-                    <button class="filter-btn">Module</button>
-                    <button class="filter-btn">Live</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Results Section -->
-        <div class="section-header mt-5">
-            <div class="results-count">
-                <strong>248</strong> courses found
-            </div>
-            <select class="sort-dropdown">
-                <option>Most Popular</option>
-                <option>Highest Rated</option>
-                <option>Newest First</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-            </select>
-        </div>
-
-        <!-- Course Grid -->
-        <div class="row g-4 mb-5">
-            <!-- Course Card 1 -->
-            @foreach ($courses as $course)
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="listing-course-card">
-                        <!-- Thumbnail -->
-                        <div class="course-thumbnail">
-
-                            @if ($course->thumbnail != null)
-                                <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="{{ $course->title }}">
-                            @else
-                                <i class="fas fa-book-open fs-1 text-muted"></i>
-                            @endif
-
-                            <!-- Premium Badge -->
-                            @if (!$course->is_free && $course->price > 0)
-                                <span class="course-badge badge-premium">Premium</span>
-                            @endif
+                    <!-- Price Type -->
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Price Type</label>
+                        <div class="filter-chips" id="priceFilters">
+                            <div class="filter-chip" data-filter="free">
+                                Free
+                            </div>
+                            <div class="filter-chip" data-filter="paid">
+                                Paid
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="course-body">
+                    <!-- Course Type -->
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Course Type</label>
+                        <div class="filter-chips" id="typeFilters">
+                            <div class="filter-chip" data-filter="Video">
+                                Video
+                            </div>
+                            <div class="filter-chip" data-filter="Module">
+                                Module
+                            </div>
+                            <div class="filter-chip" data-filter="Live">
+                                Live
+                            </div>
+                        </div>
+                    </div>
 
-                            <!-- Difficulty Badge -->
-                            @if ($course->difficulty)
-                                <span class="difficulty-badge difficulty-{{ strtolower($course->difficulty) }}">
-                                    {{ ucfirst($course->difficulty) }}
-                                </span>
-                            @endif
+                    <!-- Search Button -->
+                    <div class="col-12 mt-3">
+                        <button type="button" class="search-btn text-dark" id="searchBtn">
+                            <i class="fas fa-search me-2 text-dark"></i>Search Courses
+                        </button>
+                    </div>
 
-                            <!-- Title -->
-                            <h5 class="course-title mt-2">{{ $course->title }}</h5>
+                </div>
+            </div>
 
-                            <!-- Meta -->
-                            <div class="course-meta">
-                                <span><i class="fas fa-clock"></i> {{ $course->duration ?? '–' }}</span>
-                                <span><i class="fas fa-video"></i> {{ $course->lessons->count() }} lessons</span>
+            <!-- Results Header -->
+            <div class="results-header">
+                <div class="results-count">
+                    <strong id="courseCount">{{ $courses->total() }}</strong> courses found
+                </div>
+                <select class="sort-dropdown" id="sortDropdown">
+                    <option value="newest">Newest First</option>
+                    <option value="highest_rated">Highest Rated</option>
+                    <option value="lowest_price">Price: Low to High</option>
+                    <option value="highest_price">Price: High to Low</option>
+                    <option value="most_popular">Most Popular</option>
+                </select>
+            </div>
 
-                                @php
-                                    $rating = $course->features->rating ?? null;
-                                @endphp
+            <!-- Course Grid -->
+            <div class="row g-4 mb-5" id="courseGrid">
+                @foreach ($courses as $course)
+                    <div class="col-lg-4 col-md-6">
+                        <div class="listing-course-card">
+                            <!-- Thumbnail -->
+                            <div class="course-thumbnail">
+                                @if ($course->thumbnail != null)
+                                    <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="{{ $course->title }}">
+                                @else
+                                    <i class="fas fa-book-open fs-1 text-muted"></i>
+                                @endif
 
-                                @if ($rating)
-                                    <span>
-                                        <i class="fas fa-star text-warning"></i> {{ number_format($rating, 1) }}
-                                    </span>
+                                <!-- Premium Badge -->
+                                @if (!$course->is_free && $course->price > 0)
+                                    <span class="course-badge badge-premium">Premium</span>
                                 @endif
                             </div>
 
-                            <!-- Description -->
-                            <p class="course-description">
-                                {{ \Illuminate\Support\Str::limit($course->description, 120) }}
-                            </p>
+                            <div class="course-body">
+                                <!-- Difficulty Badge -->
+                                @if ($course->difficulty)
+                                    <span class="difficulty-badge difficulty-{{ strtolower($course->difficulty) }}">
+                                        {{ ucfirst($course->difficulty) }}
+                                    </span>
+                                @endif
 
-                            <!-- Footer -->
-                            <div class="course-footer">
-                                <span class="course-price">
-                                    @if ($course->is_free)
-                                        Free
-                                    @else
-                                        ${{ number_format($course->price, 2) }}
+                                <!-- Title -->
+                                <h5 class="course-title mt-2">{{ $course->title }}</h5>
+
+                                <!-- Meta -->
+                                <div class="course-meta">
+                                    <span><i class="fas fa-clock"></i> {{ $course->duration ?? '–' }}</span>
+                                    <span><i class="fas fa-video"></i> {{ $course->lessons->count() }} lessons</span>
+
+                                    @php
+                                        $avgRating = $course->reviews->avg('rating');
+                                    @endphp
+
+                                    @if ($avgRating)
+                                        <span>
+                                            <i class="fas fa-star text-warning"></i> {{ number_format($avgRating, 1) }}
+                                        </span>
                                     @endif
-                                </span>
+                                </div>
 
                                 <a href="{{ route('web.course.show', ['slug'=>$course->slug  , 'id' => $course->id]) }}" class="enroll-btn">
                                     Enroll Now
                                 </a>
                             </div>
                         </div>
-
                     </div>
-                </div>
-            @endforeach
-        </div>
+                @endforeach
+            </div>
 
-        <!-- Pagination -->
-        <nav aria-label="Course pagination">
-            {{-- <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1"><i class="fas fa-chevron-left"></i></a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">4</a></li>
-                <li class="page-item"><a class="page-link" href="#">5</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
-                </li>
-            </ul> --}}
-            {{ $courses->links() }}
-        </nav>
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center mt-4">
+                {{ $courses->links() }}
+            </div>
+        </div>
     </div>
 
     @push('scripts')
-        <script>
-            // Filter button interactions
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Remove active from siblings in same group
-                    const parent = this.closest('.col-md-3');
-                    if (parent) {
-                        parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const keywordSearch = document.getElementById('keywordSearch');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const difficultyFilters = document.getElementById('difficultyFilters');
+            const priceFilters = document.getElementById('priceFilters');
+            const typeFilters = document.getElementById('typeFilters');
+            const sortDropdown = document.getElementById('sortDropdown');
+            const courseGrid = document.getElementById('courseGrid');
+            const courseCount = document.getElementById('courseCount');
+            const paginationContainer = document.querySelector('.d-flex.justify-content-center.mt-4');
+
+            // Function to toggle chip active state
+            window.toggleChip = function(element) {
+                element.classList.toggle('active');
+            };
+
+            // Function to collect all filter parameters
+            function collectFilterParams() {
+                const params = {};
+
+                if (keywordSearch.value) {
+                    params.search = keywordSearch.value;
+                }
+
+                const selectedDifficulties = Array.from(difficultyFilters.children)
+                    .filter(chip => chip.classList.contains('active'))
+                    .map(chip => chip.dataset.filter);
+                if (selectedDifficulties.length > 0) {
+                    params.difficulty = selectedDifficulties[0]; // Single selection for difficulty
+                }
+
+                const selectedPrices = Array.from(priceFilters.children)
+                    .filter(chip => chip.classList.contains('active'))
+                    .map(chip => chip.dataset.filter);
+                if (selectedPrices.length > 0) {
+                    params.price_type = selectedPrices[0]; // Single selection for price type
+                }
+
+                const selectedTypes = Array.from(typeFilters.children)
+                    .filter(chip => chip.classList.contains('active'))
+                    .map(chip => chip.dataset.filter);
+                if (selectedTypes.length > 0) {
+                    params.type = selectedTypes[0]; // Single selection for type
+                }
+
+                if (sortDropdown.value) {
+                    params.sort_by = sortDropdown.value;
+                }
+
+                return params;
+            }
+
+            // Function to fetch and render courses
+            async function fetchCourses(page = 1) {
+                const params = collectFilterParams();
+                const queryString = new URLSearchParams(params).toString();
+                const url = `{{ url('/api/courses') }}?page=${page}&${queryString}`;
+
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest' // Important for Laravel's AJAX detection
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    this.classList.add('active');
+
+                    const data = await response.json(); // Assuming JSON response
+
+                    // Clear existing courses
+                    courseGrid.innerHTML = '';
+
+                    // Update course count
+                    courseCount.textContent = data.total;
+
+                    // Render new courses
+                    data.data.forEach(course => {
+                        const courseCardHtml = `
+                            <div class="col-lg-4 col-md-6">
+                                <div class="listing-course-card">
+                                    <div class="course-thumbnail">
+                                        ${course.thumbnail ?
+                                            `<img src="/storage/${course.thumbnail}" alt="${course.title}">` :
+                                            '<i class="fas fa-book-open fs-1 text-muted"></i>'
+                                        }
+                                        ${(!course.is_free && course.price > 0) ?
+                                            '<span class="course-badge badge-premium">Premium</span>' : ''
+                                        }
+                                    </div>
+                                    <div class="course-body">
+                                        ${course.difficulty ? `
+                                            <span class="difficulty-badge difficulty-${course.difficulty.toLowerCase()}">
+                                                ${course.difficulty.charAt(0).toUpperCase() + course.difficulty.slice(1)}
+                                            </span>
+                                        ` : ''}
+                                        <h5 class="course-title mt-2">${course.title}</h5>
+                                        <div class="course-meta">
+                                            <span><i class="fas fa-clock"></i> ${course.duration || '–'}</span>
+                                            <span><i class="fas fa-video"></i> ${course.lessons_count} lessons</span>
+                                            ${course.avg_rating > 0 ? `
+                                                <span>
+                                                    <i class="fas fa-star text-warning"></i> ${parseFloat(course.avg_rating).toFixed(1)}
+                                                </span>
+                                            ` : ''}
+                                        </div>
+                                        <p class="course-description">
+                                            ${course.description.length > 120 ?
+                                                course.description.substring(0, 120) + '...' :
+                                                course.description
+                                            }
+                                        </p>
+                                        <div class="educator-info">
+                                            <small class="text-muted">
+                                                By ${course.educator ? course.educator.name : 'Unknown'}
+                                            </small>
+                                        </div>
+                                        <div class="course-footer">
+                                            <span class="course-price">
+                                                ${course.is_free ? 'Free' : '$' + parseFloat(course.price).toFixed(2)}
+                                            </span>
+                                            <a href="/course/${course.slug}" class="enroll-btn">
+                                                Enroll Now
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        courseGrid.insertAdjacentHTML('beforeend', courseCardHtml);
+                    });
+
+                    // Update pagination links
+                    renderPagination(data);
+
+                } catch (error) {
+                    console.error('Error fetching courses:', error);
+                }
+            }
+
+            // Helper function to generate star ratings HTML
+            function generateStarRating(avgRating) {
+                let starsHtml = '';
+                const fullStars = Math.floor(avgRating);
+                const halfStar = Math.ceil(avgRating - fullStars);
+                const emptyStars = 5 - fullStars - halfStar;
+
+                for (let i = 0; i < fullStars; i++) {
+                    starsHtml += '<i class="fas fa-star"></i>';
+                }
+                if (halfStar) {
+                    starsHtml += '<i class="fas fa-star-half-alt"></i>';
+                }
+                for (let i = 0; i < emptyStars; i++) {
+                    starsHtml += '<i class="far fa-star"></i>';
+                }
+                return starsHtml;
+            }
+
+            // Function to render pagination links
+            function renderPagination(data) {
+                paginationContainer.innerHTML = ''; // Clear existing pagination
+
+                const ul = document.createElement('ul');
+                ul.classList.add('pagination');
+
+                // Previous Button
+                if (data.prev_page_url) {
+                    const li = document.createElement('li');
+                    li.classList.add('page-item');
+                    const a = document.createElement('a');
+                    a.classList.add('page-link');
+                    a.href = '#';
+                    a.textContent = 'Previous';
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        fetchCourses(data.current_page - 1);
+                    });
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                }
+
+                // Page Numbers
+                data.links.forEach(link => {
+                    if (link.url && link.label.match(/^[0-9]+$/)) {
+                        const li = document.createElement('li');
+                        li.classList.add('page-item');
+                        if (link.active) {
+                            li.classList.add('active');
+                        }
+                        const a = document.createElement('a');
+                        a.classList.add('page-link');
+                        a.href = '#';
+                        a.textContent = link.label;
+                        a.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            fetchCourses(link.label);
+                        });
+                        li.appendChild(a);
+                        ul.appendChild(li);
+                    }
                 });
+
+                // Next Button
+                if (data.next_page_url) {
+                    const li = document.createElement('li');
+                    li.classList.add('page-item');
+                    const a = document.createElement('a');
+                    a.classList.add('page-link');
+                    a.href = '#';
+                    a.textContent = 'Next';
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        fetchCourses(data.current_page + 1);
+                    });
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                }
+
+                if (ul.children.length > 0) {
+                    paginationContainer.appendChild(ul);
+                }
+            }
+
+            // Event Listeners for filters and search
+            // Search button click handler
+            document.getElementById('searchBtn').addEventListener('click', () => fetchCourses(1));
+
+            // Sort dropdown can trigger search immediately as it's a common UX pattern
+            sortDropdown.addEventListener('change', () => fetchCourses(1));
+
+            // Filter chip event listeners
+            difficultyFilters.addEventListener('click', (event) => {
+                if (event.target.classList.contains('filter-chip')) {
+                    // Remove active from siblings in same group
+                    Array.from(difficultyFilters.children).forEach(chip => {
+                        if (chip !== event.target) chip.classList.remove('active');
+                    });
+                    toggleChip(event.target);
+                }
             });
 
-            // Search functionality
-            document.querySelector('.search-box button').addEventListener('click', function() {
-                const searchValue = document.querySelector('.search-box input').value;
-                console.log('Searching for:', searchValue);
-                // Add your search logic here
+            priceFilters.addEventListener('click', (event) => {
+                if (event.target.classList.contains('filter-chip')) {
+                    // Remove active from siblings in same group
+                    Array.from(priceFilters.children).forEach(chip => {
+                        if (chip !== event.target) chip.classList.remove('active');
+                    });
+                    toggleChip(event.target);
+                }
             });
 
-            // Sort dropdown
-            document.querySelector('.sort-dropdown').addEventListener('change', function() {
-                console.log('Sorting by:', this.value);
-                // Add your sorting logic here
+            typeFilters.addEventListener('click', (event) => {
+                if (event.target.classList.contains('filter-chip')) {
+                    // Remove active from siblings in same group
+                    Array.from(typeFilters.children).forEach(chip => {
+                        if (chip !== event.target) chip.classList.remove('active');
+                    });
+                    toggleChip(event.target);
+                }
             });
-
-            // Enroll buttons
-          
-        </script>
+        });
+    </script>
     @endpush
     @push('styles')
         <style>
@@ -220,81 +448,156 @@
                 opacity: 0.3;
             }
 
+            .hero-content {
+                position: relative;
+                z-index: 1;
+                text-align: center;
+            }
+
             .hero-section h1 {
                 color: white;
                 font-weight: 700;
                 font-size: 2.5rem;
                 margin-bottom: 1rem;
-                position: relative;
-                z-index: 1;
             }
 
             .hero-section p {
                 color: rgba(255, 255, 255, 0.9);
                 font-size: 1.1rem;
-                position: relative;
-                z-index: 1;
             }
 
-            .search-box {
+            .advanced-search-card {
                 background: white;
-                border-radius: 50px;
-                box-shadow: 0 10px 30px rgba(0, 131, 143, 0.2);
-                padding: 8px 8px 8px 25px;
-                display: flex;
-                align-items: center;
-                position: relative;
-                z-index: 1;
-            }
-
-            .search-box input {
-                border: none;
-                outline: none;
-                flex: 1;
-                padding: 10px;
-                font-size: 1rem;
-            }
-
-            .search-box button {
-                background: var(--primary-cyan);
-                border: none;
-                border-radius: 50px;
-                padding: 12px 35px;
-                color: white;
-                font-weight: 600;
-                transition: all 0.3s;
-            }
-
-            .search-box button:hover {
-                background: var(--dark-cyan);
-                transform: translateX(2px);
-            }
-
-            .filters-section {
-                background: white;
-                border-radius: 15px;
-                padding: 25px;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-                margin-top: -40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0, 131, 143, 0.2);
+                padding: 30px;
+                margin-top: -50px;
                 position: relative;
                 z-index: 2;
+                margin-bottom: 40px;
             }
 
-            .filter-btn {
+            .search-title {
+                color: var(--primary-cyan);
+                font-weight: 700;
+                margin-bottom: 25px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .form-label {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 8px;
+            }
+
+            .search-input-group {
+                position: relative;
+            }
+
+            .search-input-group i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--primary-cyan);
+                z-index: 1;
+            }
+
+            .search-input,
+            .form-select {
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                padding: 12px 15px 12px 45px;
+                width: 100%;
+                transition: all 0.3s;
+            }
+
+            .search-input:focus,
+            .form-select:focus {
+                outline: none;
+                border-color: var(--primary-cyan);
+                box-shadow: 0 0 0 3px rgba(0, 131, 143, 0.1);
+            }
+
+            .filter-chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .filter-chip {
                 border: 2px solid #e0e0e0;
                 background: white;
-                padding: 8px 20px;
+                padding: 8px 16px;
                 border-radius: 25px;
-                margin: 5px;
+                cursor: pointer;
                 transition: all 0.3s;
                 font-weight: 500;
+                font-size: 0.9rem;
+                user-select: none;
             }
 
-            .filter-btn:hover,
-            .filter-btn.active {
-                border-color: var(--primary-cyan);
+            .filter-chip:hover {
+                border-color: var(--light-cyan);
+                transform: translateY(-2px);
+            }
+
+            .filter-chip.active {
+                border-color: #999;
+                background: #999;
+                color: white;
+            }
+
+            .search-btn {
                 background: var(--primary-cyan);
                 color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 14px 40px;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: all 0.3s;
+                width: 100%;
+            }
+
+            .search-btn:hover {
+                background: var(--dark-cyan);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 20px rgba(0, 131, 143, 0.3);
+            }
+
+            .results-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+
+            .results-count {
+                font-size: 1.1rem;
+                color: #666;
+            }
+
+            .results-count strong {
+                color: var(--primary-cyan);
+                font-size: 1.3rem;
+            }
+
+            .sort-dropdown {
+                border: 2px solid #e0e0e0;
+                border-radius: 10px;
+                padding: 10px 20px;
+                font-weight: 600;
+                background: white;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .sort-dropdown:focus {
+                outline: none;
+                border-color: var(--primary-cyan);
             }
 
             .listing-course-card {
@@ -328,6 +631,12 @@
                 color: rgba(255, 255, 255, 0.3);
             }
 
+            .course-thumbnail img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
             .course-badge {
                 position: absolute;
                 top: 15px;
@@ -338,18 +647,8 @@
                 font-weight: 600;
             }
 
-            .badge-free {
-                background: var(--accent-yellow);
-                color: #333;
-            }
-
             .badge-premium {
                 background: var(--accent-purple);
-                color: white;
-            }
-
-            .badge-live {
-                background: var(--accent-pink);
                 color: white;
             }
 
@@ -390,6 +689,10 @@
                 flex-grow: 1;
             }
 
+            .educator-info {
+                margin-bottom: 15px;
+            }
+
             .course-footer {
                 display: flex;
                 justify-content: space-between;
@@ -402,10 +705,6 @@
                 font-size: 1.5rem;
                 font-weight: 700;
                 color: var(--primary-cyan);
-            }
-
-            .course-price.free {
-                color: var(--accent-yellow);
             }
 
             .enroll-btn {
@@ -429,6 +728,7 @@
                 border-radius: 15px;
                 font-size: 0.75rem;
                 font-weight: 600;
+                margin-bottom: 10px;
             }
 
             .difficulty-beginner {
@@ -470,47 +770,18 @@
                 color: white;
             }
 
-            .section-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 30px;
-            }
-
-            .results-count {
-                color: #666;
-                font-size: 1rem;
-            }
-
-            .sort-dropdown {
-                border: 2px solid #e0e0e0;
-                border-radius: 8px;
-                padding: 8px 15px;
-                outline: none;
-                transition: all 0.3s;
-            }
-
-            .sort-dropdown:focus {
-                border-color: var(--primary-cyan);
-            }
-
             @media (max-width: 768px) {
                 .hero-section h1 {
                     font-size: 1.8rem;
                 }
 
-                .search-box {
+                .results-header {
                     flex-direction: column;
-                    padding: 15px;
-                    border-radius: 15px;
+                    gap: 15px;
+                    align-items: stretch;
                 }
 
-                .search-box input {
-                    width: 100%;
-                    margin-bottom: 10px;
-                }
-
-                .search-box button {
+                .sort-dropdown {
                     width: 100%;
                 }
             }
