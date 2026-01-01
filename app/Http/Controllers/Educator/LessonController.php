@@ -17,6 +17,8 @@ class LessonController extends Controller
     /**
      * Store a newly created lesson.
      */
+
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -60,18 +62,24 @@ class LessonController extends Controller
             if ($request->hasFile('materials')) {
                 $materials = [];
                 foreach ($request->file('materials') as $file) {
-                    $materials[] = $file->store('lessons/materials', 'public');
+                    $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
+                    $destinationPath = public_path('storage/lessons/materials');
+                    $file->move($destinationPath, $fileName);
+                    $materials = $fileName;
+                    $data['materials'] = "storage/lessons/materials/" . $materials;
                 }
-                $data['materials'] = json_encode($materials);
             }
 
             // Handle worksheets upload
             if ($request->hasFile('worksheets')) {
                 $worksheets = [];
                 foreach ($request->file('worksheets') as $file) {
-                    $worksheets[] = $file->store('lessons/worksheets', 'public');
+                    $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
+                    $destinationPath = public_path('storage/lessons/worksheets');
+                    $file->move($destinationPath, $fileName);
+                    $worksheets = $fileName;
+                    $data['worksheets'] = 'storage/lessons/worksheets/' . $worksheets;
                 }
-                $data['worksheets'] = json_encode($worksheets);
             }
 
             // Encode resources if present
@@ -99,104 +107,116 @@ class LessonController extends Controller
 
         $successMessage = "";
 
-        // try {
-        $validator = Validator::make($request->all(), [
-            'title' => 'sometimes|string|max:255',
-            'type' => 'required',
-            'duration' => 'nullable|integer|min:1',
-            'price' => 'nullable|numeric|min:0',
-            'free' => 'boolean',
-            'status' => 'in:Draft,Published',
-            'preview' => 'boolean',
-            'notes' => 'nullable|string',
-            'video_link' => 'nullable|url',
-            'materials.*' => 'file|mimes:pdf,ppt,pptx|max:51200',
-            'worksheets.*' => 'file|mimes:pdf,doc,docx|max:51200',
-            'video_path' => 'nullable|file|mimes:mp4,mov,avi|max:2048000',
-            'resources' => 'array',
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'title' => 'sometimes|string|max:255',
+                'type' => 'required',
+                'duration' => 'nullable|integer|min:1',
+                'price' => 'nullable|numeric|min:0',
+                'free' => 'boolean',
+                'status' => 'in:Draft,Published',
+                'preview' => 'boolean',
+                'notes' => 'nullable|string',
+                'video_link' => 'nullable|url',
+                'materials.*' => 'file|mimes:pdf,ppt,pptx|max:51200',
+                'worksheets.*' => 'file|mimes:pdf,doc,docx|max:51200',
+                'video_path' => 'nullable|file|mimes:mp4,mov,avi|max:2048000',
+                'resources' => 'array',
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 422);
-        }
-        $data = $validator->validated();
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->messages()], 422);
+            }
+            $data = $validator->validated();
 
-        // Handle updated uploads
 
-        if ($request->hasFile('materials')) {
-            if ($lesson->materials) {
-                foreach (json_decode($lesson->materials, true) as $path) {
-                    Storage::disk('public')->delete($path);
+
+            // Handle updated uploads
+
+            if ($request->hasFile('materials')) {
+                if ($lesson->materials) {
+                    $path = public_path($lesson->materials);
+
+                    if (file_exists($path)) {
+                        unlink($path);
+                    }
+                }
+                $materials = [];
+                foreach ($request->file('materials') as $file) {
+                    $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
+                    $destinationPath = public_path('storage/lessons/materials');
+                    $file->move($destinationPath, $fileName);
+                    $materials = $fileName;
+                    $data['materials'] = "storage/lessons/materials/" . $materials;
                 }
             }
-            $materials = [];
-            foreach ($request->file('materials') as $file) {
-                $materials[] = $file->store('lessons/materials', 'public');
-            }
-            $data['materials'] = json_encode($materials);
-        }
 
-        if ($request->hasFile('worksheets')) {
-            if ($lesson->worksheets) {
-                foreach (json_decode($lesson->worksheets, true) as $path) {
-                    Storage::disk('public')->delete($path);
+            if ($request->hasFile('worksheets')) {
+                if ($lesson->worksheets) {
+                    $path = public_path($lesson->worksheets);
+
+                    if (file_exists($path)) {
+                        unlink($path);
+                    }
+                }
+
+                foreach ($request->file('worksheets') as $file) {
+                    $fileName = time() .  rand(1000, 9999) . '_' . $file->getClientOriginalName();
+                    $destinationPath = public_path('storage/lessons/worksheets');
+                    $file->move($destinationPath, $fileName);
+                    $worksheets = $fileName;
+                    $data['worksheets'] = 'storage/lessons/worksheets/' . $worksheets;
                 }
             }
-            $worksheets = [];
-            foreach ($request->file('worksheets') as $file) {
-                $worksheets[] = $file->store('lessons/worksheets', 'public');
+
+            if ($request->filled('resources')) {
+                $data['resources'] = json_encode($request->input('resources'));
             }
-            $data['worksheets'] = json_encode($worksheets);
+
+            // return $data;
+            $lesson->update($data);
+            $successMessage = "Lesson updated successfully.";
+
+
+
+            //update the video after updating the lesson
+            // try {
+            //     $videoLink = "";
+            //     if ($request->hasFile('video_path')) {
+            //         // if ($lesson->video_path) Storage::disk('public')->delete($lesson->video_path);
+            //         // $data['video_path'] = $request->file('video_path')->store('lessons/videos', 'public');
+
+            //         // Upload to Vimeo
+            //         $vimeoService = new VimeoService();
+            //         $uploadResponse = $vimeoService->uploadVideo($request);
+            //         if (isset($uploadResponse['success']) && $uploadResponse['success'] === false) {
+            //         }
+            //         $videoLink = $uploadResponse['video_uri'];
+            //     }
+            //     if (!empty($videoLink)) {
+            //         $lesson->video_path = $videoLink;
+            //         $lesson->save();
+            //     }
+            // } catch (\Exception $e) {
+            //     \Log::error('Vimeo upload error during lesson update: ' . $e->getMessage());
+            //     $successMessage .= " However, there was an issue uploading the video. You can try again or contact the administrator.";
+            // }
+
+
+            return response()->json([
+                'message' => $successMessage,
+                'lesson' => $lesson
+            ]);
+        } catch (\Exception $e) {
+            // 🧩 Catch all unexpected errors
+            \Log::error('Lesson update error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred while updating the lesson.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        if ($request->filled('resources')) {
-            $data['resources'] = json_encode($request->input('resources'));
-        }
-
-        $lesson->update($data);
-        $successMessage = "Lesson updated successfully.";
-
-
-
-        //update the video after updating the lesson
-        // try {
-        $videoLink = "";
-        if ($request->hasFile('video_path')) {
-            // if ($lesson->video_path) Storage::disk('public')->delete($lesson->video_path);
-            // $data['video_path'] = $request->file('video_path')->store('lessons/videos', 'public');
-
-            // Upload to Vimeo
-            $vimeoService = new VimeoService();
-            $uploadResponse = $vimeoService->uploadVideo($request);
-            if (isset($uploadResponse['success']) && $uploadResponse['success'] === false) {
-                dd($uploadResponse);
-            }
-            $videoLink = $uploadResponse['video_uri'];
-        }
-        if (!empty($videoLink)) {
-            $lesson->video_path = $videoLink;
-            $lesson->save();
-        }
-        // } catch (\Exception $e) {
-        //     \Log::error('Vimeo upload error during lesson update: ' . $e->getMessage());
-        //     $successMessage .= " However, there was an issue uploading the video. You can try again or contact the administrator.";
-        // }
-
-
-        return response()->json([
-            'message' => $successMessage,
-            'lesson' => $lesson
-        ]);
-        // } catch (\Exception $e) {
-        //     // 🧩 Catch all unexpected errors
-        //     \Log::error('Lesson update error: ' . $e->getMessage());
-
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'An unexpected error occurred while updating the lesson.',
-        //         'error' => $e->getMessage(),
-        //     ], 500);
-        // }
     }
 
     /**
