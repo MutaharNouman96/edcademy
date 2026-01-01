@@ -19,11 +19,22 @@ class Lesson extends Model
         'description',
         'duration',
         'is_preview',
-        'order'
+        'order',
+        'materials',
+        'worksheets',
+        'video_path',
+        'status',
+        'price',
+        'free',
+        'published_at',
+        'thumbnail',
     ];
     protected $casts = [
         'published_at' => 'datetime',
     ];
+
+    protected $appends = ["materials_path", "worksheets_path"];
+
 
     public function course()
     {
@@ -54,8 +65,18 @@ class Lesson extends Model
         return $this->hasMany(LessonVideoViews::class);
     }
 
-    public function lesson_video_comments(){
+    public function lesson_video_comments()
+    {
         return $this->hasMany(LessonVideoComment::class);
     }
 
+    public function getMaterialsPathAttribute()
+    {
+        return  asset($this->materials);
+    }
+
+    public function getWorksheetsPathAttribute()
+    {
+        return  asset($this->worksheets);
+    }
 }
