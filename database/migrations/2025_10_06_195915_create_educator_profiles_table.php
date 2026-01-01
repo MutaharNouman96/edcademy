@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
             // Step 2 Fields
-            $table->string('primary_subject');
+            $table->string('primary_subject')->nullable();
             $table->json('teaching_levels')->nullable();  // Multiple select
             $table->decimal('hourly_rate', 8, 2);
             $table->text('certifications')->nullable();

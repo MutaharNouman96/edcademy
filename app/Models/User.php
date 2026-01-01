@@ -23,10 +23,11 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'first_name',
         'last_name',
+        'username',
         'email',
         'password',
         'role',
-        'avatar',
+        'profile_picture',
         'bio',
         'education',
         'interests',
@@ -42,7 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    protected $appends = ['full_name'];
+    protected $appends = ['full_name', 'profile_picture_url'];
 
     /**
      * The attributes that should be cast.
@@ -249,5 +250,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->purchases()
             ->where('purchasable_type', Lesson::class);
+    }
+
+
+    public function getProfilePictureUrlAttribute(){
+        return url("public/".$this->profile_picture);
     }
 }

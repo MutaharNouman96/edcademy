@@ -35,7 +35,7 @@ class EducatorController extends Controller
 
             // Step 3
             'govt_id'      => 'required|file|mimes:jpeg,png,pdf|max:2048',
-            'degree_proof' => 'required|file|mimes:jpeg,png,pdf|max:2048',
+            'degree_proof' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
             'intro_video'  => 'nullable|file|mimetypes:video/mp4,video/mov|max:51200', // 50MB
             'consent'      => 'accepted',
         ]);
