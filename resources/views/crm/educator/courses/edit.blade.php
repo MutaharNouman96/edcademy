@@ -116,7 +116,7 @@
                                 <div class="form-check mt-2">
                                     <input class="form-check-input" type="checkbox" name="free" id="freeCourse"
                                         value="1" {{ old('free', $course->free) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="freeCourse">Free course</label>
+                                    <label class="form-check-label" for="freeCourse">Free Item</label>
                                 </div>
                             </div>
 
@@ -379,7 +379,7 @@
                                         aria-labelledby="materials-tab">
                                         <label class="form-label">Upload Learning Materials (PDF, PPT)</label>
                                         <input id="lfMaterials" type="file" class="form-control"
-                                            accept=".pdf,.ppt,.pptx"  />
+                                            accept=".pdf,.ppt,.pptx" />
                                         <div id="lfMatList" class="row g-2 mt-2">
                                             <div class="col-12 text-center text-muted small">
                                                 <i class="bi bi-file-earmark-ppt fs-4"></i><br />No
@@ -488,14 +488,43 @@
 
     </div>
 
+    <!-- Edit Section Modal -->
+    <div class="modal fade" id="editSectionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Edit Section</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editSectionForm" method="POST">
+
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="sectionTitle" class="form-label">Title <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="title" id="sectionTitle" required />
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary" type="submit" id="btnEditSection">
+                            <i class="bi bi-check2-circle me-1"></i> Update Section
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
 
     @push('scripts')
         <script>
-            jQuery(function($) {
-                // safe to use $ here
-                fetchSections();
+            // safe to use $ here
+            fetchSections();
 
-            });
+
             // ------- State Model -------
             const course = {
                 id: Date.now(),
@@ -594,39 +623,7 @@
                 $('#lfResourceUrl').value = ''
             })
 
-            // $('#btnSaveLesson').addEventListener('click', () => {
-            //     // gather
-            //     const sectionId = $('#lfSectionId').value
-            //     const lessonId = $('#lfLessonId').value || null
-            //     const sec = course.sections.find(s => s.id === sectionId)
-            //     if (!sec) return
-            //     const l = {
-            //         id: lessonId || crypto.randomUUID(),
-            //         title: $('#lfTitle').value.trim(),
-            //         duration: Number($('#lfDuration').value || 0),
-            //         status: $('#lfStatus').value,
-            //         preview: $('#lfPreview').checked,
-            //         videoFileName: $('#lfVideo').files[0] ?
-            //             $('#lfVideo').files[0].name : lessonId ?
-            //             sec.lessons.find(x => x.id === lessonId).videoFileName || '' : '',
-            //         resources: $$('#lfResList .badge').map(b => b.textContent),
-            //         notes: $('#lfNotes').value.trim()
-            //     }
-            //     if (!l.title || !l.duration) {
-            //         showToast('Please add title and duration', false)
-            //         return
-            //     }
-            //     if (lessonId) {
-            //         const idx = sec.lessons.findIndex(x => x.id === lessonId)
-            //         sec.lessons[idx] = l
-            //     } else {
-            //         sec.lessons.push(l)
-            //     }
-            //     lessonModal.hide()
-            //     renderSections()
-            //     updateSummary()
-            //     showToast('Lesson saved')
-            // })
+
 
             // ------- Section controls -------
             $('#btnAddSection').addEventListener('click', () => {
@@ -734,7 +731,7 @@
                     })
                     .then(response => {
                         response.sections.forEach((sectionItem) => {
-
+                            document.querySelector("#sectionsAccordion").innerHTML = '';
                             document.querySelector("#sectionsAccordion").insertAdjacentHTML(
                                 "beforeend",
                                 renderSectionItem(sectionItem)
@@ -779,45 +776,48 @@
                                         <div class="col-12">
                                                 <!-- Video Content -->
                                                 ${response.type == 'video' ? ` <div class="" id="videoContent" role="tabpanel" aria-labelledby="video-tab">
-                                                                                                  <label class="form-label">Video</label>
-                                                                                                  <input id="lfVideo" type="file" class="form-control mb-2" accept="video/*" />
-                                                                                                  <input id="lfVideoLink" type="url" class="form-control mb-2" placeholder="Or paste a video link (YouTube, Vimeo)" />
-                                                                                                  <div class="form-text">
-                                                                                                    MP4/MOV up to 2 GB, or provide an external link.
-                                                                                                  </div>
-                                                                                                  <div id="videoPreview" class="border rounded mt-2 p-3 text-center bg-white">
-                                                                                                    <i class="bi bi-camera-video fs-1 text-muted"></i>
-                                                                                                    <p class="mb-0 small text-muted">No video selected</p>
-                                                                                                  </div>
-                                                                                                </div>` : ''}
+                                                                                                                                                                                                                                                                          <label class="form-label">Video</label>
+                                                                                                                                                                                                                                                                          <input id="lfVideo" type="file" class="form-control mb-2" accept="video/*" />
+                                                                                                                                                                                                                                                                          <input id="lfVideoLink" type="url" class="form-control mb-2" placeholder="Or paste a video link (YouTube, Vimeo)" />
+                                                                                                                                                                                                                                                                          <div class="form-text">
+                                                                                                                                                                                                                                                                            MP4/MOV up to 2 GB, or provide an external link.
+                                                                                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                                                                                          <div id="videoPreview" class="border rounded mt-2 p-3 text-center bg-white">
+                                                                                                                                                                                                                                                                            <i class="bi bi-camera-video fs-1 text-muted"></i>
+                                                                                                                                                                                                                                                                            <p class="mb-0 small text-muted">No video selected</p>
+                                                                                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                                                                                        </div>` : ''}
 
-                                                <!-- Learning Materials -->
+                                               
                                                 ${response.type == 'material' ? `
-                                                                <div class="" id="materialsContent" role="tabpanel" aria-labelledby="materials-tab" >
-                                          <label class="form-label">UploadLearningMaterials(PDF,PPT)</label>
-                                          <input
-                                            id="lfMaterials"
-                                            type="file"
-                                            class="form-control"
-                                            accept=".pdf,.ppt,.pptx"
-                                            multiple
-                                          />
-                                          <a download target="_blank" href="${response.materials_path}" class="mt-4 btn btn-outline-primary">
-                                         <i class='bi bi-link'></i> View uploaded file
-                                            </a>
-                                          <div id="lfMatList" class="rowg-2mt-2">
-                                            <div class="col-12text-centertext-mutedsmall">
-                                              <i class="bibi-file-earmark-pptfs-4"></i>
-                                              <br />No materials uploaded
-                                            </div>
-                                          </div>
-                                        </div>
-                                        ` : '' }
+                                                                                                                                                                                                                                        <div class="" id="materialsContent" role="tabpanel" aria-labelledby="materials-tab" >
+                                                                                                                                                                                                                  <label class="form-label">UploadLearningMaterials(PDF,PPT)</label>
+                                                                                                                                                                                                                  <input
+                                                                                                                                                                                                                    id="lfMaterials"
+                                                                                                                                                                                                                    type="file"
+                                                                                                                                                                                                                    class="form-control"
+                                                                                                                                                                                                                    accept=".pdf,.ppt,.pptx"
+                                                                                                                                                                                                                    multiple
+                                                                                                                                                                                                                  />
+                                                                                                                                                                                                                  <a download target="_blank" href="${response.materials_path}" class="mt-4 btn btn-outline-primary">
+                                                                                                                                                                                                                 <i class='bi bi-link'></i> View uploaded file
+                                                                                                                                                                                                                    </a>
+                                                                                                                                                                                                                  <div id="lfMatList" class="rowg-2mt-2">
+                                                                                                                                                                                                                    <div class="col-12text-centertext-mutedsmall">
+                                                                                                                                                                                                                      <i class="bibi-file-earmark-pptfs-4"></i>
+                                                                                                                                                                                                                      <br />No materials uploaded
+                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                  </div>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                ` : '' }
 
                                                 <!-- Worksheets -->
-                                            ${response.type == 'worksheet' ? 
+                                            ${response.type == 'worksheets' ? 
                                                 `<div class=""id="worksheetsContent"role="tabpanel"aria-labelledby="worksheets-tab"><labelclass="form-label">UploadWorksheets(PDF,Word)</label><inputid="lfWorksheets"type="file"class="form-control"accept=".pdf,.doc,.docx"multiple/><divid="lfWsList"class="rowg-2mt-2"><divclass="col-12text-centertext-mutedsmall"><iclass="bibi-file-earmark-textfs-4"></i><br/>Noworksheetsuploaded</div></div></div>` : ''}
+
+                                                  <a download target="_blank" href="${response.worksheets_path}" class="mt-4 btn btn-outline-primary"><i class='bi bi-link'></i> View uploaded file</a>
                                         </div>
+                                      
 
                                         <!-- Duration, Price, Status -->
                                         <div class="col-6 col-md-4">
@@ -837,7 +837,7 @@
                                                 <input class="form-check-input" type="checkbox"
                                                 ${response.free == 1 ? 'checked' : ''}
                                                 id="freeCourse" />
-                                                <label class="form-check-label" for="freeCourse">Free course</label>
+                                                <label class="form-check-label" for="freeCourse">Free Item</label>
                                             </div>
                                         </div>
                                         <div class="col-6 col-md-4">
@@ -914,7 +914,7 @@
             })
 
 
-       
+
 
             // Video file preview
             document
@@ -1014,7 +1014,7 @@
                                 </div>
                                 <div class="btn-group btn-group-sm">
                                     <button
-                                     class="btn btn-light" data-act="edit"><i class="bi bi-pencil"></i></button>
+                                     class="btn btn-light" data-act="edit" onclick="editSection('${response.id}')"><i class="bi bi-pencil"></i></button>
                                     <button class="btn btn-light" data-act="up"><i class="bi bi-arrow-up"></i></button>
                                     <button class="btn btn-light" data-act="down"><i class="bi bi-arrow-down"></i></button>
                                     <button class="btn btn-light" data-act="delete" onclick="deleteSection('${response.id}')"><i class="bi bi-trash"></i></button>
@@ -1040,14 +1040,81 @@
                     </div>
                 </div>
             </div>
-
-
-
-
-
-            
             `;
             }
+
+            function editSection(id) {
+                fetch(`{{ route('educator.courses.section.get', ':id') }}`.replace(':id', id), {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Authorization': '{{ env('AUTH_KEY') }}',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch section');
+                        }
+                        return response.json();
+                    })
+                    .then(res => {
+                        console.log(res);
+
+                        if (!res.data) {
+                            throw new Error('Invalid response format');
+                        }
+
+                        const form = document.getElementById('editSectionForm');
+                        form.action = `{{ route('educator.courses.section.update', ':id') }}`.replace(':id',
+                            id);
+
+                        form.querySelector('input[name="title"]').value = res.data.title ?? '';
+
+                        // show modal ONLY after data is set
+                        const modal = new bootstrap.Modal(document.getElementById('editSectionModal'));
+                        modal.show();
+
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong while fetching the section data.'
+                        });
+                    });
+            }
+
+
+            document.querySelector("#editSectionForm").addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const form = this;
+                console.log("form submitted section ", form.action);
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Authorization': '{{ env('AUTH_KEY') }}'
+                    },
+                    body: new FormData(form)
+                }).then(r => r.json()).then(r => {
+                    console.log(r);
+                    if (r.success) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editSectionModal'));
+                        modal.hide();
+                        fetchSections();
+                    }
+                }).catch(err => {
+                    console.error(err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong while updating the section.'
+                    });
+                });
+            });
 
             function deleteSection(id) {
                 if (confirm("Are you sure you want to delete this section?")) {
@@ -1085,11 +1152,6 @@
                                     <button class="btn btn-light" data-act="delete" onclick="deleteSection('${response.id}')"><i class="bi bi-trash"></i></button>
                                 </div>
                             </li>
-                            
-                            
-                          
-        
-                            
                             `;
             }
 
@@ -1099,6 +1161,14 @@
                 // e.preventDefault();
 
                 const form = document.getElementById('lessonForm');
+
+                if (!form.requestSubmit) {
+                    // fallback for very old browsers
+                    if (!form.checkValidity()) {
+                        form.reportValidity();
+                        return;
+                    }
+                }
                 const formData = new FormData();
 
                 const lessonType = document.getElementById('lessonType').value;
@@ -1183,10 +1253,12 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Validation Errors',
-                            text: Object.entries(data.errors).map(([key, value]) => `${key}: ${value}`).join('\n')
+                            text: Object.entries(data.errors).map(([key, value]) => `${key}: ${value}`)
+                                .join('\n')
                         });
                     }
                 } catch (err) {
+
                     console.error('Error:', err);
                     Swal.fire({
                         icon: 'error',
@@ -1212,11 +1284,13 @@
                 const formData = new FormData();
 
                 const formLessonType = document.querySelector('#' + formId + ' #lessonType').value;
-                const lessonEditModal = new bootstrap.Modal(document.getElementById('lessonModal-edit-' + formLessonId));
+                const lessonEditModal = new bootstrap.Modal(document.getElementById('lessonModal-edit-' +
+                    formLessonId));
 
 
                 // Collect basic fields
-                formData.append('course_section_id', document.querySelector('#' + formId + ' #sectionId').value);
+                formData.append('course_section_id', document.querySelector('#' + formId + ' #sectionId')
+                    .value);
                 formData.append('course_id', document.querySelector('#' + formId + ' #courseId').value);
                 formData.append('type', document.querySelector('#' + formId + ' #lessonType').value);
                 formData.append('title', document.querySelector('#' + formId + ' #lfTitle').value);
@@ -1224,7 +1298,8 @@
                 formData.append('price', document.querySelector('#' + formId + ' #price').value || 0);
                 formData.append('free', document.querySelector('#' + formId + ' #freeCourse').checked ? 1 : 0);
                 formData.append('status', document.querySelector('#' + formId + ' #lfStatus').value);
-                formData.append('preview', document.querySelector('#' + formId + ' #lfPreview').checked ? 1 : 0);
+                formData.append('preview', document.querySelector('#' + formId + ' #lfPreview').checked ? 1 :
+                    0);
                 formData.append('notes', document.querySelector('#' + formId + ' #lfNotes').value);
 
                 // Video (upload or link)
@@ -1267,14 +1342,15 @@
 
                 // Send AJAX POST
                 try {
-                    const response = await fetch('{{ url('/educator-panel/lessons/update/') }}/' + formLessonId, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Authorization': '{{ env('AUTH_KEY') }}'
-                        },
-                        body: formData
-                    });
+                    const response = await fetch('{{ url('/educator-panel/lessons/update/') }}/' +
+                        formLessonId, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Authorization': '{{ env('AUTH_KEY') }}'
+                            },
+                            body: formData
+                        });
 
                     const data = await response.json();
 
@@ -1285,7 +1361,7 @@
                             text: data.message
                         });
                         console.log(data);
-                       
+
                         document.getElementById('lfResList').innerHTML = 'No links added';
                         //close lessonModal IN bootstrap js
                         lessonModal.hide();
@@ -1296,7 +1372,8 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Validation Errors',
-                            text: Object.entries(data.errors).map(([key, value]) => `${key}: ${value}`).join('\n')
+                            text: Object.entries(data.errors).map(([key, value]) => `${key}: ${value}`)
+                                .join('\n')
                         });
                     }
                 } catch (err) {
