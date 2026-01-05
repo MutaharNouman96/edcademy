@@ -1,10 +1,14 @@
 <x-educator-layout>
     <div class="card shadow-sm">
         <div class="section-header">
-            <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center justify-content-between ">
                 <h2 class="section-title"><i class="bi bi-collection"></i> Courses</h2>
-
-               
+                <div>
+                    <a href="{{ route('educator.courses.create') }}" class="btn   btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>
+                        Create New Course
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -37,8 +41,8 @@
                             <tr>
                                 <td>
                                     @if ($course->thumbnail)
-                                        <img src="{{ asset( $course->thumbnail) }}" alt="thumb"
-                                            class="rounded" style="width:50px;height:50px;object-fit:cover;">
+                                        <img src="{{ asset($course->thumbnail) }}" alt="thumb" class="rounded"
+                                            style="width:50px;height:50px;object-fit:cover;">
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
@@ -57,11 +61,13 @@
                                 <td>{{ $course->lessons()->count() }}</td>
                                 <td>
                                     {{ $course->purchasers->count() }}
-                                    </td> <!-- TODO: link enrolled count -->
+                                </td> <!-- TODO: link enrolled count -->
                                 <td>{{ $course->created_at->format('d M Y') }}</td>
                                 <td class="text-end">
-                                   <a class="btn btn-outline-primary btn-sm" href="{{ route('web.course.show', ['slug'=>$course->slug  , 'id' => $course->id]) }}" target="_blank">
-                                       <i class="bi bi-file-earmark"></i>
+                                    <a class="btn btn-outline-primary btn-sm"
+                                        href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}"
+                                        target="_blank">
+                                        <i class="bi bi-file-earmark"></i>
                                     </a>
                                     <a href="{{ route('educator.courses.edit', $course->id) }}"
                                         class="btn btn-sm btn-outline-primary">

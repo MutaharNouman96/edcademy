@@ -48,6 +48,12 @@ class LessonController extends Controller
         }
         $data = $request->all();
 
+        $courseHasFreeLesson = Course::where('id', $request->course_id)->first()->lessons()->where('free', true)->exists();
+
+        if($courseHasFreeLesson){
+            return response()->json(['error' => 'freeLessonWarning','message' => 'Course already has a free lesson. You can only add one free lesson'], 403);
+        }
+
         try {
             // Handle video upload
             if ($request->hasFile('video_path')) {

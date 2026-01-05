@@ -14,7 +14,6 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="{{ asset('assets/css/select2-addon.css') }}" />
 
-        <link rel="stylesheet"
         <link rel="stylesheet" href="https://cdn.datatables.net/2.3.6/css/dataTables.bootstrap5.css">
 
 
@@ -34,7 +33,7 @@
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-3">
-                        <a href="edcademy-landing.html" class="text-decoration-none brand">
+                        <a href="{{ route('educator.dashboard') }}" class="text-decoration-none brand">
                             <i class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy
                         </a>
                         <span class="d-none d-md-inline text-muted">Educator Dashboard</span>
@@ -103,7 +102,7 @@
                             Reviews</a>
                         <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-2"></i>
                             Messages</a>
-                        <a class="nav-link" href="#section-resources"><i class="bi bi-folder2-open me-2"></i>
+                        <a class="nav-link" href="{{route("educator.resources.index")}}"><i class="bi bi-folder2-open me-2"></i>
                             Resources</a>
                         <a class="nav-link" href="{{ route('educator.schedule.index') }}"><i
                                 class="bi bi-calendar-event me-2"></i>

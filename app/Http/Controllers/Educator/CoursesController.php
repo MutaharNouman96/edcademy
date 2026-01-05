@@ -9,6 +9,7 @@ use App\Models\Lesson;
 use App\Models\CourseFeature;
 use App\Models\CourseSection;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class CoursesController extends Controller
 {
@@ -73,6 +74,7 @@ class CoursesController extends Controller
         $course = new Course();
         $course->user_id = auth()->id() ?? 1; // fallback for testing
         $course->title = $request->title;
+        $course->slug = Str::slug($request->title);
         $course->subject = $request->subject;
         $course->level = $request->level ?? 'School';
         $course->language = $request->language ?? 'English';
@@ -146,6 +148,7 @@ class CoursesController extends Controller
         $course = Course::findOrFail($id);
         $course->user_id = auth()->id() ?? 1; // fallback for testing
         $course->title = $request->title;
+        $course->slug = Str::slug($request->title);
         $course->subject = $request->subject;
         $course->level = $request->level ?? 'School';
         $course->language = $request->language ?? 'English';
@@ -248,6 +251,38 @@ class CoursesController extends Controller
                 'success' => true,
                 'section' => $section,
                 'message' => 'Section deleted successfully',
+            ],
+            200,
+        );
+    }
+
+    public function get_course_section($section_id)
+    {
+        $section = CourseSection::find($section_id);
+        if (!$section) {
+            return response()->json(['error' => 'Section not found'], 404);
+        }
+        return response()->json(
+            [
+                'data' => $section,
+            ],
+            200,
+        );
+    }
+
+    public function update_course_section(Request $request, $section_id)
+    {
+        $section = CourseSection::find($section_id);
+        if (!$section) {
+            return response()->json(['error' => 'Section not found'], 404);
+        }
+        $section->update([
+            'title' => $request->title
+        ]);
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $section,
             ],
             200,
         );

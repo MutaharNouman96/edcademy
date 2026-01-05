@@ -95,12 +95,31 @@
                 font-weight: 600;
             }
         </style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     @endpush
 
+
     @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
         <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
 
         <script>
+            const startPicker = flatpickr('#sch_start', {
+                enableTime: true,
+                dateFormat: 'Y-m-d H:i',
+                time_24hr: true,
+                minDate: new Date(),
+                onChange: function(selectedDates) {
+                    endPicker.set('minDate', selectedDates[0]);
+                }
+            });
+
+            const endPicker = flatpickr('#sch_end', {
+                enableTime: true,
+                dateFormat: 'Y-m-d H:i',
+                time_24hr: true
+            });
             document.addEventListener('DOMContentLoaded', async function() {
                 const calendarEl = document.getElementById('calendar');
                 const modalEl = document.getElementById('scheduleModal');

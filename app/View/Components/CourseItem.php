@@ -13,10 +13,12 @@ class CourseItem extends Component
      */
 
     public $course;
+    public $itemType;
 
-    public function __construct(\App\Models\Course $course)
+    public function __construct(\App\Models\Course $course, $itemType=null)
 {
     $this->course = $course;
+    $this->itemType = $itemType;
 }
 
     /**
