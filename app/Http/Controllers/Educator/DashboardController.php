@@ -204,4 +204,9 @@ class DashboardController extends Controller
 
         return back()->with('success', 'Profile updated successfully!');
     }
+
+
+    public function resources(){
+        return view('crm.educator.resources');
+    }
 }

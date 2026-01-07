@@ -217,6 +217,14 @@ Route::middleware(['auth', 'role:educator', 'verified'])
         Route::delete("courses/section/{section_id}", [\App\Http\Controllers\Educator\CoursesController::class, "delete_course_section"])
             ->name('educator.courses.section.delete')
             ->middleware('api.auth');
+        Route::get("course/get/section/{section_id}", [\App\Http\Controllers\Educator\CoursesController::class, "get_course_section"])
+            ->name('educator.courses.section.get')
+            ->middleware('api.auth');
+        Route::post("course/update/section/{section_id}", [\App\Http\Controllers\Educator\CoursesController::class, "update_course_section"])
+            ->name('educator.courses.section.update')
+            ->middleware('api.auth');
+
+            
 
         Route::prefix('lessons')->group(function () {
             Route::post('/store', [\App\Http\Controllers\Educator\LessonController::class, 'store']);
@@ -225,6 +233,8 @@ Route::middleware(['auth', 'role:educator', 'verified'])
         });
 
         Route::get("schudule-management", [\App\Http\Controllers\Educator\ScheduleController::class, "index"])->name("educator.schedule.index");
+
+        Route::get("resources", [EducatorDashboardController::class, 'resources'])->name("educator.resources.index");
 
         Route::prefix('settings')->group(function () {
             Route::get('/', [ProfileSettingController::class, 'index'])->name('educator.settings');

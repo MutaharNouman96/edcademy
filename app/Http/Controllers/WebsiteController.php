@@ -57,7 +57,7 @@ class WebsiteController extends Controller
 
     public function courses()
     {
-        $courses = Course::active()->published()->orderByDesc("publish_date")->with("educator", "category", "reviews", "lessons")->paginate(9);
+        $courses = Course::active()->published()->orderByDesc("publish_date")->with("educator", "category", "reviews", "lessons")->paginate(12);
 
         $courseCategories = CourseCategory::all();
         $chunks = $courseCategories->chunk(5);
@@ -269,6 +269,10 @@ class WebsiteController extends Controller
 
     public function faqs(){
         return view("website.faq");
+    }
+
+    public function how_it_works(){
+        return view("website.how_it_works");
     }
 }
 

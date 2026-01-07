@@ -4,22 +4,17 @@ namespace App\View\Components;
 
 use Illuminate\View\Component;
 
-class CourseItem extends Component
+class AdminLayout extends Component
 {
     /**
      * Create a new component instance.
      *
      * @return void
      */
-
-    public $course;
-    public $itemType;
-
-    public function __construct(\App\Models\Course $course, $itemType=null)
-{
-    $this->course = $course;
-    $this->itemType = $itemType;
-}
+    public function __construct()
+    {
+        //
+    }
 
     /**
      * Get the view / contents that represent the component.
@@ -28,6 +23,6 @@ class CourseItem extends Component
      */
     public function render()
     {
-        return view('components.course-item');
+        return view('layouts.admin');
     }
 }
