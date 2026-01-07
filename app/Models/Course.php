@@ -27,6 +27,7 @@ class Course extends Model
         'publish_date',
         'status'
     ];
+    protected $appends = ['thumbnail_path'];
 
 
     public function category()
@@ -93,6 +94,12 @@ class Course extends Model
             'purchasable',
             'user_purchased_items'
         )->withPivot('active')->withTimestamps();
+    }
+
+
+    public function getThumbnailPathAttribute()
+    {
+        return asset( $this->thumbnail);
     }
 
 

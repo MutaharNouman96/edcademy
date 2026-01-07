@@ -45,7 +45,7 @@
                                     <div class="glass-landing--card cursor-pointer">
                                         <div style="position: relative" class="">
                                             @if ($course->thumbnail)
-                                                <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+                                                <img src="{{ $course->thumbnail_path }}"
                                                     alt="Algebra" class="glass-landing--card-img" />
                                             @else
                                                 <div>
@@ -103,7 +103,7 @@
                             @foreach ($featuredEducators as $educator)
                                 <div class="glass-landing--educator-profile mt-3 col-6">
                                     @if ($educator->profile_picture)
-                                        <img src="{{ $educator->profile_picture }}" alt="Jessica R." height="100"
+                                        <img src="{{ $educator->profile_picture_url }}" alt="{{ $educator->full_name }}" height="100"
                                             class="glass-landing--Educator-avatar" />
                                     @else
                                         <div class="educator-profile-placeholder">
@@ -250,37 +250,8 @@
 
             <div class="row">
                 @foreach ($trendingCourses as $course)
-                    <div class="col-md-4">
-                        <div class="course-card">
-                            <div class=" ">
-                                <div class="placeholder-item">
-                                    <i class="bi bi-book fs-1 text-muted"></i>
-                                </div>
-                                <div class="course-badge">Popular</div>
-                            </div>
-                            <div class="course-body">
-                                <h4 class="course-title">
-                                    {{ $course->title }}
-                                </h4>
-                                <p>
-                                    {{ Str::limit($course->description, 100) }}
-                                </p>
-                                <div class="course-meta">
-                                    <span><i class="fas fa-clock"></i>
-                                        {{ $course->duration ?? '–' }}</span>
-                                    <span><i class="fas fa-star"></i>
-                                        {{ round($course->reviews->avg('rating') ?? 0, 1) }}
-                                        ({{ $course->reviews->count() ?? '–' }})
-                                    </span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <span class="course-price">${{ number_format($course->price, 2) }}</span>
-                                    <a href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}"
-                                        class="btn btn-sm"
-                                        style="background: var(--primary-cyan); color: white">Enroll Now</a>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="col-md-4 mb-4">
+                      <x-course-item :course="$course" :itemType="'trending'" />
                     </div>
                 @endforeach
 

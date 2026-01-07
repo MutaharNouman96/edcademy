@@ -11,10 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Teachers:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-    @if (env('APP_ENV') == 'local')
+    {{-- @if (env('APP_ENV') == 'local')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-    <link rel="stylesheet" href="{{ asset('assets/css/website-style.css') }}" />
+    @endif --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/website-style.css?v=' . time() ) }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/glass-landing.css') }}" />
 
 
@@ -40,7 +40,7 @@
                         <a class="nav-link" href="{{ route('web.courses') }}">Courses</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                        <a class="nav-link" href="{{ route('web.how.it.works') }}">How It Works</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#testimonials">Reviews</a>

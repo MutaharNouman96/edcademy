@@ -45,7 +45,7 @@ class ScheduleController extends Controller
             'description' => 'nullable|string',
             'start' => 'required|date',
             'end' => 'nullable|date|after_or_equal:start',
-            'session_id' => 'nullable|exists:sessions,id',
+            'session_id' => 'nullable|exists:session_calls,id',
         ]);
 
         if ($v->fails()) {

@@ -171,14 +171,16 @@
                         </div>
 
                         <div class="educator-info">
-                            <a href="{{ route("web.educator.show", $course->educator->id) }}">{{ $course->educator->full_name }}</a>
+                            <a
+                                href="{{ route('web.educator.show', $course->educator->id) }}">{{ $course->educator->full_name }}</a>
                             <p class="educator-subject">{{ $course->educator->educatorProfile->primary_subject }}</p>
 
                             <div class="educator-stats">
                                 <span><i class="fas fa-star"></i> {{ number_format($course->reviews_avg_rating, 1) }}
                                     Rating</span>
                                 <span><i class="fas fa-user-graduate"></i> {{ $studentsEnrolled }} Students</span>
-                                <span><i class="fas fa-play-circle"></i> {{ $moreCourses->count() + 1 }} Courses</span>
+                                <span><i class="fas fa-play-circle"></i> {{ $moreCourses->count() + 1 }}
+                                    Courses</span>
                             </div>
                         </div>
                     </div>
@@ -195,28 +197,65 @@
                         {{ $course->educator->name }}</h3>
 
                     <div class="row g-3">
-                        @foreach ($moreCourses as $rc)
+                        @foreach ($moreCourses as $moreCourse)
                             <div class="col-md-4">
-                                <a href="{{ route('web.course.show', ['slug' => $rc->slug, 'id' => $rc->id]) }}"
-                                    class="related-course">
-                                    <div class="related-thumb rounded">
-                                        <img src="{{ asset('storage/' . $rc->thumbnail) }}" class="img-fluid">
-                                        <span class="related-price">${{ $rc->price }}</span>
+                                <div class="listing-course-card">
+                                    <!-- Thumbnail -->
+                                    <div class="course-thumbnail">
+                                        @if ($moreCourse->thumbnail != null)
+                                            <img src="{{ $moreCourse->thumbnail_path }}" alt="{{ $moreCourse->title }}">
+                                        @else
+                                            <i class="fas fa-book-open fs-1 text-muted"></i>
+                                        @endif
+
+                                        <!-- Premium Badge -->
+                                        @if (!$moreCourse->is_free && $moreCourse->price > 0)
+                                            <span class="course-badge badge-premium">Premium</span>
+                                        @endif
                                     </div>
 
-                                    <div class="related-body">
-                                        <h6 class="related-title">{{ $rc->title }}</h6>
-                                        <div class="related-meta">
-                                            <span><i class="fas fa-clock"></i> {{ $rc->duration }}</span>
-                                            <span><i class="fas fa-user-graduate"></i>
-                                                {{ $rc->coursePurchases->count() }}</span>
+                                    <div class="course-body">
+                                        <!-- Difficulty Badge -->
+                                        @if ($moreCourse->difficulty)
+                                            <span
+                                                class="difficulty-badge difficulty-{{ strtolower($moreCourse->difficulty) }}">
+                                                {{ ucfirst($moreCourse->difficulty) }}
+                                            </span>
+                                        @endif
+
+                                        <!-- Title -->
+                                        <h5 class="course-title mt-2">{{ $moreCourse->title }}</h5>
+
+                                        <!-- Meta -->
+                                        <div class="course-meta">
+                                            <span><i class="fas fa-clock"></i> {{ $moreCourse->duration ?? '–' }}</span>
+                                            <span><i class="fas fa-video"></i> {{ $moreCourse->lessons->count() }}
+                                                lessons</span>
+
+                                            @php
+                                                $avgRating = $moreCourse->reviews->avg('rating');
+                                            @endphp
+
+
+                                            <span>
+                                                <i class="fas fa-star text-warning"></i>
+                                                {{ number_format($avgRating, 1) }}
+                                            </span>
+
                                         </div>
+
+                                        <a href="{{ route('web.course.show', ['slug' => $moreCourse->slug, 'id' => $moreCourse->id]) }}"
+                                            class="enroll-btn">
+                                            Enroll Now
+                                        </a>
                                     </div>
-                                </a>
+                                </div>
                             </div>
                         @endforeach
                     </div>
                 </div>
+
+
 
             </div>
 
@@ -225,7 +264,7 @@
                 <div class="purchase-card">
                     <div class="course-preview-img " style="cursor: pointer" data-bs-toggle="modal"
                         data-bs-target="#previewModal">
-                        <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="">
+                        <img src="{{  $course->thumbnail_path }}" class="img-fluid rounded" alt="">
                     </div>
 
                     <div class="price-section">
@@ -362,6 +401,11 @@
                         </button>
                     </div>
                 </div>
+            </div>
+
+
+            <div class="col-lg-12">
+
             </div>
         </div>
         <br>
