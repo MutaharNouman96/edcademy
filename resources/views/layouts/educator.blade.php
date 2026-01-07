@@ -102,7 +102,8 @@
                             Reviews</a>
                         <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-2"></i>
                             Messages</a>
-                        <a class="nav-link" href="{{route("educator.resources.index")}}"><i class="bi bi-folder2-open me-2"></i>
+                        <a class="nav-link" href="{{ route('educator.resources.index') }}"><i
+                                class="bi bi-folder2-open me-2"></i>
                             Resources</a>
                         <a class="nav-link" href="{{ route('educator.schedule.index') }}"><i
                                 class="bi bi-calendar-event me-2"></i>
