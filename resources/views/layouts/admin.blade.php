@@ -116,6 +116,18 @@
                     <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
                         <i class="bi bi-bar-chart-line me-2"></i>Dashboard
                     </a>
+                    <a class="nav-link {{ request()->routeIs('admin.manage.educators') ? 'active' : '' }}" href="{{ route('admin.manage.educators') }}">
+                        <i class="bi bi-person-workspace me-2"></i>Manage Educators
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.manage.students') ? 'active' : '' }}" href="{{ route('admin.manage.students') }}">
+                        <i class="bi bi-people-fill me-2"></i>Manage Students
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.manage.courses') ? 'active' : '' }}" href="{{ route('admin.manage.courses') }}">
+                        <i class="bi bi-book me-2"></i>Manage Courses
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.payouts.index') ? 'active' : '' }}" href="{{ route('admin.payouts.index') }}">
+                        <i class="bi bi-cash-coin me-2"></i>Payouts
+                    </a>
                 </nav>
             </aside>
 
