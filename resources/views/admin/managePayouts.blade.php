@@ -58,38 +58,31 @@
 @endif
 
 <!-- View Tabs -->
-<div class="alert alert-info mb-4">
-    <i class="bi bi-info-circle me-2"></i>
-    <strong>Note:</strong> Each tab has its own filter options tailored to the specific data type. Switch between tabs to manage different aspects of the payout system.
-</div>
 <ul class="nav nav-tabs mb-4" id="payoutTabs" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link {{ $currentView ?? 'earnings' == 'earnings' ? 'active' : '' }}"
-                id="earnings-tab" data-bs-toggle="tab" data-bs-target="#earnings"
-                type="button" role="tab" aria-controls="earnings" aria-selected="true">
+        <a class="nav-link {{ $currentView ?? 'earnings' == 'earnings' ? 'active' : '' }}"
+                href="{{ route('admin.payouts.index', ['view' => 'earnings']) }}">
             <i class="bi bi-graph-up me-1"></i>Earnings
-        </button>
+        </a>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link {{ $currentView ?? 'earnings' == 'payouts' ? 'active' : '' }}"
-                id="payouts-tab" data-bs-toggle="tab" data-bs-target="#payouts"
-                type="button" role="tab" aria-controls="payouts" aria-selected="false">
+        <a class="nav-link {{ $currentView ?? 'earnings' == 'payouts' ? 'active' : '' }}"
+                href="{{ route('admin.payouts.index', ['view' => 'payouts']) }}">
             <i class="bi bi-wallet me-1"></i>Payouts
-        </button>
+        </a>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link {{ $currentView ?? 'earnings' == 'educator_payouts' ? 'active' : '' }}"
-                id="educator-payouts-tab" data-bs-toggle="tab" data-bs-target="#educator-payouts"
-                type="button" role="tab" aria-controls="educator-payouts" aria-selected="false">
+        <a class="nav-link {{ $currentView ?? 'earnings' == 'educator_payouts' ? 'active' : '' }}"
+                href="{{ route('admin.payouts.index', ['view' => 'educator_payouts']) }}">
             <i class="bi bi-credit-card me-1"></i>Educator Payouts
-        </button>
+        </a>
     </li>
 </ul>
 
 <div class="tab-content" id="payoutTabsContent">
 
     <!-- Earnings Tab -->
-    <div class="tab-pane fade {{ $currentView ?? 'earnings' == 'earnings' ? 'show active' : '' }}"
+    <div class="{{ $currentView ?? 'earnings' == 'earnings' ? '' : 'd-none' }}"
          id="earnings" role="tabpanel" aria-labelledby="earnings-tab">
 
         <div class="kpi-card">
@@ -252,7 +245,7 @@
     </div>
 
     <!-- Payouts Tab -->
-    <div class="tab-pane fade {{ $currentView ?? 'earnings' == 'payouts' ? 'show active' : '' }}"
+    <div class="mt-5 {{ $currentView ?? 'earnings' == 'payouts' ? '' : 'd-none' }}"
          id="payouts" role="tabpanel" aria-labelledby="payouts-tab">
         <div class="kpi-card">
             <div class="p-3 border-bottom">
@@ -374,7 +367,7 @@
     </div>
 
     <!-- Educator Payouts Tab -->
-    <div class="tab-pane fade {{ $currentView ?? 'earnings' == 'educator_payouts' ? 'show active' : '' }}"
+    <div class="mt-5 {{ $currentView ?? 'earnings' == 'educator_payouts' ? '' : 'd-none' }}"
          id="educator-payouts" role="tabpanel" aria-labelledby="educator-payouts-tab">
 
         <div class="kpi-card">
