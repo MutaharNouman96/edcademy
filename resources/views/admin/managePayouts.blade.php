@@ -143,8 +143,10 @@
                     <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-control">
                 </div>
                 <div class="col-md-2 text-md-end">
-                    <button class="btn btn-brand me-2">Apply Filters</button>
-                    <a href="{{ route('admin.payouts.index', ['view' => 'earnings']) }}" class="btn btn-outline-secondary">Clear</a>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-brand">Apply Filters</button>
+                        <a href="{{ route('admin.payouts.index', ['view' => 'earnings']) }}" class="btn btn-outline-secondary">Clear</a>
+                    </div>
                 </div>
             </div>
                 </form>
@@ -295,8 +297,10 @@
                     <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-control">
                 </div>
                 <div class="col-md-2 text-md-end">
-                    <button class="btn btn-brand me-2">Apply Filters</button>
-                    <a href="{{ route('admin.payouts.index', ['view' => 'payouts']) }}" class="btn btn-outline-secondary">Clear</a>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-brand">Apply Filters</button>
+                        <a href="{{ route('admin.payouts.index', ['view' => 'payouts']) }}" class="btn btn-outline-secondary">Clear</a>
+                    </div>
                 </div>
             </div>
                 </form>
@@ -422,8 +426,10 @@
                     <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-control">
                 </div>
                 <div class="col-md-2 text-md-end">
-                    <button class="btn btn-brand me-2">Apply Filters</button>
-                    <a href="{{ route('admin.payouts.index', ['view' => 'educator_payouts']) }}" class="btn btn-outline-secondary">Clear</a>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-brand">Apply Filters</button>
+                        <a href="{{ route('admin.payouts.index', ['view' => 'educator_payouts']) }}" class="btn btn-outline-secondary">Clear</a>
+                    </div>
                 </div>
             </div>
                 </form>
