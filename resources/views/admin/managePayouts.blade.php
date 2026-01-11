@@ -92,11 +92,13 @@
     <div class="tab-pane fade {{ $currentView ?? 'earnings' == 'earnings' ? 'show active' : '' }}"
          id="earnings" role="tabpanel" aria-labelledby="earnings-tab">
 
-        <div class="tab-section-header">
-            <h5 class="section-title">
-                <i class="bi bi-graph-up me-2"></i>Individual Earnings Management
-            </h5>
-            <p class="text-muted small">Track and manage individual earnings from courses, sessions, and resources</p>
+        <div class="kpi-card p-3 mb-4">
+            <div class="tab-section-header">
+                <h5 class="section-title">
+                    <i class="bi bi-graph-up me-2"></i>Individual Earnings Management
+                </h5>
+                <p class="text-muted small">Track and manage individual earnings from courses, sessions, and resources</p>
+            </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -248,12 +250,13 @@
     <!-- Payouts Tab -->
     <div class="tab-pane fade {{ $currentView ?? 'earnings' == 'payouts' ? 'show active' : '' }}"
          id="payouts" role="tabpanel" aria-labelledby="payouts-tab">
-
-        <div class="tab-section-header">
-            <h5 class="section-title">
-                <i class="bi bi-wallet me-2"></i>Payout Batch Management
-            </h5>
-            <p class="text-muted small">Manage payout batches and process payments to educators</p>
+        <div class="kpi-card p-3 mb-4">
+            <div class="tab-section-header">
+                <h5 class="section-title">
+                    <i class="bi bi-wallet me-2"></i>Payout Batch Management
+                </h5>
+                <p class="text-muted small">Manage payout batches and process payments to educators</p>
+            </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -366,11 +369,13 @@
     <div class="tab-pane fade {{ $currentView ?? 'earnings' == 'educator_payouts' ? 'show active' : '' }}"
          id="educator-payouts" role="tabpanel" aria-labelledby="educator-payouts-tab">
 
-        <div class="tab-section-header">
-            <h5 class="section-title">
-                <i class="bi bi-credit-card me-2"></i>Educator Payout Transactions
-            </h5>
-            <p class="text-muted small">View completed payout transactions and payment processing history</p>
+        <div class="kpi-card p-3 mb-4">
+            <div class="tab-section-header">
+                <h5 class="section-title">
+                    <i class="bi bi-credit-card me-2"></i>Educator Payout Transactions
+                </h5>
+                <p class="text-muted small">View completed payout transactions and payment processing history</p>
+            </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
