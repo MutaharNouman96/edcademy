@@ -131,7 +131,7 @@
                         <i class="bi bi-shield-check me-2"></i>Content Moderation
                     </a>
                     <div class="nav-link text-muted small fw-bold mt-2 mb-1">FINANCIAL</div>
-                    <a class="nav-link {{ request()->routeIs('admin.admin.payouts.index') ? 'active' : '' }}" href="{{ route('admin.admin.payouts.index') }}">
+                    <a class="nav-link {{ request()->routeIs('admin.payouts.index') ? 'active' : '' }}" href="{{ route('admin.payouts.index') }}">
                         <i class="bi bi-cash-coin me-2"></i>Payouts
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.earnings.index') ? 'active' : '' }}" href="{{ route('admin.earnings.index') }}">
