@@ -76,7 +76,7 @@
                     <span class="d-none d-md-inline text-muted">Educator Dashboard</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                   
+
                     <a class="btn btn-sm btn-outline-primary" href="{{ route('website.index') }}">
                         <i class="bi bi-globe me-1"></i> Go to website
                     </a>
