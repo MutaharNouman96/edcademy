@@ -5,6 +5,11 @@
 <!-- Summary Cards -->
 @if(isset($totalEarnings))
 <div class="row g-4 mb-4">
+    <div class="col-12 mb-3">
+        <h5 class="section-title mb-3">
+            <i class="bi bi-bar-chart-line me-2"></i>Earnings Overview
+        </h5>
+    </div>
     <div class="col-12 col-md-6 col-xl-3">
         <div class="kpi-card p-3">
             <div class="d-flex justify-content-between align-items-start">
@@ -53,6 +58,10 @@
 @endif
 
 <!-- View Tabs -->
+<div class="alert alert-info mb-4">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>Note:</strong> Each tab has its own filter options tailored to the specific data type. Switch between tabs to manage different aspects of the payout system.
+</div>
 <ul class="nav nav-tabs mb-4" id="payoutTabs" role="tablist">
     <li class="nav-item" role="presentation">
         <button class="nav-link {{ $currentView ?? 'earnings' == 'earnings' ? 'active' : '' }}"
@@ -83,6 +92,16 @@
     <div class="tab-pane fade {{ $currentView ?? 'earnings' == 'earnings' ? 'show active' : '' }}"
          id="earnings" role="tabpanel" aria-labelledby="earnings-tab">
 
+        <div class="tab-section-header">
+            <h5 class="section-title">
+                <i class="bi bi-graph-up me-2"></i>Individual Earnings Management
+            </h5>
+            <p class="text-muted small">Track and manage individual earnings from courses, sessions, and resources</p>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0"><i class="bi bi-funnel me-2"></i>Earnings Filters</h6>
+        </div>
         <form method="GET" action="{{ route('admin.payouts.index') }}" class="filter-bar p-3 mb-4">
             <input type="hidden" name="view" value="earnings">
             <div class="row g-2 align-items-end">
@@ -230,6 +249,16 @@
     <div class="tab-pane fade {{ $currentView ?? 'earnings' == 'payouts' ? 'show active' : '' }}"
          id="payouts" role="tabpanel" aria-labelledby="payouts-tab">
 
+        <div class="tab-section-header">
+            <h5 class="section-title">
+                <i class="bi bi-wallet me-2"></i>Payout Batch Management
+            </h5>
+            <p class="text-muted small">Manage payout batches and process payments to educators</p>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0"><i class="bi bi-funnel me-2"></i>Payout Filters</h6>
+        </div>
         <form method="GET" action="{{ route('admin.payouts.index') }}" class="filter-bar p-3 mb-4">
             <input type="hidden" name="view" value="payouts">
             <div class="row g-2 align-items-end">
@@ -337,6 +366,16 @@
     <div class="tab-pane fade {{ $currentView ?? 'earnings' == 'educator_payouts' ? 'show active' : '' }}"
          id="educator-payouts" role="tabpanel" aria-labelledby="educator-payouts-tab">
 
+        <div class="tab-section-header">
+            <h5 class="section-title">
+                <i class="bi bi-credit-card me-2"></i>Educator Payout Transactions
+            </h5>
+            <p class="text-muted small">View completed payout transactions and payment processing history</p>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0"><i class="bi bi-funnel me-2"></i>Educator Payout Filters</h6>
+        </div>
         <form method="GET" action="{{ route('admin.payouts.index') }}" class="filter-bar p-3 mb-4">
             <input type="hidden" name="view" value="educator_payouts">
             <div class="row g-2 align-items-end">
@@ -586,6 +625,23 @@
         background: var(--brand);
         color: #fff;
         border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .section-title {
+        color: var(--ink);
+        font-weight: 800;
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-title i {
+        color: var(--brand);
+    }
+
+    .tab-section-header {
+        border-bottom: 2px solid var(--soft);
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
 </style>
 @endpush
