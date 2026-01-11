@@ -372,4 +372,31 @@ if (app()->environment('local')) {
 
         return new OrderInvoiceMail($order);
     });
+
+    // Debug route to check and set admin role
+    Route::get('/debug/set-admin/{email}', function ($email) {
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return "User with email {$email} not found";
+        }
+
+        $user->update(['role' => 'admin']);
+        return "User {$email} role set to admin. Current role: {$user->fresh()->role}";
+    });
+
+    Route::get('/debug/check-user/{email}', function ($email) {
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return "User with email {$email} not found";
+        }
+
+        return [
+            'id' => $user->id,
+            'email' => $user->email,
+            'role' => $user->role,
+            'isAdmin' => $user->isAdmin(),
+            'isStudent' => $user->isStudent(),
+            'isEducator' => $user->isEducator(),
+        ];
+    });
 }
