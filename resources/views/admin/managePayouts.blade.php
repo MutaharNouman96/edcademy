@@ -213,7 +213,7 @@
                 </div>
 
                 <!-- Bulk Actions -->
-                @if($earnings ?? []->count() > 0)
+                @if(isset($earnings) && $earnings->count() > 0)
                 <div class="mt-3 d-flex gap-2">
                     <form method="POST" action="{{ route('admin.earnings.bulk-update') }}" id="bulk-earnings-form">
                         @csrf
