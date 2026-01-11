@@ -10,24 +10,30 @@ class Lesson extends Model
     use HasFactory;
 
     protected $fillable = [
-        'couse_section_id',
+        'course_section_id',
         'course_id',
+        'title',
         'name',
         'type',
         'category',
         'video_link',
+        'video_path',
         'description',
         'duration',
         'is_preview',
+        'preview',
         'order',
         'materials',
         'worksheets',
-        'video_path',
+        'resources',
+        'assignments',
+        'notes',
         'status',
         'price',
         'free',
         'published_at',
         'thumbnail',
+        'popular',
     ];
     protected $casts = [
         'published_at' => 'datetime',
