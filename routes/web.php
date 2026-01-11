@@ -154,7 +154,31 @@ Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+        Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+
+        // Manage Educators
+        Route::get('educators', [App\Http\Controllers\Admin\DashboardController::class, 'manageEducators'])
+            ->name('manage.educators');
+
+        Route::patch('educators/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateEducatorStatus'])
+            ->name('educators.status');
+
+        Route::delete('educators/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteEducator'])
+            ->name('educators.delete');
+
+        // Manage Students
+        Route::get('students', [App\Http\Controllers\Admin\DashboardController::class, 'manageStudents'])
+            ->name('manage.students');
+
+        // Manage Courses
+        Route::get('courses', [App\Http\Controllers\Admin\DashboardController::class, 'manageCourses'])
+            ->name('manage.courses');
+
+        Route::patch('courses/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateCourseStatus'])
+            ->name('courses.status');
+
+        Route::delete('courses/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteCourse'])
+            ->name('courses.delete');
 
         Route::get("payouts", [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('admin.payouts.index');
         Route::get("payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name("admin.payouts.show");
@@ -224,7 +248,7 @@ Route::middleware(['auth', 'role:educator', 'verified'])
             ->name('educator.courses.section.update')
             ->middleware('api.auth');
 
-            
+
 
         Route::prefix('lessons')->group(function () {
             Route::post('/store', [\App\Http\Controllers\Educator\LessonController::class, 'store']);

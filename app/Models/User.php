@@ -97,6 +97,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Earning::class, 'educator_id');
     }
 
+    public function courses()
+    {
+        return $this->hasMany(Course::class, 'user_id');
+    }
+
     public function educatorReviews()
     {
         return $this->hasMany(\App\Models\EducatorReview::class, 'educator_id');
@@ -232,7 +237,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return trim("{$this->first_name} {$this->last_name}");
     }
 
-   
+
 
 
     public function purchases()

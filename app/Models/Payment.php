@@ -31,6 +31,11 @@ class Payment extends Model
         return $this->belongsTo(User::class, 'student_id');
     }
 
+    public function educator()
+    {
+        return $this->belongsTo(User::class, 'educator_id');
+    }
+
     public function course()
     {
         return $this->belongsTo(Course::class);
@@ -40,6 +45,6 @@ class Payment extends Model
     {
         return $this->belongsTo(PaymentMethod::class, 'payment_method', 'name');
     }
-    
+
     protected $table = 'payments';
 }
