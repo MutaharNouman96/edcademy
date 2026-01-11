@@ -180,9 +180,14 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('courses/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteCourse'])
             ->name('courses.delete');
 
-        Route::get("payouts", [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('admin.payouts.index');
-        Route::get("payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name("admin.payouts.show");
-        Route::post("process/payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name("admin.payouts.process");
+        Route::get("payouts", [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
+        Route::get("payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name("payouts.show");
+        Route::post("process/payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name("payouts.process");
+
+        // Additional payout management routes
+        Route::patch("earnings/{id}/status", [App\Http\Controllers\Admin\PayoutController::class, 'updateEarningStatus'])->name("earnings.status");
+        Route::post("earnings/bulk-update", [App\Http\Controllers\Admin\PayoutController::class, 'bulkUpdateEarnings'])->name("earnings.bulk-update");
+        Route::post("payouts/create", [App\Http\Controllers\Admin\PayoutController::class, 'createPayout'])->name("payouts.create");
 
         Route::resource('earnings', App\Http\controllers\Admin\EarningController::class)->only(['index', 'show']);
     });
