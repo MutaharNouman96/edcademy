@@ -330,7 +330,7 @@
                                     </span>
                                 </td>
                                 <td>{{ Str::limit($payout->description, 50) }}</td>
-                                <td>{{ $payout->created_at->format('M d, Y') }}</td>
+                                <td>{{ $payout->created_at ? $payout->created_at->format('M d, Y') : 'N/A' }}</td>
                                 <td>{{ $payout->processed_at ? $payout->processed_at->format('M d, Y') : 'N/A' }}</td>
                                 <td>
                                     @if($payout->status === 'pending')

@@ -9,6 +9,10 @@ class Payout extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'processed_at' => 'datetime',
+    ];
+
     protected $fillable = [
         'id',
         'educator_id',
