@@ -9,6 +9,7 @@ use App\Models\RefundRequest;
 use App\Models\CourseReview;
 use App\Models\Order;
 use App\Models\Course;
+use App\Models\Lesson;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -423,5 +424,75 @@ class DashboardController extends Controller
         $course = Course::findOrFail($id);
         $course->delete();
         return back()->with('success', 'Course deleted successfully');
+    }
+
+    public function manageLessons(Request $request)
+    {
+        $query = Lesson::with(['course.educator', 'courseSection']);
+
+        if ($request->filled('status')) {
+            if (in_array($request->status, ['Draft', 'Published'])) {
+                $query->where('status', $request->status);
+            }
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('course_id')) {
+            $query->where('course_id', $request->course_id);
+        }
+
+        if ($request->filled('free')) {
+            $query->where('free', $request->free === '1' ? 1 : 0);
+        }
+
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%')
+                  ->orWhereHas('course', function ($courseQuery) use ($search) {
+                      $courseQuery->where('title', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('course.educator', function ($educatorQuery) use ($search) {
+                      $educatorQuery->where('first_name', 'like', '%' . $search . '%')
+                                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%']);
+                  });
+            });
+        }
+
+        $lessons = $query->latest()->paginate(15);
+
+        // Get courses for filter dropdown
+        $courses = Course::select('id', 'title')->get();
+
+        return view('admin.manageLessons', compact('lessons', 'courses'));
+    }
+
+    public function updateLessonStatus(Request $request, $id)
+    {
+        if (!in_array($request->status, ['Draft', 'Published'])) {
+            return back()->with('error', 'Invalid status selected');
+        }
+
+        $lesson = Lesson::findOrFail($id);
+        $lesson->update(['status' => $request->status]);
+
+        if ($request->status === 'Published' && !$lesson->published_at) {
+            $lesson->update(['published_at' => now()]);
+        }
+
+        return back()->with('success', 'Lesson status updated successfully');
+    }
+
+    public function showLesson($id)
+    {
+        $lesson = Lesson::with(['course.educator', 'courseSection'])->findOrFail($id);
+
+        return view('admin.showLesson', compact('lesson'));
     }
 }

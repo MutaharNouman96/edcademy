@@ -180,6 +180,16 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('courses/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteCourse'])
             ->name('courses.delete');
 
+        // Manage Lessons
+        Route::get('lessons', [App\Http\Controllers\Admin\DashboardController::class, 'manageLessons'])
+            ->name('manage.lessons');
+
+        Route::patch('lessons/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateLessonStatus'])
+            ->name('lessons.status');
+
+        Route::get('lessons/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'showLesson'])
+            ->name('lessons.show');
+
         Route::get("payouts", [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
         Route::get("payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name("payouts.show");
         Route::post("process/payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name("payouts.process");

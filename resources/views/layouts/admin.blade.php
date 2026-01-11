@@ -125,6 +125,9 @@
                     <a class="nav-link {{ request()->routeIs('admin.manage.courses') ? 'active' : '' }}" href="{{ route('admin.manage.courses') }}">
                         <i class="bi bi-book me-2"></i>Manage Courses
                     </a>
+                    <a class="nav-link {{ request()->routeIs('admin.manage.lessons') ? 'active' : '' }}" href="{{ route('admin.manage.lessons') }}">
+                        <i class="bi bi-collection-play me-2"></i>Manage Lessons
+                    </a>
                     <a class="nav-link {{ request()->routeIs('admin.payouts.index') ? 'active' : '' }}" href="{{ route('admin.payouts.index') }}">
                         <i class="bi bi-cash-coin me-2"></i>Payouts
                     </a>
