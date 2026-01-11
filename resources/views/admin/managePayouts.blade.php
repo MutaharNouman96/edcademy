@@ -15,7 +15,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Total Earnings</div>
-                    <div class="kpi-value">AED {{ number_format($totalEarnings, 2) }}</div>
+                    <div class="kpi-value">AED </br> {{ number_format($totalEarnings, 2) }}</div>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-cash-coin"></i></span>
             </div>
@@ -26,7 +26,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Pending</div>
-                    <div class="kpi-value">AED {{ number_format($pendingEarnings, 2) }}</div>
+                    <div class="kpi-value">AED </br> {{ number_format($pendingEarnings, 2) }}</div>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-clock"></i></span>
             </div>
@@ -37,7 +37,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Approved</div>
-                    <div class="kpi-value">AED {{ number_format($approvedEarnings, 2) }}</div>
+                    <div class="kpi-value">AED </br> {{ number_format($approvedEarnings, 2) }}</div>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-check-circle"></i></span>
             </div>
@@ -48,7 +48,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Paid</div>
-                    <div class="kpi-value">AED {{ number_format($paidEarnings, 2) }}</div>
+                    <div class="kpi-value">AED </br> {{ number_format($paidEarnings, 2) }}</div>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-check2-all"></i></span>
             </div>
@@ -144,7 +144,7 @@
                 </div>
                 <div class="col-md-2 text-md-end">
                     <div class="d-flex gap-2 justify-content-end">
-                        <button class="btn btn-brand">Apply Filters</button>
+                        <button class="btn btn-brand">Apply</button>
                         <a href="{{ route('admin.payouts.index', ['view' => 'earnings']) }}" class="btn btn-outline-secondary">Clear</a>
                     </div>
                 </div>
@@ -298,7 +298,7 @@
                 </div>
                 <div class="col-md-2 text-md-end">
                     <div class="d-flex gap-2 justify-content-end">
-                        <button class="btn btn-brand">Apply Filters</button>
+                        <button class="btn btn-brand">Apply</button>
                         <a href="{{ route('admin.payouts.index', ['view' => 'payouts']) }}" class="btn btn-outline-secondary">Clear</a>
                     </div>
                 </div>
@@ -427,7 +427,7 @@
                 </div>
                 <div class="col-md-2 text-md-end">
                     <div class="d-flex gap-2 justify-content-end">
-                        <button class="btn btn-brand">Apply Filters</button>
+                        <button class="btn btn-brand">Apply</button>
                         <a href="{{ route('admin.payouts.index', ['view' => 'educator_payouts']) }}" class="btn btn-outline-secondary">Clear</a>
                     </div>
                 </div>
