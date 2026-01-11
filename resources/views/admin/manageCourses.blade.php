@@ -10,7 +10,6 @@
                 <option value="">All Status</option>
                 <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
                 <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
-                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
             </select>
         </div>
         <div class="col-md-3">
@@ -80,11 +79,7 @@
                             @endif
                         </td>
                         <td>
-                            <span class="badge text-bg-{{
-                                $course->status === 'published' ? 'success' :
-                                ($course->status === 'draft' ? 'warning' :
-                                ($course->status === 'rejected' ? 'danger' : 'secondary'))
-                            }}">
+                            <span class="badge text-bg-{{ $course->status === 'published' ? 'success' : 'warning' }}">
                                 {{ ucfirst($course->status) }}
                             </span>
                         </td>
@@ -102,7 +97,6 @@
                                             <select name="status" onchange="this.form.submit()" class="form-select form-select-sm mb-2">
                                                 <option value="published" {{ $course->status === 'published' ? 'selected' : '' }}>Published</option>
                                                 <option value="draft" {{ $course->status === 'draft' ? 'selected' : '' }}>Draft</option>
-                                                <option value="rejected" {{ $course->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
                                             </select>
                                         </form>
                                     </li>

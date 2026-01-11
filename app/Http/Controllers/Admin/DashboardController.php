@@ -380,7 +380,7 @@ class DashboardController extends Controller
         $query = Course::with('educator');
 
         if ($request->filled('status')) {
-            if (in_array($request->status, ['published', 'draft', 'rejected'])) {
+            if (in_array($request->status, ['published', 'draft'])) {
                 $query->where('status', $request->status);
             }
         }
@@ -409,7 +409,7 @@ class DashboardController extends Controller
 
     public function updateCourseStatus(Request $request, $id)
     {
-        if (!in_array($request->status, ['published', 'draft', 'rejected'])) {
+        if (!in_array($request->status, ['published', 'draft'])) {
             return back()->with('error', 'Invalid status selected');
         }
 
