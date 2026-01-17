@@ -107,7 +107,7 @@
                                     <span class="input-group-text">$</span>
                                     <input type="number" name="price" value="{{ old('price', $course->price) }}"
                                         min="0" step="0.01"
-                                        class="form-control @error('price') is-invalid @enderror" placeholder="49.00">
+                                        class="form-control @error('price') is-invalid @enderror" placeholder="100.00">
                                 </div>
                                 @error('price')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -116,7 +116,7 @@
                                 <div class="form-check mt-2">
                                     <input class="form-check-input" type="checkbox" name="free" id="freeCourse"
                                         value="1" {{ old('free', $course->free) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="freeCourse">Free Item</label>
+                                    <label class="form-check-label" for="freeCourse">Free Course</label>
                                 </div>
                             </div>
 
@@ -418,8 +418,8 @@
                                         class="form-control" placeholder="49.00" />
                                 </div>
                                 <div class="form-check mt-2">
-                                    <input class="form-check-input" type="checkbox" id="freeCourse" />
-                                    <label class="form-check-label" for="freeCourse">Free course</label>
+                                    <input class="form-check-input" type="checkbox" id="freeLessonItem" />
+                                    <label class="form-check-label" for="freeLessonItem">Free Lesson Item</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
@@ -776,44 +776,38 @@
                                         <div class="col-12">
                                                 <!-- Video Content -->
                                                 ${response.type == 'video' ? ` <div class="" id="videoContent" role="tabpanel" aria-labelledby="video-tab">
-                                                                                                                                                                                                                                                                          <label class="form-label">Video</label>
-                                                                                                                                                                                                                                                                          <input id="lfVideo" type="file" class="form-control mb-2" accept="video/*" />
-                                                                                                                                                                                                                                                                          <input id="lfVideoLink" type="url" class="form-control mb-2" placeholder="Or paste a video link (YouTube, Vimeo)" />
-                                                                                                                                                                                                                                                                          <div class="form-text">
-                                                                                                                                                                                                                                                                            MP4/MOV up to 2 GB, or provide an external link.
-                                                                                                                                                                                                                                                                          </div>
-                                                                                                                                                                                                                                                                          <div id="videoPreview" class="border rounded mt-2 p-3 text-center bg-white">
-                                                                                                                                                                                                                                                                            <i class="bi bi-camera-video fs-1 text-muted"></i>
-                                                                                                                                                                                                                                                                            <p class="mb-0 small text-muted">No video selected</p>
-                                                                                                                                                                                                                                                                          </div>
-                                                                                                                                                                                                                                                                        </div>` : ''}
+                                                                                                                                                                                                                                                                                                                                  <label class="form-label">Video</label>
+                                                                                                                                                                                                                                                                                                                                  <input id="lfVideo" type="file" class="form-control mb-2" accept="video/*" />
+                                                                                                                                                                                                                                                                                                                                  <input id="lfVideoLink" type="url" class="form-control mb-2" placeholder="Or paste a video link (YouTube, Vimeo)" />
+                                                                                                                                                                                                                                                                                                                                  <div class="form-text">
+                                                                                                                                                                                                                                                                                                                                    MP4/MOV up to 2 GB, or provide an external link.
+                                                                                                                                                                                                                                                                                                                                  </div>
+                                                                                                                                                                                                                                                                                                                                  <div id="videoPreview" class="border rounded mt-2 p-3 text-center bg-white">
+                                                                                                                                                                                                                                                                                                                                    <i class="bi bi-camera-video fs-1 text-muted"></i>
+                                                                                                                                                                                                                                                                                                                                    <p class="mb-0 small text-muted">No video selected</p>
+                                                                                                                                                                                                                                                                                                                                  </div>
+                                                                                                                                                                                                                                                                                                                                </div>` : ''}
 
                                                
                                                 ${response.type == 'material' ? `
-                                                                                                                                                                                                                                        <div class="" id="materialsContent" role="tabpanel" aria-labelledby="materials-tab" >
-                                                                                                                                                                                                                  <label class="form-label">UploadLearningMaterials(PDF,PPT)</label>
-                                                                                                                                                                                                                  <input
-                                                                                                                                                                                                                    id="lfMaterials"
-                                                                                                                                                                                                                    type="file"
-                                                                                                                                                                                                                    class="form-control"
-                                                                                                                                                                                                                    accept=".pdf,.ppt,.pptx"
-                                                                                                                                                                                                                    multiple
-                                                                                                                                                                                                                  />
-                                                                                                                                                                                                                  <a download target="_blank" href="${response.materials_path}" class="mt-4 btn btn-outline-primary">
-                                                                                                                                                                                                                 <i class='bi bi-link'></i> View uploaded file
-                                                                                                                                                                                                                    </a>
-                                                                                                                                                                                                                  <div id="lfMatList" class="rowg-2mt-2">
-                                                                                                                                                                                                                    <div class="col-12text-centertext-mutedsmall">
-                                                                                                                                                                                                                      <i class="bibi-file-earmark-pptfs-4"></i>
-                                                                                                                                                                                                                      <br />No materials uploaded
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                  </div>
-                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                ` : '' }
+                                                                                                                                                                                                                                                                                                <div class="" id="materialsContent" role="tabpanel" aria-labelledby="materials-tab" >
+                                                                                                                                                                                                                                                                          <label class="form-label">Upload Learning Materials(PDF,PPT)</label>
+                                                                                                                                                                                                                                                                          <input id="lfMaterials" type="file" class="form-control" accept=".pdf,.ppt,.pptx" />
+                                                                                                                                                                                                                                                                          <a download target="_blank" href="${response.materials_path}" class="mt-4 btn btn-outline-primary">
+                                                                                                                                                                                                                                                                         <i class='bi bi-link'></i> View Uploaded Material File
+                                                                                                                                                                                                                                                                            </a>
+                                                                                                                                                                                                                                                                          <div id="lfMatList" class="row g-2 mt-2">
+                                                                                                                                                                                                                                                                            <div class="col-12 text-center text-muted small">
+                                                                                                                                                                                                                                                                              <i class="bi bi-file-earmark-ppt fs-4"></i>
+                                                       
+                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                        ` : '' }
 
                                                 <!-- Worksheets -->
                                             ${response.type == 'worksheets' ? 
-                                                `<div class=""id="worksheetsContent"role="tabpanel"aria-labelledby="worksheets-tab"><labelclass="form-label">UploadWorksheets(PDF,Word)</label><inputid="lfWorksheets"type="file"class="form-control"accept=".pdf,.doc,.docx"multiple/><divid="lfWsList"class="rowg-2mt-2"><divclass="col-12text-centertext-mutedsmall"><iclass="bibi-file-earmark-textfs-4"></i><br/>Noworksheetsuploaded</div></div></div>` : ''}
+                                                `<div class=""id="worksheetsContent" role="tabpanel" aria-labelledby="worksheets-tab"><label class="form-label">Upload Worksheets (PDF,Word)</label><input id="lfWorksheets" type="file" class="form-control"accept=".pdf,.doc,.docx"multiple/><divid="lfWsList"class="rowg-2mt-2"><div class="col-12 text-center text-muted small"><iclass="bibi-file-earmark-textfs-4"></i><br/>No work sheets uploaded</div></div></div>` : ''}
 
                                                   <a download target="_blank" href="${response.worksheets_path}" class="mt-4 btn btn-outline-primary"><i class='bi bi-link'></i> View uploaded file</a>
                                         </div>
@@ -836,8 +830,8 @@
                                             <div class="form-check mt-2">
                                                 <input class="form-check-input" type="checkbox"
                                                 ${response.free == 1 ? 'checked' : ''}
-                                                id="freeCourse" />
-                                                <label class="form-check-label" for="freeCourse">Free Item</label>
+                                                id="freeLessonItem" />
+                                                <label class="form-check-label" for="freeLessonItem">Free Lesson Item</label>
                                             </div>
                                         </div>
                                         <div class="col-6 col-md-4">
@@ -1180,7 +1174,7 @@
                 formData.append('title', document.getElementById('lfTitle').value);
                 formData.append('duration', document.getElementById('lfDuration').value);
                 formData.append('price', document.getElementById('price').value || 0);
-                formData.append('free', document.getElementById('freeCourse').checked ? 1 : 0);
+                formData.append('free', document.getElementById('freeLessonItem').checked ? 1 : 0);
                 formData.append('status', document.getElementById('lfStatus').value);
                 formData.append('preview', document.getElementById('lfPreview').checked ? 1 : 0);
                 formData.append('notes', document.getElementById('lfNotes').value);
@@ -1296,7 +1290,7 @@
                 formData.append('title', document.querySelector('#' + formId + ' #lfTitle').value);
                 formData.append('duration', document.querySelector('#' + formId + ' #lfDuration').value);
                 formData.append('price', document.querySelector('#' + formId + ' #price').value || 0);
-                formData.append('free', document.querySelector('#' + formId + ' #freeCourse').checked ? 1 : 0);
+                formData.append('free', document.querySelector('#' + formId + ' #freeLessonItem').checked ? 1 : 0);
                 formData.append('status', document.querySelector('#' + formId + ' #lfStatus').value);
                 formData.append('preview', document.querySelector('#' + formId + ' #lfPreview').checked ? 1 :
                     0);
