@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\Educator\CourseTestController as EducatorCourseTestController;
 use App\Http\Controllers\Educator\ReviewController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -38,7 +39,7 @@ use App\Http\Controllers\StudentDashboardController;
 use App\Mail\OrderInvoiceMail;
 use App\Models\Order;
 use Illuminate\Support\Facades\Broadcast;
-
+use App\Http\Controllers\WatermarkController;
 //livewire routes
 
 
@@ -209,8 +210,26 @@ Route::middleware(['auth', 'role:educator', 'verified'])
 
         Route::resource('courses', \App\Http\Controllers\Educator\CoursesController::class)->names('educator.courses');
 
+        Route::resource('courses-test', EducatorCourseTestController::class)->names('educator.courses.test');
+        // Section Management
+        Route::post('course-test/{course}/sections', [EducatorCourseTestController::class, 'storeSection'])
+            ->name('educator.courses.test.sections.store');
+        Route::put('course-test/sections/{section}', [EducatorCourseTestController::class, 'updateSection'])
+            ->name('educator.courses.test.sections.update');
+        Route::delete('course-test/sections/{section}', [EducatorCourseTestController::class, 'destroySection'])
+            ->name('educator.courses.test.sections.destroy');
+
+        // Lesson Management
+        Route::post('course-test/sections/{section}/lessons', [EducatorCourseTestController::class, 'storeLesson'])
+            ->name('educator.courses.test.sections.lessons.store');
+        Route::put('course-test/lessons/{lesson}', [EducatorCourseTestController::class, 'updateLesson'])
+            ->name('educator.courses.test.lessons.update');
+        Route::delete('course-test/lessons/{lesson}', [EducatorCourseTestController::class, 'destroyLesson'])
+            ->name('educator.courses.test.lessons.destroy');
+
         Route::get("reviews", [ReviewController::class, "index"])->name("educator.reviews.index");
 
+        Route::post('generate-course-content', [\App\Http\Controllers\OpenAIController::class, 'generateCourseContent'])->name('educator.generate.course.content');
 
         Route::get("course/get/sections/{course_id}", [\App\Http\Controllers\Educator\CoursesController::class, "course_sections"])->middleware('api.auth');
         Route::post("courses/section/{course_id}", [\App\Http\Controllers\Educator\CoursesController::class, "post_course_section"])->middleware('api.auth');
@@ -224,7 +243,7 @@ Route::middleware(['auth', 'role:educator', 'verified'])
             ->name('educator.courses.section.update')
             ->middleware('api.auth');
 
-            
+
 
         Route::prefix('lessons')->group(function () {
             Route::post('/store', [\App\Http\Controllers\Educator\LessonController::class, 'store']);
@@ -344,3 +363,9 @@ if (app()->environment('local')) {
         return new OrderInvoiceMail($order);
     });
 }
+
+
+
+
+Route::view('watermark-pdf', 'watermark-pdf');
+Route::post('/watermark-pdf', [WatermarkController::class, 'applyWatermark']);

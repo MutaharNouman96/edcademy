@@ -10,9 +10,9 @@ class Lesson extends Model
     use HasFactory;
 
     protected $fillable = [
-        'couse_section_id',
+        'course_section_id',
         'course_id',
-        'name',
+        'title',
         'type',
         'category',
         'video_link',
@@ -22,7 +22,7 @@ class Lesson extends Model
         'order',
         'materials',
         'worksheets',
-        'video_path',
+        // 'video_path',
         'status',
         'price',
         'free',
