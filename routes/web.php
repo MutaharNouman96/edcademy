@@ -154,11 +154,50 @@ Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+        Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
-        Route::get("payouts", [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('admin.payouts.index');
-        Route::get("payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name("admin.payouts.show");
-        Route::post("process/payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name("admin.payouts.process");
+        // Manage Educators
+        Route::get('educators', [App\Http\Controllers\Admin\DashboardController::class, 'manageEducators'])
+            ->name('manage.educators');
+
+        Route::patch('educators/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateEducatorStatus'])
+            ->name('educators.status');
+
+        Route::delete('educators/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteEducator'])
+            ->name('educators.delete');
+
+        // Manage Students
+        Route::get('students', [App\Http\Controllers\Admin\DashboardController::class, 'manageStudents'])
+            ->name('manage.students');
+
+        // Manage Courses
+        Route::get('courses', [App\Http\Controllers\Admin\DashboardController::class, 'manageCourses'])
+            ->name('manage.courses');
+
+        Route::patch('courses/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateCourseStatus'])
+            ->name('courses.status');
+
+        Route::delete('courses/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteCourse'])
+            ->name('courses.delete');
+
+        // Manage Lessons
+        Route::get('lessons', [App\Http\Controllers\Admin\DashboardController::class, 'manageLessons'])
+            ->name('manage.lessons');
+
+        Route::patch('lessons/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateLessonStatus'])
+            ->name('lessons.status');
+
+        Route::get('lessons/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'showLesson'])
+            ->name('lessons.show');
+
+        Route::get("payouts", [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
+        Route::get("payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name("payouts.show");
+        Route::post("process/payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name("payouts.process");
+
+        // Additional payout management routes
+        Route::patch("earnings/{id}/status", [App\Http\Controllers\Admin\PayoutController::class, 'updateEarningStatus'])->name("earnings.status");
+        Route::post("earnings/bulk-update", [App\Http\Controllers\Admin\PayoutController::class, 'bulkUpdateEarnings'])->name("earnings.bulk-update");
+        Route::post("payouts/create", [App\Http\Controllers\Admin\PayoutController::class, 'createPayout'])->name("payouts.create");
 
         Route::resource('earnings', App\Http\controllers\Admin\EarningController::class)->only(['index', 'show']);
     });
@@ -224,7 +263,7 @@ Route::middleware(['auth', 'role:educator', 'verified'])
             ->name('educator.courses.section.update')
             ->middleware('api.auth');
 
-            
+
 
         Route::prefix('lessons')->group(function () {
             Route::post('/store', [\App\Http\Controllers\Educator\LessonController::class, 'store']);
@@ -342,5 +381,32 @@ if (app()->environment('local')) {
         $order = Order::find(1991);
 
         return new OrderInvoiceMail($order);
+    });
+
+    // Debug route to check and set admin role
+    Route::get('/debug/set-admin/{email}', function ($email) {
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return "User with email {$email} not found";
+        }
+
+        $user->update(['role' => 'admin']);
+        return "User {$email} role set to admin. Current role: {$user->fresh()->role}";
+    });
+
+    Route::get('/debug/check-user/{email}', function ($email) {
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return "User with email {$email} not found";
+        }
+
+        return [
+            'id' => $user->id,
+            'email' => $user->email,
+            'role' => $user->role,
+            'isAdmin' => $user->isAdmin(),
+            'isStudent' => $user->isStudent(),
+            'isEducator' => $user->isEducator(),
+        ];
     });
 }
