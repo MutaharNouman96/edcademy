@@ -24,4 +24,18 @@ class UserPurchasedItem extends MorphPivot
     {
         return $this->morphTo(); // to course or lesson
     }
+
+    public function educator()
+    {
+        return $this->hasOneThrough(
+            User::class,
+            Course::class,
+            'id',        // Course.id
+            'id',        // User.id
+            'purchasable_id',
+            'user_id'
+        )->where('purchasable_type', Course::class);
+    }
+
+    
 }

@@ -76,7 +76,7 @@
                     <span class="d-none d-md-inline text-muted">Educator Dashboard</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                   
+
                     <a class="btn btn-sm btn-outline-primary" href="{{ route('website.index') }}">
                         <i class="bi bi-globe me-1"></i> Go to website
                     </a>
@@ -113,18 +113,71 @@
                     <i class="bi bi-mortarboard-fill me-2"></i>Ed-Cademy
                 </h4>
                 <nav class="nav flex-column gap-1">
-                    <a class="nav-link" href="#"><i class="bi bi-people-fill"></i>User Management</a>
-                    <a class="nav-link" href="#"><i class="bi bi-shield-check"></i>Content Moderation</a>
-                    <a class="nav-link" href="#"><i class="bi bi-calendar3"></i>Tutoring & Sessions</a>
-                    <a class="nav-link" href="#"><i class="bi bi-basket"></i>Marketplace & Products</a>
-                    <a class="nav-link" href="#"><i class="bi bi-cash-coin"></i>Financials</a>
-                    <a class="nav-link active" href="#"><i class="bi bi-bar-chart-line"></i>Analytics &
-                        Reporting</a>
+                    <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                        href="{{ route('admin.dashboard') }}">
+                        <i class="bi bi-bar-chart-line me-2"></i>Dashboard
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.manage.educators') ? 'active' : '' }}"
+                        href="{{ route('admin.manage.educators') }}">
+                        <i class="bi bi-person-workspace me-2"></i>Manage Educators
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.manage.students') ? 'active' : '' }}"
+                        href="{{ route('admin.manage.students') }}">
+                        <i class="bi bi-people-fill me-2"></i>Manage Students
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.manage.courses') ? 'active' : '' }}"
+                        href="{{ route('admin.manage.courses') }}">
+                        <i class="bi bi-book me-2"></i>Manage Courses
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.manage.lessons') ? 'active' : '' }}"
+                        href="{{ route('admin.manage.lessons') }}">
+                        <i class="bi bi-collection-play me-2"></i>Manage Lessons
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.payouts.index') ? 'active' : '' }}"
+                        href="{{ route('admin.payouts.index') }}">
+                        <i class="bi bi-cash-coin me-2"></i>Payouts
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.financial-reports.index') ? 'active' : '' }}"
+                        href="{{ route('admin.financial-reports.index') }}">
+                        <i class="bi bi-file-earmark-text me-2"></i>Financial Reports
+                    </a>
+
                 </nav>
             </aside>
 
             <!-- Main -->
             <main class="col-md-9 col-lg-10 main-content">
+
+                @if ($message = Session::get('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>{{ $message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+
+                @if ($message = Session::get('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-circle me-2"></i>{{ $message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+
+                @if ($message = Session::get('danger'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>{{ $message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-circle me-2"></i>Please fix the errors below.
+                        @foreach ($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
 
                 {{ $slot }}
 

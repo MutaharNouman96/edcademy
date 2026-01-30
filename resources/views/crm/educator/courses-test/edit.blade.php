@@ -10,7 +10,7 @@
                         <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Course</h4>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('educator.courses.test.update', $course->id) }}" method="POST"
+                        <form action="{{ route('educator.courses.crud.update', $course->id) }}" method="POST"
                             enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
@@ -198,7 +198,7 @@
                             </div>
 
                             <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                                <a href="{{ route('educator.courses.test.show', $course) }}"
+                                <a href="{{ route('educator.courses.crud.show', $course) }}"
                                     class="btn btn-secondary">Cancel</a>
                                 <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Update
                                     Course</button>
@@ -233,7 +233,7 @@
                                             onclick="addLesson({{ $section->id }})">
                                             <i class="bi bi-plus"></i> Lesson
                                         </button>
-                                        <form action="{{ route('educator.courses.test.sections.destroy', $section) }}"
+                                        <form action="{{ route('educator.courses.crud.sections.destroy', $section) }}"
                                             method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
@@ -274,7 +274,7 @@
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
                                                     <form
-                                                        action="{{ route('educator.courses.test.lessons.destroy', $lesson) }}"
+                                                        action="{{ route('educator.courses.crud.lessons.destroy', $lesson) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
@@ -325,7 +325,7 @@
     <div class="modal fade" id="addSectionModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{ route('educator.courses.test.sections.store', $course) }}" method="POST">
+                <form action="{{ route('educator.courses.crud.sections.store', $course) }}" method="POST">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Add Section</h5>
@@ -479,7 +479,7 @@
                             <div class="tab-content p-3 bg-light">
                                 <div class="tab-pane fade show active" id="videoUpload" role="tabpanel"
                                     aria-labelledby="video-tab">
-                                    <input type="file" class="form-control" name="file" accept="video/*">
+                                    <input type="file" class="form-control" name="video" accept="video/*">
 
                                     <div class="form-text">
                                         MP4/MOV up to 2 GB, upload the video here.
@@ -487,7 +487,7 @@
                                 </div>
                                 <div class="tab-pane fade" id="worksheetUpload" role="tabpanel"
                                     aria-labelledby="worksheet-tab">
-                                    <input type="file" class="form-control" name="file"
+                                    <input type="file" class="form-control" name="worksheets"
                                         accept=".pdf,.doc,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
                                     <div class="form-text">
                                         PDF/Word up to 50 MB, or provide an external link.
@@ -495,7 +495,7 @@
                                 </div>
                                 <div class="tab-pane fade" id="materialUpload" role="tabpanel"
                                     aria-labelledby="material-tab">
-                                    <input type="file" class="form-control" name="file"
+                                    <input type="file" class="form-control" name="materials"
                                         accept=".pdf,.ppt,.pptx">
                                     <div class="form-text">
                                         PDF/PPT up to 50 MB, or provide an external link.
@@ -679,7 +679,7 @@
             function editSection(id, title, order) {
                 document.getElementById('edit_section_title').value = title;
                 document.getElementById('edit_section_order').value = order;
-                document.getElementById('editSectionForm').action = `{{ url('educator-panel') }}/course-test/sections/${id}`;
+                document.getElementById('editSectionForm').action = `{{ url('educator-panel') }}/course-crud/sections/${id}`;
                 new bootstrap.Modal(document.getElementById('editSectionModal')).show();
             }
 
@@ -768,7 +768,7 @@
             function editSection(id, title, order) {
                 document.getElementById('edit_section_title').value = title;
                 document.getElementById('edit_section_order').value = order;
-                document.getElementById('editSectionForm').action = `{{ url('educator-panel') }}/course-test/sections/${id}`;
+                document.getElementById('editSectionForm').action = `{{ url('educator-panel') }}/course-crud/sections/${id}`;
 
                 const modal = new bootstrap.Modal(document.getElementById('editSectionModal'));
                 modal.show();
@@ -784,7 +784,7 @@
             // Lesson Management Functions
             function addLesson(sectionId) {
                 document.getElementById('addLessonForm').action =
-                    `{{ url('educator-panel') }}/course-test/sections/${sectionId}/lessons`;
+                    `{{ url('educator-panel') }}/course-crud/sections/${sectionId}/lessons`;
                 document.getElementById('addLessonForm').reset();
 
                 const modal = new bootstrap.Modal(document.getElementById('addLessonModal'));
@@ -796,7 +796,7 @@
                 const modal = new bootstrap.Modal(document.getElementById('editLessonModal'));
                 const form = document.getElementById('editLessonForm');
 
-                form.action = `{{ url('educator-panel') }}/course-test/lessons/${lesson.id}`;
+                form.action = `{{ url('educator-panel') }}/course-crud/lessons/${lesson.id}`;
                 document.getElementById('edit_lesson_id').value = lesson.id;
 
                 document.getElementById('edit_title').value = lesson.title;

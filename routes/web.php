@@ -4,7 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\Educator\CourseTestController as EducatorCourseTestController;
+use App\Http\Controllers\Educator\CourseCrudController as EducatorCourseCrudController;
 use App\Http\Controllers\Educator\ReviewController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -17,17 +17,7 @@ use App\Http\Controllers\Educator\SessionCallController;
 use App\Http\Controllers\Educator\VideoStatController;
 use App\Http\Controllers\EducatorController;
 
-use App\Http\Controllers\Educator\Settings\{
-    ProfileSettingController,
-    SecuritySettingController,
-    PaymentSettingController,
-    PaymentMethodController,
-    AvailabilitySettingController,
-    PrivacySettingController,
-    VerificationSettingController,
-    ConnectionController,
-    PreferenceController
-};
+use App\Http\Controllers\Educator\Settings\{ProfileSettingController, SecuritySettingController, PaymentSettingController, PaymentMethodController, AvailabilitySettingController, PrivacySettingController, VerificationSettingController, ConnectionController, PreferenceController};
 use App\Http\Controllers\EducatorPaymentController;
 use App\Http\Controllers\NotificationSettingController;
 use App\Http\Controllers\OrderController;
@@ -42,7 +32,6 @@ use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\WatermarkController;
 //livewire routes
 
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -54,37 +43,34 @@ use App\Http\Controllers\WatermarkController;
 |
 */
 
-Route::get('/', [WebsiteController::class, 'index'])->name("website.index");
-Route::get("become-an-educator", [WebsiteController::class, "educator_signup"])->name("web.eudcator.signup");
-Route::post("educator/signup/store", [EducatorController::class, "store"])->name("educator.signup.store");
+Route::get('/', [WebsiteController::class, 'index'])->name('website.index');
+Route::get('become-an-educator', [WebsiteController::class, 'educator_signup'])->name('web.eudcator.signup');
+Route::post('educator/signup/store', [EducatorController::class, 'store'])->name('educator.signup.store');
 
-Route::get("courses", [WebsiteController::class, "courses"])->name("web.courses");
-Route::get("course/{slug}/{id}", [CourseController::class, "show"])->name("web.course.show");
+Route::get('courses', [WebsiteController::class, 'courses'])->name('web.courses');
+Route::get('course/{slug}/{id}', [CourseController::class, 'show'])->name('web.course.show');
 
-Route::get("educators", [WebsiteController::class, "educators"])->name("web.educators.index");
-Route::get("educator/{educator}", [WebsiteController::class, "educator"])->name("web.educator.show");
+Route::get('educators', [WebsiteController::class, 'educators'])->name('web.educators.index');
+Route::get('educator/{educator}', [WebsiteController::class, 'educator'])->name('web.educator.show');
 
 // API route for fetching educators dynamically
 
-Route::post("loginOrRegister", [LoginController::class, "loginOrRegister"])->name("web.loginOrRegister");
+Route::post('loginOrRegister', [LoginController::class, 'loginOrRegister'])->name('web.loginOrRegister');
 
-Route::get("cart", [WebsiteController::class, "cart"])->name("web.cart");
-Route::get("cart/checkout", [CartController::class, "checkout"])->name("web.cart.checkout");
+Route::get('cart', [WebsiteController::class, 'cart'])->name('web.cart');
+Route::get('cart/checkout', [CartController::class, 'checkout'])->name('web.cart.checkout');
 Route::post('cart/add-to-cart', [CartController::class, 'store'])->name('web.cart.addToCart');
 Route::delete('cart/remove-from-cart', [CartController::class, 'remove'])->name('web.cart.removeFromCart');
-Route::get('cart/clear',  [CartController::class, 'clear'])->name('web.cart.clearCart');
+Route::get('cart/clear', [CartController::class, 'clear'])->name('web.cart.clearCart');
 Route::post('/cart/login', [CartController::class, 'loginUserInCartPage'])->name('cart.login');
-
 
 Route::post('order/add-to-cart', [OrderController::class, 'addToOrderCart'])->name('order.addToOrderCart');
 Route::post('order/buy-now', [OrderController::class, 'buyNow'])->name('order.buyNow');
 Route::post('order/remove-order-item/', [OrderController::class, 'removeOrderItem'])->name('order.removeOrderItem');
 
-
 Route::post('/stripe/checkout', [StripeController::class, 'createCheckout']);
 
-Route::get('/payment/success/{order}', [OrderController::class, 'success'])
-    ->name('payment.success');
+Route::get('/payment/success/{order}', [OrderController::class, 'success'])->name('payment.success');
 
 // Success callback from Stripe
 Route::get('/stripe/success', [StripeController::class, 'success']);
@@ -93,32 +79,29 @@ Route::get('/stripe/success', [StripeController::class, 'success']);
 Route::get('/stripe/cancel', [StripeController::class, 'cancel']);
 
 Route::post('paypal/create', [PaypalController::class, 'create'])->name('web.paypal.create');
-Route::post('/paypal/capture', [PayPalController::class, 'capture'])
-    ->name('paypal.capture');
+Route::post('/paypal/capture', [PayPalController::class, 'capture'])->name('paypal.capture');
 
-Route::get("how-it-works", [WebsiteController::class, "how_it_works"])->name("web.how.it.works");
+Route::get('how-it-works', [WebsiteController::class, 'how_it_works'])->name('web.how.it.works');
 
+Route::get('contact-us', [WebsiteController::class, 'contact_us'])->name('web.contact.us');
 
-Route::get("contact-us", [WebsiteController::class, "contact_us"])->name("web.contact.us");
+Route::get('privacy-policy', [WebsiteController::class, 'privacy_policy'])->name('web.privacy.policy');
 
-Route::get("privacy-policy", [WebsiteController::class, "privacy_policy"])->name("web.privacy.policy");
+Route::get('terms-and-conditions', [WebsiteController::class, 'terms_and_conditions'])->name('web.terms.and.conditions');
 
-Route::get("terms-and-conditions", [WebsiteController::class, "terms_and_conditions"])->name("web.terms.and.conditions");
+Route::get('reviews', [WebsiteController::class, 'reviews'])->name('web.reviews');
 
-Route::get("reviews", [WebsiteController::class, "reviews"])->name("web.reviews");
-
-Route::get("faqs", [WebsiteController::class, "faqs"])->name("web.faqs");
+Route::get('faqs', [WebsiteController::class, 'faqs'])->name('web.faqs');
 Route::view('community-guidelines', 'website.community-guidelines')->name('web.community.guidelines');
 Route::view('safety-and-trust-policy', 'website.safety-and-trust-policy')->name('web.safety.and.trust.policy');
 Route::view('student-parent-policy', 'website.student-parent-policy')->name('web.student.parent.policy');
 Route::view('about-us', 'website.about-us')->name('web.about-us');
 Route::view('privacy-policy', 'website.privacy-policy')->name('web.privacy-policy');
 Route::view('terms-and-conditions', 'website.terms-and-conditions')->name('web.terms-and-conditions');
-Route::get("educator-policy", [WebsiteController::class, "educator_policy"])->name("web.educator-policy");
-Route::get("refund-policy", [WebsiteController::class, "refund_policy"])->name("web.refund-policy");
-Route::get("cancel-policy", [WebsiteController::class, "cancel_policy"])->name("web.cancel.policy");
-Route::get("user-agreement", [WebsiteController::class, "user_agreement"])->name("web.user.agreement");
-
+Route::get('educator-policy', [WebsiteController::class, 'educator_policy'])->name('web.educator-policy');
+Route::get('refund-policy', [WebsiteController::class, 'refund_policy'])->name('web.refund-policy');
+Route::get('cancel-policy', [WebsiteController::class, 'cancel_policy'])->name('web.cancel.policy');
+Route::get('user-agreement', [WebsiteController::class, 'user_agreement'])->name('web.user.agreement');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -131,22 +114,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::prefix('chat')->group(function () {
+        Route::get('/', [ChatMessageController::class, 'index'])->name('chat.index');
 
-
-    Route::prefix("chat")->group(function () {
-        Route::get("/", [ChatMessageController::class, "index"])->name("chat.index");
-
-
-        Route::get('/messages/{chat}', [ChatMessageController::class, 'fetchMessages'])
-            ->name('chat.messages');
+        Route::get('/messages/{chat}', [ChatMessageController::class, 'fetchMessages'])->name('chat.messages');
 
         // Create or open chat with specific user
-        Route::get('/open/{user}', [ChatMessageController::class, 'openChat'])
-            ->name('chat.open');
+        Route::get('/open/{user}', [ChatMessageController::class, 'openChat'])->name('chat.open');
 
         // Send message
-        Route::post('/send', [ChatMessageController::class, 'sendMessage'])
-            ->name('chat.send');
+        Route::post('/send', [ChatMessageController::class, 'sendMessage'])->name('chat.send');
     });
 });
 
@@ -155,13 +132,85 @@ Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+        Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
-        Route::get("payouts", [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('admin.payouts.index');
-        Route::get("payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name("admin.payouts.show");
-        Route::post("process/payout/{payout}", [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name("admin.payouts.process");
+        // Manage Educators
+        Route::get('educators', [App\Http\Controllers\Admin\DashboardController::class, 'manageEducators'])->name('manage.educators');
+
+        Route::patch('educators/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateEducatorStatus'])->name('educators.status');
+
+        Route::delete('educators/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteEducator'])->name('educators.delete');
+
+        Route::get('educators/{id}', [App\Http\Controllers\Admin\EducatorController::class, 'show'])->name('educators.show');
+
+        Route::get('educators/{id}/payouts', [App\Http\Controllers\Admin\EducatorController::class, 'payouts'])->name('educators.payouts');
+
+        Route::get('educators/{id}/courses', [App\Http\Controllers\Admin\EducatorController::class, 'courses'])->name('educators.courses');
+
+        Route::get('educators/{id}/earnings', [App\Http\Controllers\Admin\EducatorController::class, 'earnings'])->name('educators.earnings');
+
+        Route::get('educators/{id}/sessions', [App\Http\Controllers\Admin\EducatorController::class, 'sessions'])->name('educators.sessions');
+
+        // Manage Students
+        Route::get('students', [App\Http\Controllers\Admin\DashboardController::class, 'manageStudents'])->name('manage.students');
+
+        Route::get('students/{id}', [App\Http\Controllers\Admin\StudentController::class, 'show'])->name('students.show');
+
+        Route::get('students/{id}/courses', [App\Http\Controllers\Admin\StudentController::class, 'courses'])->name('students.courses');
+
+        Route::get('students/{id}/payments', [App\Http\Controllers\Admin\StudentController::class, 'payments'])->name('students.payments');
+
+        Route::get('students/{id}/sessions', [App\Http\Controllers\Admin\StudentController::class, 'sessions'])->name('students.sessions');
+
+        Route::get('students/{studentId}/sessions/{sessionId}', [App\Http\Controllers\Admin\StudentController::class, 'getSessionDetails'])->name('students.session.details');
+
+        // Additional student actions
+        Route::post('students/{id}/reset-password', [App\Http\Controllers\Admin\StudentController::class, 'resetPassword'])->name('students.reset-password');
+
+        Route::get('students/{id}/activity-logs', [App\Http\Controllers\Admin\StudentController::class, 'activityLogs'])->name('students.activity-logs');
+
+        Route::delete('students/{id}', [App\Http\Controllers\Admin\StudentController::class, 'destroy'])->name('students.destroy');
+
+        // Manage Courses
+        Route::get('courses', [App\Http\Controllers\Admin\DashboardController::class, 'manageCourses'])->name('manage.courses');
+
+        Route::patch('courses/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateCourseStatus'])->name('courses.status');
+
+        Route::delete('courses/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteCourse'])->name('courses.delete');
+
+        Route::get('courses/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'showCourse'])->name('courses.show');
+
+        Route::post('courses/{id}/approve', [App\Http\Controllers\Admin\CourseController::class, 'approve'])->name('courses.approve');
+
+        Route::post('courses/{id}/reject', [App\Http\Controllers\Admin\CourseController::class, 'reject'])->name('courses.reject');
+
+        // Manage Lessons
+        Route::get('lessons', [App\Http\Controllers\Admin\DashboardController::class, 'manageLessons'])->name('manage.lessons');
+
+        Route::patch('lessons/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateLessonStatus'])->name('lessons.status');
+
+        Route::get('lessons/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'showLesson'])->name('lessons.show');
+
+        Route::get('payouts', [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
+        Route::get('payout/{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name('payouts.show');
+        Route::post('process/payout/{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name('payouts.process');
+
+        // Payout generation and management
+        Route::get('payouts/upcoming', [App\Http\Controllers\Admin\PayoutController::class, 'upcomingPayouts'])->name('payouts.upcoming');
+        Route::post('payouts/generate-upcoming', [App\Http\Controllers\Admin\PayoutController::class, 'generateUpcomingPayouts'])->name('payouts.generate-upcoming');
+        Route::post('payouts/release', [App\Http\Controllers\Admin\PayoutController::class, 'releasePayouts'])->name('payouts.release');
+        Route::post('payouts/{payout}/release', [App\Http\Controllers\Admin\PayoutController::class, 'releasePayout'])->name('payouts.release-single');
+        Route::get('payouts/{payout}/details', [App\Http\Controllers\Admin\PayoutController::class, 'getPayoutDetails'])->name('payouts.details');
+
+        // Additional payout management routes
+        Route::patch('earnings/{id}/status', [App\Http\Controllers\Admin\PayoutController::class, 'updateEarningStatus'])->name('earnings.status');
+        Route::post('earnings/bulk-update', [App\Http\Controllers\Admin\PayoutController::class, 'bulkUpdateEarnings'])->name('earnings.bulk-update');
+        Route::post('payouts/create', [App\Http\Controllers\Admin\PayoutController::class, 'createPayout'])->name('payouts.create');
 
         Route::resource('earnings', App\Http\controllers\Admin\EarningController::class)->only(['index', 'show']);
+
+        // Financial Reports
+        Route::get('financial-reports', [App\Http\Controllers\Admin\FinancialReportsController::class, 'index'])->name('financial-reports.index');
     });
 
 // Educator routes
@@ -169,36 +218,30 @@ Route::middleware(['auth', 'role:admin'])
 Route::middleware(['auth', 'role:educator', 'verified'])
     ->prefix('educator-panel')
     ->group(function () {
-        Route::get('dashboard', [EducatorDashboardController::class, 'index'])
-            ->name('educator.dashboard');
+        Route::get('dashboard', [EducatorDashboardController::class, 'index'])->name('educator.dashboard');
         Route::get('/lesson-views/chart', [LessonVideoViewsController::class, 'viewsChart']);
 
-
-        Route::get('profile', [EducatorDashboardController::class, 'profile'])
-            ->name('educator.profile');
+        Route::get('profile', [EducatorDashboardController::class, 'profile'])->name('educator.profile');
         Route::put('profile', [EducatorDashboardController::class, 'profile_update'])->name('educator.profile.update');
 
-        Route::get("video-stats", [VideoStatController::class, 'index'])
-            ->name('educator.video-stats.index');
+        Route::get('video-stats', [VideoStatController::class, 'index'])->name('educator.video-stats.index');
 
-        Route::get("video-stats/{video}", [VideoStatController::class, 'show']);
+        Route::get('video-stats/{video}', [VideoStatController::class, 'show']);
 
-        Route::get("sessions", [SessionCallController::class, 'index'])->name('educator.sessions.index');
-        Route::get("sessions/create", [SessionCallController::class, 'create'])->name('educator.sessions.create');
-        Route::post("sessions/store", [SessionCallController::class, 'store'])->name('educator.sessions.store');
+        Route::get('sessions', [SessionCallController::class, 'index'])->name('educator.sessions.index');
+        Route::get('sessions/create', [SessionCallController::class, 'create'])->name('educator.sessions.create');
+        Route::post('sessions/store', [SessionCallController::class, 'store'])->name('educator.sessions.store');
 
-
-        Route::resource('earnings', EarningController::class)->only(['index', 'show'])->names('educator.earnings');
+        Route::resource('earnings', EarningController::class)
+            ->only(['index', 'show'])
+            ->names('educator.earnings');
 
         Route::get('/payments', [EducatorPaymentController::class, 'index'])->name('educator.payments.index');
         Route::get('/payments/{payment}', [EducatorPaymentController::class, 'show'])->name('educator.payments.show');
 
-
-
-        Route::get("payouts", [PayoutController::class, 'index'])->name('educator.payouts.index');
+        Route::get('payouts', [PayoutController::class, 'index'])->name('educator.payouts.index');
 
         Route::prefix('payouts')->group(function () {
-
             Route::get('/kpis', [PayoutController::class, 'kpis']);
             Route::get('/upcoming', [PayoutController::class, 'upcoming']);
             Route::get('/history', [PayoutController::class, 'history']);
@@ -210,40 +253,33 @@ Route::middleware(['auth', 'role:educator', 'verified'])
 
         Route::resource('courses', \App\Http\Controllers\Educator\CoursesController::class)->names('educator.courses');
 
-        Route::resource('courses-test', EducatorCourseTestController::class)->names('educator.courses.test');
+        Route::resource('courses-crud', EducatorCourseCrudController::class)->names('educator.courses.crud');
         // Section Management
-        Route::post('course-test/{course}/sections', [EducatorCourseTestController::class, 'storeSection'])
-            ->name('educator.courses.test.sections.store');
-        Route::put('course-test/sections/{section}', [EducatorCourseTestController::class, 'updateSection'])
-            ->name('educator.courses.test.sections.update');
-        Route::delete('course-test/sections/{section}', [EducatorCourseTestController::class, 'destroySection'])
-            ->name('educator.courses.test.sections.destroy');
-
+        Route::post('course-crud/{course}/sections', [EducatorCourseCrudController::class, 'storeSection'])->name('educator.courses.crud.sections.store');
+        Route::put('course-crud/sections/{section}', [EducatorCourseCrudController::class, 'updateSection'])->name('educator.courses.crud.sections.update');
+        Route::delete('course-crud/sections/{section}', [EducatorCourseCrudController::class, 'destroySection'])->name('educator.courses.crud.sections.destroy');
         // Lesson Management
-        Route::post('course-test/sections/{section}/lessons', [EducatorCourseTestController::class, 'storeLesson'])
-            ->name('educator.courses.test.sections.lessons.store');
-        Route::put('course-test/lessons/{lesson}', [EducatorCourseTestController::class, 'updateLesson'])
-            ->name('educator.courses.test.lessons.update');
-        Route::delete('course-test/lessons/{lesson}', [EducatorCourseTestController::class, 'destroyLesson'])
-            ->name('educator.courses.test.lessons.destroy');
+        Route::post('course-crud/sections/{section}/lessons', [EducatorCourseCrudController::class, 'storeLesson'])->name('educator.courses.crud.sections.lessons.store');
+        Route::put('course-crud/lessons/{lesson}', [EducatorCourseCrudController::class, 'updateLesson'])->name('educator.courses.crud.lessons.update');
+        Route::delete('course-crud/lessons/{lesson}', [EducatorCourseCrudController::class, 'destroyLesson'])->name('educator.courses.crud.lessons.destroy');
 
-        Route::get("reviews", [ReviewController::class, "index"])->name("educator.reviews.index");
+        Route::get('reviews', [ReviewController::class, 'index'])->name('educator.reviews.index');
 
-        Route::post('generate-course-content', [\App\Http\Controllers\OpenAIController::class, 'generateCourseContent'])->name('educator.generate.course.content');
+        Route::post('generate-course-content', [\App\Http\Controllers\OpenAIController::class, 'generateCourseContent'])
+            ->name('educator.generate.course.content')
+            ->middleware('throttle:5,1');
 
-        Route::get("course/get/sections/{course_id}", [\App\Http\Controllers\Educator\CoursesController::class, "course_sections"])->middleware('api.auth');
-        Route::post("courses/section/{course_id}", [\App\Http\Controllers\Educator\CoursesController::class, "post_course_section"])->middleware('api.auth');
-        Route::delete("courses/section/{section_id}", [\App\Http\Controllers\Educator\CoursesController::class, "delete_course_section"])
+        Route::get('course/get/sections/{course_id}', [\App\Http\Controllers\Educator\CoursesController::class, 'course_sections'])->middleware('api.auth');
+        Route::post('courses/section/{course_id}', [\App\Http\Controllers\Educator\CoursesController::class, 'post_course_section'])->middleware('api.auth');
+        Route::delete('courses/section/{section_id}', [\App\Http\Controllers\Educator\CoursesController::class, 'delete_course_section'])
             ->name('educator.courses.section.delete')
             ->middleware('api.auth');
-        Route::get("course/get/section/{section_id}", [\App\Http\Controllers\Educator\CoursesController::class, "get_course_section"])
+        Route::get('course/get/section/{section_id}', [\App\Http\Controllers\Educator\CoursesController::class, 'get_course_section'])
             ->name('educator.courses.section.get')
             ->middleware('api.auth');
-        Route::post("course/update/section/{section_id}", [\App\Http\Controllers\Educator\CoursesController::class, "update_course_section"])
+        Route::post('course/update/section/{section_id}', [\App\Http\Controllers\Educator\CoursesController::class, 'update_course_section'])
             ->name('educator.courses.section.update')
             ->middleware('api.auth');
-
-
 
         Route::prefix('lessons')->group(function () {
             Route::post('/store', [\App\Http\Controllers\Educator\LessonController::class, 'store']);
@@ -251,9 +287,9 @@ Route::middleware(['auth', 'role:educator', 'verified'])
             Route::delete('delete/{lesson}', [\App\Http\Controllers\Educator\LessonController::class, 'destroy']);
         });
 
-        Route::get("schudule-management", [\App\Http\Controllers\Educator\ScheduleController::class, "index"])->name("educator.schedule.index");
+        Route::get('schudule-management', [\App\Http\Controllers\Educator\ScheduleController::class, 'index'])->name('educator.schedule.index');
 
-        Route::get("resources", [EducatorDashboardController::class, 'resources'])->name("educator.resources.index");
+        Route::get('resources', [EducatorDashboardController::class, 'resources'])->name('educator.resources.index');
 
         Route::prefix('settings')->group(function () {
             Route::get('/', [ProfileSettingController::class, 'index'])->name('educator.settings');
@@ -309,8 +345,7 @@ Route::middleware(['auth', 'role:student'])
         Route::get('dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
         Route::get('profile', [StudentProfileController::class, 'edit'])->name('profile.edit');
         Route::post('profile', [StudentProfileController::class, 'update'])->name('profile.update');
-        Route::post('/userprofile', [StudentProfileController::class, 'updateProfile'])
-            ->name('UserProfile.update');
+        Route::post('/userprofile', [StudentProfileController::class, 'updateProfile'])->name('UserProfile.update');
         Route::post('profile/account', [StudentProfileController::class, 'updateAccount'])->name('profile.updateAccount');
         Route::post('profile/password', [StudentProfileController::class, 'updatePassword'])->name('profile.updatePassword');
         Route::post('profile/notifications', [StudentProfileController::class, 'updateNotifications'])->name('profile.updateNotifications');
@@ -331,30 +366,19 @@ Route::middleware(['auth', 'role:student'])
         Route::get('wishlist', [StudentDashboardController::class, 'wishlist'])->name('wishlist');
         Route::delete('wishlist/{course_id}', [StudentDashboardController::class, 'removeWishlistCourse'])->name('wishlist.remove');
 
-
-
         Route::post('lesson-comment', [StudentDashboardController::class, 'storeLessonComment'])->name('lesson_comment.store');
     });
-
 
 Route::post('book-session', [WebsiteController::class, 'bookSession'])->name('book.session');
 
 Route::middleware(['guest'])->group(function () {
-    Route::get('student/signup', fn() => view('student.signup'))
-        ->name('student.signup');
+    Route::get('student/signup', fn() => view('student.signup'))->name('student.signup');
     Route::post('student/signup', [\App\Http\Controllers\Auth\RegisteredUserController::class, 'store'])->name('student.signup.store');
 });
 
-
-
-
-
 require __DIR__ . '/auth.php';
 
-
 Broadcast::routes(['middleware' => ['auth']]);
-
-
 
 if (app()->environment('local')) {
     Route::get('/mail/preview/invoice', function () {
@@ -362,10 +386,34 @@ if (app()->environment('local')) {
 
         return new OrderInvoiceMail($order);
     });
+
+    // Debug route to check and set admin role
+    Route::get('/debug/set-admin/{email}', function ($email) {
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return "User with email {$email} not found";
+        }
+
+        $user->update(['role' => 'admin']);
+        return "User {$email} role set to admin. Current role: {$user->fresh()->role}";
+    });
+
+    Route::get('/debug/check-user/{email}', function ($email) {
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return "User with email {$email} not found";
+        }
+
+        return [
+            'id' => $user->id,
+            'email' => $user->email,
+            'role' => $user->role,
+            'isAdmin' => $user->isAdmin(),
+            'isStudent' => $user->isStudent(),
+            'isEducator' => $user->isEducator(),
+        ];
+    });
 }
-
-
-
 
 Route::view('watermark-pdf', 'watermark-pdf');
 Route::post('/watermark-pdf', [WatermarkController::class, 'applyWatermark']);

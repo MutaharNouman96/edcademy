@@ -22,7 +22,7 @@
                     </div>
 
                     <div class="card-body">
-                        <form action="{{ route('educator.courses.test.store') }}" method="POST"
+                        <form action="{{ route('educator.courses.crud.store') }}" method="POST"
                         id="create-form"
                             enctype="multipart/form-data">
                             @csrf
@@ -195,7 +195,7 @@
 
 
                             <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                                <a href="{{ route('educator.courses.test.index') }}"
+                                <a href="{{ route('educator.courses.crud.index') }}"
                                     class="btn btn-secondary">Cancel</a>
                                 <button type="submit" class="btn btn-success">
                                     <i class="bi bi-check-lg"></i> Create Course

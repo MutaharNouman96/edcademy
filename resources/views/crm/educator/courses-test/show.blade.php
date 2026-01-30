@@ -31,7 +31,7 @@
                     </div>
                     <div>
                         @can('update', $course)
-                            <a href="{{ route('educator.courses.test.edit', $course) }}" class="btn btn-primary">
+                            <a href="{{ route('educator.courses.crud.edit', $course) }}" class="btn btn-primary">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
                         @endcan
@@ -207,7 +207,7 @@
                                 <i class="bi bi-inbox display-4 d-block mb-2"></i>
                                 <p>No curriculum added yet</p>
                                 @can('update', $course)
-                                    <a href="{{ route('educator.courses.test.edit', $course) }}" class="btn btn-primary">Add
+                                    <a href="{{ route('educator.courses.crud.edit', $course) }}" class="btn btn-primary">Add
                                         Content</a>
                                 @endcan
                             </div>

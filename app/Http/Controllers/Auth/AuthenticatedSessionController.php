@@ -30,6 +30,16 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
+        // Debug logging
+        \Log::info('User login', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'role' => $user->role,
+            'isAdmin' => $user->isAdmin(),
+            'isEducator' => $user->isEducator(),
+            'isStudent' => $user->isStudent(),
+        ]);
+
         if ($user->isAdmin()) {
             return redirect()->intended(route('admin.dashboard'));
         }

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
 
-class CourseTestController extends Controller
+class CourseCrudController extends Controller
 {
     public function index()
     {
@@ -76,7 +76,7 @@ class CourseTestController extends Controller
 
         $course = Course::create($validated);
 
-        return redirect()->route('educator.courses.test.show', $course)
+        return redirect()->route('educator.courses.crud.show', $course)
             ->with('success', 'Course created successfully!');
     }
 
@@ -286,7 +286,7 @@ class CourseTestController extends Controller
                     'preview' => $lesson->preview,
                     'status' => $lesson->status,
                     'section_id' => $section->id,
-                    'destroy_url' => route('educator.courses.test.lessons.destroy', $lesson),
+                    'destroy_url' => route('educator.courses.crud.lessons.destroy', $lesson),
                 ]
             ]);
         } catch (\Exception $e) {
@@ -351,7 +351,7 @@ class CourseTestController extends Controller
                 'preview' => $lesson->preview,
                 'status' => $lesson->status,
                 'section_id' => $lesson->section_id,
-                'destroy_url' => route('educator.courses.test.lessons.destroy', $lesson),
+                'destroy_url' => route('educator.courses.crud.lessons.destroy', $lesson),
             ]
         ]);
         }catch(\Exception $e){
