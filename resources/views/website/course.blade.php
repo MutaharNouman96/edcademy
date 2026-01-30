@@ -66,11 +66,41 @@
                         <div class="course-section">
                             <div class="section-header {{ $loop->first ? 'active' : '' }}"
                                 onclick="toggleSection(this)">
-                                <div class="section-info">
-                                    <h5>
-                                        <i class="fas fa-chevron-down"></i>
-                                        {{ $section->title }}
-                                    </h5>
+                                <div class="section-info w-100">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <h5 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                                            <i class="fas fa-chevron-down"></i>
+                                            {{ $section->title }}
+                                        </h5>
+                                        <div style="text-align: right;  " class="d-flex w-auto gap-4 align-items-center">
+                                            @php
+                                                $sectionTotal = $section->lessons->sum('price');
+                                            @endphp
+                                            @if($sectionTotal > 0)
+                                                <div style="font-weight: 700; color: var(--primary-cyan);">${{ number_format($sectionTotal, 2) }}</div>
+                                            @endif
+                                            <div class="d-flex gap-2">
+                                                <form action="{{ route('order.addToOrderCart') }}" method="post" class="add-to-cart-form">
+                                                    @csrf
+                                                    <input type="hidden" name="item_id" value="{{ $section->id }}">
+                                                    <input type="hidden" name="model" value="App\Models\Section">
+                                                    <input type="hidden" name="responseType" value="json">
+                                                    <button type="submit" class="btn btn-outline-primary" title="Add to Cart">
+                                                        <i class="fas fa-cart-plus"></i>  
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('order.addToOrderCart') }}" method="post" class="buy-now-form">
+                                                    @csrf
+                                                    <input type="hidden" name="item_id" value="{{ $section->id }}">
+                                                    <input type="hidden" name="model" value="App\Models\Section">
+                                                    <input type="hidden" name="action" value="buy_now">
+                                                    <button type="submit" class="btn btn-primary" title="Buy Now">
+                                                        <i class="fas fa-shopping-bag"></i>  
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="section-meta">
                                         <span>{{ $section->lessons->count() }} lessons</span>
                                     </div>
@@ -78,10 +108,8 @@
                             </div>
 
                             <div class="section-content {{ $loop->first ? 'show' : '' }}">
-
                                 @foreach ($section->lessons as $lesson)
                                     <div class="lesson-item">
-
                                         <div class="lesson-info">
                                             <div
                                                 class="lesson-icon {{ $lesson->type == 'video' ? 'icon-video' : ($lesson->type == 'pdf' ? 'icon-pdf' : 'icon-sheet') }}">

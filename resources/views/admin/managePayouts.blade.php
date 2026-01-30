@@ -2,6 +2,26 @@
 
 <h4 class="mb-3">Payouts Management</h4>
 
+<!-- Navi
+ation Tabs -->
+<div class="nav nav-tabs mb-4" role="tablist">
+    <a class="nav-link {{ request('view', 'earnings') === 'earnings' ? 'active' : '' }}"
+       href="{{ route('admin.payouts.index', ['view' => 'earnings']) }}">
+        <i class="bi bi-graph-up me-1"></i>Earnings
+    </a>
+    <a class="nav-link {{ request('view') === 'payouts' ? 'active' : '' }}"
+       href="{{ route('admin.payouts.index', ['view' => 'payouts']) }}">
+        <i class="bi bi-cash me-1"></i>Payouts
+    </a>
+    <a class="nav-link {{ request('view') === 'educator_payouts' ? 'active' : '' }}"
+       href="{{ route('admin.payouts.index', ['view' => 'educator_payouts']) }}">
+        <i class="bi bi-person-check me-1"></i>Educator Payouts
+    </a>
+    <a class="nav-link" href="{{ route('admin.payouts.upcoming') }}">
+        <i class="bi bi-clock-history me-1"></i>Upcoming Payouts
+    </a>
+</div>
+
 <!-- Summary Cards -->
 @if(isset($totalEarnings))
 <div class="row g-4 mb-4">
@@ -57,27 +77,7 @@
 </div>
 @endif
 
-<!-- View Tabs -->
-<ul class="nav nav-tabs mb-4" id="payoutTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <a class="nav-link {{ $currentView ?? 'earnings' == 'earnings' ? 'active' : '' }}"
-                href="{{ route('admin.payouts.index', ['view' => 'earnings']) }}">
-            <i class="bi bi-graph-up me-1"></i>Earnings
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link {{ $currentView ?? 'earnings' == 'payouts' ? 'active' : '' }}"
-                href="{{ route('admin.payouts.index', ['view' => 'payouts']) }}">
-            <i class="bi bi-wallet me-1"></i>Payouts
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link {{ $currentView ?? 'earnings' == 'educator_payouts' ? 'active' : '' }}"
-                href="{{ route('admin.payouts.index', ['view' => 'educator_payouts']) }}">
-            <i class="bi bi-credit-card me-1"></i>Educator Payouts
-        </a>
-    </li>
-</ul>
+
 
 <div class="tab-content" id="payoutTabsContent">
 

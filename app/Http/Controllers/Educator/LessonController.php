@@ -10,7 +10,8 @@ use App\Services\VimeoService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use App\Services\DocumentService;
+use Illuminate\Support\Facades\File;
 
 class LessonController extends Controller
 {
@@ -50,8 +51,8 @@ class LessonController extends Controller
 
         $courseHasFreeLesson = Course::where('id', $request->course_id)->first()->lessons()->where('free', true)->exists();
 
-        if($courseHasFreeLesson){
-            return response()->json(['error' => 'freeLessonWarning','message' => 'Course already has a free lesson. You can only add one free lesson'], 403);
+        if ($courseHasFreeLesson) {
+            return response()->json(['error' => 'freeLessonWarning', 'message' => 'Course already has a free lesson. You can only add one free lesson'], 403);
         }
 
         try {
@@ -69,10 +70,25 @@ class LessonController extends Controller
                 $materials = [];
                 foreach ($request->file('materials') as $file) {
                     $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
+                    $destinationFolder = public_path('storage/lessons/materials');
+                    // Ensure directory exists
+                    if (!File::exists($destinationFolder)) {
+                        File::makeDirectory($destinationFolder, 0755, true);
+                    }
+
+                    $fullPath = $destinationFolder . '/' . $fileName;
+
+                    $docService  = new DocumentService();
+                    $watermarkedContent = $docService->generateWatermarkedPdf(
+                        $file->getRealPath()
+                    );
+
+                    File::put($fullPath, $watermarkedContent);
+
                     $destinationPath = public_path('storage/lessons/materials');
                     $file->move($destinationPath, $fileName);
                     $materials = $fileName;
-                    $data['materials'] = "storage/lessons/materials/" . $materials;
+                    $materialsPaths[] = "storage/lessons/materials/" . $fileName;
                 }
             }
 

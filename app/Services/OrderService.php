@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
+use App\Models\CourseSection;
 
 class OrderService
 {
@@ -53,20 +54,41 @@ class OrderService
 
             if ($order) {
 
-                if(OrderItem::where('order_id', $order->id)->where('item_id', $orderItemsData['item_id'])->where('model', $orderItemsData['model'])->exists()) {
+                if (OrderItem::where('order_id', $order->id)->where('item_id', $orderItemsData['item_id'])->where('model', $orderItemsData['model'])->exists()) {
                     Session::flash('message', 'Item already exists in cart.');
                     return false;
                 }
                 $orderItemsData['order_id'] = $order->id;
-                $orderItemsData['price'] = $this->getItemPrice($orderItemsData['item_id'], $orderItemsData['model']);
-                $orderItemsData['quantity'] = 1;
-                $orderItemdsData['tax'] = setting('tax' , 0);
+                if ($orderItemsData['model'] == 'App\Models\Section') {
+                    $section = CourseSection::find($orderItemsData['item_id']);
+                    $lessons = $section->lessons;
 
-                $total = $orderItemsData['price'] * $orderItemsData['quantity'];
-                $totalWithTax = $total + ($total * ($orderItemdsData['tax'] / 100));
-                $orderItemsData['total'] = $totalWithTax;
-                
-                $order->items()->create($orderItemsData);
+                    foreach ($lessons as $lesson) {
+                        $lessonData = $orderItemsData;
+                        $lessonData['item_id'] = $lesson->id;
+                        $lessonData['model'] = 'App\Models\Lesson';
+                        $lessonData['price'] = $this->getItemPrice($lesson->id, 'App\Models\Lesson');
+                        $lessonData['quantity'] = 1;
+                        $lessonData['tax'] = setting('tax', 0);
+
+                        $total = $lessonData['price'] * $lessonData['quantity'];
+                        $totalWithTax = $total + ($total * ($lessonData['tax'] / 100));
+                        $lessonData['total'] = $totalWithTax;
+
+                        $order->items()->create($lessonData);
+                    }
+                    return true;
+                } else {
+                    $orderItemsData['price'] = $this->getItemPrice($orderItemsData['item_id'], $orderItemsData['model']);
+                    $orderItemsData['quantity'] = 1;
+                    $orderItemdsData['tax'] = setting('tax', 0);
+
+                    $total = $orderItemsData['price'] * $orderItemsData['quantity'];
+                    $totalWithTax = $total + ($total * ($orderItemdsData['tax'] / 100));
+                    $orderItemsData['total'] = $totalWithTax;
+
+                    $order->items()->create($orderItemsData);
+                }
                 Session::flash('message', 'Item added to cart successfully.');
             }
 

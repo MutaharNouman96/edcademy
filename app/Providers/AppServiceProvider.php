@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use App\Models\Payment;
+ use App\Models\Payment;
 use App\Observers\PaymentObserver;
-use Illuminate\Support\ServiceProvider;
+ use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use App\Services\ApplicationSettings;
@@ -17,6 +17,9 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
+
+    
+
     public function register()
     {
         //
@@ -33,5 +36,7 @@ class AppServiceProvider extends ServiceProvider
         Payment::observe(PaymentObserver::class);
         Paginator::useBootstrapFive();
         ApplicationSettingsService::load();
+
+
     }
 }
