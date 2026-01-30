@@ -1,43 +1,43 @@
 <x-admin-layout>
-  
-    <div class="filter-bar p-3 mb-4">
+
+    <form method="GET" action="{{ route('admin.dashboard') }}" class="filter-bar p-3 mb-4">
         <div class="row g-2 align-items-end">
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Time Range</label>
-                <select class="form-select">
-                    <option selected>This Month</option>
-                    <option>Last 7 days</option>
-                    <option>Last 30 days</option>
-                    <option>Quarter to date</option>
-                    <option>Year to date</option>
+                <select class="form-select" name="time_range">
+                    <option value="this_month" {{ request('time_range') == 'this_month' ? 'selected' : '' }}>This Month</option>
+                    <option value="last_7_days" {{ request('time_range') == 'last_7_days' ? 'selected' : '' }}>Last 7 days</option>
+                    <option value="last_30_days" {{ request('time_range') == 'last_30_days' ? 'selected' : '' }}>Last 30 days</option>
+                    <option value="quarter_to_date" {{ request('time_range') == 'quarter_to_date' ? 'selected' : '' }}>Quarter to date</option>
+                    <option value="year_to_date" {{ request('time_range') == 'year_to_date' ? 'selected' : '' }}>Year to date</option>
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Segment</label>
-                <select class="form-select">
-                    <option selected>All Users</option>
-                    <option>Students</option>
-                    <option>Educators</option>
-                    <option>Premium Educators</option>
+                <select class="form-select" name="segment">
+                    <option value="all_users" {{ request('segment') == 'all_users' || !request('segment') ? 'selected' : '' }}>All Users</option>
+                    <option value="students" {{ request('segment') == 'students' ? 'selected' : '' }}>Students</option>
+                    <option value="educators" {{ request('segment') == 'educators' ? 'selected' : '' }}>Educators</option>
+                    <option value="premium_educators" {{ request('segment') == 'premium_educators' ? 'selected' : '' }}>Premium Educators</option>
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Region</label>
-                <select class="form-select">
-                    <option selected>All</option>
-                    <option>UAE</option>
-                    <option>GCC</option>
-                    <option>EU</option>
-                    <option>US</option>
+                <select class="form-select" name="region">
+                    <option value="all" {{ request('region') == 'all' || !request('region') ? 'selected' : '' }}>All</option>
+                    <option value="uae" {{ request('region') == 'uae' ? 'selected' : '' }}>UAE</option>
+                    <option value="gcc" {{ request('region') == 'gcc' ? 'selected' : '' }}>GCC</option>
+                    <option value="eu" {{ request('region') == 'eu' ? 'selected' : '' }}>EU</option>
+                    <option value="us" {{ request('region') == 'us' ? 'selected' : '' }}>US</option>
                 </select>
             </div>
             <div class="col-md-3 text-md-end">
-                <button class="btn btn-brand">
+                <button type="submit" class="btn btn-brand">
                     <i class="bi bi-funnel me-1"></i>Apply
                 </button>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- KPI Row -->
     <div class="row g-4">
@@ -47,18 +47,15 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="kpi-label mb-1">Total Users</div>
-                        <div class="kpi-value">128,940</div>
-                        <div class="delta up mt-1">
-                            <i class="bi bi-arrow-up-right"></i> +3.4% vs last month
-                        </div>
+                        <div class="kpi-value">{{ number_format($totalUsers) }}</div>
                     </div>
                     <span class="kpi-icon"><i class="bi bi-people-fill"></i></span>
                 </div>
                 <div class="mt-3">
                     <div class="progress brand" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" style="width: 68%"></div>
+                        <div class="progress-bar" role="progressbar" style="width: 75%"></div>
                     </div>
-                    <small class="text-muted">New this month: 6,120</small>
+                    <small class="text-muted">New this period: {{ number_format($newUsersCurrentPeriod) }}</small>
                 </div>
             </div>
         </div>
@@ -69,16 +66,13 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="kpi-label mb-1">Active Educators</div>
-                        <div class="kpi-value">2,147</div>
-                        <div class="delta up mt-1">
-                            <i class="bi bi-arrow-up-right"></i> +1.9% WoW
-                        </div>
+                        <div class="kpi-value">{{ number_format($activeEducators) }}</div>
                     </div>
                     <span class="kpi-icon"><i class="bi bi-person-workspace"></i></span>
                 </div>
                 <div class="mt-3 d-flex gap-2">
-                    <span class="chip soft"><i class="bi bi-star-fill me-1"></i> Premium 38%</span>
-                    <span class="chip soft"><i class="bi bi-play-btn-fill me-1"></i> Live 412</span>
+                    <span class="chip soft"><i class="bi bi-star-fill me-1"></i> Premium {{ $activeEducators > 0 ? round(($premiumEducators / $activeEducators) * 100) : 0 }}%</span>
+                    <span class="chip soft"><i class="bi bi-play-btn-fill me-1"></i> Live {{ $liveEducators }}</span>
                 </div>
             </div>
         </div>
@@ -89,18 +83,15 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="kpi-label mb-1">Revenue (AED)</div>
-                        <div class="kpi-value">AED 1,284,560</div>
-                        <div class="delta up mt-1">
-                            <i class="bi bi-arrow-up-right"></i> +12.6% MoM
-                        </div>
+                        <div class="kpi-value">AED {{ number_format($totalRevenue, 0) }}</div>
                     </div>
                     <span class="kpi-icon"><i class="bi bi-cash-coin"></i></span>
                 </div>
                 <div class="mt-3">
                     <div class="progress brand" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" style="width: 74%"></div>
+                        <div class="progress-bar" role="progressbar" style="width: 80%"></div>
                     </div>
-                    <small class="text-muted">Payouts pending: AED 218,400</small>
+                    <small class="text-muted">Revenue this period: AED {{ number_format($revenueCurrentPeriod, 0) }}</small>
                 </div>
             </div>
         </div>
@@ -111,17 +102,14 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="kpi-label mb-1">Disputes / Flagged</div>
-                        <div class="kpi-value">37 / 112</div>
-                        <div class="delta down mt-1">
-                            <i class="bi bi-arrow-down-right"></i> −8.0% disputes
-                        </div>
+                        <div class="kpi-value">{{ $totalDisputes }} / {{ $flaggedContent }}</div>
                     </div>
                     <span class="kpi-icon"><i class="bi bi-shield-exclamation"></i></span>
                 </div>
                 <div class="mt-3 d-flex flex-wrap gap-2">
-                    <span class="chip soft"><i class="bi bi-chat-dots me-1"></i> Reviews 46</span>
-                    <span class="chip soft"><i class="bi bi-file-earmark-text me-1"></i> Docs 28</span>
-                    <span class="chip soft"><i class="bi bi-film me-1"></i> Videos 38</span>
+                    <span class="chip soft"><i class="bi bi-chat-dots me-1"></i> Reviews {{ $totalDisputes }}</span>
+                    <span class="chip soft"><i class="bi bi-file-earmark-text me-1"></i> Docs {{ $flaggedContent }}</span>
+                    <span class="chip soft"><i class="bi bi-film me-1"></i> Videos 0</span>
                 </div>
             </div>
         </div>
@@ -129,13 +117,13 @@
 
     <!-- Secondary Row -->
     <div class="row g-4 mt-1">
-        <!-- Disputes Table -->
+        <!-- Recent Payments -->
         <div class="col-12 col-xl-6">
             <div class="kpi-card p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5 class="section-title mb-0">
-                        <i class="bi bi-clipboard2-pulse me-2 text-primary"></i>Open
-                        Disputes
+                        <i class="bi bi-credit-card me-2 text-success"></i>Recent
+                        Payments
                     </h5>
                     <a href="#" class="btn btn-sm btn-brand"><i class="bi bi-arrow-right-short"></i> View All</a>
                 </div>
@@ -144,155 +132,101 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Ticket</th>
-                                <th>User</th>
-                                <th>Type</th>
-                                <th>Age</th>
+                                <th>Transaction</th>
+                                <th>Student</th>
+                                <th>Educator</th>
+                                <th>Amount</th>
                                 <th>Status</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($recentPayments as $index => $payment)
                             <tr>
-                                <td>1</td>
-                                <td>#D-10492</td>
-                                <td>Fatima K.</td>
-                                <td>Refund</td>
-                                <td>3d</td>
-                                <td><span class="badge text-bg-warning">Pending</span></td>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $payment['transaction_id'] }}</td>
+                                <td>{{ $payment['student'] }}</td>
+                                <td>{{ $payment['educator'] }}</td>
+                                <td>{{ $payment['amount'] }}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
+                                    @if(strtolower($payment['status']) === 'completed')
+                                        <span class="badge text-bg-success">Completed</span>
+                                    @elseif(strtolower($payment['status']) === 'pending')
+                                        <span class="badge text-bg-warning">Pending</span>
+                                    @elseif(strtolower($payment['status']) === 'failed')
+                                        <span class="badge text-bg-danger">Failed</span>
+                                    @else
+                                        <span class="badge text-bg-secondary">{{ $payment['status'] }}</span>
+                                    @endif
                                 </td>
                             </tr>
+                            @empty
                             <tr>
-                                <td>2</td>
-                                <td>#D-10488</td>
-                                <td>Ahmed S.</td>
-                                <td>Quality</td>
-                                <td>1d</td>
-                                <td>
-                                    <span class="badge text-bg-primary">In Review</span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </td>
+                                <td colspan="7" class="text-center text-muted">No payments found</td>
                             </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>#D-10473</td>
-                                <td>Sara M.</td>
-                                <td>Access</td>
-                                <td>6h</td>
-                                <td><span class="badge text-bg-success">Resolved</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>#D-10461</td>
-                                <td>John P.</td>
-                                <td>Other</td>
-                                <td>5d</td>
-                                <td><span class="badge text-bg-danger">Escalated</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
-                <small class="text-muted">SLA: 24h first reply • 72h resolution target</small>
+                <small class="text-muted">Latest payment transactions</small>
             </div>
         </div>
 
-        <!-- Flagged Content -->
+        <!-- New Educators -->
         <div class="col-12 col-xl-6">
             <div class="kpi-card p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5 class="section-title mb-0">
-                        <i class="bi bi-flag-fill me-2 text-danger"></i>Flagged Content
+                        <i class="bi bi-person-plus me-2 text-info"></i>New
+                        Educators
                     </h5>
-                    <a href="#" class="btn btn-sm btn-outline-secondary"><i
-                            class="bi bi-shield-check me-1"></i> Moderation Queue</a>
+                    <a href="#" class="btn btn-sm btn-brand"><i class="bi bi-arrow-right-short"></i> View All</a>
                 </div>
                 <div class="table-responsive">
                     <table class="table align-middle">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Item</th>
-                                <th>Owner</th>
-                                <th>Reason</th>
-                                <th>Signals</th>
-                                <th>Queue</th>
+                                <th>Educator</th>
+
+                                <th>Courses</th>
+                                <th>Status</th>
+                                <th>Joined</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($newEducatorsList as $index => $educator)
                             <tr>
-                                <td>112</td>
-                                <td>Worksheet: Algebra I</td>
-                                <td>R. Malik</td>
-                                <td>Possible duplicate</td>
-                                <td>
-                                    <span class="badge text-bg-info">AI-Match 86%</span>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $educator['name'] }}
+                                </br>
+                                {{ $educator['email'] }}
                                 </td>
+                                    <td>{{ $educator['courses_count'] }} course</td>
                                 <td>
-                                    <span class="badge text-bg-primary">Originality</span>
+                                    @if(strtolower($educator['status']) === 'approved')
+                                        <span class="badge text-bg-success">Approved</span>
+                                    @elseif(strtolower($educator['status']) === 'pending')
+                                        <span class="badge text-bg-warning">Pending</span>
+                                    @elseif(strtolower($educator['status']) === 'rejected')
+                                        <span class="badge text-bg-danger">Rejected</span>
+                                    @else
+                                        <span class="badge text-bg-secondary">{{ $educator['status'] }}</span>
+                                    @endif
                                 </td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </td>
+                                <td>{{ $educator['joined'] }}</td>
+
                             </tr>
+                            @empty
                             <tr>
-                                <td>109</td>
-                                <td>Video: Cell Division</td>
-                                <td>L. Pereira</td>
-                                <td>TOS language</td>
-                                <td><span class="badge text-bg-warning">Toxicity</span></td>
-                                <td><span class="badge text-bg-secondary">Safety</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </td>
+                                <td colspan="7" class="text-center text-muted">No new educators</td>
                             </tr>
-                            <tr>
-                                <td>103</td>
-                                <td>Quiz Bank: WWII</td>
-                                <td>A. Rahman</td>
-                                <td>Copyright claim</td>
-                                <td><span class="badge text-bg-danger">Takedown</span></td>
-                                <td><span class="badge text-bg-dark">Legal</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-2">
-                    <div class="d-flex justify-content-between">
-                        <small class="text-muted">Queue load</small>
-                        <small class="fw-semibold">62%</small>
-                    </div>
-                    <div class="progress brand" style="height: 6px">
-                        <div class="progress-bar" style="width: 62%"></div>
-                    </div>
-                </div>
+                <small class="text-muted">Recently registered educators</small>
             </div>
         </div>
     </div>

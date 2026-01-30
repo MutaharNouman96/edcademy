@@ -25,7 +25,9 @@ class Course extends Model
         'tags',
         'publish_option',
         'publish_date',
-        'status'
+        'status',
+        'approval_status',
+        'review_note'
     ];
     protected $appends = ['thumbnail_path'];
 

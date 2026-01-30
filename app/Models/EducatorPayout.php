@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class EducatorPayout extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'processed_at' => 'datetime',
+    ];
+
     protected $fillable = [
         'educator_id',
         'payment_id',
@@ -15,7 +20,7 @@ class EducatorPayout extends Model
         'status',
         'processed_at',
         'processed_by',
-        'description',       
+        'description',
     ];
     public function educator()
     {
