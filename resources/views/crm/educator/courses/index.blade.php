@@ -4,7 +4,7 @@
             <div class="d-flex align-items-center justify-content-between ">
                 <h2 class="section-title"><i class="bi bi-collection"></i> Courses</h2>
                 <div>
-                    <a href="{{ route('educator.courses.create') }}" class="btn   btn-primary">
+                    <a href="{{ route('educator.courses.crud.create') }}" class="btn   btn-primary">
                         <i class="bi bi-plus-lg me-1"></i>
                         Create New Course
                     </a>
@@ -65,11 +65,11 @@
                                 <td>{{ $course->created_at->format('d M Y') }}</td>
                                 <td class="text-end">
                                     <a class="btn btn-outline-primary btn-sm"
-                                        href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}"
+                                        href="{{ route('web.course.show', ['slug' => $course->slug ?? 'course', 'id' => $course->id]) }}"
                                         target="_blank">
                                         <i class="bi bi-file-earmark"></i>
                                     </a>
-                                    <a href="{{ route('educator.courses.edit', $course->id) }}"
+                                    <a href="{{ route('educator.courses.crud.edit', $course->id) }}"
                                         class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-pencil"></i>
                                     </a>

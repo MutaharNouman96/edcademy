@@ -186,6 +186,7 @@
 
             <!-- RIGHT – CHAT AREA -->
             <div class="chat-area">
+                @if(sizeof($chats) > 0) 
                 <div class="chat-header" id="chatHeader">
                     Select a chat
                 </div>
@@ -208,6 +209,13 @@
                         </button>
                     </div>
                 </div>
+                @else
+                <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
+                    <div class="">
+                        No Chats found
+                    </div>
+                </div>
+                @endif
             </div>
 
         </div>

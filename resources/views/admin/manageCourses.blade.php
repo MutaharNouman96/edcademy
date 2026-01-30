@@ -21,6 +21,15 @@
                 <option value="advanced" {{ request('level') == 'advanced' ? 'selected' : '' }}>Advanced</option>
             </select>
         </div>
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Approval</label>
+            <select name="approval_status" class="form-select">
+                <option value="">All Approvals</option>
+                <option value="pending" {{ request('approval_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="approved" {{ request('approval_status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                <option value="rejected" {{ request('approval_status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+            </select>
+        </div>
         <div class="col-md-4">
             <label class="form-label fw-semibold">Search</label>
             <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Course title, description, or educator name">
@@ -42,6 +51,7 @@
                 <th>Level</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Approval</th>
                 <th>Created</th>
                 <th class="text-end">Actions</th>
             </tr>
@@ -83,6 +93,11 @@
                                 {{ ucfirst($course->status) }}
                             </span>
                         </td>
+                        <td>
+                            <span class="badge text-bg-{{ $course->approval_status === 'approved' ? 'success' : ($course->approval_status === 'rejected' ? 'danger' : 'info') }}">
+                                {{ ucfirst($course->approval_status ?? 'pending') }}
+                            </span>
+                        </td>
                         <td>{{ $course->created_at->format('M d, Y') }}</td>
                         <td class="text-end">
                             <div class="dropdown">
@@ -90,6 +105,11 @@
                                     Actions
                                 </button>
                                 <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="{{ route('admin.courses.show', $course->id) }}" class="dropdown-item">
+                                            <i class="bi bi-eye me-1"></i> View Course
+                                        </a>
+                                    </li>
                                     <li>
                                         <form method="POST" action="{{ route('admin.courses.status', $course->id) }}" class="d-inline">
                                             @csrf
@@ -117,7 +137,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted">No courses found</td>
+                        <td colspan="9" class="text-center text-muted">No courses found</td>
                     </tr>
                 @endforelse
             </tbody>

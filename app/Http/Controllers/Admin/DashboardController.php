@@ -390,6 +390,10 @@ class DashboardController extends Controller
             $query->where('level', $request->level);
         }
 
+        if ($request->filled('approval_status')) {
+            $query->where('approval_status', $request->approval_status);
+        }
+
         if ($request->filled('q')) {
             $search = $request->q;
             $query->where(function ($q) use ($search) {
@@ -424,6 +428,12 @@ class DashboardController extends Controller
         $course = Course::findOrFail($id);
         $course->delete();
         return back()->with('success', 'Course deleted successfully');
+    }
+
+    public function showCourse($id)
+    {
+        $course = Course::with(['educator', 'category', 'sections.lessons'])->findOrFail($id);
+        return view('admin.showCourse', compact('course'));
     }
 
     public function manageLessons(Request $request)

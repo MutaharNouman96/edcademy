@@ -242,4 +242,166 @@ class PayoutController extends Controller
 
         return back()->with('success', 'Payout created successfully');
     }
+
+    // Generate upcoming payouts based on approved earnings
+    public function generateUpcomingPayouts()
+    {
+        // Get all approved earnings that haven't been paid yet and don't have a payout
+        $approvedEarnings = Earning::where('status', 'approved')
+            ->whereNull('payout_id')
+            ->with('educator')
+            ->get()
+            ->groupBy('educator_id');
+
+        $generatedPayouts = [];
+
+        foreach ($approvedEarnings as $educatorId => $earnings) {
+            $totalAmount = $earnings->sum('net_amount');
+
+            if ($totalAmount > 0) {
+                $payout = Payout::create([
+                    'educator_id' => $educatorId,
+                    'amount' => $totalAmount,
+                    'status' => 'pending',
+                    'description' => 'Auto-generated payout for ' . $earnings->count() . ' earnings'
+                ]);
+
+                // Link earnings to this payout
+                Earning::whereIn('id', $earnings->pluck('id'))
+                    ->update(['payout_id' => $payout->id]);
+
+                $generatedPayouts[] = $payout;
+            }
+        }
+
+        return back()->with('success', 'Generated ' . count($generatedPayouts) . ' upcoming payouts');
+    }
+
+    // View upcoming payouts (pending payouts)
+    public function upcomingPayouts(Request $request)
+    {
+        $query = Payout::with('educator')
+            ->where('status', 'pending');
+
+        // Filter by educator
+        if ($request->filled('educator_id')) {
+            $query->where('educator_id', $request->educator_id);
+        }
+
+        // Filter by amount range
+        if ($request->filled('min_amount')) {
+            $query->where('amount', '>=', $request->min_amount);
+        }
+        if ($request->filled('max_amount')) {
+            $query->where('amount', '<=', $request->max_amount);
+        }
+
+        // Search by educator name
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->whereHas('educator', function ($q) use ($search) {
+                $q->where('first_name', 'like', '%' . $search . '%')
+                  ->orWhere('last_name', 'like', '%' . $search . '%')
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%']);
+            });
+        }
+
+        $upcomingPayouts = $query->latest()->paginate(15);
+
+        // Get summary statistics
+        $totalUpcomingAmount = Payout::where('status', 'pending')->sum('amount');
+        $totalUpcomingCount = Payout::where('status', 'pending')->count();
+
+        // Get educators for filter dropdown
+        $educators = User::where('role', 'educator')->select('id', 'first_name', 'last_name')->get();
+
+        return view('admin.payouts.upcoming', compact(
+            'upcomingPayouts',
+            'totalUpcomingAmount',
+            'totalUpcomingCount',
+            'educators'
+        ));
+    }
+
+    // Release/process multiple payouts
+    public function releasePayouts(Request $request)
+    {
+        $request->validate([
+            'payout_ids' => 'required|array',
+            'payout_ids.*' => 'exists:payouts,id',
+            'processed_by' => 'required|string|max:255',
+            'notes' => 'nullable|string'
+        ]);
+
+        $payouts = Payout::whereIn('id', $request->payout_ids)
+            ->where('status', 'pending')
+            ->get();
+
+        $processedCount = 0;
+
+        foreach ($payouts as $payout) {
+            $payout->update([
+                'status' => 'completed',
+                'processed_at' => now(),
+                'processed_by' => $request->processed_by,
+                'description' => $request->notes ?: $payout->description
+            ]);
+
+            // Update related earnings to paid status
+            Earning::where('payout_id', $payout->id)
+                ->update([
+                    'status' => 'paid',
+                    'paid_at' => now()
+                ]);
+
+            $processedCount++;
+        }
+
+        return back()->with('success', 'Successfully released ' . $processedCount . ' payouts');
+    }
+
+    // Release single payout
+    public function releasePayout(Request $request, Payout $payout)
+    {
+        $request->validate([
+            'processed_by' => 'required|string|max:255',
+            'notes' => 'nullable|string'
+        ]);
+
+        if ($payout->status !== 'pending') {
+            return back()->with('error', 'Only pending payouts can be released');
+        }
+
+        $payout->update([
+            'status' => 'completed',
+            'processed_at' => now(),
+            'processed_by' => $request->processed_by,
+            'description' => $request->notes ?: $payout->description
+        ]);
+
+        // Update related earnings to paid status
+        Earning::where('payout_id', $payout->id)
+            ->update([
+                'status' => 'paid',
+                'paid_at' => now()
+            ]);
+
+        return back()->with('success', 'Payout released successfully');
+    }
+
+    // Get payout details with earnings
+    public function getPayoutDetails(Payout $payout)
+    {
+        $payout->load(['educator', 'earning']);
+        $earnings = Earning::where('payout_id', $payout->id)
+            ->with(['course', 'session'])
+            ->get();
+
+        return response()->json([
+            'payout' => $payout,
+            'earnings' => $earnings,
+            'total_earnings' => $earnings->count(),
+            'total_amount' => $earnings->sum('net_amount')
+        ]);
+    }
 }

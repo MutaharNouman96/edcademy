@@ -24,6 +24,7 @@
     <th>Student</th>
     <th>Email</th>
     <th>Joined</th>
+    <th class="text-end">Actions</th>
 </tr>
                 </thead>
                 <tbody>
@@ -33,10 +34,15 @@
         <td>{{ $student->full_name }}</td>
         <td>{{ $student->email }}</td>
         <td>{{ $student->created_at->format('M d, Y') }}</td>
+        <td class="text-end">
+            <a href="{{ route('admin.students.show', $student->id) }}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-eye"></i> View
+            </a>
+        </td>
     </tr>
 @empty
     <tr>
-        <td colspan="4" class="text-center text-muted">No students found</td>
+        <td colspan="5" class="text-center text-muted">No students found</td>
     </tr>
 @endforelse
 </tbody>

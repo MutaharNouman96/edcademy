@@ -50,6 +50,9 @@
                         </td>
                         <td>{{ $educator->created_at->format('M d, Y') }}</td>
                         <td class="text-end">
+                            <a href="{{ route('admin.educators.show', $educator->id) }}" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-eye"></i> View
+                            </a>
                             <form method="POST" action="{{ route('admin.educators.status', $educator->id) }}" class="d-inline">
                                 @csrf
                                 @method('PATCH')
