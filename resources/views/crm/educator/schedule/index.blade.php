@@ -13,14 +13,14 @@
                     <div class="modal-body">
                         <input type="hidden" id="sch_id" />
                         <div class="mb-2">
-                            <label class="form-label">Session (optional)</label>
+                            <label class="form-label">Session </label>
                             <select id="sch_session" class="form-select">
                                 <option value="">— Select a session —</option>
                             </select>
                         </div>
 
                         <div class="mb-2">
-                            <label class="form-label">Title</label>
+                            <label class="form-label">Title *</label>
                             <input id="sch_title" class="form-control" required>
                         </div>
 
@@ -35,8 +35,8 @@
                         </div>
 
                         <div class="mb-2">
-                            <label class="form-label">Description</label>
-                            <textarea id="sch_description" class="form-control" rows="3"></textarea>
+                            <label class="form-label">Description *</label>
+                            <textarea id="sch_description" class="form-control" rows="3" required></textarea>
                         </div>
 
                         <div class="mb-2 d-flex align-items-center gap-2">

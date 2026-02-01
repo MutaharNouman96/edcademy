@@ -308,6 +308,10 @@
                         <p><strong>Status:</strong> <span
                                 class="badge bg-{{ $course->status == 'published' ? 'success' : 'warning' }}">{{ ucfirst($course->status) }}</span>
                         </p>
+                        <div class="mb-2">
+                            Approval Status : <span
+                                class="badge bg-{{ $course->approval_status == 'approved' ? 'success' : ($course->approval_status == 'rejected' ? 'danger' : 'info') }}">{{ ucfirst($course->approval_status) }}</span>
+                        </div>
                         <p><strong>Sections:</strong> {{ $course->sections->count() }}</p>
                         <p><strong>Total Lessons:</strong> {{ $course->lessons->count() }}</p>
                         <p><strong>Created:</strong> {{ $course->created_at->format('M d, Y') }}</p>

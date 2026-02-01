@@ -191,12 +191,12 @@
 
     @push('scripts')
         <script>
-            const courseCompletionData = @json($courseCompletionData);
-            const watchTimeLabels = @json($watchTimeLabels);
-            const watchTimeData = @json($watchTimeData);
-            const myCourses = @json($myCourses);
-            const newVideos = @json($newVideosFeed);
-            const payments = @json($paymentData);
+            window.courseCompletionData = @json($courseCompletionData);
+            window.watchTimeLabels = @json($watchTimeLabels);
+            window.watchTimeData = @json($watchTimeData);
+            window.myCourses = @json($myCourses);
+            window.newVideos = @json($newVideosFeed);
+            window.payments = @json($paymentData);
         </script>
         <div id="dashboard-data" data-course-details-url="{{ route('student.course_details', ['course_id' => '_COURSE_ID_']) }}"></div>
         @endpush
