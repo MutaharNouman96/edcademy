@@ -135,7 +135,7 @@ class CourseCrudController extends Controller
         // Handle status
         if ($validated['publish_option'] === 'now') {
             $validated['status'] = 'published';
-            $validated['publish_date'] = now();
+          
         } elseif ($validated['publish_option'] === 'schedule') {
             $validated['status'] = 'scheduled';
         } else {

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Course;
 use App\Models\CourseCategory;
 use App\Models\CourseReview;
+use App\Models\EducatorReview;
 use App\Models\Order;
 use App\Models\StudentTestimonial;
 use App\Models\Subject;
@@ -273,6 +274,29 @@ class WebsiteController extends Controller
 
     public function how_it_works(){
         return view("website.how_it_works");
+    }
+
+    public function reviews()
+    {
+        $courseReviews = CourseReview::with(['course', 'student'])
+            ->latest()
+            ->limit(30)
+            ->get();
+
+        $educatorReviews = EducatorReview::with(['educator', 'student'])
+            ->latest()
+            ->limit(30)
+            ->get();
+
+        $courseReviewsAvg = CourseReview::average('rating');
+        $educatorReviewsAvg = EducatorReview::average('rating');
+
+        return view('website.reviews', compact(
+            'courseReviews',
+            'educatorReviews',
+            'courseReviewsAvg',
+            'educatorReviewsAvg',
+        ));
     }
 }
 

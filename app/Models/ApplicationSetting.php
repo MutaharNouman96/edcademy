@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class ApplicationSetting extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'key',
+        'value',
+        'type',
+        'group',
+        'description',
+    ];
 }

@@ -43,10 +43,10 @@
                         <a class="nav-link" href="{{ route('web.how.it.works') }}">How It Works</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#testimonials">Reviews</a>
+                        <a class="nav-link" href="{{ route('web.reviews') }}">Reviews</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" style="color: var(--primary-cyan)">Browse Content</a>
+                        <a class="nav-link" href="{{ route('blogs.index') }}" style="color: var(--primary-cyan)">Browse Content</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('web.eudcator.signup') }}"

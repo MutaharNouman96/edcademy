@@ -21,7 +21,15 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        if (!in_array(Auth::user()->role, $roles)) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Backwards-compatible: support both the legacy `users.role` column
+        // and Spatie's roles system (if present).
+        $allowedByLegacyRole = in_array($user->role, $roles, true);
+        $allowedBySpatieRole = method_exists($user, 'hasAnyRole') ? $user->hasAnyRole($roles) : false;
+
+        if (!$allowedByLegacyRole && !$allowedBySpatieRole) {
             abort(403, 'Unauthorized');
         }
 

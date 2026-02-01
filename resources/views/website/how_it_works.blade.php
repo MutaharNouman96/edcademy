@@ -165,7 +165,7 @@
             }
 
             .hero {
-                background: linear-gradient(135deg, var(--primary-cyan), var());
+                background: linear-gradient(135deg, var(--primary-cyan), var(--dark-cyan));
                 color: #fff;
             }
 

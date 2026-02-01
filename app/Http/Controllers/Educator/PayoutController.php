@@ -77,7 +77,9 @@ class PayoutController extends Controller
         return response()->json(
             $query->latest()->get()->map(function ($p) {
                 return [
-                    'release_date' => $p->created_at->addDays(14)->format('d M Y'),
+                    'release_date' => $p->created_at->day <= 15
+                        ? $p->created_at->copy()->day(15)->format('d M Y')
+                        : $p->created_at->copy()->day(30)->format('d M Y'),
                     'source'       => 'Order #' . $p->order_id,
                     'amount'       => number_format($p->net_amount, 2),
                     'status'       => ucfirst($p->status),
