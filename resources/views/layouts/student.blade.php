@@ -34,7 +34,7 @@
                         Messages</a>
                     <div class="dropdown">
                         <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
+                            <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->full_name }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ route('student.profile.edit') }}">Account Settings</a></li>

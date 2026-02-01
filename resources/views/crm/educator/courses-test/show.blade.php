@@ -207,7 +207,8 @@
                                 <i class="bi bi-inbox display-4 d-block mb-2"></i>
                                 <p>No curriculum added yet</p>
                                 @can('update', $course)
-                                    <a href="{{ route('educator.courses.crud.edit', $course) }}" class="btn btn-primary">Add
+                                    <a href="{{ route('educator.courses.crud.edit', $course) }}"
+                                        class="btn btn-primary">Add
                                         Content</a>
                                 @endcan
                             </div>
@@ -276,20 +277,7 @@
                     </div>
                 </div>
 
-                <!-- Price Card -->
-                <div class="card shadow-sm mb-3">
-                    <div class="card-body text-center">
-                        @if ($course->is_free)
-                            <h3 class="text-success mb-3">FREE</h3>
-                        @else
-                            <h3 class="text-primary mb-3">${{ number_format($course->price, 2) }}</h3>
-                        @endif
-                        <button class="btn btn-success w-100 mb-2">
-                            <i class="bi bi-cart-plus"></i> Enroll Now
-                        </button>
-                        <p class="small text-muted mb-0">30-day money-back guarantee</p>
-                    </div>
-                </div>
+
 
                 <!-- Additional Info -->
                 <div class="card shadow-sm mb-3">
@@ -301,14 +289,16 @@
                             <small class="text-muted">Course Type</small>
                             <div><strong>{{ ucfirst($course->type) }}</strong></div>
                         </div>
-                        @if ($course->publish_date)
+                        @if ($course->status == 'published')
                             <div class="mb-2">
-                                <small class="text-muted">Published</small>
-                                <div>
-                                    <strong>{{ \Carbon\Carbon::parse($course->publish_date)->format('M d, Y') }}</strong>
-                                </div>
+                                <small class="text-muted">Publish Now</small>
+
                             </div>
                         @endif
+                        <div class="mb-2">
+                            Approval Status : <span
+                                class="badge bg-{{ $course->approval_status == 'approved' ? 'success' : ($course->approval_status == 'rejected' ? 'danger' : 'info') }}">{{ ucfirst($course->approval_status) }}</span>
+                        </div>
                         <div class="mb-2">
                             <small class="text-muted">Last Updated</small>
                             <div><strong>{{ $course->updated_at->format('M d, Y') }}</strong></div>

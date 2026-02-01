@@ -28,6 +28,7 @@ use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Mail\OrderInvoiceMail;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\WatermarkController;
 //livewire routes
@@ -91,6 +92,10 @@ Route::get('terms-and-conditions', [WebsiteController::class, 'terms_and_conditi
 
 Route::get('reviews', [WebsiteController::class, 'reviews'])->name('web.reviews');
 
+// Blogs (Browse Content)
+Route::get('blogs', [App\Http\Controllers\BlogController::class, 'index'])->name('blogs.index');
+Route::get('blogs/{blog:slug}', [App\Http\Controllers\BlogController::class, 'show'])->name('blogs.show');
+
 Route::get('faqs', [WebsiteController::class, 'faqs'])->name('web.faqs');
 Route::view('community-guidelines', 'website.community-guidelines')->name('web.community.guidelines');
 Route::view('safety-and-trust-policy', 'website.safety-and-trust-policy')->name('web.safety.and.trust.policy');
@@ -133,6 +138,37 @@ Route::middleware(['auth', 'role:admin'])
     ->name('admin.')
     ->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('visual-reports', [App\Http\Controllers\Admin\VisualReportsController::class, 'index'])->name('visual-reports.index');
+
+        // Blogs
+        Route::get('blogs', [App\Http\Controllers\Admin\BlogController::class, 'index'])->name('blogs.index');
+        Route::get('blogs/create', [App\Http\Controllers\Admin\BlogController::class, 'create'])->name('blogs.create');
+        Route::post('blogs', [App\Http\Controllers\Admin\BlogController::class, 'store'])->name('blogs.store');
+        Route::get('blogs/{blog}/edit', [App\Http\Controllers\Admin\BlogController::class, 'edit'])->name('blogs.edit');
+        Route::put('blogs/{blog}', [App\Http\Controllers\Admin\BlogController::class, 'update'])->name('blogs.update');
+        Route::delete('blogs/{blog}', [App\Http\Controllers\Admin\BlogController::class, 'destroy'])->name('blogs.destroy');
+
+        // Admin settings (app + account)
+        Route::get('settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
+        Route::put('settings/app', [App\Http\Controllers\Admin\SettingsController::class, 'updateApp'])->name('settings.app.update');
+        Route::put('settings/account/profile', [App\Http\Controllers\Admin\SettingsController::class, 'updateAccountProfile'])->name('settings.account.profile');
+        Route::put('settings/account/password', [App\Http\Controllers\Admin\SettingsController::class, 'updateAccountPassword'])->name('settings.account.password');
+
+        // Internal app users + roles/permissions (Spatie)
+        Route::get('inapp-users', [App\Http\Controllers\Admin\InAppUserManagement::class, 'usersIndex'])->name('inapp-users.index');
+        Route::get('inapp-users/create', [App\Http\Controllers\Admin\InAppUserManagement::class, 'usersCreate'])->name('inapp-users.create');
+        Route::post('inapp-users', [App\Http\Controllers\Admin\InAppUserManagement::class, 'usersStore'])->name('inapp-users.store');
+        Route::get('inapp-users/{user}/edit', [App\Http\Controllers\Admin\InAppUserManagement::class, 'usersEdit'])->name('inapp-users.edit');
+        Route::put('inapp-users/{user}', [App\Http\Controllers\Admin\InAppUserManagement::class, 'usersUpdate'])->name('inapp-users.update');
+        Route::delete('inapp-users/{user}', [App\Http\Controllers\Admin\InAppUserManagement::class, 'usersDestroy'])->name('inapp-users.destroy');
+
+        Route::get('access-control', [App\Http\Controllers\Admin\InAppUserManagement::class, 'accessControlIndex'])->name('access-control.index');
+        Route::post('access-control/roles', [App\Http\Controllers\Admin\InAppUserManagement::class, 'roleStore'])->name('roles.store');
+        Route::put('access-control/roles/{role}', [App\Http\Controllers\Admin\InAppUserManagement::class, 'roleUpdate'])->name('roles.update');
+        Route::delete('access-control/roles/{role}', [App\Http\Controllers\Admin\InAppUserManagement::class, 'roleDestroy'])->name('roles.destroy');
+        Route::post('access-control/permissions', [App\Http\Controllers\Admin\InAppUserManagement::class, 'permissionStore'])->name('permissions.store');
+        Route::delete('access-control/permissions/{permission}', [App\Http\Controllers\Admin\InAppUserManagement::class, 'permissionDestroy'])->name('permissions.destroy');
 
         // Manage Educators
         Route::get('educators', [App\Http\Controllers\Admin\DashboardController::class, 'manageEducators'])->name('manage.educators');
