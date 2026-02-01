@@ -3,25 +3,32 @@
         <div class="section-header">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <h2 class="section-title"><i class="bi bi-calendar3-event"></i> Sessions</h2>
-                <div class="toolbar d-flex flex-wrap gap-2">
-                    <select id="filterType" class="form-select form-select-sm">
-                        <option value="">All Types</option>
-                        <option value="1on1">1:1</option>
-                        <option value="group">Group</option>
-                        <option value="cohort">Cohort</option>
-                    </select>
-                    <select id="filterStatus" class="form-select form-select-sm">
-                        <option value="">All Status</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="pending">Pending</option>
-                        <option value="cancelled">Cancelled</option>
-                        <option value="completed">Completed</option>
-                        <option value="no-show">No‑show</option>
-                    </select>
-                    <input id="searchText" class="form-control form-control-sm" placeholder="Search name/course…" />
-                    <button id="resetFilters" class="btn btn-sm btn-outline-secondary"><i
-                            class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+                <div>
+                    <a href="{{ route('educator.sessions.create') }}" class="btn btn-primary">
+                        <i class="bi bi-plus me-1"></i> New Session
+                    </a>
                 </div>
+
+            </div>
+
+            <div class="toolbar d-flex flex-wrap gap-2 mt-3">
+                <select id="filterType" class="form-select form-select-sm">
+                    <option value="">All Types</option>
+                    <option value="1on1">1:1</option>
+                    <option value="group">Group</option>
+                    <option value="cohort">Cohort</option>
+                </select>
+                <select id="filterStatus" class="form-select form-select-sm">
+                    <option value="">All Status</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="completed">Completed</option>
+                    <option value="no-show">No‑show</option>
+                </select>
+                <input id="searchText" class="form-control form-control-sm" placeholder="Search name/course…" />
+                <button id="resetFilters" class="btn btn-sm btn-outline-secondary"><i
+                        class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
             </div>
         </div>
         <div class="p-3 pt-0">

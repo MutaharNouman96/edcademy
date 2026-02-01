@@ -73,7 +73,7 @@
                     <a href="{{ route('admin.dashboard') }}" class="text-decoration-none brand">
                         <i class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy
                     </a>
-                    <span class="d-none d-md-inline text-muted">Educator Dashboard</span>
+                    <span class="d-none d-md-inline text-muted">Admin Dashboard</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
 
@@ -85,13 +85,8 @@
                             <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->first_name }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="#"> View Public
-                                    Profile
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="#">Account Settings</a></li>
-                            <li><a class="dropdown-item" href="#">Switch to Student View</a></li>
+                           
+                            <li><a class="dropdown-item" href="{{ route('admin.settings.index') }}">App & Account Settings</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -109,13 +104,31 @@
         <div class="row">
             <!-- Sidebar -->
             <aside class="col-md-3 col-lg-2 p-3 sidebar">
-                <h4 class="mb-4">
-                    <i class="bi bi-mortarboard-fill me-2"></i>Ed-Cademy
-                </h4>
+                
                 <nav class="nav flex-column gap-1">
                     <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                         href="{{ route('admin.dashboard') }}">
                         <i class="bi bi-bar-chart-line me-2"></i>Dashboard
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.visual-reports.*') ? 'active' : '' }}"
+                        href="{{ route('admin.visual-reports.index') }}">
+                        <i class="bi bi-graph-up-arrow me-2"></i>Visual Reports
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}"
+                        href="{{ route('admin.blogs.index') }}">
+                        <i class="bi bi-journal-text me-2"></i>Blogs
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
+                        href="{{ route('admin.settings.index') }}">
+                        <i class="bi bi-gear me-2"></i>Settings
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.inapp-users.*') ? 'active' : '' }}"
+                        href="{{ route('admin.inapp-users.index') }}">
+                        <i class="bi bi-person-plus me-2"></i>Internal Users
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.access-control.*') ? 'active' : '' }}"
+                        href="{{ route('admin.access-control.index') }}">
+                        <i class="bi bi-shield-lock me-2"></i>Roles & Permissions
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.manage.educators') ? 'active' : '' }}"
                         href="{{ route('admin.manage.educators') }}">
@@ -186,106 +199,113 @@
     </div>
 
     <script>
-        // Earnings Breakdown
-        new Chart(document.getElementById('earningsChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Maryam B.', 'Omar H.', 'Sara M.', 'Ali R.', 'Fatima K.'],
-                datasets: [{
-                    label: 'Earnings ($)',
-                    data: [52000, 43500, 39200, 28000, 21500],
-                    backgroundColor: [
-                        '#0B3C77',
-                        '#1d9bf0',
-                        '#16a34a',
-                        '#f59e0b',
-                        '#94a3b8'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        // Dashboard-only charts (guarded so other admin pages don't error)
+        const earningsEl = document.getElementById('earningsChart');
+        if (earningsEl) {
+            new Chart(earningsEl, {
+                type: 'bar',
+                data: {
+                    labels: ['Maryam B.', 'Omar H.', 'Sara M.', 'Ali R.', 'Fatima K.'],
+                    datasets: [{
+                        label: 'Earnings ($)',
+                        data: [52000, 43500, 39200, 28000, 21500],
+                        backgroundColor: [
+                            '#0B3C77',
+                            '#1d9bf0',
+                            '#16a34a',
+                            '#f59e0b',
+                            '#94a3b8'
+                        ]
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        })
-
-        // Content Health Bubble Chart
-        new Chart(document.getElementById('contentChart'), {
-            type: 'bubble',
-            data: {
-                datasets: [{
-                        label: 'Maryam B.',
-                        data: [{
-                            x: 32000,
-                            y: 4.6,
-                            r: 15
-                        }],
-                        backgroundColor: '#0B3C77'
-                    },
-                    {
-                        label: 'Omar H.',
-                        data: [{
-                            x: 28500,
-                            y: 4.3,
-                            r: 20
-                        }],
-                        backgroundColor: '#1d9bf0'
-                    },
-                    {
-                        label: 'Sara M.',
-                        data: [{
-                            x: 25800,
-                            y: 4.5,
-                            r: 12
-                        }],
-                        backgroundColor: '#16a34a'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Views'
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
                         }
                     },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Avg Rating'
-                        },
-                        min: 0,
-                        max: 5
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
 
-        // Sentiment Pie Chart
-        new Chart(document.getElementById('sentimentChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Positive', 'Neutral', 'Negative'],
-                datasets: [{
-                    data: [68, 22, 10],
-                    backgroundColor: ['#16a34a', '#f59e0b', '#dc2626']
-                }]
-            },
-            options: {
-                responsive: true
-            }
-        })
+        const contentEl = document.getElementById('contentChart');
+        if (contentEl) {
+            new Chart(contentEl, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                            label: 'Maryam B.',
+                            data: [{
+                                x: 32000,
+                                y: 4.6,
+                                r: 15
+                            }],
+                            backgroundColor: '#0B3C77'
+                        },
+                        {
+                            label: 'Omar H.',
+                            data: [{
+                                x: 28500,
+                                y: 4.3,
+                                r: 20
+                            }],
+                            backgroundColor: '#1d9bf0'
+                        },
+                        {
+                            label: 'Sara M.',
+                            data: [{
+                                x: 25800,
+                                y: 4.5,
+                                r: 12
+                            }],
+                            backgroundColor: '#16a34a'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Views'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Avg Rating'
+                            },
+                            min: 0,
+                            max: 5
+                        }
+                    }
+                }
+            })
+        }
+
+        const sentimentEl = document.getElementById('sentimentChart');
+        if (sentimentEl) {
+            new Chart(sentimentEl, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    datasets: [{
+                        data: [68, 22, 10],
+                        backgroundColor: ['#16a34a', '#f59e0b', '#dc2626']
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            })
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
