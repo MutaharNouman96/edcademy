@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\EmailService;
 use App\Services\ActivityNotificationService;
 use App\Mail\SessionBookedMail;
+use App\Models\Policy;
 
 class WebsiteController extends Controller
 {
@@ -348,6 +349,12 @@ class WebsiteController extends Controller
             'courseReviewsAvg',
             'educatorReviewsAvg',
         ));
+    }
+
+
+    public function policy($slug){
+        $policy = Policy::where('slug', $slug)->first();
+        return view('website.policy', compact('policy'));
     }
 }
 
