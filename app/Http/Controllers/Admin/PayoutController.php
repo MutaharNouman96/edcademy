@@ -9,6 +9,9 @@ use App\Models\EducatorPayout;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Services\EmailService;
+use App\Services\ActivityNotificationService;
+use App\Mail\EducatorPayoutMail;
 
 class PayoutController extends Controller
 {
@@ -172,12 +175,26 @@ class PayoutController extends Controller
             'notes' => 'nullable|string'
         ]);
 
+        $oldStatus = $payout->status;
         $payout->update([
             'status' => $request->status,
             'processed_at' => now(),
             'processed_by' => $request->processed_by,
             'description' => $request->notes
         ]);
+
+        // Log activity
+        ActivityNotificationService::logAndNotify(
+            auth()->user(),
+            'process_payout',
+            'Payout',
+            $payout->id,
+            "Payout #{$payout->id} for {$payout->educator->full_name}",
+            ['status' => $oldStatus],
+            ['status' => $request->status, 'processed_by' => $request->processed_by],
+            "Processed payout #{$payout->id} - Status changed from {$oldStatus} to {$request->status}",
+            ['amount' => $payout->amount, 'notes' => $request->notes]
+        );
 
         // Update related earnings if payout is completed
         if ($request->status === 'completed') {
@@ -186,6 +203,28 @@ class PayoutController extends Controller
                     'status' => 'paid',
                     'paid_at' => now()
                 ]);
+
+            // Send success email to educator
+            try {
+                EmailService::send(
+                    $payout->educator->email,
+                    new EducatorPayoutMail($payout, true),
+                    'emails'
+                );
+            } catch (\Exception $e) {
+                \Log::error('Failed to send payout success email: ' . $e->getMessage());
+            }
+        } elseif ($request->status === 'failed') {
+            // Send failure email to educator
+            try {
+                EmailService::send(
+                    $payout->educator->email,
+                    new EducatorPayoutMail($payout, false),
+                    'emails'
+                );
+            } catch (\Exception $e) {
+                \Log::error('Failed to send payout failure email: ' . $e->getMessage());
+            }
         }
 
         return back()->with('success', 'Payout processed successfully');
@@ -340,6 +379,7 @@ class PayoutController extends Controller
         $processedCount = 0;
 
         foreach ($payouts as $payout) {
+            $oldStatus = $payout->status;
             $payout->update([
                 'status' => 'completed',
                 'processed_at' => now(),
@@ -347,12 +387,36 @@ class PayoutController extends Controller
                 'description' => $request->notes ?: $payout->description
             ]);
 
+            // Log activity for each payout
+            ActivityNotificationService::logAndNotify(
+                auth()->user(),
+                'bulk_release_payout',
+                'Payout',
+                $payout->id,
+                "Bulk payout release #{$payout->id} for {$payout->educator->full_name}",
+                ['status' => $oldStatus],
+                ['status' => 'completed', 'processed_by' => $request->processed_by],
+                "Bulk released payout #{$payout->id} - Amount: ${$payout->amount}",
+                ['amount' => $payout->amount, 'bulk_operation' => true]
+            );
+
             // Update related earnings to paid status
             Earning::where('payout_id', $payout->id)
                 ->update([
                     'status' => 'paid',
                     'paid_at' => now()
                 ]);
+
+            // Send success email to educator
+            try {
+                EmailService::send(
+                    $payout->educator->email,
+                    new EducatorPayoutMail($payout, true),
+                    'emails'
+                );
+            } catch (\Exception $e) {
+                \Log::error('Failed to send bulk payout email: ' . $e->getMessage());
+            }
 
             $processedCount++;
         }
@@ -372,6 +436,7 @@ class PayoutController extends Controller
             return back()->with('error', 'Only pending payouts can be released');
         }
 
+        $oldStatus = $payout->status;
         $payout->update([
             'status' => 'completed',
             'processed_at' => now(),
@@ -379,12 +444,36 @@ class PayoutController extends Controller
             'description' => $request->notes ?: $payout->description
         ]);
 
+        // Log activity
+        ActivityNotificationService::logAndNotify(
+            auth()->user(),
+            'release_payout',
+            'Payout',
+            $payout->id,
+            "Payout #{$payout->id} for {$payout->educator->full_name}",
+            ['status' => $oldStatus],
+            ['status' => 'completed', 'processed_by' => $request->processed_by],
+            "Released payout #{$payout->id} - Amount: ${$payout->amount}",
+            ['amount' => $payout->amount, 'notes' => $request->notes]
+        );
+
         // Update related earnings to paid status
         Earning::where('payout_id', $payout->id)
             ->update([
                 'status' => 'paid',
                 'paid_at' => now()
             ]);
+
+        // Send success email to educator
+        try {
+            EmailService::send(
+                $payout->educator->email,
+                new EducatorPayoutMail($payout, true),
+                'emails'
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to send payout release email: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Payout released successfully');
     }

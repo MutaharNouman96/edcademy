@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\User;
+use App\Services\EmailService;
+use App\Services\ActivityNotificationService;
+use App\Mail\ChatMessageNotificationMail;
 
 class ChatMessageController extends Controller
 {
@@ -93,8 +96,39 @@ class ChatMessageController extends Controller
             'file' => $filePath,
         ]);
 
+        // Log activity
+        $receiver = $chat->sender_id === auth()->id() ? $chat->receiver : $chat->sender;
+        ActivityNotificationService::logAndNotify(
+            auth()->user(),
+            'send_message',
+            'ChatMessage',
+            $msg->id,
+            "Message to {$receiver->full_name}",
+            null,
+            [
+                'message' => $request->message ? substr($request->message, 0, 100) . (strlen($request->message) > 100 ? '...' : '') : 'File attachment',
+                'type' => $request->type ?? 'text',
+                'receiver_id' => $receiver->id,
+                'chat_id' => $chat->id
+            ],
+            "Sent " . ($request->type ?? 'text') . " message to {$receiver->full_name}",
+            ['message_length' => strlen($request->message ?? ''), 'has_file' => !is_null($filePath)]
+        );
+
         // REALTIME PUSHER EVENT
         broadcast(new \App\Events\NewChatMessage($msg))->toOthers();
+
+        // Send email notification to receiver
+        try {
+            // Only send email if receiver has email notifications enabled (you can add a preference check here)
+            EmailService::send(
+                $receiver->email,
+                new ChatMessageNotificationMail($msg, $receiver),
+                'emails'
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to send chat message notification email: ' . $e->getMessage());
+        }
 
         return response()->json($msg);
     }
