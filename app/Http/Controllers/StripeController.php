@@ -14,6 +14,9 @@ use App\Models\EducatorPayment;
 use App\Models\Lesson;
 use App\Models\UserPurchasedItem;
 use App\Services\EmailService;
+use App\Services\ActivityNotificationService;
+use App\Mail\PaymentCancelledMail;
+use App\Mail\StudentCourseEnrollmentMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -120,6 +123,48 @@ class StripeController extends Controller
                 'purchasable_type' => $item->model,
                 'active' => true,
             ]);
+
+            // Log enrollment activity
+            if ($item->model === 'App\Models\Course') {
+                $course = Course::find($item->item_id);
+                if ($course) {
+                    ActivityNotificationService::logAndNotify(
+                        auth()->user(),
+                        'enroll_course',
+                        'Course',
+                        $course->id,
+                        $course->title,
+                        null,
+                        [
+                            'enrolled_at' => now(),
+                            'price_paid' => $item->total,
+                            'educator_id' => $course->user_id
+                        ],
+                        "Enrolled in course '{$course->title}'",
+                        ['payment_amount' => $item->total, 'educator_name' => $course->user->full_name]
+                    );
+                }
+            } elseif ($item->model === 'App\Models\Lesson') {
+                $lesson = Lesson::find($item->item_id);
+                if ($lesson) {
+                    ActivityNotificationService::logAndNotify(
+                        auth()->user(),
+                        'enroll_lesson',
+                        'Lesson',
+                        $lesson->id,
+                        $lesson->title,
+                        null,
+                        [
+                            'enrolled_at' => now(),
+                            'price_paid' => $item->total,
+                            'course_id' => $lesson->course_id
+                        ],
+                        "Enrolled in lesson '{$lesson->title}'",
+                        ['payment_amount' => $item->total, 'course_name' => $lesson->course->title ?? 'Unknown']
+                    );
+                }
+            }
+
             EducatorPayment::firstOrCreate([
                 'educator_id' => $itemEducatorId,
                 'order_id' => $order->id,
@@ -138,6 +183,16 @@ class StripeController extends Controller
             'emails'
         );
 
+        // Send course enrollment confirmation email
+        try {
+            EmailService::send(
+                $order->user->email,
+                new StudentCourseEnrollmentMail($order),
+                'emails'
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to send course enrollment email: ' . $e->getMessage());
+        }
 
         return redirect()->route('payment.success', $order->id);
     }
@@ -152,7 +207,21 @@ class StripeController extends Controller
         $orderId = $request->order_id;
 
         if ($orderId) {
-            Order::where('id', $orderId)->update(['status' => 'cancelled']);
+            $order = Order::find($orderId);
+            if ($order) {
+                $order->update(['status' => 'cancelled']);
+
+                // Send payment cancelled email
+                try {
+                    EmailService::send(
+                        $order->user->email,
+                        new PaymentCancelledMail($order),
+                        'emails'
+                    );
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send payment cancelled email: ' . $e->getMessage());
+                }
+            }
         }
 
         return redirect('/cart')->with('error', 'Payment was cancelled.');

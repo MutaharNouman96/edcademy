@@ -13,6 +13,11 @@ use Illuminate\Support\Str;
 use App\Services\DocumentService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use App\Services\EmailService;
+use App\Services\ActivityNotificationService;
+use App\Mail\CourseSubmittedMail;
+use App\Mail\AdminNotificationMail;
+use App\Models\User;
 
 
 class CourseCrudController extends Controller
@@ -75,6 +80,68 @@ class CourseCrudController extends Controller
         }
 
         $course = Course::create($validated);
+
+        // Log activity
+        ActivityNotificationService::logAndNotify(
+            auth()->user(),
+            'create_course',
+            'Course',
+            $course->id,
+            $course->title,
+            null,
+            [
+                'title' => $course->title,
+                'subject' => $course->subject,
+                'price' => $course->price,
+                'status' => $course->status,
+                'publish_option' => $course->publish_option
+            ],
+            "Created new course '{$course->title}'",
+            [
+                'subject' => $course->subject,
+                'level' => $course->level,
+                'price' => $course->price,
+                'duration' => $course->duration
+            ]
+        );
+
+        // Send course submitted email to educator
+        try {
+            EmailService::send(
+                auth()->user()->email,
+                new CourseSubmittedMail($course),
+                'emails'
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to send course submitted email: ' . $e->getMessage());
+        }
+
+        // Send notification to admin about new course submission
+        try {
+            $adminEmails = User::where('role', 'admin')->pluck('email')->toArray();
+            foreach ($adminEmails as $adminEmail) {
+                EmailService::send(
+                    $adminEmail,
+                    new AdminNotificationMail(
+                        'info',
+                        [
+                            'course_title' => $course->title,
+                            'educator_name' => $course->user->full_name,
+                            'educator_email' => $course->user->email,
+                            'course_subject' => $course->subject,
+                            'course_price' => '$' . number_format($course->price, 2),
+                            'submission_date' => $course->created_at->format('M j, Y g:i A'),
+                            'status' => 'Pending Review',
+                        ],
+                        'New Course Submitted for Review - Ed-Cademy',
+                        'A new course has been submitted and requires review.'
+                    ),
+                    'emails'
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send admin notification for course submission: ' . $e->getMessage());
+        }
 
         return redirect()->route('educator.courses.crud.show', $course)
             ->with('success', 'Course created successfully!');
