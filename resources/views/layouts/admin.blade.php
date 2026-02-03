@@ -11,6 +11,9 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        .cke_notifications_area{
+            display: none !important;
+        }
         :root {
             --brand: #0b3c77;
             --light: #f8fafc;
@@ -117,6 +120,10 @@
                     <a class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}"
                         href="{{ route('admin.blogs.index') }}">
                         <i class="bi bi-journal-text me-2"></i>Blogs
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.policies.*') ? 'active' : '' }}"
+                        href="{{ route('admin.policies.index') }}">
+                        <i class="bi bi-file-earmark-text me-2"></i>Policies
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
                         href="{{ route('admin.settings.index') }}">

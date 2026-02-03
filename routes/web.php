@@ -47,6 +47,7 @@ use App\Http\Controllers\WatermarkController;
 Route::get('/', [WebsiteController::class, 'index'])->name('website.index');
 Route::get('become-an-educator', [WebsiteController::class, 'educator_signup'])->name('web.eudcator.signup');
 Route::post('educator/signup/store', [EducatorController::class, 'store'])->name('educator.signup.store');
+Route::get('policies/{slug}', [WebsiteController::class, 'policy'])->name('web.policy');
 
 Route::get('courses', [WebsiteController::class, 'courses'])->name('web.courses');
 Route::get('course/{slug}/{id}', [CourseController::class, 'show'])->name('web.course.show');
@@ -141,6 +142,9 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('visual-reports', [App\Http\Controllers\Admin\VisualReportsController::class, 'index'])->name('visual-reports.index');
 
+        // Policies
+        Route::resource('policies', App\Http\Controllers\Admin\PolicyController::class)->except(['show']);
+        Route::post('policies/{policy}/restore', [App\Http\Controllers\Admin\PolicyController::class, 'restore'])->name('policies.restore');
         // Blogs
         Route::get('blogs', [App\Http\Controllers\Admin\BlogController::class, 'index'])->name('blogs.index');
         Route::get('blogs/create', [App\Http\Controllers\Admin\BlogController::class, 'create'])->name('blogs.create');

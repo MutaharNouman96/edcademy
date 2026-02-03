@@ -14,7 +14,7 @@
     {{-- @if (env('APP_ENV') == 'local')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/website-style.css?v=' . time() ) }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/website-style.css?v=' . time()) }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/glass-landing.css') }}" />
 
 
@@ -46,7 +46,8 @@
                         <a class="nav-link" href="{{ route('web.reviews') }}">Reviews</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('blogs.index') }}" style="color: var(--primary-cyan)">Browse Content</a>
+                        <a class="nav-link" href="{{ route('blogs.index') }}" style="color: var(--primary-cyan)">Browse
+                            Content</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('web.eudcator.signup') }}"
@@ -60,21 +61,23 @@
                             <li class="nav-item ms-lg-2">
                                 <a class="nav-link" href="{{ route('student.dashboard') }}">Dashboard</a>
                             </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-user-circle me-1"></i> {{ auth()->user()->first_name }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item text-danger" href="{{ route('logout') }}"
-                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    Sign out
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-user-circle me-1"></i> {{ auth()->user()->first_name }}
                                 </a>
-                                <form method="POST" action="{{ route('logout') }}" id="logout-form" class="d-none">
-                                    @csrf
-                                </form>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item text-danger" href="{{ route('logout') }}"
+                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            Sign out
+                                        </a>
+                                        <form method="POST" action="{{ route('logout') }}" id="logout-form"
+                                            class="d-none">
+                                            @csrf
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
-                        </ul>
-                    </li>
                         @else
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('login') }}">Login</a>
@@ -181,12 +184,10 @@
                     Company
                 </h5>
                 <div class="footer-links">
-                    <a href="{{ route("web.about-us") }}">About Us</a>
-                    <a href="{{ route("web.educator-policy") }}">Educator Policy</a>
-                    <a href="{{ route("web.student.parent.policy") }}">Student Policy</a>
-                    <a href="{{ route('web.refund-policy') }}">Refund Policy</a>
-                    <a href="{{ route("web.privacy-policy") }}">Privacy Policy</a>
-                    <a href="{{ route("web.terms-and-conditions") }}"> Terms & Conditions</a>
+                    <a href="{{ route('web.about-us') }}">About Us</a>
+                    @foreach (App\Models\Policy::all() as $policy)
+                        <a href="{{ route('web.policy', $policy->slug) }}">{{ $policy->name }}</a>
+                    @endforeach
 
                 </div>
             </div>
@@ -286,7 +287,7 @@
                             timer: 1000,
                             showConfirmButton: true
                         })
-                    }else{
+                    } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',

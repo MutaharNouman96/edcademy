@@ -72,11 +72,11 @@ class EventServiceProvider extends ServiceProvider
                 // Get location info (you might want to use a geolocation service)
                 $location = null; // Could be enhanced with IP geolocation service
 
-                EmailService::send(
-                    $user->email,
-                    new LoginNotificationMail($user, $ipAddress, $userAgent, $location),
-                    'emails'
-                );
+                // EmailService::send(
+                //     $user->email,
+                //     new LoginNotificationMail($user, $ipAddress, $userAgent, $location),
+                //     'emails'
+                // );
             } catch (\Exception $e) {
                 \Log::error('Failed to send login notification email: ' . $e->getMessage());
             }
