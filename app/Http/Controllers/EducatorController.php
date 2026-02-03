@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Events\EducatorRegistered;
 use App\Models\User;
 use App\Models\EducatorProfile;
+use App\Services\EmailService;
+use App\Mail\AdminNotificationMail;
+use App\Mail\EducatorWelcomeMail;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -90,6 +93,32 @@ class EducatorController extends Controller
             ]);
 
             DB::commit();
+
+            // Send notification to admin about new educator registration
+            try {
+                $adminEmails = User::where('role', 'admin')->pluck('email')->toArray();
+                foreach ($adminEmails as $adminEmail) {
+                    EmailService::send(
+                        $adminEmail,
+                        new AdminNotificationMail(
+                            'info',
+                            [
+                                'educator_name' => $user->full_name,
+                                'educator_email' => $user->email,
+                                'registration_date' => $user->created_at->format('M j, Y g:i A'),
+                                'primary_subject' => $request->primary_subject,
+                                'hourly_rate' => '$' . $request->hourly_rate,
+                                'status' => 'Pending Verification',
+                            ],
+                            'New Educator Registration Requires Review - Ed-Cademy',
+                            'A new educator has registered and requires verification.'
+                        ),
+                        'emails'
+                    );
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send admin notification for educator registration: ' . $e->getMessage());
+            }
 
             try {
                 event(new EducatorRegistered($user));

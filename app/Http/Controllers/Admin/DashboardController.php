@@ -12,6 +12,10 @@ use App\Models\Course;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Services\EmailService;
+use App\Services\ActivityNotificationService;
+use App\Mail\EducatorApprovalMail;
+use App\Mail\EducatorRejectionMail;
 
 class DashboardController extends Controller
 {
@@ -353,7 +357,43 @@ class DashboardController extends Controller
     public function updateEducatorStatus(Request $request, $id)
     {
         $educator = User::where('role','educator')->findOrFail($id);
-        $educator->educatorProfile()->update(['status' => $request->status]);
+        $oldStatus = $educator->educatorProfile->status;
+        $newStatus = $request->status;
+
+        $educator->educatorProfile()->update(['status' => $newStatus]);
+
+        // Log activity
+        ActivityNotificationService::logAndNotify(
+            auth()->user(),
+            $newStatus === 'approved' ? 'approve' : ($newStatus === 'rejected' ? 'reject' : 'update'),
+            'Educator',
+            $educator->id,
+            "{$educator->full_name} educator application",
+            ['status' => $oldStatus],
+            ['status' => $newStatus, 'reason' => $request->reason],
+            "Changed educator status from {$oldStatus} to {$newStatus} for {$educator->full_name}",
+            ['educator_email' => $educator->email, 'reason' => $request->reason]
+        );
+
+        // Send email based on status change
+        try {
+            if ($newStatus === 'approved' && $oldStatus !== 'approved') {
+                EmailService::send(
+                    $educator->email,
+                    new EducatorApprovalMail($educator),
+                    'emails'
+                );
+            } elseif ($newStatus === 'rejected' && $oldStatus !== 'rejected') {
+                EmailService::send(
+                    $educator->email,
+                    new EducatorRejectionMail($educator, $request->reason ?? ''),
+                    'emails'
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send educator status update email: ' . $e->getMessage());
+        }
+
         return back()->with('success','Educator status updated');
     }
 
