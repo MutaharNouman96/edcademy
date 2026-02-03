@@ -1,102 +1,20 @@
 <x-guest-layout>
     <div>
         <!-- Hero Section -->
-        <div class="hero-section">
-            <div class="container hero-content">
-                <h1 class="text-dark">Discover Your Next Course</h1>
-                <p class="text-dark">
-                    Explore thousands of courses from expert educators
-                </p>
-            </div>
-        </div>
+     
+       @include('components.courses-filter')    
 
         <!-- Main Content -->
         <div class="container">
             <!-- Advanced Search Card -->
-            <div class="advanced-search-card">
-                <h4 class="search-title">
-                    <i class="fas fa-search"></i>
-                    Search Courses
-                </h4>
 
-                <div class="row">
-                    <!-- Keyword Search -->
-                    <div class="col-12 mb-3">
-                        <label class="form-label">Search by Title or Subject</label>
-                        <div class="search-input-group">
-                            <i class="fas fa-search"></i>
-                            <input type="text" class="search-input" id="keywordSearch"
-                                placeholder="e.g., Python, Math, Web Development..." />
-                        </div>
-                    </div>
-
-                    <!-- Difficulty -->
-                    <div class="col-12 mb-3">
-                        <label class="form-label">Difficulty Level</label>
-                        <div class="filter-chips" id="difficultyFilters">
-                            <div class="filter-chip" data-filter="Beginner">
-                                Beginner
-                            </div>
-                            <div class="filter-chip" data-filter="Intermediate">
-                                Intermediate
-                            </div>
-                            <div class="filter-chip" data-filter="Advanced">
-                                Advanced
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Price Type -->
-                    <div class="col-12 mb-3">
-                        <label class="form-label">Price Type</label>
-                        <div class="filter-chips" id="priceFilters">
-                            <div class="filter-chip" data-filter="free">
-                                Free
-                            </div>
-                            <div class="filter-chip" data-filter="paid">
-                                Paid
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Course Type -->
-                    <div class="col-12 mb-3">
-                        <label class="form-label">Course Type</label>
-                        <div class="filter-chips" id="typeFilters">
-                            <div class="filter-chip" data-filter="Video">
-                                Video
-                            </div>
-                            <div class="filter-chip" data-filter="Module">
-                                Module
-                            </div>
-                            <div class="filter-chip" data-filter="Live">
-                                Live
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Search Button -->
-                    <div class="col-12 mt-3">
-                        <button type="button" class="search-btn text-dark" id="searchBtn">
-                            <i class="fas fa-search me-2 text-dark"></i>Search Courses
-                        </button>
-                    </div>
-
-                </div>
-            </div>
 
             <!-- Results Header -->
             <div class="results-header">
                 <div class="results-count">
                     <strong id="courseCount">{{ $courses->total() }}</strong> courses found
                 </div>
-                <select class="sort-dropdown" id="sortDropdown">
-                    <option value="newest">Newest First</option>
-                    <option value="highest_rated">Highest Rated</option>
-                    <option value="lowest_price">Price: Low to High</option>
-                    <option value="highest_price">Price: High to Low</option>
-                    <option value="most_popular">Most Popular</option>
-                </select>
+
             </div>
 
             <!-- Course Grid -->
@@ -210,19 +128,19 @@
                                     </div>
                                     <div class="course-body">
                                         ${course.difficulty ? `
-                                                            <span class="difficulty-badge difficulty-${course.difficulty.toLowerCase()}">
-                                                                ${course.difficulty.charAt(0).toUpperCase() + course.difficulty.slice(1)}
-                                                            </span>
-                                                        ` : ''}
+                                                                            <span class="difficulty-badge difficulty-${course.difficulty.toLowerCase()}">
+                                                                                ${course.difficulty.charAt(0).toUpperCase() + course.difficulty.slice(1)}
+                                                                            </span>
+                                                                        ` : ''}
                                         <h5 class="course-title mt-2">${course.title}</h5>
                                         <div class="course-meta">
                                             <span><i class="fas fa-clock"></i> ${course.duration || '–'}</span>
                                             <span><i class="fas fa-video"></i> ${course.lessons_count} lessons</span>
                                             ${course.avg_rating > 0 ? `
-                                                                <span>
-                                                                    <i class="fas fa-star text-warning"></i> ${parseFloat(course.avg_rating).toFixed(1)}
-                                                                </span>
-                                                            ` : ''}
+                                                                                <span>
+                                                                                    <i class="fas fa-star text-warning"></i> ${parseFloat(course.avg_rating).toFixed(1)}
+                                                                                </span>
+                                                                            ` : ''}
                                         </div>
                                         <p class="course-description">
                                             ${course.description.length > 120 ?
