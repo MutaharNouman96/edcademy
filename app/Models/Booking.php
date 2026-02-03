@@ -18,5 +18,26 @@ class Booking extends Model
         'subject',
         'message',
         'status',
+        'meeting_link',
+        'platform',
     ];
+
+    protected $casts = [
+        'date' => 'date',
+    ];
+
+    public function student()
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function educator()
+    {
+        return $this->belongsTo(User::class, 'educator_id');
+    }
+
+    public function getScheduledAtAttribute()
+    {
+        return $this->date->setTimeFromTimeString($this->time);
+    }
 }

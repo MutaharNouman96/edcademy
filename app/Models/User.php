@@ -10,6 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\SessionCall;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -94,7 +95,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sessions()
     {
-        return $this->hasMany(Session::class, 'educator_id');
+        return $this->hasMany(SessionCall::class, 'educator_id');
     }
 
 

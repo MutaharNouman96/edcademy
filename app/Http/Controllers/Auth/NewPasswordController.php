@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Services\EmailService;
+use App\Mail\PasswordResetSuccessMail;
 
 class NewPasswordController extends Controller
 {
@@ -45,6 +47,17 @@ class NewPasswordController extends Controller
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
                 ])->save();
+
+                // Send password reset success email
+                try {
+                    EmailService::send(
+                        $user->email,
+                        new PasswordResetSuccessMail($user, now()->toDateTimeString()),
+                        'emails'
+                    );
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send password reset success email: ' . $e->getMessage());
+                }
 
                 event(new PasswordReset($user));
             }

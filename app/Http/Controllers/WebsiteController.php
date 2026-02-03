@@ -16,6 +16,9 @@ use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\EmailService;
+use App\Services\ActivityNotificationService;
+use App\Mail\SessionBookedMail;
 
 class WebsiteController extends Controller
 {
@@ -253,7 +256,7 @@ class WebsiteController extends Controller
             return response()->json(['success' => false, 'message' => 'Please log in to book a session.'], 401);
         }
 
-        Booking::create([
+        $booking = Booking::create([
             'student_id' => Auth::id() ?? 114,
             'educator_id' => $request->educator_id,
             'date' => $request->date,
@@ -263,6 +266,54 @@ class WebsiteController extends Controller
             'message' => $request->message,
             'status' => 'pending',
         ]);
+
+        // Log activity
+        $student = $booking->student;
+        $educator = $booking->educator;
+
+        if ($student) {
+            ActivityNotificationService::logAndNotify(
+                $student,
+                'book_session',
+                'Booking',
+                $booking->id,
+                "Session with {$educator->full_name}",
+                null,
+                [
+                    'educator_id' => $booking->educator_id,
+                    'date' => $booking->date,
+                    'time' => $booking->time,
+                    'duration' => $booking->duration,
+                    'subject' => $booking->subject,
+                    'status' => $booking->status
+                ],
+                "Booked session with {$educator->full_name} for {$booking->date} at {$booking->time}",
+                ['session_details' => $request->all()]
+            );
+        }
+
+        // Send session booked emails
+        try {
+            // Email to student
+            if ($student) {
+                EmailService::send(
+                    $student->email,
+                    new SessionBookedMail($booking, false), // false = for student
+                    'emails'
+                );
+            }
+
+            // Email to educator
+            if ($educator) {
+                EmailService::send(
+                    $educator->email,
+                    new SessionBookedMail($booking, true), // true = for educator
+                    'emails'
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send session booked emails: ' . $e->getMessage());
+        }
 
         return response()->json(['success' => true, 'message' => 'Session booked successfully!']);
     }
