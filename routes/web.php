@@ -254,11 +254,13 @@ Route::middleware(['auth', 'role:admin'])
     });
 
 // Educator routes
+Route::get('educator-panel/dashboard', [EducatorDashboardController::class, 'index'])->name('educator.dashboard')->middleware(['auth', 'role:educator']);
 
-Route::middleware(['auth', 'role:educator', 'verified'])
+
+Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verified'])
     ->prefix('educator-panel')
     ->group(function () {
-        Route::get('dashboard', [EducatorDashboardController::class, 'index'])->name('educator.dashboard');
+       
         Route::get('/lesson-views/chart', [LessonVideoViewsController::class, 'viewsChart']);
 
         Route::get('profile', [EducatorDashboardController::class, 'profile'])->name('educator.profile');

@@ -127,7 +127,7 @@
                         <div class="mb-3">
                             <label class="glass-landing--form-label">Teaching Levels *</label>
                             <select name="teaching_levels[]" multiple
-                                class="form-select glass-landing--form-select @error('teaching_levels') is-invalid @enderror"
+                                class="select2 form-select glass-landing--form-select @error('teaching_levels') is-invalid @enderror"
                                 required>
                                 @foreach (['Elementary', 'Middle School', 'High School', 'College', 'Professional'] as $level)
                                     <option value="{{ $level }}"
@@ -193,10 +193,10 @@
                     <div class="step hidden-step" id="step3">
                         <div class="mb-3">
                             <label class="glass-landing--form-label">Upload CV *</label>
-                            <input name="govt_id" type="file"
-                                class="form-control glass-landing--form-input @error('govt_id') is-invalid @enderror"
+                            <input name="cv" type="file"
+                                class="form-control glass-landing--form-input @error('cv') is-invalid @enderror"
                                 accept="image/*,application/pdf" required />
-                            @error('govt_id')
+                            @error('cv')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
@@ -251,12 +251,12 @@
                 </div>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <button class="glass-landing--social-btn">
+                        <button disabled class="glass-landing--social-btn">
                             <i class="fab fa-google me-2 text-danger"></i>Sign up with Google
                         </button>
                     </div>
                     <div class="col-md-6">
-                        <button class="glass-landing--social-btn">
+                        <button disabled class="glass-landing--social-btn">
                             <i class="fab fa-facebook me-2 text-primary"></i>Sign up with Facebook
                         </button>
                     </div>
@@ -460,31 +460,114 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            const steps = document.querySelectorAll('.step')
-            const indicators = document.querySelectorAll('.glass-landing--step')
-            let currentStep = 0
+            const steps = document.querySelectorAll('.step');
+            const indicators = document.querySelectorAll('.glass-landing--step');
+            let currentStep = 0;
 
             function showStep(index) {
                 steps.forEach((step, i) =>
                     step.classList.toggle('hidden-step', i !== index)
-                )
+                );
                 indicators.forEach((ind, i) =>
                     ind.classList.toggle('active', i <= index)
-                )
-                currentStep = index
+                );
+                currentStep = index;
+            }
+
+            function validateStep(stepIndex) {
+                const stepEl = steps[stepIndex];
+                if (!stepEl) return true;
+
+                // Clear previous inline validation state
+                stepEl.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                stepEl.querySelectorAll('.invalid-feedback.d-block').forEach(el => el.classList.remove('d-block'));
+
+                let valid = true;
+
+                if (stepIndex === 0) {
+                    // Step 1: required text/email/password + password match
+                    const first = stepEl.querySelector('[name="first_name"]');
+                    const last = stepEl.querySelector('[name="last_name"]');
+                    const email = stepEl.querySelector('[name="email"]');
+                    const password = stepEl.querySelector('[name="password"]');
+                    const passwordConfirmation = stepEl.querySelector('[name="password_confirmation"]');
+
+                    [first, last, email, password, passwordConfirmation].forEach(field => {
+                        if (!field) return;
+                        if (!field.value.trim()) {
+                            field.classList.add('is-invalid');
+                            valid = false;
+                        } else {
+                            field.classList.remove('is-invalid');
+                        }
+                    });
+                    if (password && passwordConfirmation && password.value !== passwordConfirmation.value) {
+                        passwordConfirmation.classList.add('is-invalid');
+                        valid = false;
+                    }
+                } else if (stepIndex === 1) {
+                    // Step 2: primary_subject, at least one teaching_level, hourly_rate
+                    const primarySubject = stepEl.querySelector('[name="primary_subject"]');
+                    const teachingLevels = stepEl.querySelector('[name="teaching_levels[]"]');
+                    const hourlyRate = stepEl.querySelector('[name="hourly_rate"]');
+
+                    if (!primarySubject?.value) {
+                        primarySubject?.classList.add('is-invalid');
+                        valid = false;
+                    } else {
+                        primarySubject?.classList.remove('is-invalid');
+                    }
+
+                    const selectedLevels = teachingLevels ? Array.from(teachingLevels.selectedOptions).map(o => o.value) : [];
+                    if (selectedLevels.length === 0) {
+                        teachingLevels?.classList.add('is-invalid');
+                        valid = false;
+                    } else {
+                        teachingLevels?.classList.remove('is-invalid');
+                    }
+
+                    const rate = hourlyRate?.value?.trim();
+                    if (!rate || isNaN(parseFloat(rate)) || parseFloat(rate) < 5) {
+                        hourlyRate?.classList.add('is-invalid');
+                        valid = false;
+                    } else {
+                        hourlyRate?.classList.remove('is-invalid');
+                    }
+                } else if (stepIndex === 2) {
+                    // Step 3: cv (file), consent (checkbox)
+                    const govtId = stepEl.querySelector('[name="cv"]');
+                    const consent = stepEl.querySelector('[name="consent"]');
+
+                    if (!govtId?.files?.length) {
+                        govtId?.classList.add('is-invalid');
+                        valid = false;
+                    } else {
+                        govtId?.classList.remove('is-invalid');
+                    }
+                    if (!consent?.checked) {
+                        consent?.classList.add('is-invalid');
+                        valid = false;
+                    } else {
+                        consent?.classList.remove('is-invalid');
+                    }
+                }
+
+                return valid;
             }
 
             document.querySelectorAll('.next-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    if (currentStep < steps.length - 1)
-                        showStep(currentStep + 1)
-                })
-            })
+                    if (currentStep >= steps.length - 1) return;
+                    if (!validateStep(currentStep)) return;
+                    showStep(currentStep + 1);
+                });
+            });
+
             document.querySelectorAll('.back-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    if (currentStep > 0) showStep(currentStep - 1)
-                })
-            })
+                    if (currentStep > 0) showStep(currentStep - 1);
+                });
+            });
         </script>
     @endpush
 </x-guest-layout>
