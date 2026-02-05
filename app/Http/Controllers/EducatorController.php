@@ -12,6 +12,8 @@ use App\Mail\EducatorWelcomeMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+
 
 class EducatorController extends Controller
 {
@@ -25,43 +27,49 @@ class EducatorController extends Controller
         $request->validate([
             // Step 1
             'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'email'      => 'required|email|unique:users,email',
-            'password'   => 'required|confirmed|min:6',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|confirmed|min:6',
 
             // Step 2
             'primary_subject' => 'required|string|max:255',
             'teaching_levels' => 'required|array',
-            'hourly_rate'     => 'required|numeric|min:5',
-            'certifications'  => 'nullable|string',
+            'hourly_rate' => 'required|numeric|min:5',
+            'certifications' => 'nullable|string',
             'preferred_teaching_style' => 'nullable|string|max:255',
 
             // Step 3
-            'govt_id'      => 'required|file|mimes:jpeg,png,pdf|max:2048',
+            'cv' => 'required|file|mimes:jpeg,png,pdf|max:2048',
             'degree_proof' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
-            'intro_video'  => 'nullable|file|mimetypes:video/mp4,video/mov|max:51200', // 50MB
-            'consent'      => 'accepted',
+            'intro_video' => 'nullable|file|mimetypes:video/mp4,video/mov|max:51200', // 50MB
+            'consent' => 'accepted',
         ]);
 
         DB::beginTransaction();
+        $cvPath = null;
+        $degreePath = null;
+        $videoPath = null;
         try {
             // Create user
             $user = User::create([
-                'first_name'     => $request->first_name,
+                'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
-                'email'    => $request->email,
+                'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role'     => 'educator',
+                'role' => 'educator',
             ]);
             //send user verification email
-            $user->sendEmailVerificationNotification();
-
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (\Exception $e) {
+                \Log::error('Failed to send email verification notification: ' . $e->getMessage());
+            }
 
             // File uploads
-            if ($request->hasFile('govt_id')) {
-                $govtIdName = time() . '_' . $request->file('govt_id')->getClientOriginalName();
-                $request->file('govt_id')->move(public_path('storage/educators/ids'), $govtIdName);
-                $govtIdPath = 'storage/educators/ids/' . $govtIdName;
+            if ($request->hasFile('cv')) {
+                $cvName = time() . '_' . $request->file('cv')->getClientOriginalName();
+                $request->file('cv')->move(public_path('storage/educators/cvs'), $cvName);
+                $cvPath = 'storage/educators/cvs/' . $cvName;
             }
 
             if ($request->hasFile('degree_proof')) {
@@ -85,7 +93,7 @@ class EducatorController extends Controller
                 'hourly_rate' => $request->hourly_rate,
                 'certifications' => $request->certifications,
                 'preferred_teaching_style' => json_encode($request->preferred_teaching_style),
-                'govt_id_path' => $govtIdPath,
+                'cv_path' => $cvPath,
                 'degree_proof_path' => $degreePath,
                 'intro_video_path' => $videoPath,
                 'consent_verified' => true,
@@ -94,44 +102,48 @@ class EducatorController extends Controller
 
             DB::commit();
 
-            // Send notification to admin about new educator registration
-            try {
-                $adminEmails = User::where('role', 'admin')->pluck('email')->toArray();
-                foreach ($adminEmails as $adminEmail) {
-                    EmailService::send(
-                        $adminEmail,
-                        new AdminNotificationMail(
-                            'info',
-                            [
-                                'educator_name' => $user->full_name,
-                                'educator_email' => $user->email,
-                                'registration_date' => $user->created_at->format('M j, Y g:i A'),
-                                'primary_subject' => $request->primary_subject,
-                                'hourly_rate' => '$' . $request->hourly_rate,
-                                'status' => 'Pending Verification',
-                            ],
-                            'New Educator Registration Requires Review - Ed-Cademy',
-                            'A new educator has registered and requires verification.'
-                        ),
-                        'emails'
-                    );
-                }
-            } catch (\Exception $e) {
-                \Log::error('Failed to send admin notification for educator registration: ' . $e->getMessage());
-            }
-
-            try {
-                event(new EducatorRegistered($user));
-            } catch (\Exception $e) {
-                \Log::error('Educator registration event failed: ' . $e->getMessage());
-            }
+            Session::flash('success', 'Your application has been submitted successfully!');
             auth()->login($user);
 
             return redirect()->route('educator.dashboard')->with('success', 'Your application has been submitted successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            dd($e->getMessage());
-            return back()->with('error', 'An error occurred while submitting.')->withInput();
+            // dd($e->getMessage());
+            return back()
+                ->with('error', 'An error occurred while submitting.' . $e->getMessage())
+                ->withInput();
+        }
+
+        // Send notification to admin about new educator registration
+        try {
+            $adminEmails = User::where('role', 'admin')->pluck('email')->toArray();
+            foreach ($adminEmails as $adminEmail) {
+                EmailService::send(
+                    $adminEmail,
+                    new AdminNotificationMail(
+                        'info',
+                        [
+                            'educator_name' => $user->full_name,
+                            'educator_email' => $user->email,
+                            'registration_date' => $user->created_at->format('M j, Y g:i A'),
+                            'primary_subject' => $request->primary_subject,
+                            'hourly_rate' => '$' . $request->hourly_rate,
+                            'status' => 'Pending Verification',
+                        ],
+                        'New Educator Registration Requires Review - Ed-Cademy',
+                        'A new educator has registered and requires verification.',
+                    ),
+                    'emails',
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send admin notification for educator registration: ' . $e->getMessage());
+        }
+
+        try {
+            event(new EducatorRegistered($user));
+        } catch (\Exception $e) {
+            \Log::error('Educator registration event failed: ' . $e->getMessage());
         }
     }
 }
