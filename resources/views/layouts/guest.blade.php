@@ -16,9 +16,9 @@
     @endif --}}
     <link rel="stylesheet" href="{{ asset('assets/css/website-style.css?v=' . time()) }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/glass-landing.css') }}" />
-
-
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('assets/css/select2-addon.css') }}" />
     @stack('styles')
 </head>
 
@@ -78,6 +78,48 @@
                                     </li>
                                 </ul>
                             </li>
+                        @elseif (auth()->check() && auth()->user()->role == 'educator')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('educator.dashboard') }}">Dashboard</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-user-circle me-1"></i> {{ auth()->user()->first_name }}
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item text-danger" href="{{ route('logout') }}"
+                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            Sign out
+                                        </a>
+                                        <form method="POST" action="{{ route('logout') }}" id="logout-form"
+                                            class="d-none">
+                                            @csrf
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        @elseif (auth()->check() && auth()->user()->role == 'admin')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('admin.dashboard') }}">Dashboard</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-user-circle me-1"></i> {{ auth()->user()->first_name }}
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item text-danger" href="{{ route('logout') }}"
+                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            Sign out
+                                        </a>
+                                        <form method="POST" action="{{ route('logout') }}" id="logout-form"
+                                            class="d-none">
+                                            @csrf
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
                         @else
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('login') }}">Login</a>
@@ -106,19 +148,31 @@
 
 </nav>
 @if (session('success'))
-    <x-alert type="success" :message="session('success')" />
+    <div class="alert alert-success alert-dismissible fade show my-3" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 @endif
 
 @if (session('error'))
-    <x-alert type="error" :message="session('error')" />
+    <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 @endif
 
 @if (session('info'))
-    <x-alert type="info" :message="session('message')" />
+    <div class="alert alert-info alert-dismissible fade show my-3" role="alert">
+        {{ session('info') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 @endif
 
 @if (session('warning'))
-    <x-alert type="warning" :message="session('warning')" />
+    <div class="alert alert-warning alert-dismissible fade show my-3" role="alert">
+        {{ session('warning') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 @endif
 
 {{ $slot }}
@@ -310,6 +364,19 @@
                     console.error('Failed:', err);
                 }
             });
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            width: '100%',
+            placeholder: 'Select an option',
+            allowClear: true,
+
         });
     });
 </script>
