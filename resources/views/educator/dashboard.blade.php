@@ -1,4 +1,24 @@
 <x-educator-layout>
+    @if (!auth()->user()->hasVerifiedEmail())
+        <div class="alert alert-warning d-flex align-items-center gap-2 mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Your email address is not verified.
+            <form class="ms-auto" method="POST" action="{{ route('verification.send') }}">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    Resend Verification Email
+                </button>
+            </form>
+        </div>
+    @endif
+
+    @if (auth()->user()->educatorProfile->status == 'pending')
+        <div class="alert alert-info d-flex align-items-center gap-2 mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Your educator profile is <strong>pending approval</strong>. You will be notified once the review is
+            complete.
+        </div>
+    @endif
     <section id="section-overview" class="mb-4">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
             <h2 class="h4 mb-0">Overview</h2>
