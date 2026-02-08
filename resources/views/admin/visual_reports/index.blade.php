@@ -45,7 +45,7 @@
         <div class="col-md-3">
             <div class="kpi-card">
                 <div class="text-muted">Revenue</div>
-                <div class="kpi-value">AED {{ number_format($kpis['revenue'], 0) }}</div>
+                <div class="kpi-value">$ {{ number_format($kpis['revenue'], 0) }}</div>
             </div>
         </div>
         <div class="col-md-3">
@@ -150,7 +150,7 @@
                             },
                             {
                                 type: 'line',
-                                label: 'Revenue (AED)',
+                                label: 'Revenue ($)',
                                 data: revenue,
                                 yAxisID: 'y1',
                                 borderColor: '#16a34a',
@@ -187,7 +187,7 @@
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Revenue (AED)'
+                                    text: 'Revenue ($)'
                                 }
                             }
                         }

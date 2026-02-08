@@ -43,7 +43,7 @@
             <div class="kpi-card p-3">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <div class="kpi-value">AED {{ number_format($totalUpcomingAmount, 2) }}</div>
+                        <div class="kpi-value">$ {{ number_format($totalUpcomingAmount, 2) }}</div>
                         <div class="kpi-label">Total Amount</div>
                     </div>
                     <div class="kpi-icon">
@@ -164,7 +164,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="fw-semibold text-success">AED
+                                    <span class="fw-semibold text-success">$
                                         {{ number_format($payout->amount, 2) }}</span>
                                 </td>
                                 <td>
@@ -288,7 +288,7 @@
                         <h6>Payout Information</h6>
                         <table class="table table-sm">
                             <tr><td><strong>Educator:</strong></td><td>${data.payout.educator ? data.payout.educator.full_name : 'N/A'}</td></tr>
-                            <tr><td><strong>Amount:</strong></td><td>AED ${parseFloat(data.payout.amount).toFixed(2)}</td></tr>
+                            <tr><td><strong>Amount:</strong></td><td>$ ${parseFloat(data.payout.amount).toFixed(2)}</td></tr>
                             <tr><td><strong>Status:</strong></td><td><span class="badge bg-warning">Pending</span></td></tr>
                             <tr><td><strong>Created:</strong></td><td>${new Date(data.payout.created_at).toLocaleString()}</td></tr>
                             <tr><td><strong>Description:</strong></td><td>${data.payout.description || 'N/A'}</td></tr>
@@ -314,7 +314,7 @@
                             html += `
                                     <tr>
                                         <td><small>${source}</small></td>
-                                        <td>AED ${parseFloat(earning.net_amount).toFixed(2)}</td>
+                                        <td>$ ${parseFloat(earning.net_amount).toFixed(2)}</td>
                                         <td><small>${new Date(earning.earned_at).toLocaleDateString()}</small></td>
                                     </tr>`;
                         });
@@ -324,7 +324,7 @@
                             </table>
                         </div>
                         <div class="mt-2 pt-2 border-top">
-                            <strong>Total: AED ${parseFloat(data.total_amount).toFixed(2)}</strong>
+                            <strong>Total: $ ${parseFloat(data.total_amount).toFixed(2)}</strong>
                         </div>
                     </div>
                 </div>`;

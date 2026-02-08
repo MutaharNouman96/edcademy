@@ -40,7 +40,7 @@
                         <td>{{ $payment->transaction_id ?? 'N/A' }}</td>
                         <td>{{ $payment->course ? Str::limit($payment->course->title, 30) : 'N/A' }}</td>
                         <td>{{ $payment->educator ? $payment->educator->full_name : 'N/A' }}</td>
-                        <td>AED {{ number_format($payment->gross_amount, 2) }}</td>
+                        <td>$ {{ number_format($payment->gross_amount, 2) }}</td>
                         <td>
                             <span class="badge text-bg-{{ $payment->status === 'completed' ? 'success' : ($payment->status === 'pending' ? 'warning' : 'danger') }}">
                                 {{ ucfirst($payment->status) }}

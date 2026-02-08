@@ -82,8 +82,8 @@
             <div class="kpi-card p-3">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="kpi-label mb-1">Revenue (AED)</div>
-                        <div class="kpi-value">AED {{ number_format($totalRevenue, 0) }}</div>
+                        <div class="kpi-label mb-1">Revenue ($)</div>
+                        <div class="kpi-value">$ {{ number_format($totalRevenue, 0) }}</div>
                     </div>
                     <span class="kpi-icon"><i class="bi bi-cash-coin"></i></span>
                 </div>
@@ -91,7 +91,7 @@
                     <div class="progress brand" style="height: 6px">
                         <div class="progress-bar" role="progressbar" style="width: 80%"></div>
                     </div>
-                    <small class="text-muted">Revenue this period: AED {{ number_format($revenueCurrentPeriod, 0) }}</small>
+                    <small class="text-muted">Revenue this period: $ {{ number_format($revenueCurrentPeriod, 0) }}</small>
                 </div>
             </div>
         </div>

@@ -35,7 +35,7 @@ ation Tabs -->
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Total Earnings</div>
-                    <div class="kpi-value">AED </br> {{ number_format($totalEarnings, 2) }}</div>
+                    <div class="kpi-value">$ </br> {{ number_format($totalEarnings, 2) }}</div>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-cash-coin"></i></span>
             </div>
@@ -46,7 +46,7 @@ ation Tabs -->
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Pending</div>
-                    <div class="kpi-value">AED </br> {{ number_format($pendingEarnings, 2) }}</div>
+                    <div class="kpi-value">$ </br> {{ number_format($pendingEarnings, 2) }}</div>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-clock"></i></span>
             </div>
@@ -57,7 +57,7 @@ ation Tabs -->
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Approved</div>
-                    <div class="kpi-value">AED </br> {{ number_format($approvedEarnings, 2) }}</div>
+                    <div class="kpi-value">$ </br> {{ number_format($approvedEarnings, 2) }}</div>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-check-circle"></i></span>
             </div>
@@ -68,7 +68,7 @@ ation Tabs -->
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Paid</div>
-                    <div class="kpi-value">AED </br> {{ number_format($paidEarnings, 2) }}</div>
+                    <div class="kpi-value">$ </br> {{ number_format($paidEarnings, 2) }}</div>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-check2-all"></i></span>
             </div>
@@ -177,7 +177,7 @@ ation Tabs -->
                                 </td>
                                 <td>{{ Str::limit($earning->description, 50) }}</td>
                                 <td>
-                                    <strong>AED {{ number_format($earning->net_amount, 2) }}</strong>
+                                    <strong>$ {{ number_format($earning->net_amount, 2) }}</strong>
                                     @if($earning->gross_amount != $earning->net_amount)
                                     <br><small class="text-muted">Gross: {{ number_format($earning->gross_amount, 2) }}</small>
                                     @endif
@@ -324,7 +324,7 @@ ation Tabs -->
                             @forelse($payouts ?? [] as $payout)
                             <tr>
                                 <td>{{ $payout->educator ? $payout->educator->full_name : 'N/A' }}</td>
-                                <td><strong>AED {{ number_format($payout->amount, 2) }}</strong></td>
+                                <td><strong>$ {{ number_format($payout->amount, 2) }}</strong></td>
                                 <td>
                                     <span class="badge text-bg-{{
                                         $payout->status === 'completed' ? 'success' :
@@ -454,7 +454,7 @@ ation Tabs -->
                             <tr>
                                 <td>{{ $payout->educator ? $payout->educator->full_name : 'N/A' }}</td>
                                 <td><code>{{ $payout->payment_id }}</code></td>
-                                <td><strong>AED {{ number_format($payout->amount, 2) }}</strong></td>
+                                <td><strong>$ {{ number_format($payout->amount, 2) }}</strong></td>
                                 <td>
                                     <span class="badge text-bg-{{
                                         $payout->status === 'completed' ? 'success' :

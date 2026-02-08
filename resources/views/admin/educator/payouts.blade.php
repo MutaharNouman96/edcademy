@@ -39,8 +39,8 @@
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $payout->transaction_id ?? 'N/A' }}</td>
                         <td>{{ $payout->student ? $payout->student->full_name : 'N/A' }}</td>
-                        <td>AED {{ number_format($payout->gross_amount, 2) }}</td>
-                        <td>AED {{ number_format($payout->net_amount, 2) }}</td>
+                        <td>$ {{ number_format($payout->gross_amount, 2) }}</td>
+                        <td>$ {{ number_format($payout->net_amount, 2) }}</td>
                         <td>
                             <span class="badge text-bg-{{ $payout->status === 'completed' ? 'success' : ($payout->status === 'pending' ? 'warning' : 'danger') }}">
                                 {{ ucfirst($payout->status) }}

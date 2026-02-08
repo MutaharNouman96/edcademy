@@ -38,7 +38,7 @@
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $earning->course ? $earning->course->title : 'N/A' }}</td>
                         <td>{{ ucfirst($earning->type ?? 'N/A') }}</td>
-                        <td>AED {{ number_format($earning->net_amount, 2) }}</td>
+                        <td>$ {{ number_format($earning->net_amount, 2) }}</td>
                         <td>
                             <span class="badge text-bg-{{ $earning->status === 'paid' ? 'success' : ($earning->status === 'pending' ? 'warning' : 'danger') }}">
                                 {{ ucfirst($earning->status) }}

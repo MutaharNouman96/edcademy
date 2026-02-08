@@ -40,7 +40,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Total Earnings</div>
-                    <div class="kpi-value">AED {{ number_format($totalEarnings, 2) }}</div>
+                    <div class="kpi-value">$ {{ number_format($totalEarnings, 2) }}</div>
                     <small class="text-muted">Net amount to educators</small>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-cash-coin"></i></span>
@@ -54,7 +54,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Gross Revenue</div>
-                    <div class="kpi-value">AED {{ number_format($totalGross, 2) }}</div>
+                    <div class="kpi-value">$ {{ number_format($totalGross, 2) }}</div>
                     <small class="text-muted">Total revenue before commission</small>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-graph-up"></i></span>
@@ -68,7 +68,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Platform Commission</div>
-                    <div class="kpi-value">AED {{ number_format($totalPlatformCommission, 2) }}</div>
+                    <div class="kpi-value">$ {{ number_format($totalPlatformCommission, 2) }}</div>
                     <small class="text-muted">Platform's share</small>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-building"></i></span>
@@ -82,7 +82,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Net Revenue</div>
-                    <div class="kpi-value">AED {{ number_format($netRevenue, 2) }}</div>
+                    <div class="kpi-value">$ {{ number_format($netRevenue, 2) }}</div>
                     <small class="text-muted">Platform profit</small>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-trophy"></i></span>
@@ -105,7 +105,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Total Payouts</div>
-                    <div class="kpi-value">AED {{ number_format($totalPayouts, 2) }}</div>
+                    <div class="kpi-value">$ {{ number_format($totalPayouts, 2) }}</div>
                     <small class="text-muted">Amount paid to educators</small>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-wallet2"></i></span>
@@ -119,7 +119,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Pending Payouts</div>
-                    <div class="kpi-value">AED {{ number_format($pendingPayouts, 2) }}</div>
+                    <div class="kpi-value">$ {{ number_format($pendingPayouts, 2) }}</div>
                     <small class="text-muted">Awaiting processing</small>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-clock"></i></span>
@@ -133,7 +133,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-label mb-1">Processed Payouts</div>
-                    <div class="kpi-value">AED {{ number_format($processedPayouts, 2) }}</div>
+                    <div class="kpi-value">$ {{ number_format($processedPayouts, 2) }}</div>
                     <small class="text-muted">Successfully paid</small>
                 </div>
                 <span class="kpi-icon"><i class="bi bi-check-circle"></i></span>
