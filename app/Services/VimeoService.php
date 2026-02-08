@@ -3,12 +3,63 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
-use Vimeo\Laravel\Facades\Vimeo; // Import the Facade
+use Vimeo\Laravel\Facades\Vimeo;
 
 class VimeoService
 {
-   
+    /**
+     * Verify the configured Vimeo access token and return its permissions (scopes).
+     * Uses GET https://api.vimeo.com/oauth/verify with the token from config.
+     *
+     * Test in tinker: (new \App\Services\VimeoService())->verifyAccessToken()
+     *
+     * @param string|null $accessToken Optional token to verify; defaults to config value (VIMEO_ACCESS).
+     * @return array{success: bool, status?: int, body?: array, scopes?: string[], message?: string}
+     */
+    public function verifyAccessToken(?string $accessToken = null): array
+    {
+        $token = $accessToken ?? config('vimeo.connections.main.access_token');
+
+        if (empty($token)) {
+            return [
+                'success' => false,
+                'message' => 'No access token configured. Set VIMEO_ACCESS in .env or pass a token.',
+            ];
+        }
+
+        try {
+            if ($accessToken !== null) {
+                $http = Http::withToken($token)
+                    ->withHeaders(['Accept' => 'application/vnd.vimeo.*+json;version=3.4'])
+                    ->get('https://api.vimeo.com/oauth/verify');
+                $status = $http->status();
+                $body = $http->json() ?? [];
+            } else {
+                $response = Vimeo::request('/oauth/verify', [], 'GET');
+                $body = $response['body'] ?? [];
+                $status = $response['status'] ?? 0;
+            }
+
+            $scopes = isset($body['scope']) && is_string($body['scope'])
+                ? explode(' ', trim($body['scope']))
+                : [];
+
+            return [
+                'success' => $status === 200,
+                'status' => $status,
+                'body' => $body,
+                'scopes' => $scopes,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Verify request failed: ' . $e->getMessage(),
+            ];
+        }
+    }
+
     public function uploadVideo(Request $request): array
     {
         // 1. Validation (Highly Recommended)
