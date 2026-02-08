@@ -13,7 +13,7 @@ class VimeoService
     {
         // 1. Validation (Highly Recommended)
         $validated = Validator::make($request->all(), [
-            'video_path' => 'required|file|mimes:mp4,mov,avi,wmv|max:512000', // 500MB max (Laravel max is in KB)
+            'video' => 'required|file|mimes:mp4,mov,avi,wmv|max:512000', // 500MB max (Laravel max is in KB)
             'title'      => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
@@ -27,7 +27,7 @@ class VimeoService
         }
 
         // Get the uploaded file path
-        $fullPathToVideo = $request->file('video_path')->getRealPath();
+        $fullPathToVideo = $request->file('video')->getRealPath();
 
         // 2. Define Video Metadata
         $videoData = [
