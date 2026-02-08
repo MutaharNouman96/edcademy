@@ -107,7 +107,7 @@
                         </div>
                         <div class="col-md-6">
                             <strong>Hourly Rate:</strong>
-                            <p class="mt-1">{{ $educator->educatorProfile->hourly_rate ? 'AED ' . number_format($educator->educatorProfile->hourly_rate, 0) : 'N/A' }}</p>
+                            <p class="mt-1">{{ $educator->educatorProfile->hourly_rate ? '$ ' . number_format($educator->educatorProfile->hourly_rate, 0) : 'N/A' }}</p>
                         </div>
                     </div>
                 </div>
@@ -133,7 +133,7 @@
                                     <div class="mt-2">
                                         <small class="text-muted">
                                             @if($course->price > 0)
-                                                AED {{ number_format($course->price, 0) }}
+                                                $ {{ number_format($course->price, 0) }}
                                             @else
                                                 Free
                                             @endif

@@ -201,7 +201,7 @@
                     <!-- Step 3 -->
                     <div class="step hidden-step" id="step3">
                         <div class="mb-3">
-                            <label class="glass-landing--form-label">Upload CV *</label>
+                            <label class="glass-landing--form-label">Upload CV (Max 5MB) *</label>
                             <input name="cv" type="file"
                                 class="form-control glass-landing--form-input @error('cv') is-invalid @enderror"
                                 accept="image/*,application/pdf" required />
@@ -211,7 +211,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="glass-landing--form-label">Upload Degree / Certification Proof</label>
+                            <label class="glass-landing--form-label">Upload Degree / Certification Proof (Max 5MB)</label>
                             <input name="degree_proof" type="file"
                                 class="form-control glass-landing--form-input @error('degree_proof') is-invalid @enderror"
                                 accept="image/*,application/pdf" />
@@ -221,7 +221,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="glass-landing--form-label">Intro Video (Optional)</label>
+                            <label class="glass-landing--form-label">Intro Video (Optional, Max 50MB)</label>
                             <input name="intro_video" type="file"
                                 class="form-control glass-landing--form-input @error('intro_video') is-invalid @enderror"
                                 accept="video/*" />

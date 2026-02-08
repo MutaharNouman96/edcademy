@@ -83,7 +83,7 @@
                         </td>
                         <td>
                             @if($course->price > 0)
-                                AED {{ number_format($course->price, 0) }}
+                                $ {{ number_format($course->price, 0) }}
                             @else
                                 Free
                             @endif

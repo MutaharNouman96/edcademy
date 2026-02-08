@@ -142,7 +142,7 @@ class DashboardController extends Controller
                                                 'transaction_id' => $payment->transaction_id ?? 'N/A',
                                                 'student' => $payment->student ? $payment->student->full_name : 'Unknown',
                                                 'educator' => $payment->educator ? $payment->educator->full_name : 'Unknown',
-                                                'amount' => 'AED ' . number_format($payment->gross_amount, 0),
+                                                'amount' => '$ ' . number_format($payment->gross_amount, 0),
                                                 'status' => ucfirst($payment->status),
                                                 'date' => $payment->created_at->format('M d, Y')
                                             ];

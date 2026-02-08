@@ -176,7 +176,7 @@
                             @if($lesson->free)
                             <span class="badge bg-success">Free</span>
                             @else
-                            <span class="badge bg-primary">AED {{ number_format($lesson->price, 2) }}</span>
+                            <span class="badge bg-primary">$ {{ number_format($lesson->price, 2) }}</span>
                             @endif
                         </td>
                         <td>
