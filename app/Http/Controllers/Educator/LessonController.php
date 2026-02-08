@@ -58,10 +58,14 @@ class LessonController extends Controller
         try {
             // Handle video upload
             if ($request->hasFile('video_path')) {
-                // $data['video_path'] = $request->file('video_path')->store('lessons/videos', 'public');
                 $vimeoService = new VimeoService();
                 $uploadResponse = $vimeoService->uploadVideo($request);
-                dd($uploadResponse);
+                if (empty($uploadResponse['success']) || $uploadResponse['success'] !== true) {
+                    return response()->json([
+                        'error' => $uploadResponse['message'] ?? 'Video upload failed',
+                        'errors' => $uploadResponse['errors'] ?? null,
+                    ], 422);
+                }
                 $data['video_path'] = $uploadResponse['link'];
             }
 
