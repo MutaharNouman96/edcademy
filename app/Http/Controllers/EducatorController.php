@@ -39,8 +39,8 @@ class EducatorController extends Controller
             'preferred_teaching_style' => 'nullable|string|max:255',
 
             // Step 3
-            'cv' => 'required|file|mimes:jpeg,png,pdf|max:2048',
-            'degree_proof' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
+            'cv' => 'required|file|mimes:jpeg,png,pdf|max:6000',
+            'degree_proof' => 'nullable|file|mimes:jpeg,png,pdf|max:6000',
             'intro_video' => 'nullable|file|mimetypes:video/mp4,video/mov|max:51200', // 50MB
             'consent' => 'accepted',
         ]);
