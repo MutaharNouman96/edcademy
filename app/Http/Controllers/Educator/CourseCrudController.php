@@ -18,7 +18,7 @@ use App\Services\ActivityNotificationService;
 use App\Mail\CourseSubmittedMail;
 use App\Mail\AdminNotificationMail;
 use App\Models\User;
-
+use App\Services\VimeoService;
 
 class CourseCrudController extends Controller
 {
@@ -202,7 +202,6 @@ class CourseCrudController extends Controller
         // Handle status
         if ($validated['publish_option'] === 'now') {
             $validated['status'] = 'published';
-          
         } elseif ($validated['publish_option'] === 'schedule') {
             $validated['status'] = 'scheduled';
         } else {
@@ -340,6 +339,19 @@ class CourseCrudController extends Controller
                 $validated['worksheets'] = "storage/lessons/worksheets/" . $fileName;
             }
 
+            if ($request->hasFile('video')) {
+                $vimeoService = new VimeoService();
+                $uploadResponse = $vimeoService->uploadVideo($request);
+                if (empty($uploadResponse['success']) || $uploadResponse['success'] !== true) {
+                    return response()->json([
+                        'error' => $uploadResponse['message'] ?? 'Video upload failed',
+                        'errors' => $uploadResponse['errors'] ?? null,
+                    ], 422);
+                }
+                $data['video_path'] = $uploadResponse['link'];
+            }
+
+
             $lesson = $section->lessons()->create($validated);
 
             return response()->json([
@@ -388,40 +400,40 @@ class CourseCrudController extends Controller
         $validated['free'] = $request->has('free');
         $validated['preview'] = $request->has('preview');
 
-        try{
-        // Handle file uploads
-        if ($request->hasFile('materials')) {
-            if ($lesson->materials) {
-                Storage::disk('public')->delete($lesson->materials);
+        try {
+            // Handle file uploads
+            if ($request->hasFile('materials')) {
+                if ($lesson->materials) {
+                    Storage::disk('public')->delete($lesson->materials);
+                }
+                $validated['materials'] = $request->file('materials')->store('lessons/materials', 'public');
             }
-            $validated['materials'] = $request->file('materials')->store('lessons/materials', 'public');
-        }
 
-        if ($request->hasFile('worksheets')) {
-            if ($lesson->worksheets) {
-                Storage::disk('public')->delete($lesson->worksheets);
+            if ($request->hasFile('worksheets')) {
+                if ($lesson->worksheets) {
+                    Storage::disk('public')->delete($lesson->worksheets);
+                }
+                $validated['worksheets'] = $request->file('worksheets')->store('lessons/worksheets', 'public');
             }
-            $validated['worksheets'] = $request->file('worksheets')->store('lessons/worksheets', 'public');
-        }
-        $validated['free'] = $request->has('free');
-        $validated['preview'] = $request->has('preview');
+            $validated['free'] = $request->has('free');
+            $validated['preview'] = $request->has('preview');
 
-        $lesson->update($validated);
+            $lesson->update($validated);
 
-        return response()->json([
-            'message' => 'Lesson updated successfully',
-            'lesson' => [
-                'id' => $lesson->id,
-                'title' => $lesson->title,
-                'duration' => $lesson->duration,
-                'free' => $lesson->free,
-                'preview' => $lesson->preview,
-                'status' => $lesson->status,
-                'section_id' => $lesson->section_id,
-                'destroy_url' => route('educator.courses.crud.lessons.destroy', $lesson),
-            ]
-        ]);
-        }catch(\Exception $e){
+            return response()->json([
+                'message' => 'Lesson updated successfully',
+                'lesson' => [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                    'duration' => $lesson->duration,
+                    'free' => $lesson->free,
+                    'preview' => $lesson->preview,
+                    'status' => $lesson->status,
+                    'section_id' => $lesson->section_id,
+                    'destroy_url' => route('educator.courses.crud.lessons.destroy', $lesson),
+                ]
+            ]);
+        } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
