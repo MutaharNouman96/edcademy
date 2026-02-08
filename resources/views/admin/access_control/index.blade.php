@@ -24,7 +24,7 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label">Permissions</label>
-                            <select name="permissions[]" class="form-select" multiple size="10">
+                            <select name="permissions[]" class="form-select select2" multiple size="10">
                                 @foreach ($permissions as $permission)
                                     <option value="{{ $permission->name }}"
                                         @selected(in_array($permission->name, old('permissions', []), true))>
@@ -32,7 +32,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <div class="form-text">Hold Cmd/Ctrl to select multiple.</div>
+                            {{-- <div class="form-text">Hold Cmd/Ctrl to select multiple.</div> --}}
                         </div>
                         <div class="col-12">
                             <button class="btn btn-primary" type="submit">

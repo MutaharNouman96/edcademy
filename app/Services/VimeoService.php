@@ -13,7 +13,7 @@ class VimeoService
     {
         // 1. Validation (Highly Recommended)
         $validated = Validator::make($request->all(), [
-            'video_path' => 'required|file|mimes:mp4,mov,avi,wmv|max:500000', // Example rules: 500MB max
+            'video_path' => 'required|file|mimes:mp4,mov,avi,wmv|max:512000', // 500MB max (Laravel max is in KB)
             'title'      => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
@@ -45,18 +45,17 @@ class VimeoService
             // The response contains the video URI (e.g., '/videos/123456789')
             $uri = Vimeo::upload($fullPathToVideo, $videoData);
 
-            // 4. Extract Video ID (optional, but often useful)
+            // 4. Extract Video ID and build embed URL
             // The URI is typically in the format /videos/123456789
             $videoId = basename($uri);
-
-            // You can now store the $uri or $videoId in your database
-            // to reference the video later (e.g., for embedding or management).
+            $embedUrl = 'https://player.vimeo.com/video/' . $videoId;
 
             return [
                 'success' => true,
                 'message' => 'Video uploaded successfully',
                 'video_id' => $videoId,
-                'video_uri' => $uri
+                'video_uri' => $uri,
+                'link' => $embedUrl, // Embed URL for player; also used by LessonController
             ];
         } catch (\Exception $e) {
             // Handle Vimeo API errors or other exceptions

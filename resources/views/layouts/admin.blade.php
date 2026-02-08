@@ -9,11 +9,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="{{ asset('assets/css/select2-addon.css') }}" rel="stylesheet" />
+
     <style>
-        .cke_notifications_area{
+        .cke_notifications_area {
             display: none !important;
         }
+
         :root {
             --brand: #0b3c77;
             --light: #f8fafc;
@@ -88,8 +91,9 @@
                             <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->first_name }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                           
-                            <li><a class="dropdown-item" href="{{ route('admin.settings.index') }}">App & Account Settings</a></li>
+
+                            <li><a class="dropdown-item" href="{{ route('admin.settings.index') }}">App & Account
+                                    Settings</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -107,7 +111,7 @@
         <div class="row">
             <!-- Sidebar -->
             <aside class="col-md-3 col-lg-2 p-3 sidebar">
-                
+
                 <nav class="nav flex-column gap-1">
                     <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                         href="{{ route('admin.dashboard') }}">
@@ -204,6 +208,9 @@
             </main>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         // Dashboard-only charts (guarded so other admin pages don't error)
@@ -315,6 +322,17 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'Select an option',
+                allowClear: true, 
+            });
+        });
+    </script>
 
     @stack('scripts')
 </body>
