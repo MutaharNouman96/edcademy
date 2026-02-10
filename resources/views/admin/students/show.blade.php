@@ -131,15 +131,16 @@
                             <h5 class="mb-3">Purchased Courses ({{ $student->purchasedCourses->count() }})</h5>
                             <div class="row g-3">
                                 @foreach ($student->purchasedCourses->take(6) as $course)
+                               
                                     <div class="col-md-6">
                                         <div class="card h-100">
                                             <div class="card-body">
-                                                <h6 class="card-title">{{ Str::limit($course->title, 40) }}</h6>
+                                                <h6 class="card-title">{{ Str::limit($course->purchasable->title, 40) }}</h6>
                                                 <p class="card-text text-muted small">
-                                                    {{ Str::limit(strip_tags($course->description), 80) }}</p>
+                                                    {{ Str::limit(strip_tags($course->purchasable->description), 80) }}</p>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <span
-                                                        class="badge bg-secondary">{{ ucfirst($course->level ?? 'N/A') }}</span>
+                                                        class="badge bg-secondary">{{ ucfirst($course->purchasable->level ?? 'N/A') }}</span>
                                                     <small
                                                         class="text-muted">{{ $course->purchasable->educator ? $course->purchasable->educator->full_name : 'N/A' }}</small>
                                                 </div>

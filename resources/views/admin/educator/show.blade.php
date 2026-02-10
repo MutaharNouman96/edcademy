@@ -15,6 +15,9 @@
         <a href="{{ route('admin.manage.educators') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i>Back to Educators
         </a>
+        <a href="{{ route('admin.educators.edit', $educator->id) }}" class="btn btn-outline-warning">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
         <form method="POST" action="{{ route('admin.educators.status', $educator->id) }}" class="d-inline">
             @csrf
             @method('PATCH')
@@ -32,6 +35,8 @@
         </div>
     </div>
 </div>
+
+@php $profile = $educator->educatorProfile; @endphp
 
 <div class="row g-4">
     <!-- Main Content -->
@@ -80,34 +85,124 @@
                     </div>
                 </div>
 
-                @if($educator->educatorProfile)
+                @if($profile)
                 <!-- Educator Profile Details -->
                 <div class="border-top pt-4 mb-4">
                     <h5 class="mb-3">Profile Information</h5>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <strong>Bio:</strong>
-                            <p class="mt-1">{{ $educator->educatorProfile->bio ?? 'N/A' }}</p>
+                            <p class="mt-1">{{ $profile->bio ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6">
                             <strong>Experience:</strong>
-                            <p class="mt-1">{{ $educator->educatorProfile->experience ?? 'N/A' }}</p>
+                            <p class="mt-1">{{ $profile->experience ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6">
                             <strong>Qualifications:</strong>
-                            <p class="mt-1">{{ $educator->educatorProfile->qualifications ?? 'N/A' }}</p>
+                            <p class="mt-1">{{ $profile->qualifications ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6">
                             <strong>Specializations:</strong>
-                            <p class="mt-1">{{ $educator->educatorProfile->specializations ?? 'N/A' }}</p>
+                            <p class="mt-1">{{ $profile->specializations ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6">
                             <strong>Teaching Languages:</strong>
-                            <p class="mt-1">{{ $educator->educatorProfile->teaching_languages ?? 'N/A' }}</p>
+                            <p class="mt-1">{{ $profile->teaching_languages ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6">
                             <strong>Hourly Rate:</strong>
-                            <p class="mt-1">{{ $educator->educatorProfile->hourly_rate ? '$ ' . number_format($educator->educatorProfile->hourly_rate, 0) : 'N/A' }}</p>
+                            <p class="mt-1">{{ $profile->hourly_rate ? '$ ' . number_format($profile->hourly_rate, 0) : 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Primary Subject:</strong>
+                            <p class="mt-1">{{ $profile->primary_subject ?? 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Teaching Levels:</strong>
+                            <p class="mt-1">
+                                @php
+                                    $levels = $profile->teaching_levels ? json_decode($profile->teaching_levels, true) : null;
+                                @endphp
+                                {{ is_array($levels) ? implode(', ', $levels) : 'N/A' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents & Media Preview -->
+                <div class="border-top pt-4 mb-4">
+                    <h5 class="mb-3"><i class="bi bi-file-earmark me-2"></i>Documents & Media</h5>
+                    <div class="row g-3">
+                        <!-- CV Preview -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center h-100">
+                                <h6 class="mb-2"><i class="bi bi-file-pdf me-1"></i>CV / Resume</h6>
+                                @if($profile->cv_path)
+                                    @php $cvExt = strtolower(pathinfo($profile->cv_path, PATHINFO_EXTENSION)); @endphp
+                                    @if(in_array($cvExt, ['jpeg', 'jpg', 'png']))
+                                        <img src="{{ asset($profile->cv_path) }}" alt="CV" class="img-fluid rounded mb-2" style="max-height: 200px; object-fit: contain;">
+                                    @else
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
+                                            <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 3rem;"></i>
+                                        </div>
+                                    @endif
+                                    <a href="{{ asset($profile->cv_path) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="bi bi-eye me-1"></i>Preview CV
+                                    </a>
+                                @else
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
+                                        <i class="bi bi-x-circle text-muted" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <span class="badge bg-secondary">Not Uploaded</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Degree Proof Preview -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center h-100">
+                                <h6 class="mb-2"><i class="bi bi-award me-1"></i>Degree Proof</h6>
+                                @if($profile->degree_proof_path)
+                                    @php $degreeExt = strtolower(pathinfo($profile->degree_proof_path, PATHINFO_EXTENSION)); @endphp
+                                    @if(in_array($degreeExt, ['jpeg', 'jpg', 'png']))
+                                        <img src="{{ asset($profile->degree_proof_path) }}" alt="Degree" class="img-fluid rounded mb-2" style="max-height: 200px; object-fit: contain;">
+                                    @else
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
+                                            <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 3rem;"></i>
+                                        </div>
+                                    @endif
+                                    <a href="{{ asset($profile->degree_proof_path) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="bi bi-eye me-1"></i>Preview Degree
+                                    </a>
+                                @else
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
+                                        <i class="bi bi-x-circle text-muted" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <span class="badge bg-secondary">Not Uploaded</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Intro Video Preview -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center h-100">
+                                <h6 class="mb-2"><i class="bi bi-camera-video me-1"></i>Intro Video</h6>
+                                @if($profile->intro_video_path)
+                                    <video class="w-100 rounded mb-2" style="max-height: 200px;" controls>
+                                        <source src="{{ asset($profile->intro_video_path) }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <a href="{{ asset($profile->intro_video_path) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>Open Full Screen
+                                    </a>
+                                @else
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
+                                        <i class="bi bi-x-circle text-muted" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <span class="badge bg-secondary">Not Uploaded</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -178,7 +273,7 @@
         </div>
 
         <!-- Additional Info -->
-        <div class="kpi-card">
+        <div class="kpi-card mb-4">
             <div class="p-3">
                 <h6 class="mb-3">Additional Information</h6>
                 <dl class="row">
@@ -191,6 +286,29 @@
                     <dt class="col-sm-5">Active:</dt>
                     <dd class="col-sm-7">{{ $educator->is_active ? 'Yes' : 'No' }}</dd>
                 </dl>
+            </div>
+        </div>
+
+        <!-- Send Note / Email -->
+        <div class="kpi-card mb-4">
+            <div class="p-3">
+                <h6 class="mb-3"><i class="bi bi-envelope me-2"></i>Send Email to Educator</h6>
+                <form method="POST" action="{{ route('admin.educators.sendNote', $educator->id) }}">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
+                        <input type="text" name="subject" value="{{ old('subject') }}" class="form-control @error('subject') is-invalid @enderror" placeholder="e.g. Profile Update Required" required>
+                        @error('subject') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Message <span class="text-danger">*</span></label>
+                        <textarea name="body" rows="5" class="form-control @error('body') is-invalid @enderror" placeholder="Write your note here..." required>{{ old('body') }}</textarea>
+                        @error('body') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <button type="submit" class="btn btn-brand w-100">
+                        <i class="bi bi-send me-1"></i>Send Email
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -240,6 +358,18 @@
 
     .card:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-brand {
+        background: var(--brand);
+        border-color: var(--brand);
+        color: #fff;
+    }
+
+    .btn-brand:hover {
+        background: var(--brand-700);
+        border-color: var(--brand-700);
+        color: #fff;
     }
 </style>
 @endpush

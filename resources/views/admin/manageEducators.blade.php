@@ -1,7 +1,12 @@
 
 <x-admin-layout>
 
-<h4 class="mb-3">Manage Educators</h4>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Manage Educators</h4>
+    <a href="{{ route('admin.educators.create') }}" class="btn btn-brand">
+        <i class="bi bi-person-plus me-1"></i>Add New Educator
+    </a>
+</div>
 
 <form method="GET" action="{{ route('admin.manage.educators') }}" class="filter-bar p-3 mb-4">
     <div class="row g-2 align-items-end">
@@ -50,8 +55,11 @@
                         </td>
                         <td>{{ $educator->created_at->format('M d, Y') }}</td>
                         <td class="text-end">
-                            <a href="{{ route('admin.educators.show', $educator->id) }}" class="btn btn-sm btn-outline-primary me-2">
+                            <a href="{{ route('admin.educators.show', $educator->id) }}" class="btn btn-sm btn-outline-primary me-1">
                                 <i class="bi bi-eye"></i> View
+                            </a>
+                            <a href="{{ route('admin.educators.edit', $educator->id) }}" class="btn btn-sm btn-outline-warning me-1">
+                                <i class="bi bi-pencil"></i> Edit
                             </a>
                             <form method="POST" action="{{ route('admin.educators.status', $educator->id) }}" class="d-inline">
                                 @csrf
