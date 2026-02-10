@@ -17,13 +17,15 @@ class EducatorProfile extends Model
         'certifications',
         'preferred_teaching_style',
         'govt_id_path',
-        'degree_proof_path',
-        'intro_video_path',
         'consent_verified',
         'status',
         'verified_at',
         'verified_by',
         'cv_path',
+        'degree_proof_path',
+        'intro_video_path',
+
+
     ];
 
     public function user()

@@ -181,7 +181,12 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::delete('educators/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteEducator'])->name('educators.delete');
 
+        Route::get('educators/create', [App\Http\Controllers\Admin\EducatorController::class, 'create'])->name('educators.create');
+        Route::post('educators', [App\Http\Controllers\Admin\EducatorController::class, 'store'])->name('educators.store');
         Route::get('educators/{id}', [App\Http\Controllers\Admin\EducatorController::class, 'show'])->name('educators.show');
+        Route::get('educators/{id}/edit', [App\Http\Controllers\Admin\EducatorController::class, 'edit'])->name('educators.edit');
+        Route::put('educators/{id}', [App\Http\Controllers\Admin\EducatorController::class, 'update'])->name('educators.update');
+        Route::post('educators/{id}/send-note', [App\Http\Controllers\Admin\EducatorController::class, 'sendNote'])->name('educators.sendNote');
 
         Route::get('educators/{id}/payouts', [App\Http\Controllers\Admin\EducatorController::class, 'payouts'])->name('educators.payouts');
 
