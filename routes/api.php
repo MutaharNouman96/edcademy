@@ -37,6 +37,11 @@ Route::middleware('auth:sanctum')->group(function () {
 // Public API routes (no authentication required)
 Route::get('/educators', [EducatorController::class, 'index'])->name('api.educators.index');
 Route::get('/courses', [CourseController::class, 'index'])->name('api.courses.index');
+
+// Session booking: available slots and dates (public, for educator profile page)
+Route::get('/educator/{id}/available-slots', [\App\Http\Controllers\WebsiteController::class, 'getAvailableSlotsApi'])->name('api.educator.available-slots');
+Route::get('/educator/{id}/available-dates', [\App\Http\Controllers\WebsiteController::class, 'getAvailableDatesApi'])->name('api.educator.available-dates');
+
 Route::get('/test', function() {
     return response()->json(['test' => 'API is working']);
 });

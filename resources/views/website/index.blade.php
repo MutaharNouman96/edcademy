@@ -27,10 +27,13 @@
                     <h2 class="glass-landing--section-title">Why Choose Ed-Cademy?</h2>
 
                     <div class="glass-landing--tab-container">
-                        <button class="btn glass-landing--tab-btn active">Videos</button>
-                        <button class="btn glass-landing--tab-btn">Worksheets</button>
-                        <button class="btn glass-landing--tab-btn">Bundles</button>
-                        <button class="btn glass-landing--tab-btn">Educators</button>
+                        <a href="{{ route('web.courses', ['courseHas=videos']) }}"
+                            class="btn glass-landing--tab-btn active">Videos</a>
+                        <a href="{{ route('web.courses', ['courseHas=worksheets']) }}"
+                            class="btn glass-landing--tab-btn">Worksheets</a>
+                        <a href="{{ route('web.courses', ['courseHas=bundles']) }}"
+                            class="btn glass-landing--tab-btn">Bundles</a>
+                        <a href="{{ route('web.educators.index') }}" class="btn glass-landing--tab-btn">Educators</a>
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-12">
@@ -45,8 +48,8 @@
                                     <div class="glass-landing--card cursor-pointer">
                                         <div style="position: relative" class="">
                                             @if ($course->thumbnail)
-                                                <img src="{{ $course->thumbnail_path }}"
-                                                    alt="Algebra" class="glass-landing--card-img" />
+                                                <img src="{{ $course->thumbnail_path }}" alt="Algebra"
+                                                    class="glass-landing--card-img" />
                                             @else
                                                 <div>
                                                     <div
@@ -103,7 +106,8 @@
                             @foreach ($featuredEducators as $educator)
                                 <div class="glass-landing--educator-profile mt-3 col-6">
                                     @if ($educator->profile_picture)
-                                        <img src="{{ $educator->profile_picture_url }}" alt="{{ $educator->full_name }}" height="100"
+                                        <img src="{{ $educator->profile_picture_url }}"
+                                            alt="{{ $educator->full_name }}" height="100"
                                             class="glass-landing--Educator-avatar" />
                                     @else
                                         <div class="educator-profile-placeholder">
@@ -251,7 +255,7 @@
             <div class="row">
                 @foreach ($trendingCourses as $course)
                     <div class="col-md-4 mb-4">
-                      <x-course-item :course="$course" :itemType="'trending'" />
+                        <x-course-item :course="$course" :itemType="'trending'" />
                     </div>
                 @endforeach
 

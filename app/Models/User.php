@@ -98,6 +98,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(SessionCall::class, 'educator_id');
     }
 
+    /** Weekly availability slots (day + time range) for session booking */
+    public function sessionSchedules()
+    {
+        return $this->hasMany(EducatorSessionSchedule::class, 'educator_id');
+    }
 
     public function earnings()
     {
@@ -265,6 +270,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     public function getProfilePictureUrlAttribute(){
-        return url("public/".$this->profile_picture);
+        return $this->profile_picture ? url("public/".$this->profile_picture) : null    ;
     }
 }

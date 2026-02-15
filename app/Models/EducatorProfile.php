@@ -14,6 +14,7 @@ class EducatorProfile extends Model
         'primary_subject',
         'teaching_levels',
         'hourly_rate',
+        'max_sessions_per_day',
         'certifications',
         'preferred_teaching_style',
         'govt_id_path',

@@ -120,6 +120,7 @@ class EducatorController extends Controller
                 'avg_rating' => $educator->educatorReviews->avg('rating') ?? 0,
                 'educator_reviews_count' => $educator->educatorReviews->count() ?? 0,
                 'students_count' => $educator->students_count ?? 0,
+                'profile_picture_url' => $educator->profile_picture_url ?? null,
             ];
         });
 

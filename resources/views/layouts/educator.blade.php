@@ -89,6 +89,9 @@
                         <a class="nav-link @if (request()->is('educator-panel/sessions*')) active @endif"
                             href="{{ route('educator.sessions.index') }}"><i class="bi bi-calendar3 me-2"></i>
                             Sessions/Bookings</a>
+                        <a class="nav-link @if (request()->is('educator-panel/session-schedule*')) active @endif"
+                            href="{{ route('educator.session-schedule.index') }}"><i class="bi bi-calendar2-range me-2"></i>
+                            Session availability</a>
                         <hr>
 
                         <a class="nav-link @if (request()->is('educator-panel/payouts')) active @endif"
