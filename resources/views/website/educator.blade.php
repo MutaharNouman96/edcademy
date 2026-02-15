@@ -376,24 +376,21 @@ foreach ($starRatings as $star => $count) {
                                 <label class="form-label">
                                     <i class="far fa-calendar me-2"></i>Select Date
                                 </label>
-                                <input type="date" class="form-control" name="date" required>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="booking-date-display" placeholder="Click to pick a date" readonly>
+                                    <button type="button" class="btn btn-outline-secondary" id="open-calendar-btn" title="Choose date"><i class="far fa-calendar-alt"></i></button>
+                                </div>
+                                <input type="hidden" name="date" id="booking-date-iso" value="" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">
                                     <i class="far fa-clock me-2"></i>Select Time
                                 </label>
-                                <select class="form-select" name="time" required>
-                                    <option value="">Choose a time slot</option>
-                                    <option value="09:00">09:00 AM</option>
-                                    <option value="10:00">10:00 AM</option>
-                                    <option value="11:00">11:00 AM</option>
-                                    <option value="13:00">01:00 PM</option>
-                                    <option value="14:00">02:00 PM</option>
-                                    <option value="15:00">03:00 PM</option>
-                                    <option value="16:00">04:00 PM</option>
-                                    <option value="17:00">05:00 PM</option>
+                                <select class="form-select" name="time" id="booking-time-select" required disabled>
+                                    <option value="">Choose a date first</option>
                                 </select>
+                                <small class="text-muted d-block mt-1" id="time-slot-hint">Pick a date to see available times</small>
                             </div>
 
                             <div class="mb-3">
@@ -402,10 +399,11 @@ foreach ($starRatings as $star => $count) {
                                 </label>
                                 <select class="form-select" name="duration" required>
                                     <option value="">Choose duration</option>
-                                    <option value="1">1 hour - ${{ $educator_profile->hourly_rate * 1}}</option>
-                                    <option value="1.5">1.5 hours - ${{ $educator_profile->hourly_rate * 1.5}}</option>
-                                    <option value="2">2 hours - ${{ $educator_profile->hourly_rate * 2}}</option>
-                                    <option value="3">3 hours - ${{ $educator_profile->hourly_rate * 3}}</option>
+                                    @php $hr = $educator_profile->hourly_rate ?? 0; @endphp
+                                    <option value="1">1 hour - ${{ number_format($hr * 1, 2) }}</option>
+                                    <option value="1.5">1.5 hours - ${{ number_format($hr * 1.5, 2) }}</option>
+                                    <option value="2">2 hours - ${{ number_format($hr * 2, 2) }}</option>
+                                    <option value="3">3 hours - ${{ number_format($hr * 3, 2) }}</option>
                                 </select>
                             </div>
 
@@ -508,15 +506,114 @@ foreach ($starRatings as $star => $count) {
         </div>
     </div>
 </div>
+
+<!-- Date picker calendar modal -->
+<div class="modal fade" id="bookingCalendarModal" tabindex="-1" aria-labelledby="bookingCalendarModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookingCalendarModalLabel"><i class="far fa-calendar-alt me-2"></i>Select a date</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div id="booking-calendar" style="min-height: 380px; width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    @push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.css" rel="stylesheet">
+    @endpush
     @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
         <script>
-            // Book session
+            const educatorId = {{ $educator->id }};
+            const apiBase = '{{ url("/api/educator") }}';
+
+            let bookingCalendar = null;
+            const calendarModalEl = document.getElementById('bookingCalendarModal');
+            const bookingDateIso = document.getElementById('booking-date-iso');
+            const bookingDateDisplay = document.getElementById('booking-date-display');
+            const bookingTimeSelect = document.getElementById('booking-time-select');
+            const timeSlotHint = document.getElementById('time-slot-hint');
+
+            function formatDisplayDate(isoDate) {
+                const d = new Date(isoDate + 'T12:00:00');
+                return d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            }
+
+            function loadTimeSlots(dateIso) {
+                bookingTimeSelect.disabled = true;
+                bookingTimeSelect.innerHTML = '<option value="">Loading...</option>';
+                timeSlotHint.textContent = 'Loading available times...';
+                fetch(`${apiBase}/${educatorId}/available-slots?date=${encodeURIComponent(dateIso)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        bookingTimeSelect.innerHTML = '<option value="">Choose a time slot</option>';
+                        if (data.success && data.slots && data.slots.length) {
+                            data.slots.forEach(function(t) {
+                                const opt = document.createElement('option');
+                                opt.value = t;
+                                const [h, m] = t.split(':');
+                                const hour = parseInt(h, 10);
+                                const ampm = hour >= 12 ? 'PM' : 'AM';
+                                const hour12 = hour % 12 || 12;
+                                opt.textContent = `${hour12}:${m} ${ampm}`;
+                                bookingTimeSelect.appendChild(opt);
+                            });
+                            bookingTimeSelect.disabled = false;
+                            timeSlotHint.textContent = data.slots.length + ' slot(s) available';
+                        } else {
+                            timeSlotHint.textContent = 'No slots available this day';
+                        }
+                    })
+                    .catch(function() {
+                        bookingTimeSelect.innerHTML = '<option value="">Error loading slots</option>';
+                        timeSlotHint.textContent = 'Could not load times. Try again.';
+                    });
+            }
+
+            calendarModalEl.addEventListener('shown.bs.modal', function() {
+                if (!bookingCalendar) {
+                    bookingCalendar = new FullCalendar.Calendar(document.getElementById('booking-calendar'), {
+                        initialView: 'dayGridMonth',
+                        selectable: true,
+                        selectLongPressDelay: 0,
+                        validRange: { start: new Date().toISOString().slice(0, 10) },
+                        headerToolbar: { left: 'prev,next', center: 'title', right: '' },
+                        dateClick: function(info) {
+                            const dateStr = info.dateStr;
+                            bookingDateIso.value = dateStr;
+                            bookingDateDisplay.value = formatDisplayDate(dateStr);
+                            bookingDateIso.setAttribute('value', dateStr);
+                            loadTimeSlots(dateStr);
+                            bootstrap.Modal.getInstance(calendarModalEl).hide();
+                        }
+                    });
+                    bookingCalendar.render();
+                } else {
+                    bookingCalendar.updateSize();
+                }
+            });
+
+            function openCalendarModal() {
+                const modal = bootstrap.Modal.getOrCreateInstance(calendarModalEl);
+                modal.show();
+            }
+
+            document.getElementById('open-calendar-btn').addEventListener('click', openCalendarModal);
+            bookingDateDisplay.addEventListener('click', openCalendarModal);
+
             function bookSession(event) {
                 event.preventDefault();
-
                 const form = document.getElementById('booking-form');
+                if (!bookingDateIso.value) {
+                    alert('Please select a date first.');
+                    return;
+                }
                 const formData = new FormData(form);
-                const educatorId = {{ $educator->id }}; // Assuming educator ID is available in the blade
+                formData.set('date', bookingDateIso.value);
                 formData.append('educator_id', educatorId);
 
                 fetch("{{ route('book.session') }}", {
@@ -530,10 +627,15 @@ foreach ($starRatings as $star => $count) {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Payment part...');
-                        $('#booking-alert').removeClass('d-none');
+                        document.getElementById('booking-alert').classList.remove('d-none');
+                        form.reset();
+                        bookingDateIso.value = '';
+                        bookingDateDisplay.value = '';
+                        bookingTimeSelect.innerHTML = '<option value="">Choose a date first</option>';
+                        bookingTimeSelect.disabled = true;
+                        timeSlotHint.textContent = 'Pick a date to see available times';
                     } else {
-                        alert('Error booking session: ' + data.message);
+                        alert(data.message || 'Booking failed.');
                     }
                 })
                 .catch(error => {

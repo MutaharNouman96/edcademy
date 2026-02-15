@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             LessonVideoViewSeeder::class,
 
             SessionAndScheduleSeeder::class,
+            EducatorSessionScheduleSeeder::class,
 
             PaymentSeeder::class,
             // EarningSeeder::class,

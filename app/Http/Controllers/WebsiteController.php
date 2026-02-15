@@ -20,6 +20,9 @@ use App\Services\EmailService;
 use App\Services\ActivityNotificationService;
 use App\Mail\SessionBookedMail;
 use App\Models\Policy;
+use App\Models\EducatorProfile;
+use App\Models\EducatorSessionSchedule;
+use Carbon\Carbon;
 
 class WebsiteController extends Controller
 {
@@ -241,20 +244,27 @@ class WebsiteController extends Controller
     public function bookSession(Request $request)
     {
         $request->validate([
-            'date' => 'required|date',
+            'date' => 'required|date|after_or_equal:today',
             'time' => 'required|string',
-            'duration' => 'required|numeric',
-            'subject' => 'required|string',
+            'duration' => 'required|numeric|in:1,1.5,2,3',
+            'subject' => 'required|string|max:255',
             'educator_id' => 'required|exists:users,id',
-            'message' => 'nullable|string',
+            'message' => 'nullable|string|max:1000',
         ]);
 
-        // Here you would typically save the booking to a database.
-        // For now, we'll just return a success response.
-        // You'll need to create a 'Booking' model and migration for this.
-
-                if (!Auth::check()) {
+        if (!Auth::check()) {
             return response()->json(['success' => false, 'message' => 'Please log in to book a session.'], 401);
+        }
+
+        $educatorId = (int) $request->educator_id;
+        $date = $request->date;
+        $time = preg_replace('/^(\d{1,2}):(\d{2}).*$/', '${1}:${2}', $request->time);
+        if (strlen($time) === 4) {
+            $time = '0' . $time;
+        }
+
+        if (!$this->isSlotAvailable($educatorId, $date, $time)) {
+            return response()->json(['success' => false, 'message' => 'This time slot is no longer available. Please choose another.'], 422);
         }
 
         $booking = Booking::create([
@@ -356,5 +366,159 @@ class WebsiteController extends Controller
         $policy = Policy::where('slug', $slug)->first();
         return view('website.policy', compact('policy'));
     }
-}
 
+    // -------------------------------------------------------------------------
+    // Session booking: available slots (API + internal)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Get available time slots for an educator on a given date.
+     * Respects educator_session_schedules and max_sessions_per_day; excludes existing bookings.
+     *
+     * @param int $educatorId
+     * @param string $date Y-m-d
+     * @param int $slotIntervalMinutes
+     * @return array List of time strings ['09:00', '09:30', ...]
+     */
+    public function getAvailableSlots(int $educatorId, string $date, int $slotIntervalMinutes = 30): array
+    {
+        $carbonDate = Carbon::parse($date);
+        $dayOfWeek = $carbonDate->isoWeekday(); // 1=Mon .. 7=Sun
+
+        $schedules = EducatorSessionSchedule::where('educator_id', $educatorId)
+            ->where('day_of_week', $dayOfWeek)
+            ->orderBy('start_time')
+            ->get();
+
+        if ($schedules->isEmpty()) {
+            return [];
+        }
+
+        $profile = EducatorProfile::where('user_id', $educatorId)->first();
+        $maxPerDay = $profile && $profile->max_sessions_per_day ? (int) $profile->max_sessions_per_day : 6;
+
+        $bookings = Booking::where('educator_id', $educatorId)
+            ->whereDate('date', $date)
+            ->whereNotIn('status', ['cancelled'])
+            ->get();
+
+        $existingCount = $bookings->count();
+        if ($existingCount >= $maxPerDay) {
+            return [];
+        }
+        $slotsAllowed = $maxPerDay - $existingCount;
+
+        $slotInterval = $slotIntervalMinutes;
+        $minDurationHours = 1;
+        $candidates = [];
+
+        foreach ($schedules as $schedule) {
+            $start = $this->timeStringToMinutes($schedule->start_time);
+            $end = $this->timeStringToMinutes($schedule->end_time);
+            $minEnd = $start + (int)($minDurationHours * 60);
+            if ($minEnd > $end) {
+                continue;
+            }
+            for ($t = $start; $t + (int)($minDurationHours * 60) <= $end; $t += $slotInterval) {
+                $timeStr = $this->minutesToTimeString($t);
+                $candidates[] = $timeStr;
+            }
+        }
+        $candidates = array_unique($candidates);
+        sort($candidates);
+
+        $available = [];
+        foreach ($candidates as $slotStart) {
+            if (count($available) >= $slotsAllowed) {
+                break;
+            }
+            $slotStartMin = $this->timeStringToMinutes($slotStart);
+            $slotEndMin = $slotStartMin + (int)($minDurationHours * 60);
+
+            $overlaps = false;
+            foreach ($bookings as $b) {
+                $bStart = $this->timeStringToMinutes($b->time);
+                $bEnd = $bStart + (float)$b->duration * 60;
+                if ($slotStartMin < $bEnd && $slotEndMin > $bStart) {
+                    $overlaps = true;
+                    break;
+                }
+            }
+            if (!$overlaps) {
+                $available[] = $slotStart;
+            }
+        }
+
+        return array_values($available);
+    }
+
+    private function timeStringToMinutes($time): int
+    {
+        if ($time instanceof \Carbon\Carbon) {
+            return (int)$time->format('G') * 60 + (int)$time->format('i');
+        }
+        $parts = explode(':', substr($time, 0, 5));
+        return ((int)($parts[0] ?? 0)) * 60 + ((int)($parts[1] ?? 0));
+    }
+
+    private function minutesToTimeString(int $minutes): string
+    {
+        $h = (int)floor($minutes / 60);
+        $m = $minutes % 60;
+        return sprintf('%02d:%02d', $h, $m);
+    }
+
+    /**
+     * API: GET /api/educator/{id}/available-slots?date=Y-m-d
+     */
+    public function getAvailableSlotsApi(Request $request, $educatorId)
+    {
+        $request->validate(['date' => 'required|date|after_or_equal:today']);
+        $educator = User::where('id', $educatorId)->where('role', 'educator')->first();
+        if (!$educator) {
+            return response()->json(['success' => false, 'message' => 'Educator not found.'], 404);
+        }
+        $slots = $this->getAvailableSlots((int) $educatorId, $request->date);
+        return response()->json(['success' => true, 'slots' => $slots]);
+    }
+
+    /**
+     * API: GET /api/educator/{id}/available-dates?month=Y-m
+     * Returns dates in that month that have at least one available slot (for calendar UI).
+     */
+    public function getAvailableDatesApi(Request $request, $educatorId)
+    {
+        $request->validate(['month' => 'required|date_format:Y-m']);
+        $educator = User::where('id', $educatorId)->where('role', 'educator')->first();
+        if (!$educator) {
+            return response()->json(['success' => false, 'message' => 'Educator not found.'], 404);
+        }
+        $start = Carbon::parse($request->month . '-01');
+        $end = $start->copy()->endOfMonth();
+        $today = Carbon::today();
+        $dates = [];
+        for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
+            if ($d->lt($today)) {
+                continue;
+            }
+            $slots = $this->getAvailableSlots((int) $educatorId, $d->format('Y-m-d'));
+            if (count($slots) > 0) {
+                $dates[] = $d->format('Y-m-d');
+            }
+        }
+        return response()->json(['success' => true, 'dates' => $dates]);
+    }
+
+    /**
+     * Validate that date+time is an available slot (used in bookSession).
+     */
+    private function isSlotAvailable(int $educatorId, string $date, string $time): bool
+    {
+        $slots = $this->getAvailableSlots($educatorId, $date);
+        $timeNorm = substr($time, 0, 5);
+        if (strlen($timeNorm) === 4) {
+            $timeNorm = '0' . $timeNorm;
+        }
+        return in_array($timeNorm, $slots, true);
+    }
+}

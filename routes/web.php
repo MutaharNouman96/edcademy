@@ -279,6 +279,11 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
         Route::get('sessions/create', [SessionCallController::class, 'create'])->name('educator.sessions.create');
         Route::post('sessions/store', [SessionCallController::class, 'store'])->name('educator.sessions.store');
 
+        Route::get('session-schedule', [\App\Http\Controllers\Educator\SessionScheduleController::class, 'index'])->name('educator.session-schedule.index');
+        Route::post('session-schedule', [\App\Http\Controllers\Educator\SessionScheduleController::class, 'store'])->name('educator.session-schedule.store');
+        Route::delete('session-schedule/{id}', [\App\Http\Controllers\Educator\SessionScheduleController::class, 'destroy'])->name('educator.session-schedule.destroy');
+        Route::post('session-schedule/max-sessions', [\App\Http\Controllers\Educator\SessionScheduleController::class, 'updateMaxSessions'])->name('educator.session-schedule.max-sessions');
+
         Route::resource('earnings', EarningController::class)
             ->only(['index', 'show'])
             ->names('educator.earnings');

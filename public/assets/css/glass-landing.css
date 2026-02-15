@@ -4,7 +4,7 @@
     background-size: cover;
     min-height: 100vh;
     position: relative;
-    padding: 120px 0;
+    padding: 180px 0;
 }
 
 .glass-landing--hero::before {
@@ -313,5 +313,9 @@
 
     .glass-landing--stats-number {
         font-size: 3rem;
+    }
+
+    .glass-landing--hero {
+        padding: 120px 0;
     }
 }

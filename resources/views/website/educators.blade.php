@@ -3,8 +3,8 @@
         <!-- Hero Section -->
         <div class="hero-section">
             <div class="container hero-content">
-                <h1 class="text-dark">Find Your Perfect Educator</h1>
-                <p class="text-dark">
+                <h1 class="text-white">Find Your Perfect Educator</h1>
+                <p class="text-white">
                     Connect with expert educators tailored to your learning
                     needs
                 </p>
@@ -24,73 +24,73 @@
                     <!-- Keyword Search -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Search by Name or Keyword</label>
-<div class="search-input-group">
-    <i class="fas fa-search"></i>
-    <input type="text" class="search-input" id="keywordSearch"
-        placeholder="e.g., Math, Physics, Dr. Smith..." />
-</div>
+                        <div class="search-input-group">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="search-input" id="keywordSearch"
+                                placeholder="e.g., Math, Physics, Dr. Smith..." />
+                        </div>
                     </div>
 
                     <!-- Primary Subject -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Primary Subject</label>
-<div class="search-input-group">
-    <i class="fas fa-book"></i>
-    <select class="form-select search-input" id="subjectFilter">
-        <option value="">All Subjects</option>
-        <option value="mathematics">Mathematics</option>
-        <option value="science">Science</option>
-        <option value="programming">Programming</option>
-        <option value="languages">Languages</option>
-        <option value="arts">Arts & Design</option>
-        <option value="business">Business</option>
-        <option value="music">Music</option>
-    </select>
-</div>
+                        <div class="search-input-group">
+                            <i class="fas fa-book"></i>
+                            <select class="form-select search-input" id="subjectFilter">
+                                <option value="">All Subjects</option>
+                                <option value="mathematics">Mathematics</option>
+                                <option value="science">Science</option>
+                                <option value="programming">Programming</option>
+                                <option value="languages">Languages</option>
+                                <option value="arts">Arts & Design</option>
+                                <option value="business">Business</option>
+                                <option value="music">Music</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Teaching Levels -->
                     <div class="col-12 mb-3">
                         <label class="form-label">Teaching Levels</label>
-<div class="filter-chips" id="levelFilters">
-    <div class="filter-chip" data-filter="Elementary">
-        Elementary
-    </div>
-    <div class="filter-chip" data-filter="Middle School">
-        Middle School
-    </div>
-    <div class="filter-chip" data-filter="High School">
-        High School
-    </div>
-    <div class="filter-chip" data-filter="College">
-        College
-    </div>
-    <div class="filter-chip" data-filter="Professional">
-        Professional
-    </div>
-</div>
+                        <div class="filter-chips" id="levelFilters">
+                            <div class="filter-chip" data-filter="Elementary">
+                                Elementary
+                            </div>
+                            <div class="filter-chip" data-filter="Middle School">
+                                Middle School
+                            </div>
+                            <div class="filter-chip" data-filter="High School">
+                                High School
+                            </div>
+                            <div class="filter-chip" data-filter="College">
+                                College
+                            </div>
+                            <div class="filter-chip" data-filter="Professional">
+                                Professional
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Teaching Style -->
                     <div class="col-12 mb-3">
                         <label class="form-label">Preferred Teaching Style</label>
-<div class="filter-chips" id="styleFilters">
-    <div class="filter-chip" data-filter="Hands-on">
-        Hands-on
-    </div>
-    <div class="filter-chip" data-filter="Interactive">
-        Interactive
-    </div>
-    <div class="filter-chip" data-filter="Project-based">
-        Project-based
-    </div>
-    <div class="filter-chip" data-filter="Lecture-based">
-        Lecture-based
-    </div>
-    <div class="filter-chip" data-filter="Visual Learning">
-        Visual Learning
-    </div>
-</div>
+                        <div class="filter-chips" id="styleFilters">
+                            <div class="filter-chip" data-filter="Hands-on">
+                                Hands-on
+                            </div>
+                            <div class="filter-chip" data-filter="Interactive">
+                                Interactive
+                            </div>
+                            <div class="filter-chip" data-filter="Project-based">
+                                Project-based
+                            </div>
+                            <div class="filter-chip" data-filter="Lecture-based">
+                                Lecture-based
+                            </div>
+                            <div class="filter-chip" data-filter="Visual Learning">
+                                Visual Learning
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Hourly Rate Range -->
@@ -109,20 +109,20 @@
                     <!-- Additional Filters -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Additional Filters</label>
-<div class="filter-chips" id="additionalFilters">
-    <div class="filter-chip" data-filter="certified">
-        Certified
-    </div>
-    <div class="filter-chip" data-filter="top_rated">
-        Top Rated
-    </div>
-</div>
+                        <div class="filter-chips" id="additionalFilters">
+                            <div class="filter-chip" data-filter="certified">
+                                Certified
+                            </div>
+                            <div class="filter-chip" data-filter="top_rated">
+                                Top Rated
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Search Button -->
                     <div class="col-12 mt-3">
                         <button type="button" class="search-btn text-dark" id="searchBtn">
-                            <i class="fas fa-search me-2 text-dark"></i>Search Educators
+                            <i class="fas fa-search me-2"></i>Search Educators
                         </button>
                     </div>
 
@@ -131,19 +131,19 @@
 
             <!-- Results Header -->
             <div class="results-header">
-<div class="results-count">
-    <strong id="educatorCount">{{ $educators->total() }}</strong> educators found
-</div>
-<select class="sort-dropdown" id="sortDropdown">
-    <option value="highest_rated">Highest Rated</option>
-    <option value="lowest_price">Lowest Price</option>
-    <option value="highest_price">Highest Price</option>
-    <option value="most_students">Most Students</option>
-    <option value="most_experience">Most Experience</option>
-</select>
+                <div class="results-count">
+                    <strong id="educatorCount">{{ $educators->total() }}</strong> educators found
+                </div>
+                <select class="sort-dropdown" id="sortDropdown">
+                    <option value="highest_rated">Highest Rated</option>
+                    <option value="lowest_price">Lowest Price</option>
+                    <option value="highest_price">Highest Price</option>
+                    <option value="most_students">Most Students</option>
+                    <option value="most_experience">Most Experience</option>
+                </select>
             </div>
 
-                        <div class="row g-4 mb-5" id="educatorGrid">
+            <div class="row g-4 mb-5" id="educatorGrid">
                 @foreach ($educators as $educator)
                     <div class="col-lg-4 col-md-6">
                         <div class="educator-card">
@@ -153,12 +153,13 @@
                                 @if ($educator->educatorProfile && $educator->educatorProfile->is_featured)
                                     <span class="featured-badge">FEATURED</span>
                                 @endif
-                                @if ($educator->is_online) {{-- Assuming 'is_online' attribute exists for user --}}
+                                @if ($educator->is_online)
+                                    {{-- Assuming 'is_online' attribute exists for user --}}
                                     <div class="online-indicator"></div>
                                 @endif
                             </div>
                             <div class="educator-body">
-                                <h3 class="educator-name">{{ $educator->first_name .' '. $educator->last_name }}</h3>
+                                <h3 class="educator-name">{{ $educator->first_name . ' ' . $educator->last_name }}</h3>
                                 <p class="educator-subject">
                                     {{ $educator->educatorProfile->primary_subject ?? 'N/A' }}
                                 </p>
@@ -172,7 +173,6 @@
                                             $emptyStars = 5 - $fullStars - $halfStar;
                                         @endphp
                                         @for ($i = 0; $i < $fullStars; $i++)
-
                                             <i class="fas fa-star"></i>
                                         @endfor
                                         @if ($halfStar)
@@ -228,7 +228,8 @@
                                 <div class="educator-footer">
                                     <div class="hourly-rate">
                                         <span class="rate-label">Starting at</span>
-                                        <span class="rate-amount">${{ $educator->educatorProfile->hourly_rate ?? '0' }}<small>/hr</small></span>
+                                        <span
+                                            class="rate-amount">${{ $educator->educatorProfile->hourly_rate ?? '0' }}<small>/hr</small></span>
                                     </div>
                                     <a href="{{ route('web.educator.show', $educator->id) }}" class="action-btn">
                                         <i class="fas fa-calendar-check me-1"></i>Book
@@ -251,103 +252,104 @@
     </div>
 
     @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const keywordSearch = document.getElementById('keywordSearch');
-            const subjectFilter = document.getElementById('subjectFilter');
-            const levelFilters = document.getElementById('levelFilters');
-            const styleFilters = document.getElementById('styleFilters');
-            const priceRange = document.getElementById('priceRange');
-            const maxPriceSpan = document.getElementById('maxPrice');
-            const additionalFilters = document.getElementById('additionalFilters');
-            const sortDropdown = document.getElementById('sortDropdown');
-            const educatorGrid = document.getElementById('educatorGrid');
-            const educatorCount = document.getElementById('educatorCount');
-            const paginationContainer = document.querySelector('.d-flex.justify-content-center.mt-4');
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const keywordSearch = document.getElementById('keywordSearch');
+                const subjectFilter = document.getElementById('subjectFilter');
+                const levelFilters = document.getElementById('levelFilters');
+                const styleFilters = document.getElementById('styleFilters');
+                const priceRange = document.getElementById('priceRange');
+                const maxPriceSpan = document.getElementById('maxPrice');
+                const additionalFilters = document.getElementById('additionalFilters');
+                const sortDropdown = document.getElementById('sortDropdown');
+                const educatorGrid = document.getElementById('educatorGrid');
+                const educatorCount = document.getElementById('educatorCount');
+                const paginationContainer = document.querySelector('.d-flex.justify-content-center.mt-4');
 
-            // Function to update price display
-            window.updatePrice = function(value) {
-                maxPriceSpan.textContent = '$' + value;
-            };
+                // Function to update price display
+                window.updatePrice = function(value) {
+                    maxPriceSpan.textContent = '$' + value;
+                };
 
-            // Function to toggle chip active state
-            window.toggleChip = function(element) {
-                element.classList.toggle('active');
-            };
+                // Function to toggle chip active state
+                window.toggleChip = function(element) {
+                    element.classList.toggle('active');
+                };
 
-            // Function to collect all filter parameters
-            function collectFilterParams() {
-                const params = {};
+                // Function to collect all filter parameters
+                function collectFilterParams() {
+                    const params = {};
 
-                if (keywordSearch.value) {
-                    params.search = keywordSearch.value;
-                }
-                if (subjectFilter.value) {
-                    params.subject = subjectFilter.value;
-                }
-
-                const selectedLevels = Array.from(levelFilters.children)
-                    .filter(chip => chip.classList.contains('active'))
-                    .map(chip => chip.dataset.filter);
-                if (selectedLevels.length > 0) {
-                    params.levels = selectedLevels;
-                }
-
-                const selectedStyles = Array.from(styleFilters.children)
-                    .filter(chip => chip.classList.contains('active'))
-                    .map(chip => chip.dataset.filter);
-                if (selectedStyles.length > 0) {
-                    params.styles = selectedStyles;
-                }
-
-                params.max_rate = priceRange.value;
-
-                const selectedAdditionalFilters = Array.from(additionalFilters.children)
-                    .filter(chip => chip.classList.contains('active'))
-                    .map(chip => chip.dataset.filter);
-                if (selectedAdditionalFilters.length > 0) {
-                    params.additional_filters = selectedAdditionalFilters;
-                }
-
-                if (sortDropdown.value) {
-                    params.sort_by = sortDropdown.value;
-                }
-
-                return params;
-            }
-
-            // Function to fetch and render educators
-            async function fetchEducators(page = 1) {
-                const params = collectFilterParams();
-                const queryString = new URLSearchParams(params).toString();
-                const url = `{{ url('/api/educators') }}?page=${page}&${queryString}`;
-
-                try {
-                    const response = await fetch(url, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest' // Important for Laravel's AJAX detection
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    if (keywordSearch.value) {
+                        params.search = keywordSearch.value;
+                    }
+                    if (subjectFilter.value) {
+                        params.subject = subjectFilter.value;
                     }
 
-                    const data = await response.json(); // Assuming JSON response
+                    const selectedLevels = Array.from(levelFilters.children)
+                        .filter(chip => chip.classList.contains('active'))
+                        .map(chip => chip.dataset.filter);
+                    if (selectedLevels.length > 0) {
+                        params.levels = selectedLevels;
+                    }
 
-                    // Clear existing educators
-                    educatorGrid.innerHTML = '';
+                    const selectedStyles = Array.from(styleFilters.children)
+                        .filter(chip => chip.classList.contains('active'))
+                        .map(chip => chip.dataset.filter);
+                    if (selectedStyles.length > 0) {
+                        params.styles = selectedStyles;
+                    }
 
-                    // Update educator count
-                    educatorCount.textContent = data.total;
+                    params.max_rate = priceRange.value;
 
-                    // Render new educators
-                    data.data.forEach(educator => {
-                        const educatorCardHtml = `
+                    const selectedAdditionalFilters = Array.from(additionalFilters.children)
+                        .filter(chip => chip.classList.contains('active'))
+                        .map(chip => chip.dataset.filter);
+                    if (selectedAdditionalFilters.length > 0) {
+                        params.additional_filters = selectedAdditionalFilters;
+                    }
+
+                    if (sortDropdown.value) {
+                        params.sort_by = sortDropdown.value;
+                    }
+
+                    return params;
+                }
+
+                // Function to fetch and render educators
+                async function fetchEducators(page = 1) {
+                    const params = collectFilterParams();
+                    const queryString = new URLSearchParams(params).toString();
+                    const url = `{{ url('/api/educators') }}?page=${page}&${queryString}`;
+
+                    try {
+                        const response = await fetch(url, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest' // Important for Laravel's AJAX detection
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json(); // Assuming JSON response
+
+                        // Clear existing educators
+                        educatorGrid.innerHTML = '';
+
+                        // Update educator count
+                        educatorCount.textContent = data.total;
+
+                        // Render new educators
+                        data.data.forEach(educator => {
+                            console.log(educator);
+                            const educatorCardHtml = `
                             <div class="col-lg-4 col-md-6">
                                 <div class="educator-card">
-                                    <div class="educator-avatar-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                        <i class="fas fa-user-tie"></i>
+                                    <div class="educator-avatar-section" style="background-image: ${educator.profile_picture_url ? 'url(\'' + educator.profile_picture_url + '\')' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}">
+                                        ${educator.profile_picture_url ?  '' : '<i class="fas fa-user-tie"></i>'}
                                         ${educator.educator_profile && educator.educator_profile.is_featured ? '<span class="featured-badge">FEATURED</span>' : ''}
                                         ${educator.is_online ? '<div class="online-indicator"></div>' : ''}
                                     </div>
@@ -366,11 +368,11 @@
                                             </span>
                                         </div>
                                         ${educator.educator_profile && educator.educator_profile.teaching_style ? `
-                                            <div class="teaching-style-badge">
-                                                <i class="fas fa-chalkboard-teacher"></i>
-                                                ${educator.educator_profile.teaching_style}
-                                            </div>
-                                        ` : ''}
+                                                            <div class="teaching-style-badge">
+                                                                <i class="fas fa-chalkboard-teacher"></i>
+                                                                ${educator.educator_profile.teaching_style}
+                                                            </div>
+                                                        ` : ''}
                                         <div class="educator-stats">
                                             <span class="stat-item">
                                                 <i class="fas fa-user-graduate"></i>
@@ -390,158 +392,158 @@
                                             ${educator.educator_profile ? educator.educator_profile.bio : 'No bio available.'}
                                         </p>
                                         ${educator.educator_profile && educator.educator_profile.certifications ? `
-                                            <div class="certifications-badge">
-                                                <i class="fas fa-certificate"></i>
-                                                ${educator.educator_profile.certifications}
-                                            </div>
-                                        ` : ''}
+                                                            <div class="certifications-badge">
+                                                                <i class="fas fa-certificate"></i>
+                                                                ${educator.educator_profile.certifications}
+                                                            </div>
+                                                        ` : ''}
                                         <div class="educator-footer">
                                             <div class="hourly-rate">
                                                 <span class="rate-label">Starting at</span>
-                                                <span class="rate-amount">$${educator.educator_profile ? educator.educator_profile.hourly_rate : '0'}<small>/hr</small></span>
+                                                <span class="rate-amount">${educator.educator_profile ? educator.educator_profile.hourly_rate : '0'}<small>/hr</small></span>
                                             </div>
-                                            <a href="/educator/${educator.id}" class="action-btn">
+                                            <a href="{{ url('/') }}/educator/${educator.id}" class="action-btn">
                                                 <i class="fas fa-calendar-check me-1"></i>Book
                                             </a>
                                         </div>
                                 </div>
                             </div>
                         `;
-                        educatorGrid.insertAdjacentHTML('beforeend', educatorCardHtml);
-                    });
+                            educatorGrid.insertAdjacentHTML('beforeend', educatorCardHtml);
+                        });
 
-                    // Update pagination links
-                    renderPagination(data);
+                        // Update pagination links
+                        renderPagination(data);
 
-                } catch (error) {
-                    console.error('Error fetching educators:', error);
-                }
-            }
-
-            // Helper function to generate star ratings HTML
-            function generateStarRating(avgRating) {
-                let starsHtml = '';
-                const fullStars = Math.floor(avgRating);
-                const halfStar = Math.ceil(avgRating - fullStars);
-                const emptyStars = 5 - fullStars - halfStar;
-
-                for (let i = 0; i < fullStars; i++) {
-                    starsHtml += '<i class="fas fa-star"></i>';
-                }
-                if (halfStar) {
-                    starsHtml += '<i class="fas fa-star-half-alt"></i>';
-                }
-                for (let i = 0; i < emptyStars; i++) {
-                    starsHtml += '<i class="far fa-star"></i>';
-                }
-                return starsHtml;
-            }
-
-            // Function to render pagination links
-            function renderPagination(data) {
-                paginationContainer.innerHTML = ''; // Clear existing pagination
-
-                const ul = document.createElement('ul');
-                ul.classList.add('pagination');
-
-                // Previous Button
-                if (data.prev_page_url) {
-                    const li = document.createElement('li');
-                    li.classList.add('page-item');
-                    const a = document.createElement('a');
-                    a.classList.add('page-link');
-                    a.href = '#';
-                    a.textContent = 'Previous';
-                    a.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        fetchEducators(data.current_page - 1);
-                    });
-                    li.appendChild(a);
-                    ul.appendChild(li);
+                    } catch (error) {
+                        console.error('Error fetching educators:', error);
+                    }
                 }
 
-                // Page Numbers
-                data.links.forEach(link => {
-                    if (link.url && link.label.match(/^[0-9]+$/)) {
+                // Helper function to generate star ratings HTML
+                function generateStarRating(avgRating) {
+                    let starsHtml = '';
+                    const fullStars = Math.floor(avgRating);
+                    const halfStar = Math.ceil(avgRating - fullStars);
+                    const emptyStars = 5 - fullStars - halfStar;
+
+                    for (let i = 0; i < fullStars; i++) {
+                        starsHtml += '<i class="fas fa-star"></i>';
+                    }
+                    if (halfStar) {
+                        starsHtml += '<i class="fas fa-star-half-alt"></i>';
+                    }
+                    for (let i = 0; i < emptyStars; i++) {
+                        starsHtml += '<i class="far fa-star"></i>';
+                    }
+                    return starsHtml;
+                }
+
+                // Function to render pagination links
+                function renderPagination(data) {
+                    paginationContainer.innerHTML = ''; // Clear existing pagination
+
+                    const ul = document.createElement('ul');
+                    ul.classList.add('pagination');
+
+                    // Previous Button
+                    if (data.prev_page_url) {
                         const li = document.createElement('li');
                         li.classList.add('page-item');
-                        if (link.active) {
-                            li.classList.add('active');
-                        }
                         const a = document.createElement('a');
                         a.classList.add('page-link');
                         a.href = '#';
-                        a.textContent = link.label;
+                        a.textContent = 'Previous';
                         a.addEventListener('click', (e) => {
                             e.preventDefault();
-                            fetchEducators(link.label);
+                            fetchEducators(data.current_page - 1);
                         });
                         li.appendChild(a);
                         ul.appendChild(li);
                     }
+
+                    // Page Numbers
+                    data.links.forEach(link => {
+                        if (link.url && link.label.match(/^[0-9]+$/)) {
+                            const li = document.createElement('li');
+                            li.classList.add('page-item');
+                            if (link.active) {
+                                li.classList.add('active');
+                            }
+                            const a = document.createElement('a');
+                            a.classList.add('page-link');
+                            a.href = '#';
+                            a.textContent = link.label;
+                            a.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                fetchEducators(link.label);
+                            });
+                            li.appendChild(a);
+                            ul.appendChild(li);
+                        }
+                    });
+
+                    // Next Button
+                    if (data.next_page_url) {
+                        const li = document.createElement('li');
+                        li.classList.add('page-item');
+                        const a = document.createElement('a');
+                        a.classList.add('page-link');
+                        a.href = '#';
+                        a.textContent = 'Next';
+                        a.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            fetchEducators(data.current_page + 1);
+                        });
+                        li.appendChild(a);
+                        ul.appendChild(li);
+                    }
+
+                    if (ul.children.length > 0) {
+                        paginationContainer.appendChild(ul);
+                    }
+                }
+
+
+                // Event Listeners for filters and search
+                // Note: Search is now triggered only by button click, not on input change
+
+                // Update price display on range input (but don't search)
+                priceRange.addEventListener('input', () => {
+                    updatePrice(priceRange.value);
                 });
 
-                // Next Button
-                if (data.next_page_url) {
-                    const li = document.createElement('li');
-                    li.classList.add('page-item');
-                    const a = document.createElement('a');
-                    a.classList.add('page-link');
-                    a.href = '#';
-                    a.textContent = 'Next';
-                    a.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        fetchEducators(data.current_page + 1);
-                    });
-                    li.appendChild(a);
-                    ul.appendChild(li);
-                }
+                // Search button click handler
+                document.getElementById('searchBtn').addEventListener('click', () => fetchEducators(1));
 
-                if (ul.children.length > 0) {
-                    paginationContainer.appendChild(ul);
-                }
-            }
+                // Sort dropdown can trigger search immediately as it's a common UX pattern
+                sortDropdown.addEventListener('change', () => fetchEducators(1));
 
+                levelFilters.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('filter-chip')) {
+                        toggleChip(event.target);
+                        // Note: Search is now triggered only by button click
+                    }
+                });
 
-            // Event Listeners for filters and search
-            // Note: Search is now triggered only by button click, not on input change
+                styleFilters.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('filter-chip')) {
+                        toggleChip(event.target);
+                        // Note: Search is now triggered only by button click
+                    }
+                });
 
-            // Update price display on range input (but don't search)
-            priceRange.addEventListener('input', () => {
-                updatePrice(priceRange.value);
+                additionalFilters.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('filter-chip')) {
+                        toggleChip(event.target);
+                        // Note: Search is now triggered only by button click
+                    }
+                });
+
+                // Initial fetch of educators when the page loads
+                fetchEducators();
             });
-
-            // Search button click handler
-            document.getElementById('searchBtn').addEventListener('click', () => fetchEducators(1));
-
-            // Sort dropdown can trigger search immediately as it's a common UX pattern
-            sortDropdown.addEventListener('change', () => fetchEducators(1));
-
-            levelFilters.addEventListener('click', (event) => {
-                if (event.target.classList.contains('filter-chip')) {
-                    toggleChip(event.target);
-                    // Note: Search is now triggered only by button click
-                }
-            });
-
-            styleFilters.addEventListener('click', (event) => {
-                if (event.target.classList.contains('filter-chip')) {
-                    toggleChip(event.target);
-                    // Note: Search is now triggered only by button click
-                }
-            });
-
-            additionalFilters.addEventListener('click', (event) => {
-                if (event.target.classList.contains('filter-chip')) {
-                    toggleChip(event.target);
-                    // Note: Search is now triggered only by button click
-                }
-            });
-
-            // Initial fetch of educators when the page loads
-            fetchEducators();
-        });
-    </script>
+        </script>
     @endpush
     @push('styles')
         <style>
@@ -663,8 +665,7 @@
                 /* border-color: var(--primary-cyan); */
                 /* background: var(--primary-cyan); */
                 border-color: #999;
-                background: #999
-                color: white;
+                background: #999 color: white;
             }
 
             .price-range-container {
@@ -746,12 +747,16 @@
             }
 
             .educator-avatar-section {
-                height: 220px;
+                height: 320px;
                 background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 position: relative;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                border-radius: 20px;
             }
 
             .educator-avatar-section i {
