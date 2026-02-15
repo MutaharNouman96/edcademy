@@ -318,6 +318,62 @@
                 <!-- Availability -->
                 <div class="tab-pane fade" id="tab-availability" role="tabpanel">
                     <form id="formAvail" class="row g-3">
+                        <!-- Day availability schedule (main) -->
+                        <div class="col-12">
+                            <h6 class="mb-2"><i class="bi bi-calendar2-range me-1"></i> When can students book you?</h6>
+                            <p class="text-muted small mb-3">Turn each day on or off and set your available time range. Only these slots will be shown on your profile.</p>
+                            <div class="schedule-grid border rounded p-3 bg-light">
+                                <div class="table-responsive">
+                                    <table class="table table-borderless align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:100px">Day</th>
+                                                <th style="width:100px">Available</th>
+                                                <th>From</th>
+                                                <th>To</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="weekBody">
+                                            @php
+                                                $dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                                                $scheduleForView = isset($sessionSchedules) ? $sessionSchedules->groupBy('day_of_week') : collect();
+                                            @endphp
+                                            @foreach($dayNames as $idx => $dayName)
+                                                @php
+                                                    $dayNum = $idx + 1;
+                                                    $slot = $scheduleForView->get($dayNum)?->first();
+                                                    $active = $slot ? true : ($idx < 5);
+                                                    $start = $slot ? substr($slot->start_time, 0, 5) : '09:00';
+                                                    $end = $slot ? substr($slot->end_time, 0, 5) : '17:00';
+                                                @endphp
+                                                <tr>
+                                                    <td><strong>{{ $dayName }}</strong></td>
+                                                    <td>
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input day-active" type="checkbox" data-day="{{ $idx }}" {{ $active ? 'checked' : '' }}>
+                                                        </div>
+                                                    </td>
+                                                    <td><input class="form-control form-control-sm start" type="time" value="{{ $start }}" {{ $active ? '' : 'disabled' }}></td>
+                                                    <td><input class="form-control form-control-sm end" type="time" value="{{ $end }}" {{ $active ? '' : 'disabled' }}></td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Max sessions per day</label>
+                            <input name="max_per_day" type="number" class="form-control" min="1" max="20"
+                                value="{{ $maxSessionsPerDay ?? 6 }}">
+                            <div class="form-text">Maximum number of bookable sessions per day.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <hr class="my-3">
+                            <h6 class="mb-2 text-muted">Other options</h6>
+                        </div>
                         <div class="col-md-4">
                             <label class="form-label">Timezone</label>
                             <input id="tzInput" name="timezone" class="form-control" readonly>
@@ -347,29 +403,7 @@
                                 <label class="form-check-label" for="instantBooking">Enable instant
                                     booking</label>
                             </div>
-                            <div class="help">Students can book available slots without your approval.
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label">Weekly schedule</label>
-                            <div class="schedule-grid p-2">
-                                <div class="table-responsive">
-                                    <table class="table align-middle mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th style="width:120px">Day</th>
-                                                <th>Available</th>
-                                                <th style="width:210px">Start</th>
-                                                <th style="width:210px">End</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="weekBody"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="help mt-2">Add exceptions in your calendar for holidays or special
-                                days.</div>
+                            <div class="help">Students can book available slots without your approval.</div>
                         </div>
 
                         <div class="col-md-6">
@@ -380,11 +414,6 @@
                                 <option value="12">12 hours</option>
                                 <option value="24" selected>24 hours</option>
                             </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Max sessions / day</label>
-                            <input name="max_per_day" type="number" class="form-control" min="1"
-                                value="6">
                         </div>
 
                         <div class="col-12">
@@ -893,23 +922,14 @@
                 });
             }
 
-            // ===== Availability: weekly grid =====
+            // ===== Availability: weekly grid (session schedule: day + time) =====
             function initWeekGrid() {
-                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                 const body = document.getElementById('weekBody');
-                days.forEach((d, i) => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-          <td><strong>${d}</strong></td>
-          <td><div class='form-check form-switch'><input class='form-check-input day-active' type='checkbox' data-day='${i}' checked></div></td>
-          <td><input class='form-control form-control-sm start' type='time' value='09:00'></td>
-          <td><input class='form-control form-control-sm end' type='time' value='17:00'></td>`;
-                    body.appendChild(tr);
-                });
-                body.addEventListener('change', e => {
+                if (!body) return;
+                body.addEventListener('change', function(e) {
                     if (e.target.classList.contains('day-active')) {
                         const row = e.target.closest('tr');
-                        row.querySelectorAll('input[type="time"]').forEach(inp => inp.disabled = !e.target.checked);
+                        if (row) row.querySelectorAll('input[type="time"]').forEach(inp => inp.disabled = !e.target.checked);
                     }
                 });
             }
@@ -1144,22 +1164,24 @@
                         start: tr.querySelector('.start').value,
                         end: tr.querySelector('.end').value,
                     }));
-                    const payload = {
-                        ...serializeForm(e.target),
-                        grid
-                    };
+                    const maxPerDay = parseInt(e.target.querySelector('input[name="max_per_day"]').value, 10) || 6;
+                    const payload = { grid, max_per_day: maxPerDay };
                     try {
-                        const res = await fetch('/api/educator/availability', {
-                            method: 'PUT',
+                        const res = await fetch('{{ route("educator.availability.update") }}', {
+                            method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-Requested-With': 'XMLHttpRequest'
                             },
                             body: JSON.stringify(payload)
                         });
-                        if (!res.ok) throw 0;
-                        showToast('Availability saved.', 'success');
-                    } catch {
-                        showToast('Failed to save (demo).', 'danger');
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) throw new Error(data.message || 'Failed to save');
+                        showToast(data.message || 'Availability saved.', 'success');
+                    } catch (err) {
+                        showToast(err.message || 'Failed to save availability.', 'danger');
                     }
                 });
                 document.getElementById('formNotify').addEventListener('submit', async (e) => {
@@ -1396,38 +1418,7 @@
                     }
                 });
             });
-            $("#formAvail").on("submit", function(e) {
-                e.preventDefault();
-
-                $.ajax({
-                    url: "/educator/settings/availability",
-                    method: "POST",
-                    data: $(this).serialize(),
-
-                    success: function(res) {
-                        toastr.success("Availability saved.");
-                    },
-                    error: function(err) {
-                        toastr.error("Error saving availability.");
-                    }
-                });
-            });
-            $("#formAvail").on("submit", function(e) {
-                e.preventDefault();
-
-                $.ajax({
-                    url: "/educator/settings/availability",
-                    method: "POST",
-                    data: $(this).serialize(),
-
-                    success: function(res) {
-                        toastr.success("Availability saved.");
-                    },
-                    error: function(err) {
-                        toastr.error("Error saving availability.");
-                    }
-                });
-            });
+            // formAvail is handled in wireForms() with fetch (sends grid + max_per_day to educator.availability.update)
             $("#formNotify").on("submit", function(e) {
                 e.preventDefault();
 

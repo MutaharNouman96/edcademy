@@ -343,7 +343,9 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
 
         Route::get('resources', [EducatorDashboardController::class, 'resources'])->name('educator.resources.index');
 
-        Route::prefix('settings')->group(function () {
+        Route::prefix('settings')
+        ->withoutMiddleware(['verified', 'educator.profile.verified'])
+        ->group(function () {
             Route::get('/', [ProfileSettingController::class, 'index'])->name('educator.settings');
 
             // Profile

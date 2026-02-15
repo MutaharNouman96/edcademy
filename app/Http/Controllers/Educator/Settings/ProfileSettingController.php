@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Educator\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\EducatorProfile;
+use App\Models\EducatorSessionSchedule;
 use Illuminate\Http\Request;
 
 class ProfileSettingController extends Controller
@@ -30,6 +31,10 @@ class ProfileSettingController extends Controller
         $connections    = $user->connections;
         $preferences    = $user->preferences;
 
+        $sessionSchedules = $user->sessionSchedules()->orderBy('day_of_week')->orderBy('start_time')->get();
+        $educatorProfile  = EducatorProfile::where('user_id', $user->id)->first();
+        $maxSessionsPerDay = $educatorProfile->max_sessions_per_day ?? 6;
+
         return view('educator.settings', compact(
             'user',
             'profile',
@@ -41,7 +46,9 @@ class ProfileSettingController extends Controller
             'privacy',
             'verification',
             'connections',
-            'preferences'
+            'preferences',
+            'sessionSchedules',
+            'maxSessionsPerDay'
         ));
     }
 
