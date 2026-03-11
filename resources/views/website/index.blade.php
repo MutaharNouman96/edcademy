@@ -810,11 +810,11 @@
                                 style="color: var(--accent-yellow); margin-right: 10px"></i>
                             Set your own schedule and prices
                         </li>
-                        <li style="margin-bottom: 15px">
+                        {{-- <li style="margin-bottom: 15px">
                             <i class="fas fa-check-circle"
                                 style="color: var(--accent-yellow); margin-right: 10px"></i>
                             Access AI tools to create content faster
-                        </li>
+                        </li> --}}
                     </ul>
                     <a href="{{ route('web.eudcator.signup') }}" class="btn btn-lg mt-3"
                         style="
