@@ -150,7 +150,7 @@
                 </p>
             </div>
 
-            <div class="row">
+            <div class="row justify-content-center">
                 <div class="col-md-4 feature-card-container">
                     <div class="feature-card">
                         <div class="feature-icon">
@@ -190,7 +190,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 feature-card-container">
+                {{-- <div class="col-md-4 feature-card-container">
                     <div class="feature-card">
                         <div class="feature-icon"
                             style="
@@ -205,7 +205,7 @@
                             perfect courses and study materials.
                         </p>
                     </div>
-                </div>
+                </div> --}}
 
                 <div class="col-md-4 feature-card-container">
                     <div class="feature-card">
@@ -803,7 +803,7 @@
                         <li style="margin-bottom: 15px">
                             <i class="fas fa-check-circle"
                                 style="color: var(--accent-yellow); margin-right: 10px"></i>
-                            Earn up to 85% commission
+                            Earn up to 75% commission with no subscription plan
                         </li>
                         <li style="margin-bottom: 15px">
                             <i class="fas fa-check-circle"
