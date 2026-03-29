@@ -221,11 +221,11 @@
                 <div class="col-md-2 mb-4">
                     <h5 style="color: var(--light-cyan); margin-bottom: 20px">Learn</h5>
                     <div class="footer-links">
-                        <a href="{{ route('web.courses') }}">Browse Courses</a>
-                        <a href="{{ route('web.educators.index') }}">Find an Educator</a>
-                        <a href="#">Free Resources</a>
-                        <a href="#">Certificates</a>
-                        <a href="#">Student Blog</a>
+                        <a href="{{ route('content.browse-courses') }}">Browse Courses</a>
+                        <a href="{{ route('content.find-an-educator') }}">Find an Educator</a>
+                        <a href="{{ route('content.free-resources') }}">Free Resources</a>
+                        <a href="{{ route('content.certificates') }}">Certificates</a>
+                        <a href="{{ route('content.student-blog') }}">Student Blog</a>
                     </div>
                 </div>
 
@@ -233,10 +233,10 @@
                     <h5 style="color: var(--light-cyan); margin-bottom: 20px">Teach</h5>
                     <div class="footer-links">
                         <a href="{{ route('web.eudcator.signup') }}">Become an Educator</a>
-                        <a href="#">Create Courses</a>
-                        <a href="#">Educator Resources</a>
-                        <a href="#">Pricing Plans</a>
-                        <a href="#">Success Stories</a>
+                        <a href="{{ route('content.create-courses') }}">Create Courses</a>
+                        <a href="{{ route('content.educator-resources') }}">Educator Resources</a>
+                        <a href="{{ route('content.pricing-plans') }}">Pricing Plans</a>
+                        <a href="{{ route('content.success-stories') }}">Success Stories</a>
                     </div>
                 </div>
 
@@ -245,11 +245,11 @@
                         Support
                     </h5>
                     <div class="footer-links">
-                        <a href="#">Help Center</a>
+                        <a href="{{ route('content.help-center') }}">Help Center</a>
                         <a href="{{ route('web.contact.us') }}">Contact Us</a>
-                        <a href="#">Safety & Trust</a>
-                        <a href="#">Community Guidelines</a>
-                        <a href="#">FAQs</a>
+                        <a href="{{ route('content.safety-and-trust') }}">Safety & Trust</a>
+                        <a href="{{ route('content.community-guidelines') }}">Community Guidelines</a>
+                        <a href="{{ route('content.faqs') }}">FAQs</a>
                     </div>
                 </div>
 
