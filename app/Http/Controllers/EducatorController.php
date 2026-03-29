@@ -8,7 +8,7 @@ use App\Models\EducatorProfile;
 use App\Services\EmailService;
 use App\Mail\AdminNotificationMail;
 use App\Mail\EducatorWelcomeMail;
-
+use App\Models\EducatorAdditionalDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +42,8 @@ class EducatorController extends Controller
             'cv' => 'required|file|mimes:jpeg,png,pdf|max:6000',
             'degree_proof' => 'nullable|file|mimes:jpeg,png,pdf|max:6000',
             'intro_video' => 'nullable|file|mimetypes:video/mp4,video/mov|max:51200', // 50MB
+            'additional_documents' => 'nullable|array|max:5',
+            'additional_documents.*' => 'file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
             'consent' => 'accepted',
         ]);
 
@@ -99,6 +101,21 @@ class EducatorController extends Controller
                 'consent_verified' => true,
                 'status' => 'pending',
             ]);
+
+            if ($request->hasFile('additional_documents')) {
+                foreach ($request->file('additional_documents') as $document) {
+                    $documentName = $user->id . '_' . $document->getClientOriginalName() . '.' . $document->getClientOriginalExtension();
+                    $document->move(public_path('storage/educators/additional_documents'), $documentName);
+                    $additionalDocumentPath = 'storage/educators/additional_documents/' . $documentName;
+                    EducatorAdditionalDocument::create([
+                        'educator_id' => $user->id,
+                        'document_path' => $additionalDocumentPath,
+                        'document_type' => $document->getClientMimeType(),
+                        'document_name' => $documentName,
+                        
+                    ]);
+                }
+            }
 
             DB::commit();
 

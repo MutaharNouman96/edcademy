@@ -26,8 +26,8 @@ class EducatorController extends Controller
     public function show($id)
     {
         $educator = User::where('role', 'educator')
-                       ->with(['educatorProfile', 'courses'])
-                       ->findOrFail($id);
+            ->with(['educatorProfile', 'courses', 'additionalDocuments'])
+            ->findOrFail($id);
 
         return view('admin.educator.show', compact('educator'));
     }
@@ -54,9 +54,11 @@ class EducatorController extends Controller
             'hourly_rate'              => 'required|numeric|min:5',
             'certifications'           => 'nullable|string',
             'preferred_teaching_style' => 'nullable|string|max:255',
-            'cv'                       => 'nullable|file|mimes:jpeg,png,pdf|max:6000',
-            'degree_proof'             => 'nullable|file|mimes:jpeg,png,pdf|max:6000',
+            'cv' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
+            'degree_proof'             => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
             'intro_video'              => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:51200',
+            'additional_documents'     => 'nullable|array|max:5',
+            'additional_documents.*'    => 'file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
             'status'                   => 'required|in:pending,approved,rejected',
         ]);
 
@@ -133,7 +135,7 @@ class EducatorController extends Controller
             }
 
             return redirect()->route('admin.educators.show', $user->id)
-                             ->with('success', 'Educator account created successfully. Login details have been emailed.');
+                ->with('success', 'Educator account created successfully. Login details have been emailed.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to create educator: ' . $e->getMessage())->withInput();
@@ -146,8 +148,8 @@ class EducatorController extends Controller
     public function edit($id)
     {
         $educator = User::where('role', 'educator')
-                       ->with('educatorProfile')
-                       ->findOrFail($id);
+            ->with('educatorProfile')
+            ->findOrFail($id);
 
         return view('admin.educator.edit', compact('educator'));
     }
@@ -168,8 +170,10 @@ class EducatorController extends Controller
             'hourly_rate'              => 'required|numeric|min:5',
             'certifications'           => 'nullable|string',
             'preferred_teaching_style' => 'nullable|string|max:255',
-            'cv'                       => 'nullable|file|mimes:jpeg,png,pdf|max:6000',
-            'degree_proof'             => 'nullable|file|mimes:jpeg,png,pdf|max:6000',
+            'cv'                       => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
+            'degree_proof'             => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
+            'additional_documents'     => 'nullable|array|max:5',
+            'additional_documents.*'    => 'file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
             'intro_video'              => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:51200',
             'status'                   => 'required|in:pending,approved,rejected',
         ]);
@@ -224,7 +228,7 @@ class EducatorController extends Controller
             DB::commit();
 
             return redirect()->route('admin.educators.show', $educator->id)
-                             ->with('success', 'Educator updated successfully.');
+                ->with('success', 'Educator updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to update educator: ' . $e->getMessage())->withInput();
@@ -264,9 +268,9 @@ class EducatorController extends Controller
     {
         $educator = User::where('role', 'educator')->findOrFail($id);
         $payouts = Payment::where('educator_id', $id)
-                         ->with('student')
-                         ->latest()
-                         ->paginate(15);
+            ->with('student')
+            ->latest()
+            ->paginate(15);
 
         return view('admin.educator.payouts', compact('educator', 'payouts'));
     }
@@ -283,9 +287,9 @@ class EducatorController extends Controller
     {
         $educator = User::where('role', 'educator')->findOrFail($id);
         $earnings = Earning::where('educator_id', $id)
-                          ->with('course')
-                          ->latest()
-                          ->paginate(15);
+            ->with('course')
+            ->latest()
+            ->paginate(15);
 
         return view('admin.educator.earnings', compact('educator', 'earnings'));
     }
@@ -294,9 +298,9 @@ class EducatorController extends Controller
     {
         $educator = User::where('role', 'educator')->findOrFail($id);
         $sessions = SessionCall::where('educator_id', $id)
-                              ->with('students')
-                              ->latest()
-                              ->paginate(15);
+            ->with('students')
+            ->latest()
+            ->paginate(15);
 
         return view('admin.educator.sessions', compact('educator', 'sessions'));
     }

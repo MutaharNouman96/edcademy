@@ -225,8 +225,7 @@
                             <label class="glass-landing--form-label">Additional Documents (Optional)</label>
                             <input type="file" name="additional_documents[]" multiple
                                 class="form-control glass-landing--form-input @error('additional_documents') is-invalid @enderror"
-                                accept="image/*,application/pdf"
-                                />
+                                max="5" multiple="multiple" accept="image/*,application/pdf" />
                             @error('additional_documents')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -522,6 +521,13 @@
                             field.classList.remove('is-invalid');
                         }
                     });
+                    //check for email validity
+                    if (!email?.value.includes('@')) {
+                        email?.classList.add('is-invalid');
+                        valid = false;
+                    } else {
+                        email?.classList.remove('is-invalid');
+                    }
                     if (password && passwordConfirmation && password.value !== passwordConfirmation.value) {
                         passwordConfirmation.classList.add('is-invalid');
                         valid = false;
@@ -699,7 +705,6 @@
                     }
                 }
             });
-
         </script>
     @endpush
 </x-guest-layout>

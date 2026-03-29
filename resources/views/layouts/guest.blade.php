@@ -142,7 +142,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('student.signup') }}">
+                                <a class="nav-link" href="{{ route('register') }}">
                                     <i class="bi bi-person-plus d-lg-none me-2"></i>Register
                                 </a>
                             </li>
@@ -166,35 +166,37 @@
     </nav>
 
 
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show my-3" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
 
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if (session('info'))
-        <div class="alert alert-info alert-dismissible fade show my-3" role="alert">
-            {{ session('info') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if (session('warning'))
-        <div class="alert alert-warning alert-dismissible fade show my-3" role="alert">
-            {{ session('warning') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
 
     <div @if (!request()->routeIs('website.index')) class="mt-extra-space" @endif>
+
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show my-3" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="alert alert-info alert-dismissible fade show my-3" role="alert">
+                {{ session('info') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('warning'))
+            <div class="alert alert-warning alert-dismissible fade show my-3" role="alert">
+                {{ session('warning') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         {{ $slot }}
     </div>
     <!-- Footer -->

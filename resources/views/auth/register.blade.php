@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
+    {{-- <form method="POST" action="{{ route('register') }}">
         @csrf
 
         <!-- Name -->
@@ -48,5 +48,37 @@
                 {{ __('Register') }}
             </x-primary-button>
         </div>
-    </form>
+    </form> --}}
+<div class="container py-5 d-flex justify-content-center align-items-center flex-column">
+    <div class="row justify-content-center g-5 w-100">
+        <div class="col-12 col-md-6 d-flex justify-content-center">
+            <a href="{{ route('web.eudcator.signup') }}"
+               class="text-decoration-none w-100"
+               style="max-width: 22rem;">
+                <div class="card text-center border-0 shadow-lg bg-primary text-white rounded-4 h-100"
+                     style="min-height: 17rem; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 2rem;">
+                    <div class="mb-4">
+                        <i class="fas fa-chalkboard-teacher fa-4x"></i>
+                    </div>
+                    Educator Sign Up
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 d-flex justify-content-center">
+            <a href="{{ route('student.signup') }}"
+               class="text-decoration-none w-100"
+               style="max-width: 22rem;">
+                <div class="card text-center border-0 shadow-lg bg-success text-white rounded-4 h-100"
+                     style="min-height: 17rem; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 2rem;">
+                    <div class="mb-4">
+                        <i class="fas fa-user-graduate fa-4x"></i>
+                    </div>
+                    Student Sign Up
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+<!-- Font Awesome required for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 </x-guest-layout>
