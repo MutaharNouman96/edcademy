@@ -469,5 +469,44 @@ if (app()->environment('local')) {
     });
 }
 
+
+Route::prefix('content')->group(function () {
+    Route::get('browse-courses', function () {
+        return view('content.browse-courses');
+    })->name('content.browse-courses');
+
+    Route::get('find-an-educator', function () {
+        return view('content.find-an-educator');
+    })->name('content.find-an-educator');
+
+    Route::get('free-resources', fn () => view('content.free-resources'))->name('content.free-resources');
+
+    Route::get('certificates', fn () => view('content.certificates'))->name('content.certificates');
+
+    Route::get('student-blog', fn () => view('content.student-blog'))->name('content.student-blog');
+
+    Route::get('teach/become-an-educator', fn () => view('content.become-an-educator'))->name('content.become-an-educator');
+
+    Route::get('teach/create-courses', fn () => view('content.create-courses'))->name('content.create-courses');
+
+    Route::get('teach/educator-resources', fn () => view('content.educator-resources'))->name('content.educator-resources');
+
+    Route::get('teach/pricing-plans', fn () => view('content.pricing-plans'))->name('content.pricing-plans');
+
+    Route::get('teach/success-stories', fn () => view('content.success-stories'))->name('content.success-stories');
+
+    Route::get('support/help-center', fn () => view('content.help-center'))->name('content.help-center');
+
+    Route::get('support/contact', fn () => view('content.support-contact'))->name('content.support.contact');
+
+    Route::get('safety-and-trust', fn () => view('content.safety-and-trust'))->name('content.safety-and-trust');
+
+    Route::get('community-guidelines', fn () => view('content.community-guidelines'))->name('content.community-guidelines');
+
+    Route::get('faqs', fn () => view('content.faqs'))->name('content.faqs');
+
+    Route::get('about', fn () => view('content.about-platform'))->name('content.about');
+});
+
 Route::view('watermark-pdf', 'watermark-pdf');
 Route::post('/watermark-pdf', [WatermarkController::class, 'applyWatermark']);

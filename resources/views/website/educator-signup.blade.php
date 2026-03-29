@@ -211,11 +211,23 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="glass-landing--form-label">Upload Degree / Certification Proof (Max 5MB)</label>
+                            <label class="glass-landing--form-label">Upload Degree / Certification Proof (Max
+                                5MB)</label>
                             <input name="degree_proof" type="file"
                                 class="form-control glass-landing--form-input @error('degree_proof') is-invalid @enderror"
                                 accept="image/*,application/pdf" />
                             @error('degree_proof')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="glass-landing--form-label">Additional Documents (Optional)</label>
+                            <input type="file" name="additional_documents[]" multiple
+                                class="form-control glass-landing--form-input @error('additional_documents') is-invalid @enderror"
+                                accept="image/*,application/pdf"
+                                />
+                            @error('additional_documents')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
@@ -577,6 +589,117 @@
                     if (currentStep > 0) showStep(currentStep - 1);
                 });
             });
+
+
+            // DOM helpers to fetch input/file lists
+            function getFileInput(name) {
+                return document.querySelector(`input[name="${name}"]`);
+            }
+
+            // Container for displaying file lists below respective inputs
+            function getOrCreateFileListContainer(input) {
+                let container = input.parentElement.querySelector('.attached-files-list');
+                if (!container) {
+                    container = document.createElement('ul');
+                    container.className = 'attached-files-list list-unstyled mt-2';
+                    input.parentElement.appendChild(container);
+                }
+                return container;
+            }
+
+            function formatFileSize(bytes) {
+                const mb = bytes / 1024 / 1024;
+                if (mb >= 1) return `${mb.toFixed(2)} MB`;
+                const kb = bytes / 1024;
+                return `${kb.toFixed(2)} KB`;
+            }
+
+            // For single file input (cv, degree_proof, intro_video)
+            function handleSingleFileChange(input) {
+                const container = getOrCreateFileListContainer(input);
+                container.innerHTML = '';
+                if (input.files && input.files.length > 0) {
+                    const file = input.files[0];
+                    const li = document.createElement('li');
+                    li.classList.add('d-flex', 'align-items-center', 'mb-1');
+                    li.innerHTML = `
+                        <span>${file.name} (${formatFileSize(file.size)})</span>
+                        <button type="button" class="btn btn-sm btn-link text-danger ms-2 file-remove-btn" title="Remove file"><i class="fas fa-times"></i></button>
+                    `;
+                    // Remove functionality
+                    li.querySelector('.file-remove-btn').addEventListener('click', function() {
+                        input.value = "";
+                        container.innerHTML = '';
+                    });
+                    container.appendChild(li);
+                }
+            }
+
+            // For multiple file input (additional_documents[])
+            function handleMultipleFilesChange(input) {
+                const container = getOrCreateFileListContainer(input);
+                container.innerHTML = '';
+                const files = Array.from(input.files);
+                files.forEach((file, idx) => {
+                    const li = document.createElement('li');
+                    li.classList.add('d-flex', 'align-items-center', 'mb-1');
+                    li.innerHTML = `
+                        <span>${file.name} (${formatFileSize(file.size)})</span>
+                        <button type="button" class="btn btn-sm btn-link text-danger ms-2 file-remove-btn" title="Remove file" data-file-idx="${idx}"><i class="fas fa-times"></i></button>
+                    `;
+                    container.appendChild(li);
+                });
+
+                // Remove file handler
+                container.querySelectorAll('.file-remove-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(btn.getAttribute('data-file-idx'));
+                        // Remove the file at idx (input.files is read-only, so we need to recreate FileList)
+                        const dataTransfer = new DataTransfer();
+                        files.forEach((file, i) => {
+                            if (i !== idx) dataTransfer.items.add(file);
+                        });
+                        input.files = dataTransfer.files;
+                        handleMultipleFilesChange(input); // refresh list
+                    });
+                });
+            }
+
+            // Attach onchange events to the three file elements
+            document.addEventListener('DOMContentLoaded', function() {
+                // CV (single)
+                const cvInput = getFileInput('cv');
+                if (cvInput) {
+                    cvInput.addEventListener('change', function() {
+                        handleSingleFileChange(cvInput);
+                    });
+                    // On initial load in case of back nav or validation
+                    if (cvInput.files && cvInput.files.length > 0) {
+                        handleSingleFileChange(cvInput);
+                    }
+                }
+                // Degree proof (single)
+                const degreeInput = getFileInput('degree_proof');
+                if (degreeInput) {
+                    degreeInput.addEventListener('change', function() {
+                        handleSingleFileChange(degreeInput);
+                    });
+                    if (degreeInput.files && degreeInput.files.length > 0) {
+                        handleSingleFileChange(degreeInput);
+                    }
+                }
+                // Additional documents (multiple)
+                const addDocsInput = getFileInput('additional_documents[]');
+                if (addDocsInput) {
+                    addDocsInput.addEventListener('change', function() {
+                        handleMultipleFilesChange(addDocsInput);
+                    });
+                    if (addDocsInput.files && addDocsInput.files.length > 0) {
+                        handleMultipleFilesChange(addDocsInput);
+                    }
+                }
+            });
+
         </script>
     @endpush
 </x-guest-layout>
