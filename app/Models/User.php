@@ -272,4 +272,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getProfilePictureUrlAttribute(){
         return $this->profile_picture ? url("public/".$this->profile_picture) : null    ;
     }
+
+
+    public function additionalDocuments()
+    {
+        return $this->hasMany(EducatorAdditionalDocument::class, 'educator_id');
+    }
 }
