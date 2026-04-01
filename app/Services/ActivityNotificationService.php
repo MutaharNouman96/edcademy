@@ -103,10 +103,10 @@ class ActivityNotificationService
         $admins = User::where('role', 'admin')->get();
 
         // Notify related students for certain actions
-        if (self::isStudentRelevantEducatorAction($activity)) {
-            $students = self::getRelatedStudents($activity);
-            $recipients = array_merge($recipients, $students->toArray());
-        }
+        // if (self::isStudentRelevantEducatorAction($activity)) {
+        //     $students = self::getRelatedStudents($activity);
+        //     $recipients = array_merge($recipients, $students->toArray());
+        // }
 
         return array_merge($admins->toArray(), $recipients);
     }
@@ -165,12 +165,12 @@ class ActivityNotificationService
     /**
      * Get students related to an activity
      */
-    private static function getRelatedStudents(Activity $activity): \Illuminate\Database\Eloquent\Collection
-    {
-        // This would need to be implemented based on the specific relationships
-        // For example, students enrolled in a course, students who booked sessions, etc.
-        return collect(); // Placeholder
-    }
+    // private static function getRelatedStudents(Activity $activity): \Illuminate\Database\Eloquent\Collection
+    // {
+    //     // This would need to be implemented based on the specific relationships
+    //     // For example, students enrolled in a course, students who booked sessions, etc.
+    //     return collect(); // Placeholder
+    // }
 
     /**
      * Get educators related to an activity
