@@ -23,6 +23,7 @@
                 <table class="table table-striped align-middle w-100 data-table">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>Thumb</th>
                             <th>Title</th>
                             <th>Subject</th>
@@ -39,10 +40,11 @@
                     <tbody>
                         @forelse ($courses as $course)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>
                                     @if ($course->thumbnail)
-                                        <img src="{{ asset($course->thumbnail) }}" alt="thumb" class="rounded"
-                                            style="width:50px;height:50px;object-fit:cover;">
+                                        <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="thumb"
+                                            class="rounded" style="width:50px;height:50px;object-fit:cover;">
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
@@ -73,7 +75,7 @@
                                         class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <button wire:click="confirmDelete({{ $course->id }})"
+                                    <button onclick="confirmDelete({{ $course->id }})"
                                         class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -90,9 +92,7 @@
                 </table>
             </div>
 
-            <div class="mt-3">
-                {{ $courses->links() }}
-            </div>
+
         </div>
     </div>
 
@@ -132,6 +132,34 @@
                 const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
                 modal.hide();
             });
+
+            function confirmDelete(id) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This action cannot be undone!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`{{ route('educator.courses.crud.destroy', ':id') }}`.replace(':id', id), {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Authorization': '{{ env('AUTH_KEY') }}'
+                            }
+                        }).then(r => r.json()).then(r => {
+                            console.log(r);
+                            if (r.success) {
+                                window.location.reload();
+                            }
+                        });
+                    }
+                });
+            }
         </script>
     @endpush
 
