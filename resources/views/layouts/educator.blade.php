@@ -15,13 +15,13 @@
         <link rel="stylesheet" href="{{ asset('assets/css/select2-addon.css') }}" />
 
         <link rel="stylesheet" href="https://cdn.datatables.net/2.3.6/css/dataTables.bootstrap5.css">
+       
 
 
 
 
         {{-- @vite(['resources/js/app.js']) --}}
         <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
-
 
 
         @stack('styles')
@@ -251,11 +251,24 @@
 
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         <script>
             $(document).ready(function() {
-                $('.select2').select2();
+                $('.select2').each(function() {
+                    var $el = $(this);
+                    var opts = {
+                        width: '100%',
+                        theme: 'default',
+                    };
+                    if ($el.data('placeholder')) {
+                        opts.placeholder = $el.data('placeholder');
+                    }
+                    if ($el.prop('multiple')) {
+                        opts.closeOnSelect = false;
+                    }
+                    $el.select2(opts);
+                });
             });
         </script>
 

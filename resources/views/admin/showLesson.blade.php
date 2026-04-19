@@ -1,5 +1,18 @@
 <x-admin-layout>
 
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h4 class="mb-1">Lesson Details</h4>
@@ -74,17 +87,43 @@
                 @endif
 
                 <!-- Video Content -->
-                @if($lesson->video_path || $lesson->video_link)
+                @if($lesson->type === 'video')
                 <div class="mb-4">
                     <h5 class="section-title mb-3">Video Content</h5>
-                    @if($lesson->video_path)
+
+                    @if($lesson->video_temp_path && !$lesson->video_path)
+                    <div class="alert alert-warning">
+                        <i class="bi bi-hourglass-split me-2"></i>
+                        <strong>Pending Vimeo upload.</strong> File is on disk at:
+                        <code class="d-block mt-2 small text-break">{{ storage_path('app/'.$lesson->video_temp_path) }}</code>
+                        <form method="POST" action="{{ route('admin.lessons.approve-vimeo', $lesson->id) }}" class="mt-3 mb-0">
+                            @csrf
+                            <button type="submit" class="btn btn-brand btn-sm">
+                                <i class="bi bi-cloud-upload me-1"></i> Approve &amp; send to Vimeo
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+
+                    @if($lesson->video_path && str_contains($lesson->video_path, 'vimeo.com'))
+                    <div class="ratio ratio-16x9 mb-3">
+                        <iframe src="{{ $lesson->video_path }}?title=0&byline=0&portrait=0"
+                            class="rounded border-0"
+                            allow="autoplay; fullscreen; picture-in-picture"
+                            allowfullscreen></iframe>
+                    </div>
+                    <p class="small text-muted mb-0">
+                        <a href="{{ $lesson->video_path }}" target="_blank" rel="noopener">Open on Vimeo</a>
+                    </p>
+                    @elseif($lesson->video_path)
                     <div class="video-container mb-3">
                         <video controls class="w-100 rounded" style="max-height: 400px;">
-                            <source src="{{ asset($lesson->video_path) }}" type="video/mp4">
+                            <source src="{{ \Illuminate\Support\Str::startsWith($lesson->video_path, ['http://', 'https://']) ? $lesson->video_path : asset($lesson->video_path) }}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     </div>
                     @endif
+
                     @if($lesson->video_link)
                     <div class="alert alert-info">
                         <i class="bi bi-link-45deg me-2"></i>

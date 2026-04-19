@@ -165,7 +165,7 @@
                                                 </button>
                                             </form>
                                             <form action="{{ route('order.addToOrderCart') }}" method="post"
-                                                class="add-to-cart-form">
+                                                class="buy-now-form">
                                                 @csrf
 
                                                 <input type="hidden" name="item_id" value="{{ $lesson->id }}">

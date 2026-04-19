@@ -93,6 +93,7 @@ class OrderController extends Controller
             'item_id' => 'required',
             'model' => 'required',
         ]);
+        
         $response = app(OrderService::class)->addOrderItemToLatestCartOrder($request->all());
         if ($request->has('responseType') && $request->responseType == 'json') {
             return response()->json([

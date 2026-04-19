@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class EducatorAdditionalDocument extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'educator_id',
         'document_path',
@@ -15,12 +16,29 @@ class EducatorAdditionalDocument extends Model
         'document_name',
         'document_size',
     ];
+
+    protected $appends = [
+        'document_url',
+    ];
+
     public function educator()
     {
         return $this->belongsTo(User::class, 'educator_id');
     }
-    public function getDocumentPathAttribute($value)
+
+    /**
+     * Public URL for the stored file (document_path stays the relative path under /public).
+     */
+    public function getDocumentUrlAttribute(): ?string
     {
-        return url('storage/' . $value);
+        $path = $this->attributes['document_path'] ?? null;
+        if (! $path) {
+            return null;
+        }
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        return asset($path);
     }
 }

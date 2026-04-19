@@ -234,6 +234,8 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::patch('lessons/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateLessonStatus'])->name('lessons.status');
 
+        Route::post('lessons/{id}/approve-vimeo', [App\Http\Controllers\Admin\DashboardController::class, 'approveLessonVimeo'])->name('lessons.approve-vimeo');
+
         Route::get('lessons/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'showLesson'])->name('lessons.show');
 
         Route::get('payouts', [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
@@ -311,6 +313,14 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
         Route::put('course-crud/sections/{section}', [EducatorCourseCrudController::class, 'updateSection'])->name('educator.courses.crud.sections.update');
         Route::delete('course-crud/sections/{section}', [EducatorCourseCrudController::class, 'destroySection'])->name('educator.courses.crud.sections.destroy');
         // Lesson Management
+        Route::post('course-crud/temp-video', [\App\Http\Controllers\Educator\TempVideoUploadController::class, 'store'])->name('educator.courses.crud.temp-video.upload');
+
+        Route::post('course-crud/upload-lesson-asset/{kind}', [\App\Http\Controllers\Educator\LessonPublicAssetUploadController::class, 'store'])
+            ->where('kind', 'worksheets|materials')
+            ->name('educator.courses.crud.lesson-asset.upload');
+
+        Route::get('course-crud/lessons/{lesson}/edit-payload', [EducatorCourseCrudController::class, 'lessonEditPayload'])->name('educator.courses.crud.lessons.edit-payload');
+
         Route::post('course-crud/sections/{section}/lessons', [EducatorCourseCrudController::class, 'storeLesson'])->name('educator.courses.crud.sections.lessons.store');
         Route::put('course-crud/lessons/{lesson}', [EducatorCourseCrudController::class, 'updateLesson'])->name('educator.courses.crud.lessons.update');
         Route::delete('course-crud/lessons/{lesson}', [EducatorCourseCrudController::class, 'destroyLesson'])->name('educator.courses.crud.lessons.destroy');
@@ -380,6 +390,7 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
             // Verification
             Route::get('/verification', [VerificationSettingController::class, 'index'])->name('educator.verification.index');
             Route::post('/verification', [VerificationSettingController::class, 'store'])->name('educator.verification.store');
+            Route::delete('/verification/documents/{document}', [VerificationSettingController::class, 'destroyDocument'])->name('educator.verification.document.destroy');
 
             // Connections (Google / Zoom / Stripe)
             Route::get('/connections', [ConnectionController::class, 'index'])->name('educator.connections.index');

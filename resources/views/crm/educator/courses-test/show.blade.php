@@ -46,7 +46,7 @@
                 <!-- Course Thumbnail -->
                 @if ($course->thumbnail)
                     <div class="card shadow-sm mb-4">
-                        <img src="{{ Storage::url($course->thumbnail) }}" class="card-img-top"
+                        <img src="{{ asset('storage/' . $course->thumbnail) }}" class="card-img-top"
                             alt="{{ $course->title }}">
                     </div>
                 @endif
@@ -207,7 +207,7 @@
                                 <i class="bi bi-inbox display-4 d-block mb-2"></i>
                                 <p>No curriculum added yet</p>
                                 @can('update', $course)
-                                    <a href="{{ route('educator.courses.crud.edit', $course) }}"
+                                    <a href="{{ route('educator.courses.crud.edit', $course) . '?action=content' }}"
                                         class="btn btn-primary">Add
                                         Content</a>
                                 @endcan

@@ -98,7 +98,7 @@
                                 <div class="col-md-6 d-flex align-items-end">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="is_free"
-                                            {{ old('is_free') ? 'checked' : '' }}>
+                                            {{ old('is_free') ? 'checked' : '' }} value="1">
                                         <label class="form-check-label">Free Course</label>
                                     </div>
                                 </div>

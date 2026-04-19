@@ -16,6 +16,7 @@ use App\Services\EmailService;
 use App\Services\ActivityNotificationService;
 use App\Mail\EducatorApprovalMail;
 use App\Mail\EducatorRejectionMail;
+use App\Jobs\UploadLessonVideoToVimeoJob;
 
 class DashboardController extends Controller
 {
@@ -544,5 +545,25 @@ class DashboardController extends Controller
         $lesson = Lesson::with(['course.educator', 'courseSection'])->findOrFail($id);
 
         return view('admin.showLesson', compact('lesson'));
+    }
+
+    /**
+     * Queue Vimeo upload for a lesson that has a file in temp storage (educator upload already approved as content).
+     */
+    public function approveLessonVimeo($id)
+    {
+        $lesson = Lesson::findOrFail($id);
+
+        if ($lesson->type !== 'video' || empty($lesson->video_temp_path)) {
+            return back()->with('error', 'No pending video file to send to Vimeo.');
+        }
+
+        if (!is_file(storage_path('app/' . $lesson->video_temp_path))) {
+            return back()->with('error', 'The video file is no longer on disk. Ask the educator to upload again.');
+        }
+
+        UploadLessonVideoToVimeoJob::dispatch($lesson->id);
+
+        return back()->with('success', 'Video upload to Vimeo has been queued. Refresh in a moment to see the player link.');
     }
 }

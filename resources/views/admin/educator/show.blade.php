@@ -266,7 +266,7 @@
                                                             <div class="small mb-1 text-truncate" style="max-width: 170px;" title="{{ $fileName }}">
                                                                 {{ $fileName }}
                                                             </div>
-                                                            <a href="{{ url($document->document_path) }}" target="_blank"
+                                                            <a href="{{ $document->document_url }}" target="_blank"
                                                                 class="btn btn-sm btn-outline-primary w-100 mt-1">
                                                                 <i class="bi bi-eye me-1"></i>Preview
                                                             </a>

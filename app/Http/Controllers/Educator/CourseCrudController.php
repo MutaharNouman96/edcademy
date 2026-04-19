@@ -9,7 +9,6 @@ use App\Models\CourseSection;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use App\Services\DocumentService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +17,6 @@ use App\Services\ActivityNotificationService;
 use App\Mail\CourseSubmittedMail;
 use App\Mail\AdminNotificationMail;
 use App\Models\User;
-use App\Services\VimeoService;
 
 class CourseCrudController extends Controller
 {
@@ -76,7 +74,16 @@ class CourseCrudController extends Controller
 
         // Handle thumbnail upload
         if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            // Store to public/storage/courses/thumbnails
+            $file = $request->file('thumbnail');
+            $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
+            $destinationFolder = public_path('storage/courses/thumbnails');
+            // Ensure directory exists
+            if (!File::exists($destinationFolder)) {
+                File::makeDirectory($destinationFolder, 0755, true);
+            }
+            $file->move($destinationFolder, $fileName);
+            $validated['thumbnail'] = "courses/thumbnails/{$fileName}";
         }
 
         $course = Course::create($validated);
@@ -162,6 +169,8 @@ class CourseCrudController extends Controller
     public function edit($course)
     {
         // $this->authorize('update', $course);
+        $action = request()->get('action');
+    
 
         $categories = CourseCategory::all();
 
@@ -169,12 +178,14 @@ class CourseCrudController extends Controller
         $course->load('sections.lessons');
 
 
-        return view('crm.educator.courses-test.edit', compact('course', 'categories'));
+        return view('crm.educator.courses-test.edit', compact('course', 'categories', 'action'));
     }
 
-    public function update(Request $request, Course $course)
+    public function update(Request $request, $course_id)
     {
         // $this->authorize('update', $course);
+
+        $course = Course::findOrFail($course_id);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -211,14 +222,25 @@ class CourseCrudController extends Controller
         // Handle thumbnail
         if ($request->hasFile('thumbnail')) {
             if ($course->thumbnail) {
-                Storage::disk('public')->delete($course->thumbnail);
+                $thumbnailPath = public_path('storage/' . $course->thumbnail);
+                if (file_exists($thumbnailPath)) {
+                    unlink($thumbnailPath);
+                }
             }
-            $validated['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $file = $request->file('thumbnail');
+            $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
+            $destinationFolder = public_path('storage/courses/thumbnails');
+            if (!File::exists($destinationFolder)) {
+                File::makeDirectory($destinationFolder, 0755, true);
+            }
+            $file->move($destinationFolder, $fileName);
+            $validated['thumbnail'] = "courses/thumbnails/{$fileName}";
         }
 
         $course->update($validated);
+       
 
-        return redirect()->route('courses.show', $course)
+        return redirect()->route('educator.courses.crud.show', ['courses_crud' => $course->id])
             ->with('success', 'Course updated successfully!');
     }
 
@@ -227,7 +249,10 @@ class CourseCrudController extends Controller
         $this->authorize('delete', $course);
 
         if ($course->thumbnail) {
-            Storage::disk('public')->delete($course->thumbnail);
+            $thumbnailPath = public_path('storage/' . $course->thumbnail);
+            if (file_exists($thumbnailPath)) {
+                unlink($thumbnailPath);
+            }
         }
 
         $course->delete();
@@ -267,6 +292,38 @@ class CourseCrudController extends Controller
         return back()->with('success', 'Section deleted successfully!');
     }
 
+    /**
+     * JSON payload for the edit-lesson modal (session-auth fetch from the course edit page).
+     */
+    public function lessonEditPayload(Lesson $lesson)
+    {
+        $lesson->loadMissing('course');
+
+        if ((int) $lesson->course->user_id !== (int) auth()->id()) {
+            abort(403);
+        }
+
+        return response()->json([
+            'lesson' => [
+                'id' => $lesson->id,
+                'title' => $lesson->title,
+                'duration' => $lesson->duration,
+                'price' => $lesson->price,
+                'status' => $lesson->status,
+                'notes' => $lesson->notes,
+                'type' => $lesson->type,
+                'free' => (bool) $lesson->free,
+                'preview' => (bool) $lesson->preview,
+                'video_path' => $lesson->video_path,
+                'video_temp_path' => $lesson->video_temp_path,
+                'worksheets_path' => $lesson->worksheets ? $lesson->worksheets_path : null,
+                'materials_path' => $lesson->materials ? $lesson->materials_path : null,
+                'section_id' => $lesson->course_section_id,
+                'destroy_url' => route('educator.courses.crud.lessons.destroy', $lesson),
+            ],
+        ]);
+    }
+
     // Lesson Management
     public function storeLesson(Request $request, CourseSection $section)
     {
@@ -279,12 +336,26 @@ class CourseCrudController extends Controller
             'status' => 'required|in:Draft,Published',
             'preview' => 'boolean',
             'video_link' => 'nullable|url',
+            'video_temp_path' => 'nullable|string|max:512',
+            'worksheet_storage_path' => 'nullable|string|max:512',
+            'material_storage_path' => 'nullable|string|max:512',
             'materials' => 'nullable|file|mimes:pdf,ppt,pptx|max:10240',
             'worksheets' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'notes' => 'nullable|string',
         ];
 
         $validator = Validator::make($request->all(), $rules);
+        $validator->after(function ($validator) use ($request) {
+            if ($request->input('type') === 'video' && !$request->filled('video_temp_path')) {
+                $validator->errors()->add('video_temp_path', 'Please upload a video file.');
+            }
+            if ($request->input('type') === 'worksheet' && !$request->filled('worksheet_storage_path') && !$request->hasFile('worksheets')) {
+                $validator->errors()->add('worksheet_storage_path', 'Please upload a worksheet file.');
+            }
+            if ($request->input('type') === 'material' && !$request->filled('material_storage_path') && !$request->hasFile('materials')) {
+                $validator->errors()->add('material_storage_path', 'Please upload a material file.');
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
@@ -297,60 +368,54 @@ class CourseCrudController extends Controller
             $validated['free'] = $request->has('free');
             $validated['preview'] = $request->has('preview');
 
-            // Handle file uploads
-            if ($request->hasFile('materials')) {
-                // $validated['materials'] = $request->file('materials')->store('lessons/materials', 'public');
-                $file = $request->file('materials');
-
-                $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
-                $destinationFolder = public_path('storage/lessons/materials');
-                // Ensure directory exists
-                if (!File::exists($destinationFolder)) {
-                    File::makeDirectory($destinationFolder, 0755, true);
-                }
-                $fullPath = $destinationFolder . '/' . $fileName;
-                $docService  = new DocumentService();
-                $watermarkedContent = $docService->generateWatermarkedPdf(
-                    $file->getRealPath()
-                );
-                File::put($fullPath, $watermarkedContent);
-                $destinationPath = public_path('storage/lessons/materials');
-                $file->move($destinationPath, $fileName);
-                $validated['worksheets'] = "storage/lessons/materials/" . $fileName;
+            if (($validated['type'] ?? null) !== 'video') {
+                unset($validated['video_temp_path']);
             }
 
-            if ($request->hasFile('worksheets')) {
-                // $validated['worksheets'] = $request->file('worksheets')->store('lessons/worksheets', 'public');
-                $file = $request->file('worksheets');
-                $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
-                $destinationFolder = public_path('storage/lessons/worksheets');
-                // Ensure directory exists
-                if (!File::exists($destinationFolder)) {
-                    File::makeDirectory($destinationFolder, 0755, true);
+            if (($validated['type'] ?? null) === 'video' && !empty($validated['video_temp_path'])) {
+                $relative = $validated['video_temp_path'];
+                if (!str_starts_with($relative, 'temp_upload/')) {
+                    return response()->json(['video_temp_path' => ['Invalid video storage path.']], 422);
                 }
-                $fullPath = $destinationFolder . '/' . $fileName;
-                $docService  = new DocumentService();
-                $watermarkedContent = $docService->generateWatermarkedPdf(
-                    $file->getRealPath()
-                );
-                File::put($fullPath, $watermarkedContent);
-                $destinationPath = public_path('storage/lessons/worksheets');
-                $file->move($destinationPath, $fileName);
-                $validated['worksheets'] = "storage/lessons/worksheets/" . $fileName;
+                $abs = storage_path('app/' . $relative);
+                if (!is_file($abs)) {
+                    return response()->json(['video_temp_path' => ['Uploaded video not found. Upload again.']], 422);
+                }
             }
 
-            if ($request->hasFile('video')) {
-                $vimeoService = new VimeoService();
-                $uploadResponse = $vimeoService->uploadVideo($request);
-                if (empty($uploadResponse['success']) || $uploadResponse['success'] !== true) {
-                    return response()->json([
-                        'error' => $uploadResponse['message'] ?? 'Video upload failed',
-                        'errors' => $uploadResponse['errors'] ?? null,
-                    ], 422);
+            unset($validated['worksheet_storage_path'], $validated['material_storage_path']);
+
+            if (($validated['type'] ?? null) === 'worksheet' && $request->filled('worksheet_storage_path')) {
+                $rel = $request->input('worksheet_storage_path');
+                if (!$this->publicLessonAssetPathIsValid($rel, 'lessons/worksheets')) {
+                    return response()->json(['worksheet_storage_path' => ['Invalid or missing worksheet file.']], 422);
                 }
-                $data['video_path'] = $uploadResponse['link'];
+                $validated['worksheets'] = $rel;
+            } elseif ($request->hasFile('worksheets')) {
+                $validated['worksheets'] = $this->storeLessonWorksheetFromUpload($request->file('worksheets'));
             }
 
+            if (($validated['type'] ?? null) === 'material' && $request->filled('material_storage_path')) {
+                $rel = $request->input('material_storage_path');
+                if (!$this->publicLessonAssetPathIsValid($rel, 'lessons/materials')) {
+                    return response()->json(['material_storage_path' => ['Invalid or missing material file.']], 422);
+                }
+                $validated['materials'] = $rel;
+            } elseif ($request->hasFile('materials')) {
+                $validated['materials'] = $this->storeLessonMaterialFromUpload($request->file('materials'));
+            }
+
+            if (($validated['type'] ?? null) === 'video') {
+                $validated['video_path'] = null;
+                $validated['worksheets'] = null;
+                $validated['materials'] = null;
+            }
+            if (($validated['type'] ?? null) === 'worksheet') {
+                $validated['materials'] = null;
+            }
+            if (($validated['type'] ?? null) === 'material') {
+                $validated['worksheets'] = null;
+            }
 
             $lesson = $section->lessons()->create($validated);
 
@@ -365,6 +430,8 @@ class CourseCrudController extends Controller
                     'preview' => $lesson->preview,
                     'status' => $lesson->status,
                     'section_id' => $section->id,
+                    'video_temp_path' => $lesson->video_temp_path,
+                    'video_path' => $lesson->video_path,
                     'destroy_url' => route('educator.courses.crud.lessons.destroy', $lesson),
                 ]
             ]);
@@ -386,6 +453,7 @@ class CourseCrudController extends Controller
             'status' => 'required|in:Draft,Published',
             'preview' => 'boolean',
             'video_link' => 'nullable|url',
+            'video_temp_path' => 'nullable|string|max:512',
             'materials' => 'nullable|file|mimes:pdf,ppt,pptx|max:10240',
             'worksheets' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'notes' => 'nullable|string',
@@ -401,22 +469,58 @@ class CourseCrudController extends Controller
         $validated['preview'] = $request->has('preview');
 
         try {
+            if ($request->filled('video_temp_path')) {
+                $relative = $request->input('video_temp_path');
+                if (!str_starts_with($relative, 'temp_upload/')) {
+                    return response()->json(['error' => ['video_temp_path' => ['Invalid video storage path.']]], 422);
+                }
+                $abs = storage_path('app/' . $relative);
+                if (!is_file($abs)) {
+                    return response()->json(['error' => ['video_temp_path' => ['Uploaded video not found. Upload again.']]], 422);
+                }
+                if ($lesson->video_temp_path && $lesson->video_temp_path !== $relative) {
+                    Storage::disk('local')->delete($lesson->video_temp_path);
+                }
+                $validated['video_temp_path'] = $relative;
+                $validated['video_path'] = null;
+            } else {
+                unset($validated['video_temp_path']);
+            }
+
             // Handle file uploads
             if ($request->hasFile('materials')) {
                 if ($lesson->materials) {
-                    Storage::disk('public')->delete($lesson->materials);
+                    $materialsPath = public_path('storage/' . $lesson->materials);
+                    if (file_exists($materialsPath)) {
+                        unlink($materialsPath);
+                    }
                 }
-                $validated['materials'] = $request->file('materials')->store('lessons/materials', 'public');
+                $file = $request->file('materials');
+                $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
+                $destinationFolder = public_path('storage/lessons/materials');
+                if (!File::exists($destinationFolder)) {
+                    File::makeDirectory($destinationFolder, 0755, true);
+                }
+                $file->move($destinationFolder, $fileName);
+                $validated['materials'] = "lessons/materials/{$fileName}";
             }
 
             if ($request->hasFile('worksheets')) {
                 if ($lesson->worksheets) {
-                    Storage::disk('public')->delete($lesson->worksheets);
+                    $worksheetsPath = public_path('storage/' . $lesson->worksheets);
+                    if (file_exists($worksheetsPath)) {
+                        unlink($worksheetsPath);
+                    }
                 }
-                $validated['worksheets'] = $request->file('worksheets')->store('lessons/worksheets', 'public');
+                $file = $request->file('worksheets');
+                $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
+                $destinationFolder = public_path('storage/lessons/worksheets');
+                if (!File::exists($destinationFolder)) {
+                    File::makeDirectory($destinationFolder, 0755, true);
+                }
+                $file->move($destinationFolder, $fileName);
+                $validated['worksheets'] = "lessons/worksheets/{$fileName}";
             }
-            $validated['free'] = $request->has('free');
-            $validated['preview'] = $request->has('preview');
 
             $lesson->update($validated);
 
@@ -430,6 +534,8 @@ class CourseCrudController extends Controller
                     'preview' => $lesson->preview,
                     'status' => $lesson->status,
                     'section_id' => $lesson->section_id,
+                    'video_temp_path' => $lesson->video_temp_path,
+                    'video_path' => $lesson->video_path,
                     'destroy_url' => route('educator.courses.crud.lessons.destroy', $lesson),
                 ]
             ]);
@@ -443,14 +549,73 @@ class CourseCrudController extends Controller
 
     public function destroyLesson(Lesson $lesson)
     {
+        if ($lesson->video_temp_path) {
+            Storage::disk('local')->delete($lesson->video_temp_path);
+        }
         if ($lesson->materials) {
-            Storage::disk('public')->delete($lesson->materials);
+            $materialsPath = public_path('storage/' . $lesson->materials);
+            if (file_exists($materialsPath)) {
+                unlink($materialsPath);
+            }
         }
         if ($lesson->worksheets) {
-            Storage::disk('public')->delete($lesson->worksheets);
+            $worksheetsPath = public_path('storage/' . $lesson->worksheets);
+            if (file_exists($worksheetsPath)) {
+                unlink($worksheetsPath);
+            }
         }
 
         $lesson->delete();
         return back()->with('success', 'Lesson deleted successfully!');
+    }
+
+    private function publicLessonAssetPathIsValid(string $relative, string $expectedPrefix): bool
+    {
+        if (!str_starts_with($relative, $expectedPrefix . '/')) {
+            return false;
+        }
+        if (!preg_match('#^' . preg_quote($expectedPrefix, '#') . '/[a-f0-9]{64}\.[a-z0-9]+$#i', $relative)) {
+            return false;
+        }
+
+        return is_file(public_path('storage/' . $relative));
+    }
+
+    private function storeLessonWorksheetFromUpload($file): string
+    {
+        $ext = strtolower($file->getClientOriginalExtension() ?: '');
+        $randomName = bin2hex(random_bytes(32)) . '.' . $ext;
+        $destinationFolder = public_path('storage/lessons/worksheets');
+        if (!File::exists($destinationFolder)) {
+            File::makeDirectory($destinationFolder, 0755, true);
+        }
+        $fullPath = $destinationFolder . '/' . $randomName;
+        if ($ext === 'pdf') {
+            $docService = new DocumentService();
+            File::put($fullPath, $docService->generateWatermarkedPdf($file->getRealPath()));
+        } else {
+            $file->move($destinationFolder, $randomName);
+        }
+
+        return 'lessons/worksheets/' . $randomName;
+    }
+
+    private function storeLessonMaterialFromUpload($file): string
+    {
+        $ext = strtolower($file->getClientOriginalExtension() ?: '');
+        $randomName = bin2hex(random_bytes(32)) . '.' . $ext;
+        $destinationFolder = public_path('storage/lessons/materials');
+        if (!File::exists($destinationFolder)) {
+            File::makeDirectory($destinationFolder, 0755, true);
+        }
+        $fullPath = $destinationFolder . '/' . $randomName;
+        if ($ext === 'pdf') {
+            $docService = new DocumentService();
+            File::put($fullPath, $docService->generateWatermarkedPdf($file->getRealPath()));
+        } else {
+            $file->move($destinationFolder, $randomName);
+        }
+
+        return 'lessons/materials/' . $randomName;
     }
 }

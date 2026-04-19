@@ -21,6 +21,8 @@ use App\Http\Controllers\API\CourseController;
 |
 */
 
+// Educator lesson JSON for the course edit modal: routes/web.php → educator.courses.crud.lessons.edit-payload (web + session).
+
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/schedules', [ScheduleController::class, 'index']);

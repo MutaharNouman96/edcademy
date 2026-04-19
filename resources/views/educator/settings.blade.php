@@ -126,56 +126,81 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label">Headline</label>
-                            <input name="headline" class="form-control"
-                                placeholder="e.g., Math Educator • SAT & Algebra specialist">
-                        </div>
-
-                        <div class="col-12">
                             <label class="form-label">Bio</label>
-                            <textarea name="bio" class="form-control" rows="4" placeholder="Introduce yourself to students…"></textarea>
+                            <textarea name="bio" class="form-control" rows="4" placeholder="Introduce yourself to students…">{{ $user->bio ?? '' }}</textarea>
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label">Subjects</label>
-                            <input id="subjectsInput" class="form-control" placeholder="Type & press Enter">
+                            <label class="form-label">Subject</label>
+                            <input id="subjectsInput" class="form-control" placeholder="Type & press Enter" value="{{ $user->educatorProfile->primary_subject ?? '' }}">
                             <div id="subjectsChips" class="mt-2"></div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Languages</label>
-                            <select name="languages" class="form-select select2" multiple>
-                                <option>English</option>
-                                <option>Urdu</option>
-                                <option>Arabic</option>
-                                <option>Chinese</option>
-                                <option>French</option>
-                                <option>German</option>
-                            </select>
-                            <div class="form-text">Ctrl/Cmd‑click to select multiple.</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Hourly rate (USD)</label>
                             <div class="input-group"><span class="input-group-text">$</span><input name="rate"
                                     type="number" step="1" min="0" class="form-control"
+                                    value="{{ $user->educatorProfile->hourly_rate ?? '' }}"
                                     placeholder="25"></div>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Location</label>
-                            <input name="location" class="form-control" placeholder="City, Country">
+                            <label class="form-label">Promo Video File</label>
+                            <div class="input-group">
+                                <input type="file" name="intro_video_path" class="form-control" accept="video/*">
+                                @if (!empty($user->educatorProfile->intro_video_path))
+                                <a 
+                                    class="btn btn-outline-secondary ms-2" 
+                                    href="{{ asset('storage/' . $user->educatorProfile->intro_video_path) }}" 
+                                    target="_blank"
+                                    title="Open video in new tab"
+                                    >
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                                @endif
+                            </div>
+                            @if (!empty($user->educatorProfile->intro_video_path))
+                                <small class="form-text text-muted">
+                                    Current file: 
+                                    <a href="{{ asset('storage/' . $user->educatorProfile->intro_video_path) }}" target="_blank">
+                                        View video
+                                    </a>
+                                </small>
+                            @endif
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Promo video URL</label>
-                            <input name="video_url" class="form-control" placeholder="https://…">
+                   
+
+                        <div class="col-md-4">
+                            <label class="form-label">Teaching Levels</label>
+                            <select id="teachingLevelsSelect" name="teaching_levels[]" class="form-select select2"
+                                multiple data-placeholder="Select one or more levels">
+                                @php
+                                    $levels = ['Primary', 'Middle School', 'High School', 'Undergraduate', 'Postgraduate', 'Professional'];
+                                    $savedLevels = json_decode($user->educatorProfile->teaching_levels ?? '[]', true) ?: [];
+                                @endphp
+                                @foreach($levels as $level)
+                                    <option value="{{ $level }}" {{ in_array($level, $savedLevels) ? 'selected' : '' }}>{{ $level }}</option>
+                                @endforeach
+                            </select>
+                            <div class="form-text">Search and select all levels you teach.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Certifications</label>
+                            <textarea name="certifications" class="form-control" rows="3" placeholder="List your teaching certifications, degrees, or qualifications…">{{ $user->educatorProfile->certifications ?? '' }}</textarea>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Website</label>
-                            <input name="website" class="form-control" placeholder="https://…">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Social</label>
-                            <input name="social" class="form-control" placeholder="@twitter, linkedin URL, etc.">
+                            <label class="form-label">Preferred Teaching Style</label>
+                            <select name="preferred_teaching_style" class="form-select">
+                                <option value="">-- Select --</option>
+                                @php
+                                    $styles = ['Interactive', 'Lecture-based', 'Project-based', 'Hands-on', 'Discussion-based', 'Flipped Classroom', 'One-on-One Tutoring'];
+                                    $savedStyle = $user->educatorProfile->preferred_teaching_style ?? '';
+                                @endphp
+                                @foreach($styles as $style)
+                                    <option value="{{ $style }}" {{ $savedStyle === $style ? 'selected' : '' }}>{{ $style }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <div class="col-12 d-flex justify-content-end">
@@ -558,29 +583,69 @@
                 <!-- Verification -->
                 <div class="tab-pane fade" id="tab-verification" role="tabpanel">
                     <form id="formVerify" class="row g-3">
+                        @csrf
+                        @php
+                            $v = $verification ?? null;
+                            $ep = $user->educatorProfile;
+                            $biz = old('business_type', $v->business_type ?? 'individual');
+                        @endphp
                         <div class="col-md-6">
                             <label class="form-label">Government ID</label>
-                            <input id="idFile" type="file" class="form-control"
+                            <input id="idFile" name="gov_id_file" type="file" class="form-control"
                                 accept="image/*,application/pdf">
                             <div class="form-text">Stored securely. Only admins can view.</div>
+                            @if (!empty($ep?->govt_id_path))
+                                <small class="text-muted d-block mt-1">
+                                    Current file:
+                                    <a href="{{ asset($ep->govt_id_path) }}" target="_blank">View uploaded ID</a>
+                                </small>
+                            @endif
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Teaching credential (optional)</label>
-                            <input id="credFile" type="file" class="form-control"
+                            <input id="credFile" name="credential_file" type="file" class="form-control"
                                 accept="image/*,application/pdf">
+                            @if (!empty($ep?->degree_proof_path))
+                                <small class="text-muted d-block mt-1">
+                                    Current file:
+                                    <a href="{{ asset($ep->degree_proof_path) }}" target="_blank">View credential</a>
+                                </small>
+                            @endif
                         </div>
+
+                        <div class="col-12">
+                            <h6 class="mb-2"><i class="bi bi-paperclip me-1"></i> Additional documents</h6>
+                            <p class="text-muted small mb-2">Upload extra proof (certificates, references, etc.). PDF or images, up to 10 files per submission.</p>
+                            @if (isset($additionalDocuments) && $additionalDocuments->isNotEmpty())
+                                <ul class="list-group list-group-flush border rounded mb-3">
+                                    @foreach ($additionalDocuments as $doc)
+                                        <li class="list-group-item d-flex align-items-center justify-content-between gap-2 py-2">
+                                            <span class="text-truncate small" title="{{ $doc->document_name }}">{{ $doc->document_name }}</span>
+                                            <span class="d-flex align-items-center gap-2 flex-shrink-0">
+                                                <a href="{{ $doc->document_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">Open</a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-additional-doc" data-url="{{ route('educator.verification.document.destroy', $doc) }}">Remove</button>
+                                            </span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                            <label class="form-label">Add files</label>
+                            <input type="file" name="additional_documents[]" class="form-control" accept="image/*,application/pdf" multiple>
+                        </div>
+
                         <div class="col-md-6">
                             <label class="form-label">Business type</label>
                             <select name="business_type" class="form-select">
-                                <option value="individual">Individual</option>
-                                <option value="company">Company</option>
+                                <option value="individual" {{ $biz === 'individual' ? 'selected' : '' }}>Individual</option>
+                                <option value="company" {{ $biz === 'company' ? 'selected' : '' }}>Company</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Agreement</label>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="tos" required>
-                                <label class="form-check-label">I agree to the Educator Terms of
+                                <input class="form-check-input" type="checkbox" name="tos" value="1" id="verifyTos"
+                                    {{ old('tos', $v?->tos) ? 'checked' : '' }} required>
+                                <label class="form-check-label" for="verifyTos">I agree to the Educator Terms of
                                     Service</label>
                             </div>
                         </div>
@@ -878,7 +943,6 @@
 
             document.addEventListener('DOMContentLoaded', () => {
                 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                document.getElementById('tzChip').textContent = tz;
                 document.getElementById('tzInput').value = tz;
 
                 initSubjectsChips();
@@ -1457,17 +1521,43 @@
                 let formData = new FormData(this);
 
                 $.ajax({
-                    url: "/educator/settings/verification",
+                    url: "{{ route('educator.verification.store') }}",
                     method: "POST",
                     data: formData,
                     processData: false,
                     contentType: false,
 
                     success: function(res) {
-                        toastr.success("Verification submitted.");
+                        toastr.success(res.message || "Verification submitted.");
+                        window.location.reload();
                     },
-                    error: function(err) {
-                        toastr.error("Error submitting verification.");
+                    error: function(xhr) {
+                        var msg = "Error submitting verification.";
+                        if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                            var first = Object.values(xhr.responseJSON.errors)[0];
+                            msg = Array.isArray(first) ? first[0] : first;
+                        }
+                        toastr.error(msg);
+                    }
+                });
+            });
+
+            $(document).on("click", ".btn-remove-additional-doc", function() {
+                if (!confirm("Remove this document?")) return;
+                var url = $(this).data("url");
+                $.ajax({
+                    url: url,
+                    method: "POST",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr("content"),
+                        _method: "DELETE"
+                    },
+                    success: function(res) {
+                        toastr.success(res.message || "Document removed.");
+                        window.location.reload();
+                    },
+                    error: function() {
+                        toastr.error("Could not remove document.");
                     }
                 });
             });
