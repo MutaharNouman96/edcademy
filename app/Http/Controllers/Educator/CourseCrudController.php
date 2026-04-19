@@ -235,8 +235,9 @@ class CourseCrudController extends Controller
             ->with('success', 'Course updated successfully!');
     }
 
-    public function destroy(Course $course)
+    public function destroy($course)
     {
+        $course = Course::findOrFail($course);
         try {
             // $this->authorize('delete', $course);
 
