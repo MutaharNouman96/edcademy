@@ -58,12 +58,27 @@ class OrderService
                     Session::flash('message', 'Item already exists in cart.');
                     return false;
                 }
+
                 $orderItemsData['order_id'] = $order->id;
                 if ($orderItemsData['model'] == 'App\Models\Section') {
                     $section = CourseSection::find($orderItemsData['item_id']);
                     $lessons = $section->lessons;
 
                     foreach ($lessons as $lesson) {
+                        //if item is already in the cart, then don't add it again
+                        if (OrderItem::where('order_id', $order->id)->where('item_id', $lesson->id)->where('model', 'App\Models\Lesson')->exists()) {
+                            continue;
+                        }
+                        //if course is already in the cart, then don't add it again
+                        if (OrderItem::where('order_id', $order->id)->where('item_id', $lesson->course_id)->where('model', 'App\Models\Course')->exists()) {
+                            continue;
+                        }
+                        //if section is already in the cart, then don't add it again
+                        if (OrderItem::where('order_id', $order->id)->where('item_id', $lesson->course_section_id)->where('model', 'App\Models\CourseSection')->exists()) {
+                            continue;
+                        }
+
+
                         $lessonData = $orderItemsData;
                         $lessonData['item_id'] = $lesson->id;
                         $lessonData['model'] = 'App\Models\Lesson';

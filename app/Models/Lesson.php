@@ -17,6 +17,7 @@ class Lesson extends Model
         'category',
         'video_link',
         'video_path',
+        'video_temp_path',
         'description',
         'duration',
         'is_preview',

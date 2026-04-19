@@ -423,23 +423,39 @@
 
 
             const revCtx = document.getElementById('revenueChart');
-            new Chart(revCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Course sales', 'Live sessions', 'Resources'],
-                    datasets: [{
-                        data: [62, 25, 13],
-                        backgroundColor: ['#006b7d', '#00a1b6', '#ff6b35']
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
+            const revenueData = @json($revenueChartData);
+            const revenueTotal = revenueData.reduce((a, b) => a + Number(b), 0);
+            if (revenueTotal > 0) {
+                new Chart(revCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Course sales', 'Live sessions', 'Resources'],
+                        datasets: [{
+                            data: revenueData,
+                            backgroundColor: ['#006b7d', '#00a1b6', '#ff6b35']
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label(ctx) {
+                                        const v = ctx.parsed;
+                                        return `${ctx.label}: $${Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-            });
+                });
+            } else {
+                revCtx.insertAdjacentHTML('afterend',
+                    '<p class="text-muted small text-center py-4 mb-0">No revenue recorded in the last 30 days.</p>');
+                revCtx.style.display = 'none';
+            }
 
             // Save draft (demo)
             document.getElementById('saveCourseBtn').addEventListener('click', () => {

@@ -368,7 +368,7 @@
                                 icon: 'error',
                                 title: 'Error',
                                 text: 'Failed to add to cart : ' + res.message,
-                                timer: 1000,
+                                timer: 3000,
                                 showConfirmButton: true
                             })
                         }

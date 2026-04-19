@@ -116,4 +116,46 @@ class VimeoService
             ];
         }
     }
+
+    /**
+     * Upload a video from an absolute path on disk (e.g. storage/app/temp_upload/...).
+     *
+     * @return array{success: bool, message?: string, video_id?: string, video_uri?: string, link?: string}
+     */
+    public function uploadFromDiskPath(string $absolutePath, string $title, ?string $description = null): array
+    {
+        if (!is_file($absolutePath) || !is_readable($absolutePath)) {
+            return [
+                'success' => false,
+                'message' => 'Video file not found or not readable.',
+            ];
+        }
+
+        $videoData = [
+            'name' => $title,
+            'description' => $description ?? '',
+            'privacy' => [
+                'view' => 'unlisted',
+            ],
+        ];
+
+        try {
+            $uri = Vimeo::upload($absolutePath, $videoData);
+            $videoId = basename($uri);
+            $embedUrl = 'https://player.vimeo.com/video/' . $videoId;
+
+            return [
+                'success' => true,
+                'message' => 'Video uploaded successfully',
+                'video_id' => $videoId,
+                'video_uri' => $uri,
+                'link' => $embedUrl,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Video upload failed: ' . $e->getMessage(),
+            ];
+        }
+    }
 }

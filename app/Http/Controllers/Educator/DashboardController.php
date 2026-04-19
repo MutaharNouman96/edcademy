@@ -120,6 +120,22 @@ class DashboardController extends Controller
             ->where('status', 'paid')
             ->sum('net_amount');
 
+        /**
+         * Revenue breakdown (doughnut): net amounts by source for the last 30 days.
+         */
+        $revenueSince = Carbon::now()->subDays(30);
+        $revenueBySource = Earning::where('educator_id', $educatorId)
+            ->whereIn('status', ['pending', 'approved', 'paid'])
+            ->whereRaw('COALESCE(earned_at, created_at) >= ?', [$revenueSince])
+            ->selectRaw('source_type, SUM(net_amount) as total')
+            ->groupBy('source_type')
+            ->pluck('total', 'source_type');
+
+        $revenueChartData = [
+            round((float) $revenueBySource->get('course', 0), 2),
+            round((float) $revenueBySource->get('session', 0), 2),
+            round((float) $revenueBySource->get('resource', 0), 2),
+        ];
 
         $latestCourses = Course::where('user_id', $educatorId)->active()->published()->orderByDesc("publish_date")->with("educator", "category", "reviews", "lessons")->limit(4)->get();
         $latestVideos = Lesson::where('type', 'video')->whereIn('course_id', $courseIds)->published()->with("course", "lesson_video_views", "lesson_video_comments")->limit(4)->get();
@@ -138,7 +154,8 @@ class DashboardController extends Controller
             'escrowBalance',
             'earnedTotal',
             'latestCourses',
-            'latestVideos'
+            'latestVideos',
+            'revenueChartData'
         ));
     }
 

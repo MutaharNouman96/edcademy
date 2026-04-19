@@ -14,7 +14,6 @@ class AdminNotificationMail extends Mailable implements \Illuminate\Contracts\Qu
 
     public string $type;
     public array $data;
-    public string $subject;
     public string $message;
 
     /**

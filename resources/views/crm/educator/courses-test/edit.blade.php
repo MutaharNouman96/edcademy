@@ -1,14 +1,82 @@
 <x-educator-layout>
 
+    @push('styles')
+        <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" />
+        <style>
+            #addLessonVideoZone.dropzone,
+            #editLessonVideoZone.dropzone {
+                min-height: 140px;
+                border: 2px dashed #cbd5e1;
+                background: #f8fafc;
+            }
 
-    <div class="container py-4">
+            #addLessonVideoZone .dz-message,
+            #editLessonVideoZone .dz-message {
+                font-weight: 500;
+                color: #64748b;
+            }
+
+            #addLessonVideoPreview,
+            #editLessonVideoPreview {
+                max-height: 280px;
+                background: #0f172a;
+            }
+
+            #addLessonWorksheetPreviewFrame,
+            #addLessonMaterialPreviewFrame {
+                min-height: 240px;
+                background: #f1f5f9;
+            }
+
+            #addLessonWorksheetZone.dropzone,
+            #addLessonMaterialZone.dropzone {
+                min-height: 100px;
+                border: 2px dashed #cbd5e1;
+                background: #f8fafc;
+            }
+        </style>
+    @endpush
+
+    <div class=" py-4">
+        @if (isset($action) && $action == 'content')
+            <div class="alert alert-info">
+
+                <i class="bi bi-info-circle"></i>
+                <strong>Course Content Management</strong><br>
+                Manage your course structure: add, edit, or organize sections and lessons below.
+
+
+            </div>
+        @endif
         <div class="row">
-            <div class="col-lg-8">
+            <div class="col-lg-6">
                 <!-- Course Details Form -->
+                <!-- Sidebar -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
                         <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Course</h4>
                     </div>
+
+                    <div class="card-body">
+                        <h6 class="mb-0">Course Status</h6>
+
+                        <p><strong>Status:</strong> <span
+                                class="badge bg-{{ $course->status == 'published' ? 'success' : 'warning' }}">{{ ucfirst($course->status) }}</span>
+                        </p>
+                        <div class="mb-2">
+                            Approval Status : <span
+                                class="badge bg-{{ $course->approval_status == 'approved' ? 'success' : ($course->approval_status == 'rejected' ? 'danger' : 'info') }}">{{ ucfirst($course->approval_status) }}</span>
+                        </div>
+                        <p><strong>Sections:</strong> {{ $course->sections->count() }}</p>
+                        <p><strong>Total Lessons:</strong> {{ $course->lessons->count() }}</p>
+                        <p><strong>Created:</strong> {{ $course->created_at->format('M d, Y') }}</p>
+                        @if ($course->thumbnail)
+                            <img src="{{ asset('storage/' . $course->thumbnail) }}" class="img-fluid rounded mt-2"
+                                alt="Thumbnail">
+                        @endif
+                    </div>
+                    <hr>
+
                     <div class="card-body">
                         <form action="{{ route('educator.courses.crud.update', $course->id) }}" method="POST"
                             enctype="multipart/form-data">
@@ -106,8 +174,8 @@
                                 <div class="col-md-6">
                                     <label class="form-label d-block">&nbsp;</label>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="is_free" name="is_free"
-                                            {{ old('is_free', $course->is_free) ? 'checked' : '' }}>
+                                        <input class="form-check-input" type="checkbox" id="is_free"
+                                            name="is_free" {{ old('is_free', $course->is_free) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="is_free">Free Course</label>
                                     </div>
                                 </div>
@@ -206,7 +274,8 @@
                         </form>
                     </div>
                 </div>
-
+            </div>
+            <div class="col-lg-6">
                 <!-- Sections & Lessons Management -->
                 <div class="card shadow-sm">
                     <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
@@ -269,8 +338,8 @@
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <button class="btn btn-sm btn-outline-primary"
-                                                        onclick="editLesson({{ $lesson }})">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        onclick="editLesson({{ $lesson->id }})">
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
                                                     <form
@@ -298,30 +367,8 @@
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm mb-3">
-                    <div class="card-header bg-info text-white">
-                        <h6 class="mb-0">Course Status</h6>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Status:</strong> <span
-                                class="badge bg-{{ $course->status == 'published' ? 'success' : 'warning' }}">{{ ucfirst($course->status) }}</span>
-                        </p>
-                        <div class="mb-2">
-                            Approval Status : <span
-                                class="badge bg-{{ $course->approval_status == 'approved' ? 'success' : ($course->approval_status == 'rejected' ? 'danger' : 'info') }}">{{ ucfirst($course->approval_status) }}</span>
-                        </div>
-                        <p><strong>Sections:</strong> {{ $course->sections->count() }}</p>
-                        <p><strong>Total Lessons:</strong> {{ $course->lessons->count() }}</p>
-                        <p><strong>Created:</strong> {{ $course->created_at->format('M d, Y') }}</p>
-                        @if ($course->thumbnail)
-                            <img src="{{ Storage::url($course->thumbnail) }}" class="img-fluid rounded mt-2"
-                                alt="Thumbnail">
-                        @endif
-                    </div>
-                </div>
-            </div>
+
+
         </div>
     </div>
 
@@ -402,7 +449,8 @@
                             <i class="bi bi-play-btn-fill text-primary me-2"></i>
                             Add Lesson
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" id="addLessonModalCloseBtn"
+                            data-bs-dismiss="modal"></button>
                     </div>
 
                     <div class="modal-body">
@@ -483,26 +531,70 @@
                             <div class="tab-content p-3 bg-light">
                                 <div class="tab-pane fade show active" id="videoUpload" role="tabpanel"
                                     aria-labelledby="video-tab">
-                                    <input type="file" class="form-control" name="video" accept="video/*">
-
+                                    <input type="hidden" name="video_temp_path" id="video_temp_path"
+                                        value="">
+                                    <div id="addLessonVideoZone" class="dropzone"></div>
+                                    <div id="videoUploadLoader" class="small text-primary mt-2 d-none">
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                        Uploading video…
+                                    </div>
+                                    <div id="videoTempPathDisplay" class="form-text small mt-2"></div>
+                                    <div id="addLessonVideoPreviewWrap" class="mt-3 d-none">
+                                        <label class="form-label small fw-semibold mb-1">Preview</label>
+                                        <video id="addLessonVideoPreview" class="w-100 rounded border" controls
+                                            playsinline preload="metadata"></video>
+                                        <div class="form-text small mt-1">Plays from your file before upload finishes.
+                                        </div>
+                                    </div>
                                     <div class="form-text">
-                                        MP4/MOV up to 2 GB, upload the video here.
+                                        MP4 up to 2 GB.
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="worksheetUpload" role="tabpanel"
                                     aria-labelledby="worksheet-tab">
-                                    <input type="file" class="form-control" name="worksheets"
-                                        accept=".pdf,.doc,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                                    <input type="hidden" name="worksheet_storage_path" id="worksheet_storage_path"
+                                        value="">
+                                    <div id="addLessonWorksheetZone" class="dropzone"></div>
+                                    <div id="worksheetUploadLoader" class="small text-primary mt-2 d-none">
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                        Uploading…
+                                    </div>
+                                    <div id="worksheetPathDisplay" class="form-text small mt-2"></div>
+                                    <div id="addLessonWorksheetPreviewWrap" class="mt-3 d-none">
+                                        <label class="form-label small fw-semibold mb-1">Preview</label>
+                                        <iframe id="addLessonWorksheetPreviewFrame" class="w-100 rounded border"
+                                            title="Worksheet preview"></iframe>
+                                        <div id="addLessonWorksheetNonPdfNote" class="form-text small mt-1 d-none">
+                                            Word files can’t be previewed here; they are saved when upload completes.
+                                        </div>
+                                    </div>
                                     <div class="form-text">
-                                        PDF/Word up to 50 MB, or provide an external link.
+                                        PDF/Word up to 10 MB. Files are saved under <code>public/storage</code> with a
+                                        random name.
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="materialUpload" role="tabpanel"
                                     aria-labelledby="material-tab">
-                                    <input type="file" class="form-control" name="materials"
-                                        accept=".pdf,.ppt,.pptx">
+                                    <input type="hidden" name="material_storage_path" id="material_storage_path"
+                                        value="">
+                                    <div id="addLessonMaterialZone" class="dropzone"></div>
+                                    <div id="materialUploadLoader" class="small text-primary mt-2 d-none">
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                        Uploading…
+                                    </div>
+                                    <div id="materialPathDisplay" class="form-text small mt-2"></div>
+                                    <div id="addLessonMaterialPreviewWrap" class="mt-3 d-none">
+                                        <label class="form-label small fw-semibold mb-1">Preview</label>
+                                        <iframe id="addLessonMaterialPreviewFrame" class="w-100 rounded border"
+                                            title="Material preview"></iframe>
+                                        <div id="addLessonMaterialNonPdfNote" class="form-text small mt-1 d-none">
+                                            PowerPoint files can’t be previewed in the browser; open the link after
+                                            upload.
+                                        </div>
+                                    </div>
                                     <div class="form-text">
-                                        PDF/PPT up to 50 MB, or provide an external link.
+                                        PDF/PPT up to 10 MB. Files are saved under <code>public/storage</code> with a
+                                        random name.
                                     </div>
                                 </div>
                             </div>
@@ -536,7 +628,8 @@
 
                     <!-- Footer -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-outline-secondary" id="addLessonModalCancelBtn"
+                            data-bs-dismiss="modal">
                             <i class="bi bi-x-circle me-1"></i> Cancel
                         </button>
                         <button type="submit" class="btn btn-primary" id="lessonSubmitBtn">
@@ -551,7 +644,7 @@
 
 
     <div class="modal fade" id="editLessonModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-lg modal-dialog-centered ">
             <div class="modal-content">
 
                 <form id="editLessonForm" method="POST" enctype="multipart/form-data">
@@ -568,7 +661,8 @@
                             <i class="bi bi-pencil-square text-primary me-2"></i>
                             Edit Lesson
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" id="editLessonModalCloseBtn"
+                            data-bs-dismiss="modal"></button>
                     </div>
 
                     <!-- Body -->
@@ -648,10 +742,11 @@
 
                     <!-- Footer -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-outline-secondary" id="editLessonModalCancelBtn"
+                            data-bs-dismiss="modal">
                             <i class="bi bi-x-circle me-1"></i> Cancel
                         </button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="editLessonSubmitBtn">
                             <i class="bi bi-save me-1"></i> Update Lesson
                         </button>
                     </div>
@@ -663,10 +758,582 @@
 
 
     @push('scripts')
+        <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
         <script>
+            Dropzone.autoDiscover = false;
+
+            const tempVideoUploadUrl = @json(route('educator.courses.crud.temp-video.upload'));
+            const lessonAssetUploadUrl = (kind) =>
+                @json(url('educator-panel/course-crud/upload-lesson-asset')) + '/' + kind;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                document.querySelector('input[name="_token"]')?.value;
+
+            let addLessonVideoDropzone = null;
+            let addLessonWorksheetDropzone = null;
+            let addLessonMaterialDropzone = null;
+            let editLessonVideoDropzone = null;
+            let editLessonVideoUploading = false;
+            let addLessonVideoObjectUrl = null;
+            let editLessonVideoObjectUrl = null;
+            let addLessonWorksheetBlobUrl = null;
+            let addLessonMaterialBlobUrl = null;
+
+            const addLessonUploadLock = {
+                video: false,
+                worksheet: false,
+                material: false
+            };
+
+            function isAddLessonModalUploading() {
+                return addLessonUploadLock.video || addLessonUploadLock.worksheet || addLessonUploadLock.material;
+            }
+
+            function setAddLessonUploadPart(which, on) {
+                addLessonUploadLock[which] = !!on;
+                refreshAddLessonModalUploadUi();
+            }
+
+            function refreshAddLessonModalUploadUi() {
+                const locked = isAddLessonModalUploading();
+                ['addLessonModalCancelBtn', 'addLessonModalCloseBtn', 'lessonSubmitBtn'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.disabled = locked;
+                });
+                document.querySelectorAll('#uploadTab .nav-link').forEach(el => {
+                    el.classList.toggle('disabled', locked);
+                    el.style.pointerEvents = locked ? 'none' : '';
+                });
+                const v = document.getElementById('videoUploadLoader');
+                const w = document.getElementById('worksheetUploadLoader');
+                const m = document.getElementById('materialUploadLoader');
+                if (v) v.classList.toggle('d-none', !addLessonUploadLock.video);
+                if (w) w.classList.toggle('d-none', !addLessonUploadLock.worksheet);
+                if (m) m.classList.toggle('d-none', !addLessonUploadLock.material);
+            }
+
+            function clearAddVideoPreview() {
+                if (addLessonVideoObjectUrl) {
+                    URL.revokeObjectURL(addLessonVideoObjectUrl);
+                    addLessonVideoObjectUrl = null;
+                }
+                const wrap = document.getElementById('addLessonVideoPreviewWrap');
+                const vid = document.getElementById('addLessonVideoPreview');
+                if (vid) {
+                    vid.pause();
+                    vid.removeAttribute('src');
+                    vid.load();
+                }
+                if (wrap) wrap.classList.add('d-none');
+            }
+
+            function clearEditVideoPreview() {
+                if (editLessonVideoObjectUrl) {
+                    URL.revokeObjectURL(editLessonVideoObjectUrl);
+                    editLessonVideoObjectUrl = null;
+                }
+                const wrap = document.getElementById('editLessonVideoPreviewWrap');
+                const vid = document.getElementById('editLessonVideoPreview');
+                if (vid) {
+                    vid.pause();
+                    vid.removeAttribute('src');
+                    vid.load();
+                }
+                if (wrap) wrap.classList.add('d-none');
+            }
+
+            function showVideoPreviewFromDropzoneFile(file, which) {
+                if (!file || !file.type || !file.type.startsWith('video/')) {
+                    return;
+                }
+                const isAdd = which === 'add';
+                if (isAdd) {
+                    clearAddVideoPreview();
+                } else {
+                    clearEditVideoPreview();
+                }
+                const url = URL.createObjectURL(file);
+                if (isAdd) {
+                    addLessonVideoObjectUrl = url;
+                } else {
+                    editLessonVideoObjectUrl = url;
+                }
+                const wrap = document.getElementById(isAdd ? 'addLessonVideoPreviewWrap' :
+                    'editLessonVideoPreviewWrap');
+                const vid = document.getElementById(isAdd ? 'addLessonVideoPreview' : 'editLessonVideoPreview');
+                if (!vid || !wrap) {
+                    URL.revokeObjectURL(url);
+                    if (isAdd) {
+                        addLessonVideoObjectUrl = null;
+                    } else {
+                        editLessonVideoObjectUrl = null;
+                    }
+                    return;
+                }
+                vid.src = url;
+                vid.load();
+                wrap.classList.remove('d-none');
+            }
+
+            function clearAddWorksheetPreview() {
+                if (addLessonWorksheetBlobUrl) {
+                    URL.revokeObjectURL(addLessonWorksheetBlobUrl);
+                    addLessonWorksheetBlobUrl = null;
+                }
+                const frame = document.getElementById('addLessonWorksheetPreviewFrame');
+                const wrap = document.getElementById('addLessonWorksheetPreviewWrap');
+                const note = document.getElementById('addLessonWorksheetNonPdfNote');
+                if (frame) {
+                    frame.removeAttribute('src');
+                }
+                if (wrap) wrap.classList.add('d-none');
+                if (note) note.classList.add('d-none');
+            }
+
+            function clearAddMaterialPreview() {
+                if (addLessonMaterialBlobUrl) {
+                    URL.revokeObjectURL(addLessonMaterialBlobUrl);
+                    addLessonMaterialBlobUrl = null;
+                }
+                const frame = document.getElementById('addLessonMaterialPreviewFrame');
+                const wrap = document.getElementById('addLessonMaterialPreviewWrap');
+                const note = document.getElementById('addLessonMaterialNonPdfNote');
+                if (frame) {
+                    frame.removeAttribute('src');
+                }
+                if (wrap) wrap.classList.add('d-none');
+                if (note) note.classList.add('d-none');
+            }
+
+            function showWorksheetLocalPreview(file) {
+                clearAddWorksheetPreview();
+                const wrap = document.getElementById('addLessonWorksheetPreviewWrap');
+                const frame = document.getElementById('addLessonWorksheetPreviewFrame');
+                const note = document.getElementById('addLessonWorksheetNonPdfNote');
+                if (!file || !wrap || !frame) return;
+                wrap.classList.remove('d-none');
+                if (file.type === 'application/pdf') {
+                    if (note) note.classList.add('d-none');
+                    const url = URL.createObjectURL(file);
+                    addLessonWorksheetBlobUrl = url;
+                    frame.src = url;
+                } else {
+                    if (note) note.classList.remove('d-none');
+                    frame.removeAttribute('src');
+                }
+            }
+
+            function showMaterialLocalPreview(file) {
+                clearAddMaterialPreview();
+                const wrap = document.getElementById('addLessonMaterialPreviewWrap');
+                const frame = document.getElementById('addLessonMaterialPreviewFrame');
+                const note = document.getElementById('addLessonMaterialNonPdfNote');
+                if (!file || !wrap || !frame) return;
+                wrap.classList.remove('d-none');
+                if (file.type === 'application/pdf') {
+                    if (note) note.classList.add('d-none');
+                    const url = URL.createObjectURL(file);
+                    addLessonMaterialBlobUrl = url;
+                    frame.src = url;
+                } else {
+                    if (note) note.classList.remove('d-none');
+                    frame.removeAttribute('src');
+                }
+            }
+
+            function setEditLessonModalVideoUploading(on) {
+                editLessonVideoUploading = !!on;
+                ['editLessonModalCancelBtn', 'editLessonModalCloseBtn', 'editLessonSubmitBtn'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.disabled = !!on;
+                });
+                const loader = document.getElementById('editVideoUploadLoader');
+                if (loader) loader.classList.toggle('d-none', !on);
+            }
+
+            function destroyAddLessonAllDropzones() {
+                clearAddVideoPreview();
+                clearAddWorksheetPreview();
+                clearAddMaterialPreview();
+                if (addLessonVideoDropzone) {
+                    try {
+                        addLessonVideoDropzone.destroy();
+                    } catch (e) {}
+                    addLessonVideoDropzone = null;
+                }
+                if (addLessonWorksheetDropzone) {
+                    try {
+                        addLessonWorksheetDropzone.destroy();
+                    } catch (e) {}
+                    addLessonWorksheetDropzone = null;
+                }
+                if (addLessonMaterialDropzone) {
+                    try {
+                        addLessonMaterialDropzone.destroy();
+                    } catch (e) {}
+                    addLessonMaterialDropzone = null;
+                }
+                const vh = document.getElementById('video_temp_path');
+                const wh = document.getElementById('worksheet_storage_path');
+                const mh = document.getElementById('material_storage_path');
+                if (vh) vh.value = '';
+                if (wh) wh.value = '';
+                if (mh) mh.value = '';
+                const vd = document.getElementById('videoTempPathDisplay');
+                const wd = document.getElementById('worksheetPathDisplay');
+                const md = document.getElementById('materialPathDisplay');
+                if (vd) vd.textContent = '';
+                if (wd) wd.textContent = '';
+                if (md) md.textContent = '';
+            }
+
+            function initAddLessonAllDropzones() {
+                if (typeof Dropzone === 'undefined') return;
+                destroyAddLessonAllDropzones();
+
+                const videoEl = document.getElementById('addLessonVideoZone');
+                if (videoEl) {
+                    addLessonVideoDropzone = new Dropzone(videoEl, {
+                    url: tempVideoUploadUrl,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    paramName: 'file',
+                    maxFiles: 1,
+                    maxFilesize: 2048,
+                    acceptedFiles: 'video/mp4,video/quicktime,video/x-msvideo,video/x-ms-wmv,video/webm,video/x-matroska',
+                    chunking: true,
+                    forceChunking: true,
+                    chunkSize: 2000000,
+                    addRemoveLinks: true,
+                    dictDefaultMessage: 'Drop video here or click to upload (up to 2 GB)',
+                    init: function() {
+                        this.on('addedfile', file => {
+                            showVideoPreviewFromDropzoneFile(file, 'add');
+                        });
+                        this.on('removedfile', () => clearAddVideoPreview());
+                        this.on('maxfilesexceeded', file => {
+                            this.removeAllFiles();
+                            this.addFile(file);
+                        });
+                        this.on('sending', () => setAddLessonUploadPart('video', true));
+                        this.on('uploadprogress', () => setAddLessonUploadPart('video', true));
+                        this.on('success', (file, res) => {
+                            setAddLessonUploadPart('video', false);
+                            if (res && res.path) {
+                                const h = document.getElementById('video_temp_path');
+                                const d = document.getElementById('videoTempPathDisplay');
+                                if (h) h.value = res.path;
+                                if (d) {
+                                    d.innerHTML =
+                                        'Video is uploaded. It will be reviewed by us before publishing to the platform.';
+
+                                }
+                            }
+                        });
+                        this.on('error', (file, err, xhr) => {
+                            setAddLessonUploadPart('video', false);
+                            let msg = 'Upload failed';
+                            if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            } else if (err && err.message) {
+                                msg = err.message;
+                            } else if (typeof err === 'string') {
+                                msg = err;
+                            }
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Upload error',
+                                text: msg
+                            });
+                        });
+                        this.on('canceled', () => setAddLessonUploadPart('video', false));
+                    }
+                });
+                }
+
+                const wsEl = document.getElementById('addLessonWorksheetZone');
+                if (wsEl) {
+                    addLessonWorksheetDropzone = new Dropzone(wsEl, {
+                        url: lessonAssetUploadUrl('worksheets'),
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        paramName: 'file',
+                        maxFiles: 1,
+                        maxFilesize: 10,
+                        acceptedFiles: '.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        addRemoveLinks: true,
+                        dictDefaultMessage: 'Drop worksheet (PDF or Word) or click',
+                        init: function() {
+                            this.on('addedfile', file => showWorksheetLocalPreview(file));
+                            this.on('removedfile', () => {
+                                clearAddWorksheetPreview();
+                                const h = document.getElementById('worksheet_storage_path');
+                                const d = document.getElementById('worksheetPathDisplay');
+                                if (h) h.value = '';
+                                if (d) d.textContent = '';
+                            });
+                            this.on('maxfilesexceeded', file => {
+                                this.removeAllFiles();
+                                this.addFile(file);
+                            });
+                            this.on('sending', () => setAddLessonUploadPart('worksheet', true));
+                            this.on('uploadprogress', () => setAddLessonUploadPart('worksheet', true));
+                            this.on('success', (file, res) => {
+                                setAddLessonUploadPart('worksheet', false);
+                                if (res && res.path) {
+                                    const h = document.getElementById('worksheet_storage_path');
+                                    const d = document.getElementById('worksheetPathDisplay');
+                                    if (h) h.value = res.path;
+                                    if (d) {
+                                        d.innerHTML = 'Saved: <code class="text-break">' + res.path +
+                                            '</code>';
+                                    }
+                                    clearAddWorksheetPreview();
+                                    const wrap = document.getElementById('addLessonWorksheetPreviewWrap');
+                                    const frame = document.getElementById('addLessonWorksheetPreviewFrame');
+                                    const note = document.getElementById('addLessonWorksheetNonPdfNote');
+                                    if (res.url && /\.pdf($|\?)/i.test(res.url)) {
+                                        if (note) note.classList.add('d-none');
+                                        if (frame) frame.src = res.url;
+                                        if (wrap) wrap.classList.remove('d-none');
+                                    } else if (wrap) {
+                                        if (note) note.classList.remove('d-none');
+                                        if (frame) frame.removeAttribute('src');
+                                        wrap.classList.remove('d-none');
+                                    }
+                                }
+                            });
+                            this.on('error', (file, err, xhr) => {
+                                setAddLessonUploadPart('worksheet', false);
+                                let msg = 'Upload failed';
+                                if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+                                    msg = xhr.responseJSON.message;
+                                }
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Upload error',
+                                    text: msg
+                                });
+                            });
+                            this.on('canceled', () => setAddLessonUploadPart('worksheet', false));
+                        }
+                    });
+                }
+
+                const matEl = document.getElementById('addLessonMaterialZone');
+                if (matEl) {
+                    addLessonMaterialDropzone = new Dropzone(matEl, {
+                        url: lessonAssetUploadUrl('materials'),
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        paramName: 'file',
+                        maxFiles: 1,
+                        maxFilesize: 10,
+                        acceptedFiles: '.pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                        addRemoveLinks: true,
+                        dictDefaultMessage: 'Drop material (PDF or PowerPoint) or click',
+                        init: function() {
+                            this.on('addedfile', file => showMaterialLocalPreview(file));
+                            this.on('removedfile', () => {
+                                clearAddMaterialPreview();
+                                const h = document.getElementById('material_storage_path');
+                                const d = document.getElementById('materialPathDisplay');
+                                if (h) h.value = '';
+                                if (d) d.textContent = '';
+                            });
+                            this.on('maxfilesexceeded', file => {
+                                this.removeAllFiles();
+                                this.addFile(file);
+                            });
+                            this.on('sending', () => setAddLessonUploadPart('material', true));
+                            this.on('uploadprogress', () => setAddLessonUploadPart('material', true));
+                            this.on('success', (file, res) => {
+                                setAddLessonUploadPart('material', false);
+                                if (res && res.path) {
+                                    const h = document.getElementById('material_storage_path');
+                                    const d = document.getElementById('materialPathDisplay');
+                                    if (h) h.value = res.path;
+                                    if (d) {
+                                        d.innerHTML = 'Saved: <code class="text-break">' + res.path +
+                                            '</code>';
+                                    }
+                                    clearAddMaterialPreview();
+                                    const wrap = document.getElementById('addLessonMaterialPreviewWrap');
+                                    const frame = document.getElementById('addLessonMaterialPreviewFrame');
+                                    const note = document.getElementById('addLessonMaterialNonPdfNote');
+                                    if (res.url && /\.pdf($|\?)/i.test(res.url)) {
+                                        if (note) note.classList.add('d-none');
+                                        if (frame) frame.src = res.url;
+                                        if (wrap) wrap.classList.remove('d-none');
+                                    } else if (wrap) {
+                                        if (note) note.classList.remove('d-none');
+                                        if (frame) frame.removeAttribute('src');
+                                        wrap.classList.remove('d-none');
+                                    }
+                                }
+                            });
+                            this.on('error', (file, err, xhr) => {
+                                setAddLessonUploadPart('material', false);
+                                let msg = 'Upload failed';
+                                if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+                                    msg = xhr.responseJSON.message;
+                                }
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Upload error',
+                                    text: msg
+                                });
+                            });
+                            this.on('canceled', () => setAddLessonUploadPart('material', false));
+                        }
+                    });
+                }
+            }
+
+            function destroyEditLessonDropzone() {
+                clearEditVideoPreview();
+                if (editLessonVideoDropzone) {
+                    try {
+                        editLessonVideoDropzone.destroy();
+                    } catch (e) {}
+                    editLessonVideoDropzone = null;
+                }
+            }
+
+            function initEditLessonDropzone(lesson) {
+                const el = document.getElementById('editLessonVideoZone');
+                if (!el || typeof Dropzone === 'undefined') return;
+                destroyEditLessonDropzone();
+                const hidden = document.getElementById('edit_video_temp_path');
+                if (hidden && lesson && lesson.video_temp_path) {
+                    hidden.value = lesson.video_temp_path;
+                }
+                const disp = document.getElementById('editVideoTempPathDisplay');
+                if (disp && lesson && lesson.video_temp_path) {
+                    disp.innerHTML = 'Current file (relative): <code class="text-break">' + lesson
+                        .video_temp_path + '</code>';
+                }
+                editLessonVideoDropzone = new Dropzone(el, {
+                    url: tempVideoUploadUrl,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    paramName: 'file',
+                    maxFiles: 1,
+                    maxFilesize: 2048,
+                    acceptedFiles: 'video/mp4,video/quicktime,video/x-msvideo,video/x-ms-wmv,video/webm,video/x-matroska',
+                    chunking: true,
+                    forceChunking: true,
+                    chunkSize: 2000000,
+                    addRemoveLinks: true,
+                    dictDefaultMessage: 'Drop a new video here or click to replace',
+                    init: function() {
+                        this.on('addedfile', file => {
+                            showVideoPreviewFromDropzoneFile(file, 'edit');
+                        });
+                        this.on('removedfile', () => clearEditVideoPreview());
+                        this.on('maxfilesexceeded', file => {
+                            this.removeAllFiles();
+                            this.addFile(file);
+                        });
+                        this.on('sending', () => setEditLessonModalVideoUploading(true));
+                        this.on('uploadprogress', () => setEditLessonModalVideoUploading(true));
+                        this.on('success', (file, res) => {
+                            setEditLessonModalVideoUploading(false);
+                            if (res && res.path) {
+                                const h = document.getElementById('edit_video_temp_path');
+                                const d = document.getElementById('editVideoTempPathDisplay');
+                                if (h) h.value = res.path;
+                                if (d) {
+                                    d.innerHTML =
+                                        'Video is uploaded. It will be reviewed by us before publishing to the platform.';
+                                }
+                            }
+                        });
+                        this.on('error', (file, err, xhr) => {
+                            setEditLessonModalVideoUploading(false);
+                            let msg = 'Upload failed';
+                            if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Upload error',
+                                text: msg
+                            });
+                        });
+                        this.on('canceled', () => setEditLessonModalVideoUploading(false));
+                    }
+                });
+            }
+
+            document.getElementById('addLessonModal').addEventListener('hide.bs.modal', function(e) {
+                if (isAddLessonModalUploading()) {
+                    e.preventDefault();
+                }
+            });
+            document.getElementById('editLessonModal').addEventListener('hide.bs.modal', function(e) {
+                if (editLessonVideoUploading) {
+                    e.preventDefault();
+                }
+            });
+
+            document.getElementById('addLessonModal').addEventListener('shown.bs.modal', function() {
+                initAddLessonAllDropzones();
+            });
+            document.getElementById('addLessonModal').addEventListener('hidden.bs.modal', function() {
+                destroyAddLessonAllDropzones();
+                addLessonUploadLock.video = false;
+                addLessonUploadLock.worksheet = false;
+                addLessonUploadLock.material = false;
+                refreshAddLessonModalUploadUi();
+            });
+            document.getElementById('editLessonModal').addEventListener('hidden.bs.modal', function() {
+                destroyEditLessonDropzone();
+                setEditLessonModalVideoUploading(false);
+            });
+
             function setLessonType(type) {
                 document.getElementById('lesson_type').value = type;
+                if (type !== 'video') {
+                    const h = document.getElementById('video_temp_path');
+                    if (h) h.value = '';
+                    if (addLessonVideoDropzone) {
+                        addLessonVideoDropzone.removeAllFiles(true);
+                    }
+                    clearAddVideoPreview();
+                    const d = document.getElementById('videoTempPathDisplay');
+                    if (d) d.textContent = '';
+                }
+                if (type !== 'worksheet') {
+                    const wh = document.getElementById('worksheet_storage_path');
+                    if (wh) wh.value = '';
+                    if (addLessonWorksheetDropzone) {
+                        addLessonWorksheetDropzone.removeAllFiles(true);
+                    }
+                    clearAddWorksheetPreview();
+                    const wd = document.getElementById('worksheetPathDisplay');
+                    if (wd) wd.textContent = '';
+                }
+                if (type !== 'material') {
+                    const mh = document.getElementById('material_storage_path');
+                    if (mh) mh.value = '';
+                    if (addLessonMaterialDropzone) {
+                        addLessonMaterialDropzone.removeAllFiles(true);
+                    }
+                    clearAddMaterialPreview();
+                    const md = document.getElementById('materialPathDisplay');
+                    if (md) md.textContent = '';
+                }
             }
+        </script>
+        <script>
             const freeCheckbox = document.getElementById('lesson_free');
             const priceInput = document.getElementById('lesson_price');
 
@@ -786,6 +1453,9 @@
             }
 
             // Lesson Management Functions
+            const lessonEditPayloadUrl = (lessonId) =>
+                `{{ url('educator-panel/course-crud/lessons') }}/${lessonId}/edit-payload`;
+
             function addLesson(sectionId) {
                 document.getElementById('addLessonForm').action =
                     `{{ url('educator-panel') }}/course-crud/sections/${sectionId}/lessons`;
@@ -795,9 +1465,41 @@
                 modal.show();
             }
 
-            function editLesson(lesson) {
+            function editLesson(lessonId) {
+                destroyEditLessonDropzone();
 
-                const modal = new bootstrap.Modal(document.getElementById('editLessonModal'));
+                const modalEl = document.getElementById('editLessonModal');
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+                fetch(lessonEditPayloadUrl(lessonId), {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(async (response) => {
+                        if (!response.ok) {
+                            const err = await response.json().catch(() => ({}));
+                            throw new Error(err.message || 'Could not load lesson');
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        populateEditLessonModal(data.lesson);
+                        modal.show();
+                    })
+                    .catch((e) => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: e.message || 'Failed to load lesson details.'
+                        });
+                    });
+            }
+
+            function populateEditLessonModal(lesson) {
                 const form = document.getElementById('editLessonForm');
 
                 form.action = `{{ url('educator-panel') }}/course-crud/lessons/${lesson.id}`;
@@ -811,32 +1513,57 @@
 
                 document.getElementById('edit_type').value = lesson.type;
 
-                document.getElementById('edit_free').checked = lesson.free;
-                document.getElementById('edit_preview').checked = lesson.preview;
+                document.getElementById('edit_free').checked = !!lesson.free;
+                document.getElementById('edit_preview').checked = !!lesson.preview;
 
                 const editLessonFileType = document.getElementById('lessonTypeFileUpload');
 
                 switch (lesson.type) {
-                    case 'video':
-                        editLessonFileType.innerHTML = `<div class=" " id="editVideo">
-                            <input type="file" class="form-control" name="video_link" accept="video/*">
-                        </div>`;
-                        editLessonFileType.innerHTML +=
-                            `<a href="${lesson.video_link}" target="_blank" class="btn btn-primary btn-sm mt-2">Preview Uploaded Video</a>`;
+                    case 'video': {
+                        let vimeoBlock = '';
+                        if (lesson.video_path && String(lesson.video_path).includes('vimeo.com')) {
+                            vimeoBlock =
+                                `<div class="alert alert-success py-2 small mb-2">On Vimeo: <a href="${lesson.video_path}" target="_blank" rel="noopener">Open player link</a></div>`;
+                        }
+                        let tempBlock = '';
+                        if (lesson.video_temp_path) {
+                            tempBlock =
+                                `<div class="alert alert-warning py-2 small mb-2">Pending admin approval for Vimeo. Temp: <code class="small">${lesson.video_temp_path}</code></div>`;
+                        }
+                        editLessonFileType.innerHTML = vimeoBlock + tempBlock +
+                            `<p class="small text-muted mb-2">Upload a replacement file below. Vimeo is updated only after an admin approves.</p>
+                            <input type="hidden" name="video_temp_path" id="edit_video_temp_path" value="">
+                            <div id="editLessonVideoZone" class="dropzone"></div>
+                            <div id="editVideoUploadLoader" class="small text-primary mt-2 d-none">
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span> Uploading video…
+                            </div>
+                            <div id="editVideoTempPathDisplay" class="form-text small mt-2"></div>
+                            <div id="editLessonVideoPreviewWrap" class="mt-3 d-none">
+                                <label class="form-label small fw-semibold mb-1">Preview</label>
+                                <video id="editLessonVideoPreview" class="w-100 rounded border" controls
+                                    playsinline preload="metadata"></video>
+                                <div class="form-text small mt-1">Plays from your file before upload finishes.</div>
+                            </div>`;
+                        setTimeout(() => initEditLessonDropzone(lesson), 50);
                         break;
+                    }
                     case 'worksheet':
                         editLessonFileType.innerHTML = `<div class=" " id="editWorksheet">
                             <input type="file" class="form-control" name="worksheets" accept=".pdf,.doc,.docx">
                         </div>`;
-                        editLessonFileType.innerHTML +=
-                            `<a href="${lesson.worksheets_path}" target="_blank" class="btn btn-primary btn-sm mt-2">Preview Uploaded Worksheet</a>`;
+                        if (lesson.worksheets_path) {
+                            editLessonFileType.innerHTML +=
+                                `<a href="${lesson.worksheets_path}" target="_blank" rel="noopener" class="btn btn-primary btn-sm mt-2">Preview uploaded worksheet</a>`;
+                        }
                         break;
                     case 'material':
                         editLessonFileType.innerHTML = `<div class=" " id="editMaterial">
                             <input type="file" class="form-control" name="materials" accept=".pdf,.ppt,.pptx">
                         </div>`;
-                        editLessonFileType.innerHTML +=
-                            `<a href="${lesson.materials_path}" target="_blank" class="btn btn-primary btn-sm mt-2">Preview Uploaded Material</a>`;
+                        if (lesson.materials_path) {
+                            editLessonFileType.innerHTML +=
+                                `<a href="${lesson.materials_path}" target="_blank" rel="noopener" class="btn btn-primary btn-sm mt-2">Preview uploaded material</a>`;
+                        }
                         break;
 
 
@@ -846,8 +1573,6 @@
                 }
 
                 toggleEditPrice();
-
-                modal.show();
             }
 
             function toggleEditPrice() {
@@ -1061,6 +1786,66 @@
                     });
             });
 
+            document.getElementById('editLessonForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const form = this;
+                const submitBtn = document.getElementById('editLessonSubmitBtn');
+                const errorBox = document.getElementById('editLessonErrors');
+
+                errorBox.classList.add('d-none');
+                errorBox.innerHTML = '';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML =
+                    `<span class="spinner-border spinner-border-sm me-1"></span> Updating...`;
+
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                    .then(async response => {
+                        if (!response.ok) {
+                            const data = await response.json();
+                            throw data;
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const modalEl = document.getElementById('editLessonModal');
+                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        showLessonSuccess(data.message || 'Lesson updated successfully!');
+                    })
+                    .catch(error => {
+                        const errs = error.errors || error.error;
+                        if (errs) {
+                            let messages = '<ul class="mb-0">';
+                            Object.values(errs).forEach(errArr => {
+                                const arr = Array.isArray(errArr) ? errArr : [errArr];
+                                arr.forEach(msg => {
+                                    messages += `<li>${msg}</li>`;
+                                });
+                            });
+                            messages += '</ul>';
+                            errorBox.innerHTML = messages;
+                            errorBox.classList.remove('d-none');
+                        } else {
+                            errorBox.innerHTML = error.message || 'Something went wrong. Please try again.';
+                            errorBox.classList.remove('d-none');
+                        }
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `<i class="bi bi-save me-1"></i> Update Lesson`;
+                    });
+            });
 
 
             function showLessonSuccess(message) {
@@ -1103,8 +1888,8 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <button class="btn btn-sm btn-outline-primary"
-                                        onclick="editLesson(${lesson})">
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                        onclick="editLesson(${lesson.id})">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <form action="${lesson.destroy_url}" method="POST" class="d-inline">

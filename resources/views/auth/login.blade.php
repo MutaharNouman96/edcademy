@@ -10,15 +10,16 @@
 
         body {
             background: linear-gradient(135deg, var(--primary-cyan), var(--light-cyan));
-            min-height: 100vh; 
+            min-height: 100vh;
 
             align-items: center;
             justify-content: center;
             font-family: 'Inter', sans-serif;
         }
+
         #login-container {
-           
-           
+
+
             align-items: center;
             justify-content: center;
             padding: 10rem 1rem;
@@ -131,7 +132,12 @@
                         </div>
 
                         <!-- Register Link -->
-                       
+                        <div class="mt-4 d-flex justify-content-center align-items-center mb-4">
+                            <a class="text-cyan text-decoration-none small" href="{{ route('register') }}">
+                                Don't have an account? Register
+                            </a>
+                        </div>
+
                     </form>
 
                 </div>
