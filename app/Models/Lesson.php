@@ -79,11 +79,11 @@ class Lesson extends Model
 
     public function getMaterialsPathAttribute()
     {
-        return  asset($this->materials);
+        return  asset('storage/' . $this->materials);
     }
 
     public function getWorksheetsPathAttribute()
     {
-        return  asset($this->worksheets);
+        return  asset('storage/' . $this->worksheets);
     }
 }

@@ -25,7 +25,7 @@ class CourseCrudController extends Controller
         $courses = Course::with(['educator', 'category', 'sections.lessons'])
             ->where('user_id', auth()->id())
             ->latest()
-            ->paginate(10);
+            ->get();
 
         return view('crm.educator.courses.index', compact('courses'));
     }
@@ -101,24 +101,20 @@ class CourseCrudController extends Controller
                 'subject' => $course->subject,
                 'price' => $course->price,
                 'status' => $course->status,
-                'publish_option' => $course->publish_option
+                'publish_option' => $course->publish_option,
             ],
             "Created new course '{$course->title}'",
             [
                 'subject' => $course->subject,
                 'level' => $course->level,
                 'price' => $course->price,
-                'duration' => $course->duration
-            ]
+                'duration' => $course->duration,
+            ],
         );
 
         // Send course submitted email to educator
         try {
-            EmailService::send(
-                auth()->user()->email,
-                new CourseSubmittedMail($course),
-                'emails'
-            );
+            EmailService::send(auth()->user()->email, new CourseSubmittedMail($course), 'emails');
         } catch (\Exception $e) {
             \Log::error('Failed to send course submitted email: ' . $e->getMessage());
         }
@@ -150,16 +146,13 @@ class CourseCrudController extends Controller
         //     \Log::error('Failed to send admin notification for course submission: ' . $e->getMessage());
         // }
 
-        return redirect()->route('educator.courses.crud.show', $course)
-            ->with('success', 'Course created successfully!');
+        return redirect()->route('educator.courses.crud.show', $course)->with('success', 'Course created successfully!');
     }
 
     public function show($course)
     {
         // $this->authorize('view', $course);
         $course = Course::findOrFail($course)->load('sections.lessons', 'educator', 'category');
-
-
 
         // dd($course);
 
@@ -170,13 +163,11 @@ class CourseCrudController extends Controller
     {
         // $this->authorize('update', $course);
         $action = request()->get('action');
-    
 
         $categories = CourseCategory::all();
 
         $course = Course::findOrFail($course);
         $course->load('sections.lessons');
-
 
         return view('crm.educator.courses-test.edit', compact('course', 'categories', 'action'));
     }
@@ -238,27 +229,64 @@ class CourseCrudController extends Controller
         }
 
         $course->update($validated);
-       
 
-        return redirect()->route('educator.courses.crud.show', ['courses_crud' => $course->id])
+        return redirect()
+            ->route('educator.courses.crud.show', ['courses_crud' => $course->id])
             ->with('success', 'Course updated successfully!');
     }
 
     public function destroy(Course $course)
     {
-        $this->authorize('delete', $course);
+        try {
+            // $this->authorize('delete', $course);
 
-        if ($course->thumbnail) {
-            $thumbnailPath = public_path('storage/' . $course->thumbnail);
-            if (file_exists($thumbnailPath)) {
-                unlink($thumbnailPath);
+            if ($course->thumbnail) {
+                $thumbnailPath = public_path('storage/' . $course->thumbnail);
+                if (file_exists($thumbnailPath)) {
+                    unlink($thumbnailPath);
+                }
             }
+            if ($course->sections) {
+                foreach ($course->sections as $section) {
+                    if ($section->lessons) {
+                        foreach ($section->lessons as $lesson) {
+                            if ($lesson->video_temp_path) {
+                                Storage::disk('local')->delete($lesson->video_temp_path);
+                            }
+                            if ($lesson->materials) {
+                                $materialsPath = public_path('storage/' . $lesson->materials);
+                                if (file_exists($materialsPath)) {
+                                    unlink($materialsPath);
+                                }
+                            }
+                            if ($lesson->worksheets) {
+                                $worksheetsPath = public_path('storage/' . $lesson->worksheets);
+                                if (file_exists($worksheetsPath)) {
+                                    unlink($worksheetsPath);
+                                }
+                            }
+                            $lesson->delete();
+                        }
+                    }
+                    $section->delete();
+                }
+            }
+            //remove purchased items
+            $course->purchasers()->detach();
+            //remove reviews
+            $course->reviews()->delete();
+            //remove features
+            $course->features()->delete();
+            //remove sections
+            $course->sections()->delete();
+            //remove lessons
+            $course->lessons()->delete();
+
+            $course->delete();
+            return response()->json(['success' => true, 'message' => 'Course deleted successfully!']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        $course->delete();
-
-        return redirect()->route('courses.index')
-            ->with('success', 'Course deleted successfully!');
     }
 
     // Section Management
@@ -337,10 +365,10 @@ class CourseCrudController extends Controller
             'preview' => 'boolean',
             'video_link' => 'nullable|url',
             'video_temp_path' => 'nullable|string|max:512',
-            'worksheet_storage_path' => 'nullable|string|max:512',
-            'material_storage_path' => 'nullable|string|max:512',
-            'materials' => 'nullable|file|mimes:pdf,ppt,pptx|max:10240',
-            'worksheets' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'worksheet_storage_path' => 'nullable|string',
+            'material_storage_path' => 'nullable|string',
+            'materials' => 'nullable|file|mimes:pdf,ppt,pptx|max:50480',
+            'worksheets' => 'nullable|file|mimes:pdf,doc,docx|max:50480',
             'notes' => 'nullable|string',
         ];
 
@@ -433,7 +461,7 @@ class CourseCrudController extends Controller
                     'video_temp_path' => $lesson->video_temp_path,
                     'video_path' => $lesson->video_path,
                     'destroy_url' => route('educator.courses.crud.lessons.destroy', $lesson),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -537,12 +565,11 @@ class CourseCrudController extends Controller
                     'video_temp_path' => $lesson->video_temp_path,
                     'video_path' => $lesson->video_path,
                     'destroy_url' => route('educator.courses.crud.lessons.destroy', $lesson),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
-
 
         // return back()->with('success', 'Lesson updated successfully!');
     }

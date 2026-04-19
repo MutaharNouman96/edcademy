@@ -78,8 +78,8 @@
                         <a class="nav-link @if (request()->is('educator-panel/dashboard')) active @endif"
                             href="{{ route('educator.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>
                             Overview</a>
-                        <a class="nav-link @if (request()->is('educator-panel/courses', 'educator/courses/*')) active @endif"
-                            href="{{ route('educator.courses.index') }}"><i class="bi bi-journal-code me-2"></i> My
+                        <a class="nav-link @if (request()->is('educator-panel/courses', 'educator/courses-crud/*')) active @endif"
+                            href="{{ route('educator.courses.crud.index') }}"><i class="bi bi-journal-code me-2"></i> My
                             Courses</a>
                         <a class="nav-link @if (request()->is('educator-panel/video-stats')) active @endif"
                             href="{{ route('educator.video-stats.index') }}"><i class="bi bi-camera-video me-2"></i>
