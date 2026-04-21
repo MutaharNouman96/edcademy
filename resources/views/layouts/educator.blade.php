@@ -3,7 +3,8 @@
 
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover, shrink-to-fit=no" />
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>Ed‑Cademy — Educator Dashboard</title>
@@ -32,7 +33,12 @@
         <header class="header py-2">
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2 gap-md-3">
+                        <button class="btn btn-outline-secondary d-md-none" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#educatorSidebar"
+                            aria-controls="educatorSidebar" aria-label="Open menu">
+                            <i class="bi bi-list fs-4"></i>
+                        </button>
                         <a href="{{ route('educator.dashboard') }}" class="text-decoration-none brand">
                             <i class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy
                         </a>
@@ -72,58 +78,68 @@
 
         <div class="container-fluid">
             <div class="row">
-                <!-- Sidebar -->
-                <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
-                    <nav class="nav flex-column gap-1">
-                        <a class="nav-link @if (request()->is('educator-panel/dashboard')) active @endif"
-                            href="{{ route('educator.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>
-                            Overview</a>
-                        <a class="nav-link @if (request()->is('educator-panel/courses', 'educator/courses-crud/*')) active @endif"
-                            href="{{ route('educator.courses.crud.index') }}"><i class="bi bi-journal-code me-2"></i> My
-                            Courses</a>
-                        <a class="nav-link @if (request()->is('educator-panel/video-stats')) active @endif"
-                            href="{{ route('educator.video-stats.index') }}"><i class="bi bi-camera-video me-2"></i>
-                            Videos &
-                            Stats
-                        </a>
-                        <a class="nav-link @if (request()->is('educator-panel/sessions*')) active @endif"
-                            href="{{ route('educator.sessions.index') }}"><i class="bi bi-calendar3 me-2"></i>
-                            Sessions/Bookings</a>
-                        <a class="nav-link @if (request()->is('educator-panel/session-schedule*')) active @endif"
-                            href="{{ route('educator.session-schedule.index') }}"><i class="bi bi-calendar2-range me-2"></i>
-                            Session availability</a>
-                        <hr>
-
-                        <a class="nav-link @if (request()->is('educator-panel/payouts')) active @endif"
-                            href="{{ route('educator.payouts.index') }}"><i class="bi bi-bank me-2"></i> Payouts</a>
-                        <a class="nav-link @if (request()->is('educator-panel/payments*')) active @endif"
-                            href="{{ route('educator.payments.index') }}"><i class="bi bi-cash-coin me-2"></i>
-                            Earned Payments</a>
-                        <hr>
-                        <a class="nav-link @if (request()->is('educator-panel/reviews*')) active @endif"
-                            href="{{ route('educator.reviews.index') }}"><i class="bi bi-star-half me-2"></i>
-                            Reviews</a>
-                        <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-2"></i>
-                            Messages</a>
-                        <a class="nav-link" href="{{ route('educator.resources.index') }}"><i
-                                class="bi bi-folder2-open me-2"></i>
-                            Resources</a>
-                        <a class="nav-link" href="{{ route('educator.schedule.index') }}"><i
-                                class="bi bi-calendar-event me-2"></i>
-                            Schedule</a>
-                        <a class="nav-link" href="{{ route('educator.settings') }}"><i class="bi bi-gear me-2"></i>
-                            Settings</a>
-                    </nav>
-                    <hr />
-                    <div class="p-3 rounded" style="background: var(--light-cyan);">
-                        <div class="d-flex align-items-start gap-2">
-                            <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
-                            <div>
-                                <strong>Finish payouts setup</strong>
-                                <p class="mb-2 small">Connect Stripe/PayPal to receive earnings.</p>
-                                <button class="btn btn-sm btn-primary w-100"><i class="bi bi-link-45deg me-1"></i>
-                                    Connect
-                                    Payouts</button>
+                <!-- Sidebar: slide-in drawer below md, static column md and up -->
+                <aside id="educatorSidebar"
+                    class="sidebar offcanvas-md offcanvas-start col-12 col-md-3 col-lg-2 p-0"
+                    tabindex="-1" aria-labelledby="educatorSidebarLabel">
+                    <div class="offcanvas-header border-bottom d-md-none">
+                        <h5 class="offcanvas-title" id="educatorSidebarLabel">Menu</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                            data-bs-target="#educatorSidebar" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body p-3 d-flex flex-column">
+                        <nav class="nav flex-column gap-1">
+                            <a class="nav-link @if (request()->is('educator-panel/dashboard')) active @endif"
+                                href="{{ route('educator.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>
+                                Overview</a>
+                            <a class="nav-link @if (request()->is('educator-panel/courses', 'educator/courses-crud/*')) active @endif"
+                                href="{{ route('educator.courses.crud.index') }}"><i
+                                    class="bi bi-journal-code me-2"></i> My Courses</a>
+                            <a class="nav-link @if (request()->is('educator-panel/video-stats')) active @endif"
+                                href="{{ route('educator.video-stats.index') }}"><i
+                                    class="bi bi-camera-video me-2"></i>
+                                Videos & Stats</a>
+                            <a class="nav-link @if (request()->is('educator-panel/sessions*')) active @endif"
+                                href="{{ route('educator.sessions.index') }}"><i class="bi bi-calendar3 me-2"></i>
+                                Sessions/Bookings</a>
+                            <a class="nav-link @if (request()->is('educator-panel/session-schedule*')) active @endif"
+                                href="{{ route('educator.session-schedule.index') }}"><i
+                                    class="bi bi-calendar2-range me-2"></i>
+                                Session availability</a>
+                            <hr>
+                            <a class="nav-link @if (request()->is('educator-panel/payouts')) active @endif"
+                                href="{{ route('educator.payouts.index') }}"><i class="bi bi-bank me-2"></i>
+                                Payouts</a>
+                            <a class="nav-link @if (request()->is('educator-panel/payments*')) active @endif"
+                                href="{{ route('educator.payments.index') }}"><i class="bi bi-cash-coin me-2"></i>
+                                Earned Payments</a>
+                            <hr>
+                            <a class="nav-link @if (request()->is('educator-panel/reviews*')) active @endif"
+                                href="{{ route('educator.reviews.index') }}"><i class="bi bi-star-half me-2"></i>
+                                Reviews</a>
+                            <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-2"></i>
+                                Messages</a>
+                            <a class="nav-link" href="{{ route('educator.resources.index') }}"><i
+                                    class="bi bi-folder2-open me-2"></i>
+                                Resources</a>
+                            <a class="nav-link" href="{{ route('educator.schedule.index') }}"><i
+                                    class="bi bi-calendar-event me-2"></i>
+                                Schedule</a>
+                            <a class="nav-link" href="{{ route('educator.settings') }}"><i
+                                    class="bi bi-gear me-2"></i>
+                                Settings</a>
+                        </nav>
+                        <hr />
+                        <div class="p-3 rounded mt-auto" style="background: var(--light-cyan);">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+                                <div>
+                                    <strong>Finish payouts setup</strong>
+                                    <p class="mb-2 small">Connect Stripe/PayPal to receive earnings.</p>
+                                    <button class="btn btn-sm btn-primary w-100"><i
+                                            class="bi bi-link-45deg me-1"></i>
+                                        Connect Payouts</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -156,7 +172,6 @@
                     @endif
                     {{ $slot }}
 
-                </main>
                 </main>
             </div>
         </div>
@@ -248,7 +263,20 @@
 
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-
+        <script>
+            (function () {
+                var el = document.getElementById('educatorSidebar');
+                if (!el) return;
+                var mq = window.matchMedia('(max-width: 767.98px)');
+                el.querySelectorAll('.nav-link[href]').forEach(function (link) {
+                    link.addEventListener('click', function () {
+                        if (!mq.matches) return;
+                        var inst = bootstrap.Offcanvas.getInstance(el);
+                        if (inst) inst.hide();
+                    });
+                });
+            })();
+        </script>
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

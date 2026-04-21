@@ -483,8 +483,8 @@ class CourseCrudController extends Controller
             'preview' => 'boolean',
             'video_link' => 'nullable|url',
             'video_temp_path' => 'nullable|string|max:512',
-            'materials' => 'nullable|file|mimes:pdf,ppt,pptx|max:10240',
-            'worksheets' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'materials' => 'nullable|file|mimes:pdf,ppt,pptx|max:102400',
+            'worksheets' => 'nullable|file|mimes:pdf,doc,docx|max:102400',
             'notes' => 'nullable|string',
         ]);
 

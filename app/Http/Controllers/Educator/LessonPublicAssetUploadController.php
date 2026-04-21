@@ -20,8 +20,8 @@ class LessonPublicAssetUploadController extends Controller
         }
 
         $rules = $kind === 'worksheets'
-            ? ['file' => 'required|file|mimes:pdf,doc,docx|max:10240']
-            : ['file' => 'required|file|mimes:pdf,ppt,pptx|max:10240'];
+            ? ['file' => 'required|file|mimes:pdf,doc,docx|max:102400']
+            : ['file' => 'required|file|mimes:pdf,ppt,pptx|max:102400'];
 
         $validated = $request->validate($rules);
         $file = $validated['file'];
