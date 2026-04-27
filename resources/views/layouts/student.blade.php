@@ -11,7 +11,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/student_dashboard.js'])
+    <link rel="stylesheet" href="{{ asset('resources/css/app.css') }}">
+    <script src="{{ asset('js/app.js') }}" defer></script>
+    <script src="{{ asset('js/student_dashboard.js') }}" defer></script>
 
     @stack('styles')
 </head>
