@@ -24,40 +24,49 @@
                     </div>
                     <!-- Chapters List -->
                     <div class="chapters-list accordion" id="chaptersAccordion">
-                        @foreach ($course_chapters as $c)
-                            <div class="accordion-item mb-2">
-                                <h2 class="accordion-header" id="heading{{ $c->id }}">
-                                    <button
-                                        class="accordion-button {{ $c->id == $currentLesson->course_section_id ? '' : 'collapsed' }}"
-                                        type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#collapse{{ $c->id }}"
-                                        aria-expanded="{{ $c->id == $currentLesson->course_section_id ? 'true' : 'false' }}"
-                                        aria-controls="collapse{{ $c->id }}">
-                                        <h6 class="mb-0 fw-bold">{{ $c->title }} <span
-                                                class="small text-muted">({{ $course_lessons->where('course_section_id', $c->id)->count() }}
-                                                lessons)</span></h6>
-                                    </button>
-                                </h2>
-                                <div id="collapse{{ $c->id }}"
-                                    class="accordion-collapse collapse {{ $c->id == $currentLesson->course_section_id ? 'show' : '' }}"
-                                    aria-labelledby="heading{{ $c->id }}" data-bs-parent="#chaptersAccordion">
-                                    <div class="accordion-body p-0">
-                                        @foreach ($course_lessons->where('course_section_id', $c->id)->sortBy('id') as $lesson)
-                                            <a href="{{ route('student.course_details', ['course_id' => $course->id, 'lesson_id' => $lesson->id]) }}"
-                                                class="list-group-item list-group-item-action d-flex align-items-center ps-4 py-2 {{ $lesson->id == $currentLesson->id ? 'active-lesson' : '' }}">
-                                                <i class="bi bi-play-circle me-2"></i>
-                                                <div>
-                                                    <p class="mb-0">{{ $lesson->title }}</p>
-                                                </div>
-                                                &nbsp;&nbsp;
-                                                (<small
-                                                    class="text-muted">{{ gmdate('i:s', $lesson->duration) }}</small>)
-                                            </a>
-                                        @endforeach
+                        @if ($course_chapters)
+                            @foreach ($course_chapters as $c)
+                                <div class="accordion-item mb-2">
+                                    <h2 class="accordion-header" id="heading{{ $c->id }}">
+                                        <button
+                                            class="accordion-button {{ $c->id == $currentLesson->course_section_id ? '' : 'collapsed' }}"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapse{{ $c->id }}"
+                                            aria-expanded="{{ $c->id == $currentLesson->course_section_id ? 'true' : 'false' }}"
+                                            aria-controls="collapse{{ $c->id }}">
+                                            <h6 class="mb-0 fw-bold">{{ $c->title }} <span
+                                                    class="small text-muted">({{ $course_lessons->where('course_section_id', $c->id)->count() }}
+                                                    lessons)</span></h6>
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ $c->id }}"
+                                        class="accordion-collapse collapse {{ $c->id == $currentLesson->course_section_id ? 'show' : '' }}"
+                                        aria-labelledby="heading{{ $c->id }}"
+                                        data-bs-parent="#chaptersAccordion">
+                                        <div class="accordion-body p-0">
+                                            @foreach ($course_lessons->where('course_section_id', $c->id)->sortBy('id') as $lesson)
+                                                <a href="{{ route('student.course_details', ['course_id' => $course->id, 'lesson_id' => $lesson->id]) }}"
+                                                    class="list-group-item list-group-item-action d-flex align-items-center ps-4 py-2 {{ $lesson->id == $currentLesson->id ? 'active-lesson' : '' }}">
+                                                    <i class="bi bi-play-circle me-2"></i>
+                                                    <div>
+                                                        <p class="mb-0">{{ $lesson->title }}</p>
+                                                    </div>
+                                                    &nbsp;&nbsp;
+                                                    (<small
+                                                        class="text-muted">{{ gmdate('i:s', $lesson->duration) }}</small>)
+                                                </a>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
+                            @endforeach
+                        @else
+                            <div class="accordion-item mb-2">
+                                <div class="accordion-body p-0">
+                                    <p class="text-muted">No chapters found</p>
+                                </div>
                             </div>
-                        @endforeach
+                        @endif
                     </div>
                 </div>
             </div>
@@ -247,7 +256,7 @@
                         </div>
                     `;
                                     commentsList.insertAdjacentHTML('afterbegin',
-                                    newCommentHtml); // Add new comment at the top
+                                        newCommentHtml); // Add new comment at the top
                                     commentTextarea.value = ''; // Clear the textarea
                                 } else {
                                     alert('Error posting comment.');
