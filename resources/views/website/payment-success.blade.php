@@ -53,6 +53,29 @@
                 <div>
                     <div class="receipt-title">Payment Successful</div>
                     <div class="text-muted">Thank you! Your payment has been completed.</div>
+                <div class="mt-2">
+                    <div class="fw-semibold">What happens next?</div>
+                    <ul class="mb-2">
+                        <li>
+                            <span>You now have access to your purchased items.</span>
+                        </li>
+                        <li>
+                            <span>You can view your courses and lessons from your dashboard.</span>
+                        </li>
+                        <li>
+                            <span>An invoice and confirmation email has been sent to {{ $order->user->email }}.</span>
+                        </li>
+                        <li>
+                            <span>
+                                If you have any questions or concerns, contact our support team.
+                            </span>
+                        </li>
+                    </ul>
+                    <a href="{{ route('dashboard') }}" class="btn btn-success btn-sm">
+                        Go to Dashboard
+                    </a>
+                </div>
+           
                 </div>
 
                 <button id="printBtn" onclick="window.print();" class="btn btn-outline-secondary">
