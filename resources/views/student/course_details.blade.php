@@ -89,7 +89,7 @@
                                             </div>
                                         </div>
                                         <div class="d-flex align-items-center mb-3">
-                                            <img src="{{ $educator->profile_picture ? asset('storage/' . $educator->profile_picture) : 'https://placehold.co/40x40/E55A2B/white?text=E' }}"
+                                            <img src="{{ $educator->profile_picture ? asset( $educator->profile_picture) : 'https://placehold.co/40x40/E55A2B/white?text=E' }}"
                                                 class="rounded-circle me-2" alt="Profile Picture" width="40"
                                                 height="40">
                                             <div>
