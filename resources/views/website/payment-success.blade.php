@@ -71,7 +71,7 @@
                             </span>
                         </li>
                     </ul>
-                    <a href="{{ route('dashboard') }}" class="btn btn-success btn-sm">
+                    <a href="{{ route('student.dashboard') }}" class="btn btn-success btn-sm">
                         Go to Dashboard
                     </a>
                 </div>
