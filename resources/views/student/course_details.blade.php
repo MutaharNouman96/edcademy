@@ -24,7 +24,7 @@
                     </div>
                     <!-- Chapters List -->
                     <div class="chapters-list accordion" id="chaptersAccordion">
-                        @if ($course_chapters)
+                        @if ($course_chapters && $course_chapters->count() > 0)
                             @foreach ($course_chapters as $c)
                                 <div class="accordion-item mb-2">
                                     <h2 class="accordion-header" id="heading{{ $c->id }}">
