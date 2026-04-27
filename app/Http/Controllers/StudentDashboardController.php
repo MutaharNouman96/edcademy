@@ -573,14 +573,15 @@ class StudentDashboardController extends Controller
     {
          $user = auth()->user();
         $data['course'] = Course::where('id', $course_id)->firstOrFail();
+
         $data['educator'] = User::where('id', $data['course']->user_id)->first();
         $data['course_chapters'] = CourseSection::where('course_id', $course_id)->get();
         $data['course_lessons'] = Lesson::where('course_id', $course_id)->get();
 
         if ($lesson_id) {
-            $data['currentLesson'] = Lesson::where('id', $lesson_id)->where('course_id', $course_id)->firstOrFail();
+            $data['currentLesson'] = Lesson::where('id', $lesson_id)->where('course_id', $course_id)->first();
         } else {
-            $data['currentLesson'] = Lesson::where('course_id', $course_id)->orderBy('id')->firstOrFail();
+            $data['currentLesson'] = Lesson::where('course_id', $course_id)->orderBy('id')->first();
         }
 
         // Assign lesson_number for the current lesson
