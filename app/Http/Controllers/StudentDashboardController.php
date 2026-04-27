@@ -584,6 +584,7 @@ class StudentDashboardController extends Controller
             $data['currentLesson'] = Lesson::where('course_id', $course_id)->orderBy('id')->first();
         }
 
+        if ($data['currentLesson']) {
         // Assign lesson_number for the current lesson
         $data['currentLesson']->lesson_number = $data['course_lessons']->where('course_section_id', $data['currentLesson']->course_section_id)->sortBy('id')->search($data['currentLesson']) + 1;
 
@@ -605,6 +606,7 @@ class StudentDashboardController extends Controller
 
         abort_if(! $hasAccess, 403, 'You do not have access to this lesson. Please purchase the course or the lesson first.');
         $data['comments'] = LessonVideoComment::where('lesson_id', $data['currentLesson']->id)->with('user')->latest()->get();
+        }
 
         return view('student.course_details', $data);
     }
