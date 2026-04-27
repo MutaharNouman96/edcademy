@@ -128,40 +128,40 @@ class StripeController extends Controller
             if ($item->model === 'App\Models\Course') {
                 $course = Course::find($item->item_id);
                 if ($course) {
-                    ActivityNotificationService::logAndNotify(
-                        auth()->user(),
-                        'enroll_course',
-                        'Course',
-                        $course->id,
-                        $course->title,
-                        null,
-                        [
-                            'enrolled_at' => now(),
-                            'price_paid' => $item->total,
-                            'educator_id' => $course->user_id
-                        ],
-                        "Enrolled in course '{$course->title}'",
-                        ['payment_amount' => $item->total, 'educator_name' => $course->educator->full_name]
-                    );
+                    // ActivityNotificationService::logAndNotify(
+                    //     auth()->user(),
+                    //     'enroll_course',
+                    //     'Course',
+                    //     $course->id,
+                    //     $course->title,
+                    //     null,
+                    //     [
+                    //         'enrolled_at' => now(),
+                    //         'price_paid' => $item->total,
+                    //         'educator_id' => $course->user_id
+                    //     ],
+                    //     "Enrolled in course '{$course->title}'",
+                    //     ['payment_amount' => $item->total, 'educator_name' => $course->educator->full_name]
+                    // );
                 }
             } elseif ($item->model === 'App\Models\Lesson') {
                 $lesson = Lesson::find($item->item_id);
                 if ($lesson) {
-                    ActivityNotificationService::logAndNotify(
-                        auth()->user(),
-                        'enroll_lesson',
-                        'Lesson',
-                        $lesson->id,
-                        $lesson->title,
-                        null,
-                        [
-                            'enrolled_at' => now(),
-                            'price_paid' => $item->total,
-                            'course_id' => $lesson->course_id
-                        ],
-                        "Enrolled in lesson '{$lesson->title}'",
-                        ['payment_amount' => $item->total, 'course_name' => $lesson->course->title ?? 'Unknown']
-                    );
+                    // ActivityNotificationService::logAndNotify(
+                    //     auth()->user(),
+                    //     'enroll_lesson',
+                    //     'Lesson',
+                    //     $lesson->id,
+                    //     $lesson->title,
+                    //     null,
+                    //     [
+                    //         'enrolled_at' => now(),
+                    //         'price_paid' => $item->total,
+                    //         'course_id' => $lesson->course_id
+                    //     ],
+                    //     "Enrolled in lesson '{$lesson->title}'",
+                    //     ['payment_amount' => $item->total, 'course_name' => $lesson->course->title ?? 'Unknown']
+                    // );
                 }
             }
 
