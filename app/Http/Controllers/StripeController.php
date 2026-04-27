@@ -141,7 +141,7 @@ class StripeController extends Controller
                             'educator_id' => $course->user_id
                         ],
                         "Enrolled in course '{$course->title}'",
-                        ['payment_amount' => $item->total, 'educator_name' => $course->user->full_name]
+                        ['payment_amount' => $item->total, 'educator_name' => $course->educator->full_name]
                     );
                 }
             } elseif ($item->model === 'App\Models\Lesson') {
