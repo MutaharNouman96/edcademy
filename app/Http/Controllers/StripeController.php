@@ -119,7 +119,7 @@ class StripeController extends Controller
             $itemEducatorId = $item->model == "App\Models\Lesson" ? Lesson::find($item->item_id)->with('course')->first()->course->user_id : Course::find($item->item_id)->user_id;
             UserPurchasedItem::firstOrCreate([
                 'user_id' => auth()->id(),
-                'purchasable_id' => $item->id,
+                'purchasable_id' => $item->item_id,
                 'purchasable_type' => $item->model,
                 'active' => true,
             ]);
