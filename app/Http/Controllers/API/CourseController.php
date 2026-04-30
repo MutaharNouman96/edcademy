@@ -107,7 +107,7 @@ class CourseController extends Controller
                     ] : null,
                     'category' => $course->category ? [
                         'id' => $course->category->id,
-                        'name' => $course->category->name,
+                        'name' => $course->category->name ?? '',
                     ] : null,
                     'avg_rating' => $course->reviews->avg('rating') ?? 0,
                     'reviews_count' => $course->reviews->count() ?? 0,
