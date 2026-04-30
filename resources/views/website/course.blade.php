@@ -2,8 +2,10 @@
     <!-- Course Hero -->
     <div class="course-hero">
         <div class="container hero-content">
-
-            <span class="course-category">{{ $course->category->name }}</span>
+            @isset($course->category->name)
+                 <span class="course-category">{{ $course->category->name }}</span>
+            @endisset
+           
 
             <h1 class="course-title">{{ $course->title }}</h1>
 
