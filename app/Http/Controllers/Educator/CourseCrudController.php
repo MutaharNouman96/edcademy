@@ -83,7 +83,7 @@ class CourseCrudController extends Controller
                 File::makeDirectory($destinationFolder, 0755, true);
             }
             $file->move($destinationFolder, $fileName);
-            $validated['thumbnail'] = "courses/thumbnails/{$fileName}";
+            $validated['thumbnail'] = url("storage/courses/thumbnails/{$fileName}");
         }
 
         $course = Course::create($validated);
@@ -225,7 +225,7 @@ class CourseCrudController extends Controller
                 File::makeDirectory($destinationFolder, 0755, true);
             }
             $file->move($destinationFolder, $fileName);
-            $validated['thumbnail'] = "courses/thumbnails/{$fileName}";
+            $validated['thumbnail'] = url("storage/courses/thumbnails/{$fileName}");
         }
 
         $course->update($validated);
