@@ -89,7 +89,11 @@
                                 </div>
                             </div>
                         @empty
-                            <p class="text-muted text-center">No courses purchased yet.</p>
+                            <div class="text-center">
+                            <p class="text-muted ">No courses purchased yet.</p>
+
+                                <a href="{{ route('web.courses') }}" class="btn btn-primary ">Browse Courses</a>    
+                            </div>
                         @endforelse
                     </div>
                 </div>

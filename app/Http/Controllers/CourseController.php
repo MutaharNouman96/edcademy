@@ -18,7 +18,7 @@ class CourseController extends Controller
         ])
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
-            ->where('slug', $slug)
+           
             ->where('id', $id)
             ->firstOrFail();
 

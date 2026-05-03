@@ -115,7 +115,7 @@ class OrderController extends Controller
         if (!$orderItem) {
             return back()->with('error', 'Order item not found.');
         }
-        if ($orderItem->order->user_id != auth()->id()) {
+        if (auth()->check() && $orderItem->order->user_id != auth()->id()) {
             return back()->with('error', 'You are not authorized to remove this order item.');
         }
 

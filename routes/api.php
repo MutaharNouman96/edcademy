@@ -40,6 +40,10 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/educators', [EducatorController::class, 'index'])->name('api.educators.index');
 Route::get('/courses', [CourseController::class, 'index'])->name('api.courses.index');
 
+// Course subjects by category (used by educator course create/edit forms)
+Route::get('/categories/{category}/subjects', [\App\Http\Controllers\Educator\CourseCrudController::class, 'subjectsByCategory'])
+    ->name('api.categories.subjects');
+
 // Session booking: available slots and dates (public, for educator profile page)
 Route::get('/educator/{id}/available-slots', [\App\Http\Controllers\WebsiteController::class, 'getAvailableSlotsApi'])->name('api.educator.available-slots');
 Route::get('/educator/{id}/available-dates', [\App\Http\Controllers\WebsiteController::class, 'getAvailableDatesApi'])->name('api.educator.available-dates');

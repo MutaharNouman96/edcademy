@@ -17,6 +17,9 @@ use App\Services\ActivityNotificationService;
 use App\Mail\CourseSubmittedMail;
 use App\Mail\AdminNotificationMail;
 use App\Models\User;
+use App\Models\Subject;
+use Illuminate\Support\Str;
+use App\Models\Language;
 
 class CourseCrudController extends Controller
 {
@@ -33,7 +36,30 @@ class CourseCrudController extends Controller
     public function create()
     {
         $categories = CourseCategory::all();
-        return view('crm.educator.courses-test.create', compact('categories'));
+        $languages = Language::all();
+
+        return view('crm.educator.courses.create', compact('categories', 'languages'));
+    }
+
+    /**
+     * Return active subjects for a given category as JSON.
+     * Consumed by the course create/edit forms via /api/categories/{category}/subjects.
+     */
+    public function subjectsByCategory(CourseCategory $category)
+    {
+        $subjects = Subject::query()
+            ->where('category_id', $category->id)
+            ->active()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json([
+            'category' => [
+                'id' => $category->id,
+                'name' => $category->name,
+            ],
+            'subjects' => $subjects,
+        ]);
     }
 
     public function store(Request $request)
@@ -45,7 +71,7 @@ class CourseCrudController extends Controller
             'subject' => 'required|string|max:255',
             'level' => 'nullable|string|max:255',
             'language' => 'nullable|string|max:255',
-            'price' => 'required|numeric|min:0',
+            'price' => 'nullable|numeric|min:0',
             'is_free' => 'boolean',
             'duration' => 'nullable|string',
             'difficulty' => 'nullable|in:beginner,intermediate,advanced',
@@ -87,6 +113,12 @@ class CourseCrudController extends Controller
         }
 
         $course = Course::create($validated);
+
+        //update slug
+        $course->slug = Str::slug($course->title) . '-' . $course->id;
+        $course->save();
+
+
 
         // Log activity
         ActivityNotificationService::logAndNotify(
@@ -146,7 +178,7 @@ class CourseCrudController extends Controller
         //     \Log::error('Failed to send admin notification for course submission: ' . $e->getMessage());
         // }
 
-        return redirect()->route('educator.courses.crud.show', $course)->with('success', 'Course created successfully!');
+        return redirect()->route('educator.courses.crud.show', $course)->with('success', 'Course created successfully! Add course content under course curriculum section.');
     }
 
     public function show($course)
@@ -156,7 +188,7 @@ class CourseCrudController extends Controller
 
         // dd($course);
 
-        return view('crm.educator.courses-test.show', compact('course'));
+        return view('crm.educator.courses.show', compact('course'));
     }
 
     public function edit($course)
@@ -165,11 +197,12 @@ class CourseCrudController extends Controller
         $action = request()->get('action');
 
         $categories = CourseCategory::all();
+        $languages = Language::all();
 
         $course = Course::findOrFail($course);
         $course->load('sections.lessons');
 
-        return view('crm.educator.courses-test.edit', compact('course', 'categories', 'action'));
+        return view('crm.educator.courses.edit', compact('course', 'categories', 'languages', 'action'));
     }
 
     public function update(Request $request, $course_id)
@@ -227,11 +260,12 @@ class CourseCrudController extends Controller
             $file->move($destinationFolder, $fileName);
             $validated['thumbnail'] = url("storage/courses/thumbnails/{$fileName}");
         }
+        $course->slug = Str::slug($validated['title']) . '-' . $course->id;
 
         $course->update($validated);
 
         return redirect()
-            ->route('educator.courses.crud.show', ['courses_crud' => $course->id])
+            ->back()
             ->with('success', 'Course updated successfully!');
     }
 
@@ -395,6 +429,7 @@ class CourseCrudController extends Controller
 
             $validated['course_id'] = $section->course_id;
             $validated['free'] = $request->has('free');
+            $validated['price'] = $request->has('price') && $request->price > 0 ? $request->price : 0;
             $validated['preview'] = $request->has('preview');
 
             if (($validated['type'] ?? null) !== 'video') {

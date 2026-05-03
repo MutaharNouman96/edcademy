@@ -108,37 +108,7 @@
                     </div>
 
                     <!-- Payment Method -->
-                    <div class="checkout-card" id="paymentSection">
-                        <h3 class="section-title">
-                            <i class="fas fa-credit-card"></i>
-                            Choose Payment Method
-                        </h3>
 
-                        <div class="payment-methods">
-                            <!-- Stripe Option -->
-                            <div class="payment-option selected" onclick="selectPayment('stripe')" id="stripeOption">
-                                <div class="payment-logo stripe-logo">
-                                    <i class="fab fa-cc-stripe"></i>
-                                </div>
-                                <div class="payment-name">Credit / Debit Card</div>
-                                <p class="payment-desc">Secure payment via Stripe</p>
-                            </div>
-
-                            <!-- PayPal Option -->
-                            <div class="payment-option" onclick="selectPayment('paypal')" id="paypalOption">
-                                <div class="payment-logo paypal-logo">
-                                    <i class="fab fa-paypal"></i>
-                                </div>
-                                <div class="payment-name">PayPal</div>
-                                <p class="payment-desc">Fast & secure checkout</p>
-                            </div>
-                        </div>
-
-                        <div class="security-note">
-                            <i class="fas fa-shield-alt"></i>
-                            Your payment information is encrypted and secure
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Right Column - Order Summary -->
@@ -191,6 +161,51 @@
                             <div class="summary-row total">
                                 <span>Total</span>
                                 <span class="amount" id="finalTotal">$ {{ $finalAmount }}</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="checkout-card" id="paymentSection">
+                                <div class="fw-bold mb-3">
+                                    <i class="fas fa-credit-card"></i>
+                                    Choose Payment Method
+                                </div>
+
+                                <div class="payment-methods">
+                                    <!-- Stripe Option -->
+                                    <div class="payment-option selected" onclick="selectPayment('stripe')"
+                                        id="stripeOption">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="payment-logo stripe-logo">
+                                                <i class="fab fa-cc-stripe"></i>
+                                            </div>
+                                            <div class="payment-name">Credit / Debit Card
+                                                <div class="payment-desc text-muted text-small fw-light">Secure payment
+                                                    via Stripe</div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- PayPal Option -->
+                                    <div class="payment-option" onclick="selectPayment('paypal')" id="paypalOption">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="payment-logo paypal-logo">
+                                                <i class="fab fa-paypal"></i>
+                                            </div>
+                                            <div class="payment-name">PayPal
+                                                <div class="payment-desc text-muted text-small fw-light">Fast & secure
+                                                    checkout</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="security-note">
+                                    <i class="fas fa-shield-alt"></i>
+                                    Your payment information is encrypted and secure
+                                </div>
                             </div>
                         </div>
 
@@ -315,7 +330,24 @@
 
             function proceedCheckout() {
                 if (!loginStatus) {
-                    window.location.href = "{{ route('login', ['redirect_url' => route('web.cart')]) }}";
+                    Swal.fire({
+                        title: "Login or Register",
+                        text: "You need to be logged in to complete your purchase. Please login or register to continue.",
+                        icon: "info",
+                        showCancelButton: true,
+                        confirmButtonText: "Login",
+                        cancelButtonText: "Register",
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "{{ route('login', ['redirect_url' => route('web.cart')]) }}";
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            window.location.href =
+                                "{{ route('student.signup', ['redirect_url' => route('web.cart')]) }}";
+                        }
+                    });
+                    return;
+
                 } else {
 
                     if (selectedPayment === "stripe") {
@@ -600,7 +632,7 @@
             .checkout-card {
                 background: white;
                 border-radius: 15px;
-                padding: 30px;
+                padding: 10px;
                 box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
                 margin-bottom: 25px;
             }
@@ -719,7 +751,7 @@
 
             .payment-methods {
                 display: grid;
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr;
                 gap: 20px;
                 margin-bottom: 25px;
             }
@@ -727,8 +759,8 @@
             .payment-option {
                 border: 3px solid #e0e0e0;
                 border-radius: 15px;
-                padding: 30px 20px;
-                text-align: center;
+                padding: 5px;
+                text-align: left;
                 cursor: pointer;
                 transition: all 0.3s;
                 position: relative;
@@ -765,7 +797,7 @@
             }
 
             .payment-logo {
-                font-size: 4rem;
+                font-size: 2rem;
                 margin-bottom: 15px;
             }
 
@@ -778,7 +810,7 @@
             }
 
             .payment-name {
-                font-weight: 700;
+                font-weight: 600;
                 font-size: 1.2rem;
                 color: #333;
                 margin-bottom: 5px;
@@ -946,6 +978,7 @@
 
             .browse-btn:hover {
                 background: var(--dark-cyan);
+                color: white;
             }
 
             .browse-btn i {

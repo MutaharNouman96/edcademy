@@ -37,60 +37,10 @@
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-12">
-
-
                     <!-- Cards -->
                     <div class="row g-3">
                         @foreach ($bestReviewedCourses as $course)
-                            <div class="col-lg-4 col-md-6 col-sm-12">
-                                <a class="text-decoration-none"
-                                    href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}">
-                                    <div class="glass-landing--card cursor-pointer">
-                                        <div style="position: relative" class="">
-                                            @if ($course->thumbnail)
-                                                <img src="{{ $course->thumbnail_path }}" alt="Algebra"
-                                                    class="glass-landing--card-img" />
-                                            @else
-                                                <div>
-                                                    <div
-                                                        class="placeholder-item d-flex align-items-center justify-content-center">
-                                                        <i class="bi bi-play-circle fs-1 text-muted"></i>
-                                                    </div>
-                                                </div>
-                                            @endif
-
-                                        </div>
-                                        <div class="glass-landing--card-body">
-
-                                            <h3 class="glass-landing--card-title">
-                                                {{ $course->title }}
-                                            </h3>
-                                            <div class="glass-landing--card-price">$ {{ $course->price }}</div>
-                                            <div class="glass-landing--card-meta">
-                                                <div>
-                                                    <span class="glass-landing--stars">★</span>
-                                                    <span class="glass-landing--Educator-name text-dark">
-                                                        {{ $course->educator->full_name }}
-                                                    </span>
-                                                </div>
-                                                <a href="{{ route('web.educator.show', $course->educator->id) }}"
-                                                    class="btn btn-sm btn-outline-secondary">
-                                                    Follow
-                                                </a>
-                                            </div>
-                                            <div class="glass-landing--card-meta"
-                                                style="border-top: none; padding-top: 5px">
-                                                <div>
-                                                    <span class="glass-landing--stars">★★★</span>
-                                                    <span style="color: #9ca3af">
-                                                        {{ $course->reviews->count() }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
+                            <x-glass-landing-course-card :course="$course" />
                         @endforeach
 
 

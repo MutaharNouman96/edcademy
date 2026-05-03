@@ -11,5 +11,17 @@ class Subject extends Model
     protected $fillable = [
         'name',
         'slug',
+        'category_id',
+        'active',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(CourseCategory::class);
+    }
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
+    
 }

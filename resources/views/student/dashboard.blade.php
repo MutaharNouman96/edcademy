@@ -17,6 +17,16 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+
+    @if (cartTotalItems() > 0)
+        <div class="alert alert-info d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="bi bi-cart-fill fs-4 me-2"></i>
+            <div>
+                You have <strong>{{ cartTotalItems() }}</strong> item{{ cartTotalItems() > 1 ? 's' : '' }} pending in your cart.
+                <a href="{{ route('web.cart') }}" class="alert-link ms-1">View cart &amp; checkout</a>
+            </div>
+        </div>
+    @endif
     <main class="col-12 col-md-12 col-lg-12 p-4">
         <!-- Overview / KPIs -->
         <section id="section-overview" class="mb-4">

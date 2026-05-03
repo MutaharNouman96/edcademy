@@ -40,7 +40,7 @@ class Lesson extends Model
         'published_at' => 'datetime',
     ];
 
-    protected $appends = ["materials_path", "worksheets_path"];
+    protected $appends = ["materials_path", "worksheets_path", "lesson_video_path"];
 
 
     public function course()
@@ -85,5 +85,20 @@ class Lesson extends Model
     public function getWorksheetsPathAttribute()
     {
         return  asset('storage/' . $this->worksheets);
+    }
+
+    public function getLessonVideoPathAttribute()
+    {
+        $video_path = "";
+        if ($this->video_link) {
+            $video_path = $this->video_link;
+        } else if ($this->video_temp_path) {
+            $video_path = asset('storage/' . $this->video_temp_path);
+        } else if ($this->video_path) {
+            $video_path = asset('storage/' . $this->video_path);
+        } else {
+            $video_path = null;
+        }
+        return $video_path;
     }
 }

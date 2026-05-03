@@ -38,7 +38,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($courses as $course)
+                        @foreach ($courses as $course)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>
@@ -81,13 +81,8 @@
                                     </button>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="11" class="text-center text-muted py-3">
-                                    No courses found.
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
+
                     </tbody>
                 </table>
             </div>

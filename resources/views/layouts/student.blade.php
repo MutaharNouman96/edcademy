@@ -30,16 +30,31 @@
                     <span class="text-muted d-none d-md-inline">Student Dashboard</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a class="btn btn-sm btn-outline-primary" href="{{ route('website.index') }}"><i class="bi bi-globe me-1"></i>
+                    @if (cartTotalItems() > 0)
+                        <a class="btn btn-sm btn-outline-primary" href="{{ route('web.cart') }}"><i
+                                class="bi bi-cart me-1"></i> Cart
+                            @if (cartTotalItems() > 0)
+                                <span class=" badge rounded-pill bg-danger" style="font-size:0.75rem;">
+                                    {{ cartTotalItems() }}
+                                    <span class="visually-hidden">cart items</span>
+                                </span>
+                            @endif
+                        </a>
+                    @endif
+                    <a class="btn btn-sm btn-outline-primary" href="{{ route('website.index') }}"><i
+                            class="bi bi-globe me-1"></i>
                         Website</a>
-                    <a class="btn btn-sm btn-outline-primary" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-1"></i>
+                    <a class="btn btn-sm btn-outline-primary" href="{{ route('chat.index') }}"><i
+                            class="bi bi-chat-dots me-1"></i>
                         Messages</a>
                     <div class="dropdown">
                         <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->full_name }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ route('student.profile.edit') }}">Account Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ route('student.profile.edit') }}">Account
+                                    Settings</a>
+                            </li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -64,14 +79,20 @@
             <!-- Sidebar -->
             <aside class="col-12 col-md-3 col-lg-2 sidebar p-3">
                 <nav class="nav flex-column gap-1">
+                     <a class="nav-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}"
+                        href="{{ route('student.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+                    <hr class="m-0 p-0" />
                     <a class="nav-link {{ request()->routeIs('student.my-courses') ? 'active' : '' }}"
                         href="{{ route('student.my-courses') }}"><i class="bi bi-journal-richtext me-2"></i> My
                         Courses</a>
-                        <a class="nav-link {{ request()->routeIs('student.new-videos') ? 'active' : '' }}"
-                            href="{{ route('student.new-videos') }}"><i class="bi bi-camera-video me-2"></i> New Videos</a>
-                            <hr class="m-0 p-0" />
-                    <a class="nav-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}"
-                        href="{{ route('student.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+                    <a class="nav-link {{ request()->routeIs('student.new-videos') ? 'active' : '' }}"
+                        href="{{ route('student.new-videos') }}"><i class="bi bi-camera-video me-2"></i> New Videos</a>
+
+                    <a class="nav-link {{ request()->routeIs('web.courses') ? 'active' : '' }}"
+                        href="{{ route('web.courses') }}"><i class="bi bi-search me-2"></i> Browse Courses</a>
+               
+                    <hr class="m-0 p-0" />
+                   
 
                     <a class="nav-link {{ request()->routeIs('student.analytics') ? 'active' : '' }}"
                         href="{{ route('student.analytics') }}"><i class="bi bi-graph-up-arrow me-2"></i> Analytics</a>
@@ -79,11 +100,24 @@
                         href="{{ route('student.payments') }}"><i class="bi bi-wallet2 me-2"></i> Payments</a>
                     <a class="nav-link {{ request()->routeIs('student.wishlist') ? 'active' : '' }}"
                         href="{{ route('student.wishlist') }}"><i class="bi bi-heart me-2"></i> Wishlist</a>
-                    <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-2"></i> Messages</a>
+                    <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-2"></i>
+                        Messages</a>
+                    @if (cartTotalItems() > 0)
+                    <hr />
+                    <a class="nav-link @if (cartTotalItems() > 0) active shadow-lg @endif"
+                        href="{{ route('web.cart') }}"><i class="bi bi-cart me-2"></i> Cart
+                        @if (cartTotalItems() > 0)
+                            <span class=" badge rounded-pill bg-danger" style="font-size:0.75rem;">
+                                {{ cartTotalItems() }}
+                                <span class="visually-hidden">cart items</span>
+                            </span>
+                        @endif
 
+                    </a>
+                    @endif
                 </nav>
                 <hr />
-                <div class="p-3 rounded" style="background: var(--primary-50);">
+                {{-- <div class="p-3 rounded" style="background: var(--primary-50);">
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-lightning-charge-fill text-warning fs-5"></i>
                         <div>
@@ -93,7 +127,7 @@
                                 learning</button>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             </aside>
 
             <!-- Main -->

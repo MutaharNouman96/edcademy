@@ -39,3 +39,11 @@
 #navbar .nav-link.active:active {
     color: var(--primary-cyan) !important;
 }
+
+.shopping-cart-badge {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    font-size: 9px;
+    color: #f00;
+}

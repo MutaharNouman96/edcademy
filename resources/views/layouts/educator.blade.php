@@ -45,7 +45,7 @@
                         <span class="d-none d-md-inline text-muted">Educator Dashboard</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <a class="btn btn-sm btn-outline-primary" href="{{ route('educator.courses.create') }}">
+                        <a class="btn btn-sm btn-outline-primary" href="{{ route('educator.courses.crud.create') }}">
                             <i class="bi bi-plus-lg me-1"></i> New Course
                         </a>
                         <a class="btn btn-sm btn-outline-primary" href="{{ route('website.index') }}">

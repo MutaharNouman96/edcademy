@@ -153,21 +153,18 @@
                         <a class="nav-link cart-link d-flex align-items-center position-relative px-2"
                             href="{{ route('web.cart') }}" title="Cart">
                             <i class="fas fa-shopping-cart me-2"></i>
-                            <span
-                                class="cart-count-badge badge rounded-pill align-items-center justify-content-center d-flex"
-                                id="cartCount">
-                                {{ cartTotalItems() }}
-                            </span>
+
+                            @if (cartTotalItems() > 0)
+                                <span class="shopping-cart-badge">
+                                    <i class="fa fa-circle"></i>
+                                </span>
+                            @endif
                         </a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
-
-
-
-
     <div @if (!request()->routeIs('website.index')) class="mt-extra-space" @endif>
 
         @if (session('success'))
@@ -355,6 +352,11 @@
                         if (res.status === true) {
                             btn.text('Added to cart');
                             btn.prop('disabled', true);
+
+
+                            $('.cart-link').append(
+                                '<i class="fas fa-shopping-cart me-2"></i> <span class="shopping-cart-badge"><i class="fa fa-circle"></i></span>'
+                                );
 
                             Swal.fire({
                                 icon: 'success',

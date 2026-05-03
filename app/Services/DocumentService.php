@@ -32,7 +32,7 @@ class DocumentService
 
             // --- Position: Top Right ---
             $wWidth = 40;
-            $margin = 10;
+            $margin = 2;
             $x = $size['width'] - $wWidth - $margin;
             $y = $margin;
 
@@ -43,7 +43,7 @@ class DocumentService
             // --- Add Date Below Watermark ---
             $pdf->SetFont('Arial', 'B', 10);
             $pdf->SetTextColor(128, 128, 128); // Grey color
-            $pdf->SetXY($x, $y + ($wWidth * 0.5)); // Position text below image
+            $pdf->SetXY(0,2); // Position text below image
             $pdf->Cell($wWidth, 10, time(), 0, 0, 'C');
         }
 

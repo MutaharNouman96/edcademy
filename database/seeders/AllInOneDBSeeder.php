@@ -28,63 +28,72 @@ class AllInOneDBSeeder extends Seeder
             'email' => 'admin@edcademy.com',
             'password' => Hash::make('password123'),
             'role' => 'admin',
-            'email_verified_at' => now()
+            'email_verified_at' => now(),
         ]);
 
         // Educators
         $educators = collect();
         for ($i = 1; $i <= 20; $i++) {
             $faker = Faker::create();
-            $educators->push(User::create([
-                'first_name' => $faker->firstName(),
-                'last_name' => $faker->lastName(),
-                'email' => "educator{$i}@edcademy.com",
-                'password' => Hash::make('password123'),
-                'role' => 'educator',
-                'email_verified_at' => now()
-            ]));
+            $educators->push(
+                User::create([
+                    'first_name' => $faker->firstName(),
+                    'last_name' => $faker->lastName(),
+                    'email' => "educator{$i}@edcademy.com",
+                    'password' => Hash::make('password123'),
+                    'role' => 'educator',
+                    'email_verified_at' => now(),
+                ]),
+            );
         }
 
         // Students
         $students = collect();
         for ($i = 1; $i <= 300; $i++) {
             $faker = Faker::create();
-            $students->push(User::create([
-                'first_name' => $faker->firstName(),
-                'last_name' => $faker->lastName(),
-                'email' => "student{$i}@edcademy.com",
-                'password' => Hash::make('password123'),
-                'role' => 'student',
-                'email_verified_at' => now()
-            ]));
+            $students->push(
+                User::create([
+                    'first_name' => $faker->firstName(),
+                    'last_name' => $faker->lastName(),
+                    'email' => "student{$i}@edcademy.com",
+                    'password' => Hash::make('password123'),
+                    'role' => 'student',
+                    'email_verified_at' => now(),
+                ]),
+            );
         }
-
-
 
         // --- COURSES ---
         echo "Seeding courses...\n";
 
-        $subjects = ['Math', 'Physics', 'Chemistry', 'Biology', 'English', 'Computer Science', 'Economics', 'Art', 'Geography', 'History', 'Sociology'];
-
-        foreach ($subjects as $subject) {
-            Subject::create([
-                'name' => $subject,
-                'slug' => Str::slug($subject)
-            ]);
-        }
-
-        $categories = ['Science', 'Business', 'Arts', 'Languages', 'Test Preparation'];
+        // Define categories with their respective subjects (6-7 per category)
+        $categoriesWithSubjects = [
+            'Science' => ['Physics', 'Chemistry', 'Biology', 'Mathematics', 'Geology', 'Astronomy', 'Environmental Science'],
+            'Business' => ['Accounting', 'Marketing', 'Finance', 'Entrepreneurship', 'Economics', 'Business Law', 'Management'],
+            'Arts' => ['Painting', 'Sculpture', 'Music', 'Dance', 'Drama', 'Photography', 'Film Studies'],
+            'Languages' => ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Japanese', 'Russian'],
+            'Test Preparation' => ['SAT', 'GRE', 'GMAT', 'TOEFL', 'IELTS', 'ACT', 'LSAT'],
+            'Technology' => ['Computer Science', 'Programming', 'Information Systems', 'Cybersecurity', 'Data Science', 'Networking', 'Artificial Intelligence'],
+        ];
+        $categories = array_keys($categoriesWithSubjects);
 
         foreach ($categories as $category) {
-            CourseCategory::create([
+            $category = CourseCategory::create([
                 'name' => $category,
                 'slug' => Str::slug($category),
-                'parent_id' => null
+                'parent_id' => null,
             ]);
+            $subjects = $categoriesWithSubjects[$category];
+            foreach ($subjects as $subject) {
+                Subject::create([
+                    'name' => $subject,
+                    'slug' => Str::slug($subject),
+                    'category_id' => $category->id,
+                ]);
+            }
         }
 
         $categoriesIds = CourseCategory::all()->pluck('id')->toArray();
-
 
         $levels = ['Beginner', 'Intermediate', 'Advanced'];
         $languages = ['English', 'Latin', 'German', 'Spanish', 'French'];
@@ -112,7 +121,7 @@ class AllInOneDBSeeder extends Seeder
                     'status' => 'published',
                     'publish_option' => 'now',
                     'schedule_date' => now()->addDays(rand(1, 7)),
-                    'course_category_id' => fake()->randomElement($categoriesIds)
+                    'course_category_id' => fake()->randomElement($categoriesIds),
                 ]);
 
                 // --- SECTIONS & LESSONS ---

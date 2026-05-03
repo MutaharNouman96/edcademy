@@ -1,487 +1,668 @@
 <x-educator-layout>
-    <div>
-        <!-- Header -->
-        <header class="header py-2">
-            <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                    <a href="edcademy-landing.html" class="text-decoration-none brand"><i
-                            class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy</a>
-                    <span class="text-muted d-none d-md-inline">Create Course</span>
-                </div>
-                {{-- <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-sm btn-outline-primary" id="btnExport">
-                        <i class="bi bi-download me-1"></i> Export JSON
-                    </button>
-                    <label class="btn btn-sm btn-outline-primary mb-0" for="importJson"><i
-                            class="bi bi-upload me-1"></i>
-                        Import</label>
-                    <input type="file" id="importJson" accept="application/json" hidden />
-                    <a class="btn btn-sm btn-outline-primary" href="edcademy-educator-dashboard.html"><i
-                            class="bi bi-speedometer2 me-1"></i> Dashboard</a>
-                </div> --}}
-            </div>
-        </header>
 
-        <div class="container-fluid py-3">
-            <div class="row g-3">
-                <!-- Builder (left) -->
-                <div class="col-lg-8">
-                    <!-- Course Details -->
-                    <div class="card p-3 mb-3">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h5 class="mb-0">Course Details</h5>
-                            <span class="pill" style="background: var(--light-cyan); color: var(--dark-cyan)"><i
-                                    class="bi bi-info-circle me-1"></i> Complete to enable
-                                Publish</span>
-                        </div>
-                        <form action="{{ route('educator.courses.store') }}" method="POST"
-                            enctype="multipart/form-data" class="row g-3">
-                            @csrf
+    @push('styles')
+        <style>
+            .course-create-page {
+                background: #f6f8fb;
+            }
 
-                            <div class="col-12 col-md-8">
-                                <label class="form-label">Title <span class="text-danger">*</span></label>
-                                <input type="text" name="title" value="{{ old('title') }}"
-                                    class="form-control @error('title') is-invalid @enderror"
-                                    placeholder="e.g., Calculus I — Limits & Derivatives" required />
-                                @error('title')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            .course-create-page .page-header {
+                background: #fff;
+                border-bottom: 1px solid #e5e7eb;
+            }
 
-                            <div class="col-6 col-md-4">
-                                <label class="form-label">Subject <span class="text-danger">*</span></label>
-                                <input type="text" name="subject" value="{{ old('subject') }}"
-                                    class="form-control @error('subject') is-invalid @enderror"
-                                    placeholder="Math, Physics" required />
-                                @error('subject')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            .course-create-page .form-card {
+                border: 0;
+                border-radius: 0.85rem;
+                box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+            }
 
-                            <div class="col-6 col-md-4">
-                                <label class="form-label">Level</label>
-                                <select name="level" class="form-select @error('level') is-invalid @enderror">
-                                    <option value="School" {{ old('level') == 'School' ? 'selected' : '' }}>School
-                                    </option>
-                                    <option value="High School" {{ old('level') == 'High School' ? 'selected' : '' }}>
-                                        High School</option>
-                                    <option value="University" {{ old('level') == 'University' ? 'selected' : '' }}>
-                                        University</option>
-                                    <option value="Professional" {{ old('level') == 'Professional' ? 'selected' : '' }}>
-                                        Professional</option>
-                                </select>
-                                @error('level')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            .course-create-page .form-card .card-header {
+                background: #fff;
+                border-bottom: 1px solid #f1f5f9;
+                padding: 1rem 1.25rem;
+            }
 
-                            <div class="col-6 col-md-4">
-                                <label class="form-label">Language</label>
-                                <select name="language" class="form-select @error('language') is-invalid @enderror">
-                                    <option value="English" {{ old('language') == 'English' ? 'selected' : '' }}>
-                                        English</option>
-                                    <option value="Arabic" {{ old('language') == 'Arabic' ? 'selected' : '' }}>Arabic
-                                    </option>
-                                    <option value="Urdu" {{ old('language') == 'Urdu' ? 'selected' : '' }}>Urdu
-                                    </option>
-                                    <option value="French" {{ old('language') == 'French' ? 'selected' : '' }}>French
-                                    </option>
-                                </select>
-                                @error('language')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            .course-create-page .form-card .card-header h6 {
+                font-weight: 700;
+                color: #0f172a;
+            }
 
-                            <div class="col-6 col-md-4">
-                                <label class="form-label">Price (USD)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" name="price" value="{{ old('price') }}" min="0"
-                                        step="0.01" class="form-control @error('price') is-invalid @enderror"
-                                        placeholder="49.00" />
-                                </div>
-                                @error('price')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
+            .course-create-page .form-card .card-header .section-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 0.55rem;
+                background: #eef2ff;
+                color: #4f46e5;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 0.65rem;
+            }
 
-                                <div class="form-check mt-2 d-none">
-                                    <input class="form-check-input" type="checkbox" name="free" id="freeCourse"
-                                        value="1" {{ old('free') ? 'checked' : '' }} />
-                                    <label class="form-check-label" for="freeCourse">Free course</label>
-                                </div>
-                            </div>
+            .course-create-page .form-label {
+                font-weight: 600;
+                color: #0f172a;
+                font-size: 0.875rem;
+            }
 
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-select @error('status') is-invalid @enderror">
-                                    <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>
-                                        Publish</option>
-                                   
-                                    <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>Draft only
-                                    </option>
-                                </select>
-                                @error('status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            .course-create-page .form-text {
+                color: #64748b;
+            }
 
-                            {{-- <div class="col-12 col-md-6" id="scheduleWrap"
-                                style="{{ old('status') == 'schedule' ? '' : 'display: none' }}">
-                                <label class="form-label">Publish date</label>
-                                <input type="date" name="schedule_date" value="{{ old('schedule_date') }}"
-                                    class="form-control @error('schedule_date') is-invalid @enderror" />
-                                @error('schedule_date')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div> --}}
+            .course-create-page .required {
+                color: #dc2626;
+                margin-left: 2px;
+            }
 
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">Thumbnail</label>
-                                <input type="file" name="thumbnail"
-                                    class="form-control @error('thumbnail') is-invalid @enderror" accept="image/*" />
-                                @error('thumbnail')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
+            .course-create-page .thumb-preview-wrap {
+                border: 1px dashed #cbd5e1;
+                border-radius: 0.6rem;
+                background: #f8fafc;
+                padding: 0.75rem;
+                min-height: 132px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #94a3b8;
+                font-size: 0.85rem;
+            }
 
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">Tags (comma-separated)</label>
-                                <input type="text" name="tags" value="{{ old('tags') }}"
-                                    class="form-control @error('tags') is-invalid @enderror"
-                                    placeholder="algebra, exam prep, STEM" />
-                                @error('tags')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            .course-create-page .thumb-preview-wrap img {
+                max-height: 160px;
+                max-width: 100%;
+                border-radius: 0.45rem;
+                box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+            }
 
-                            <div class="col-12">
-                                <label class="form-label">Description <span class="text-danger">*</span></label>
-                                <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="4"
-                                    placeholder="What students will learn, prerequisites, outcomes..." required>{{ old('description') }}</textarea>
-                                @error('description')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            .course-create-page .action-bar {
+                position: sticky;
+                bottom: 0;
+                background: #fff;
+                border-top: 1px solid #e5e7eb;
+                padding: 0.85rem 1rem;
+                border-radius: 0 0 0.85rem 0.85rem;
+                z-index: 5;
+            }
 
-                            <div class="col-12 d-none">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="drip" id="drip"
-                                        value="1" {{ old('drip') ? 'checked' : '' }} />
-                                    <label class="form-check-label" for="drip">Enable drip status by
-                                        lesson</label>
-                                </div>
-                            </div>
+            .course-create-page .form-check.toggle-card {
+                border: 1px solid #e5e7eb;
+                border-radius: 0.6rem;
+                padding: 0.65rem 0.85rem 0.65rem 2.6rem;
+                background: #fff;
+            }
 
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary">Save Course</button>
-                            </div>
-                        </form>
+            .course-create-page .form-check.toggle-card.active {
+                border-color: #4f46e5;
+                background: #eef2ff;
+            }
+        </style>
+    @endpush
 
-                    </div>
-                    <div
-                        @if (!isset($course)) style="opacity: 0.5; pointer-events: none;"
-                        title="Save Course and add Lesson Details for each of the course sections." @endif>
-                        <!-- Lesson Builder -->
-                        <div class="card p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <h5 class="mb-0">Lessons & Content</h5>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-outline-primary" id="btnAddSection">
-                                        <i class="bi bi-layout-split me-1"></i> Add Section
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary" id="btnExpandAll">
-                                        <i class="bi bi-arrows-expand me-1"></i> Expand
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary" id="btnCollapseAll">
-                                        <i class="bi bi-arrows-collapse me-1"></i> Collapse
-                                    </button>
-                                </div>
-                            </div>
+    <div class="course-create-page py-4">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-10">
 
-                            <div class="accordion" id="sectionsAccordion"></div>
-
-                            <div class="mt-3 small text-muted">
-                                <i class="bi bi-shield-check me-1"></i>Video uploads are
-                                fingerprinted for IP protection. Captions are auto‑generated.
-                            </div>
-                        </div>
-
-                        <!-- Actions (bottom) -->
-                        <div class="d-flex align-items-center gap-2 mt-3">
-                            <button class="btn btn-outline-primary" id="btnSaveDraft">
-                                <i class="bi bi-save me-1"></i> Save Draft
-                            </button>
-                            <button class="btn btn-primary" id="btnPublish" disabled>
-                                <i class="bi bi-rocket-takeoff me-1"></i> Publish Course
-                            </button>
-                            <button class="btn btn-light ms-auto" id="btnPreview">
-                                <i class="bi bi-box-arrow-up-right me-1"></i> Preview Listing
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Summary (right) -->
-                <div class="col-lg-4">
-                    <div class="sticky-col">
-                        <div class="card p-3 mb-3">
-                            <h6 class="mb-2">Course Summary</h6>
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <div id="thumbPreview" class="rounded border"
-                                    style="
-                    width: 72px;
-                    height: 48px;
-                    background: #fff
-                      url('')
-                      center/cover no-repeat;
-                  ">
-                                </div>
-                                <div>
-                                    <div class="fw-semibold" id="sumTitle">Untitled course</div>
-                                    <div class="small text-muted" id="sumSubject">—</div>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="summary-key">Price</span>
-
-                                <strong id="sumPrice">$0.00</strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="summary-key">Lessons</span><strong id="sumLessons">0</strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="summary-key">Total duration</span><strong id="sumDuration">0m</strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="summary-key">Release</span><strong id="sumRelease">Draft</strong>
-                            </div>
-                        </div>
-
-                        <div class="card p-3 mb-3">
-                            <h6 class="mb-2">Checklist</h6>
-                            <div class="form-check small">
-                                <input class="form-check-input" type="checkbox" id="chkTitle" disabled />
-                                <label class="form-check-label" for="chkTitle">Title & Subject</label>
-                            </div>
-                            <div class="form-check small">
-                                <input class="form-check-input" type="checkbox" id="chkDesc" disabled />
-                                <label class="form-check-label" for="chkDesc">Description</label>
-                            </div>
-                            <div class="form-check small">
-                                <input class="form-check-input" type="checkbox" id="chkThumb" disabled />
-                                <label class="form-check-label" for="chkThumb">Thumbnail</label>
-                            </div>
-                            <div class="form-check small">
-                                <input class="form-check-input" type="checkbox" id="chkLesson" disabled />
-                                <label class="form-check-label" for="chkLesson">≥ 1 published lesson</label>
-                            </div>
-                            <hr />
-                            <div class="d-flex justify-content-between">
-                                <span class="summary-key">Ready to publish</span><strong id="sumReady"
-                                    class="text-danger">No</strong>
-                            </div>
-                        </div>
-
-                        <div class="card p-3">
-                            <h6 class="mb-2">Tips</h6>
-                            <ul class="small mb-0">
-                                <li>Keep lessons 6–12 minutes for better retention.</li>
-                                <li>Use "+ Free preview" on 1 lesson.</li>
-                                <li>Add tags so students can discover your course.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Lesson Modal -->
-        <div class="modal fade" id="lessonModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title"><i class="bi bi-film me-2"></i>Lesson</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="lessonForm" class="row g-3">
-                            <input type="hidden" id="lfSectionId" />
-                            <input type="hidden" id="lfLessonId" />
-
-                            <!-- Title -->
-                            <div class="col-12">
-                                <label class="form-label">Title <span class="text-danger">*</span></label>
-                                <input id="lfTitle" class="form-control"
-                                    placeholder="e.g., Limits — Concept & Notation" required />
-                            </div>
-
-                            <!-- Tabs for Content Type -->
-                            <div class="col-12">
-                                <ul class="nav nav-tabs" id="lessonTab" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="video-tab" data-bs-toggle="tab"
-                                            data-bs-target="#videoContent" type="button" role="tab">
-                                            <i class="bi bi-camera-video me-1"></i> Video Content
-                                        </button>
+                    <!-- Header -->
+                    <div class="page-header rounded-3 px-4 py-3 mb-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <nav aria-label="breadcrumb" class="mb-1">
+                                <ol class="breadcrumb mb-0 small">
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ route('educator.dashboard') }}" class="text-decoration-none">Dashboard</a>
                                     </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="materials-tab" data-bs-toggle="tab"
-                                            data-bs-target="#materialsContent" type="button" role="tab">
-                                            <i class="bi bi-file-earmark-ppt me-1"></i> Learning
-                                            Materials
-                                        </button>
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ route('educator.courses.crud.index') }}" class="text-decoration-none">Courses</a>
                                     </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="worksheets-tab" data-bs-toggle="tab"
-                                            data-bs-target="#worksheetsContent" type="button" role="tab">
-                                            <i class="bi bi-file-earmark-text me-1"></i> Worksheets
-                                        </button>
-                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">Create</li>
+                                </ol>
+                            </nav>
+                            <h4 class="mb-0">
+                                <i class="bi bi-mortarboard-fill text-primary me-2"></i> Create new course
+                            </h4>
+                            <p class="text-muted small mb-0">Fill in the basics — you can add sections, lessons and media after the course is created.</p>
+                        </div>
+                        <a href="{{ route('educator.courses.crud.index') }}" class="btn btn-outline-secondary btn-sm d-none d-md-inline-flex">
+                            <i class="bi bi-arrow-left me-1"></i> Back
+                        </a>
+                    </div>
+
+                    @if ($errors->any())
+                        <div class="alert alert-danger d-flex">
+                            <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                            <div>
+                                <strong>Please fix the following:</strong>
+                                <ul class="mb-0 mt-1 ps-3">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
                                 </ul>
+                            </div>
+                        </div>
+                    @endif
 
-                                <div class="tab-content border border-top-0 p-3 rounded-bottom bg-light">
-                                    <!-- Video Content -->
-                                    <div class="tab-pane fade show active" id="videoContent" role="tabpanel"
-                                        aria-labelledby="video-tab">
-                                        <label class="form-label">Video</label>
-                                        <input id="lfVideo" type="file" class="form-control mb-2"
-                                            accept="video/*" />
-                                        <input id="lfVideoLink" type="url" class="form-control mb-2"
-                                            placeholder="Or paste a video link (YouTube, Vimeo)" />
-                                        <div class="form-text">
-                                            MP4/MOV up to 2 GB, or provide an external link.
-                                        </div>
-                                        <div id="videoPreview" class="border rounded mt-2 p-3 text-center bg-white">
-                                            <i class="bi bi-camera-video fs-1 text-muted"></i>
-                                            <p class="mb-0 small text-muted">No video selected</p>
-                                        </div>
+                    <form action="{{ route('educator.courses.crud.store') }}" method="POST" id="create-form"
+                        enctype="multipart/form-data" novalidate>
+                        @csrf
+
+                        <!-- Basic information -->
+                        <div class="card form-card mb-4">
+                            <div class="card-header d-flex align-items-center">
+                                <span class="section-icon"><i class="bi bi-info-circle"></i></span>
+                                <div>
+                                    <h6 class="mb-0">Basic information</h6>
+                                    <small class="text-muted">What is your course about?</small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                               
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="course_category_id">Category <span class="required">*</span></label>
+                                        <select id="course_category_id" name="course_category_id"
+                                            class="form-select @error('course_category_id') is-invalid @enderror" required>
+                                            <option value="" disabled {{ old('course_category_id') ? '' : 'selected' }}>
+                                                Select a category…
+                                            </option>
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category->id }}"
+                                                    {{ old('course_category_id') == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('course_category_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
 
-                                    <!-- Learning Materials -->
-                                    <div class="tab-pane fade" id="materialsContent" role="tabpanel"
-                                        aria-labelledby="materials-tab">
-                                        <label class="form-label">Upload Learning Materials (PDF, PPT)</label>
-                                        <input id="lfMaterials" type="file" class="form-control"
-                                            accept=".pdf,.ppt,.pptx" multiple />
-                                        <div id="lfMatList" class="row g-2 mt-2">
-                                            <div class="col-12 text-center text-muted small">
-                                                <i class="bi bi-file-earmark-ppt fs-4"></i><br />No
-                                                materials uploaded
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Worksheets -->
-                                    <div class="tab-pane fade" id="worksheetsContent" role="tabpanel"
-                                        aria-labelledby="worksheets-tab">
-                                        <label class="form-label">Upload Worksheets (PDF, Word)</label>
-                                        <input id="lfWorksheets" type="file" class="form-control"
-                                            accept=".pdf,.doc,.docx" multiple />
-                                        <div id="lfWsList" class="row g-2 mt-2">
-                                            <div class="col-12 text-center text-muted small">
-                                                <i class="bi bi-file-earmark-text fs-4"></i><br />No
-                                                worksheets uploaded
-                                            </div>
-                                        </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="subject">Subject <span class="required">*</span></label>
+                                        <select id="subject" name="subject"
+                                            class="form-select @error('subject') is-invalid @enderror"
+                                            data-old-value="{{ old('subject') }}" required>
+                                            <option value="" selected disabled>
+                                                Select a category first…
+                                            </option>
+                                        </select>
+                                        <div class="form-text" id="subject_help">Subjects load after a category is selected.</div>
+                                        @error('subject')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
+
+                               
+                            </div>
+                        </div>
+
+                        <!-- Course details -->
+                        <div class="card form-card mb-4">
+                            <div class="card-header d-flex align-items-center">
+                                <span class="section-icon"><i class="bi bi-sliders2"></i></span>
+                                <div>
+                                    <h6 class="mb-0">Course details</h6>
+                                    <small class="text-muted">Format, level and language.</small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="type">Course type</label>
+                                        <select id="type" name="type" class="form-select">
+                                            @php($oldType = old('type', 'module'))
+                                            <option value="module" {{ $oldType === 'module' ? 'selected' : '' }}>Module-based</option>
+                                            <option value="video" {{ $oldType === 'video' ? 'selected' : '' }}>Video course</option>
+                                            <option value="live" {{ $oldType === 'live' ? 'selected' : '' }}>Live course</option>
+                                        </select>
+                                        <div class="form-text">How students will primarily consume the content.</div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="difficulty">Difficulty</label>
+                                        <select id="difficulty" name="difficulty" class="form-select">
+                                            <option value="" {{ old('difficulty') ? '' : 'selected' }}>Select difficulty…</option>
+                                            <option value="beginner" {{ old('difficulty') === 'beginner' ? 'selected' : '' }}>Beginner</option>
+                                            <option value="intermediate" {{ old('difficulty') === 'intermediate' ? 'selected' : '' }}>Intermediate</option>
+                                            <option value="advanced" {{ old('difficulty') === 'advanced' ? 'selected' : '' }}>Advanced</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="level">Level</label>
+                                        <input type="text" id="level" name="level"
+                                            class="form-control"
+                                            value="{{ old('level') }}"
+                                            placeholder="e.g. Grade 10, A-Level, Year 1">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="language_id">Language</label>
+                                        <select id="language" name="language"
+                                            class="form-select @error('language') is-invalid @enderror">
+                                           
+                                            @foreach ($languages as $language)
+                                                <option value="{{ $language->name }}"
+                                                    {{ old('language') == $language->id ? 'selected' : '' }}>
+                                                    {{ $language->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('language_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="duration">Duration</label>
+                                        <input type="text" id="duration" name="duration"
+                                            class="form-control"
+                                            value="{{ old('duration') }}"
+                                            placeholder="e.g. 8 weeks, 20 hours">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="schedule_date">Schedule date & time</label>
+                                        <input type="datetime-local" id="schedule_date" name="schedule_date"
+                                            class="form-control"
+                                           
+                                            value="{{ old('schedule_date') }}">
+                                        <div class="form-text">Optional. Used for live or cohort-based courses.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Media -->
+                        <div class="card form-card mb-4">
+                            <div class="card-header d-flex align-items-center">
+                                <span class="section-icon"><i class="bi bi-image"></i></span>
+                                <div>
+                                    <h6 class="mb-0">Course thumbnail</h6>
+                                    <small class="text-muted">A square or 16:9 image works best (max 2 MB).</small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3 align-items-start">
+                                    <div class="col-md-7">
+                                        <label class="form-label" for="thumbnail">Upload image</label>
+                                        <input type="file" id="thumbnail" name="thumbnail"
+                                            class="form-control @error('thumbnail') is-invalid @enderror"
+                                            accept="image/*">
+                                        @error('thumbnail')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <div class="form-text">JPG, PNG or WEBP. You can change this later.</div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label">Preview</label>
+                                        <div id="thumb-preview-wrap" class="thumb-preview-wrap">
+                                            <span id="thumb-preview-empty">No image selected</span>
+                                            <img id="thumb-preview-img" src="" alt="Thumbnail preview" style="display:none">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <div class="card form-card mb-4">
+                            <div class="card-header d-flex align-items-center">
+                                <span class="section-icon"><i class="bi bi-currency-dollar"></i></span>
+                                <div>
+                                    <h6 class="mb-0">Pricing</h6>
+                                    <small class="text-muted">Set the course price or mark it as free.</small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="price">Price (USD)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" step="0.01" min="0" id="price" name="price"
+                                                class="form-control @error('price') is-invalid @enderror"
+                                                value="{{ old('price', 0) }}"
+                                                placeholder="0.00">
+                                            @error('price')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="form-text">Use 0 if you’ll mark this course as free.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check toggle-card {{ old('is_free') ? 'active' : '' }}">
+                                            <input class="form-check-input" type="checkbox" id="is_free" name="is_free"
+                                                value="1" {{ old('is_free') ? 'checked' : '' }}>
+                                            <label class="form-check-label fw-semibold" for="is_free">
+                                                <i class="bi bi-unlock-fill text-success me-1"></i> This is a free course
+                                            </label>
+                                            <div class="form-text small mb-0">Free courses can still require login.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content release -->
+                        <div class="card form-card mb-4">
+                            <div class="card-header d-flex align-items-center">
+                                <span class="section-icon"><i class="bi bi-droplet"></i></span>
+                                <div>
+                                    <h6 class="mb-0">Content release</h6>
+                                    <small class="text-muted">Optional drip schedule for staged content.</small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-6">
+                                        <div class="form-check toggle-card {{ old('drip') ? 'active' : '' }}">
+                                            <input class="form-check-input" type="checkbox" id="drip" name="drip"
+                                                value="1" {{ old('drip') ? 'checked' : '' }}>
+                                            <label class="form-check-label fw-semibold" for="drip">
+                                                <i class="bi bi-calendar2-event text-primary me-1"></i> Enable drip content
+                                            </label>
+                                            <div class="form-text small mb-0">Release lessons over time after enrollment.</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="drip_duration">Drip interval</label>
+                                        <input type="text" id="drip_duration" name="drip_duration"
+                                            class="form-control"
+                                            value="{{ old('drip_duration') }}"
+                                            placeholder="e.g. 1 lesson per 3 days">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card form-card mb-4">
+                            <div class="card-header d-flex align-items-center">
+                                <span class="section-icon"><i class="bi bi-info-circle"></i></span>
+                                <div>
+                                    <h6 class="mb-0">Course details</h6>
+                                    <small class="text-muted">Format, level and language.</small>
+                                </div>
                             </div>
 
-                            <!-- Duration, Price, Status -->
-                            <div class="col-6 col-md-4">
-                                <label class="form-label">Duration (min) <span class="text-danger">*</span></label>
-                                <input id="lfDuration" type="number" min="1" step="1"
-                                    class="form-control" placeholder="8" required />
-                            </div>
-                            <div class="col-6 col-md-4">
-                                <label class="form-label">Price (USD)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input id="price" type="number" min="0" step="0.01"
-                                        class="form-control" placeholder="49.00" />
+                             <div class="card-body">
+                                 <div class="mb-3">
+                                    <label class="form-label" for="title">Course title <span class="required">*</span></label>
+                                    <input type="text" id="title" name="title"
+                                        class="form-control form-control-lg @error('title') is-invalid @enderror"
+                                        value="{{ old('title') }}"
+                                        placeholder="e.g. Mastering Algebra for High School Students" required>
+                                    @error('title')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">A clear, specific title helps students find your course.</div>
                                 </div>
-                                <div class="form-check mt-2 d-none">
-                                    <input class="form-check-input" type="checkbox" id="freeCourse" />
-                                    <label class="form-check-label" for="freeCourse">Free course</label>
+
+                                 <div class="mt-3">
+                                    <label class="form-label" for="description">Description <span class="required">*</span></label>
+                                    <textarea id="description" name="description" rows="5"
+                                        class="form-control @error('description') is-invalid @enderror"
+                                        placeholder="Describe what students will learn, prerequisites, outcomes…" required>{{ old('description') }}</textarea>
+                                    @error('description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <small class="text-muted">Tip: include who this course is for and what they’ll achieve.</small>
+                                        <button type="button" id="generate-ai" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-stars me-1"></i> Generate with AI
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-6 col-md-4">
-                                <label class="form-label">Status</label>
-                                <select id="lfStatus" class="form-select">
-                                    <option value="Draft">Draft</option>
-                                    <option value="Published">Published</option>
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-4 d-flex align-items-end">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="lfPreview" />
-                                    <label class="form-check-label" for="lfPreview">Free preview</label>
+                        </div>
+
+                        <!-- Publishing -->
+                        <div class="card form-card mb-4">
+                            <div class="card-header d-flex align-items-center">
+                                <span class="section-icon"><i class="bi bi-send"></i></span>
+                                <div>
+                                    <h6 class="mb-0">Publishing</h6>
+                                    <small class="text-muted">Choose when this course goes live.</small>
                                 </div>
                             </div>
 
-                            <!-- Resources -->
-                            <div class="col-12">
-                                <label class="form-label">Additional Resources (links)</label>
-                                <div class="input-group">
-                                    <input id="lfResourceUrl" class="form-control"
-                                        placeholder="Paste a link (extra PDF, sheet, site)" />
-                                    <button class="btn btn-outline-primary" type="button" id="btnAddRes">
-                                        <i class="bi bi-plus-lg"></i>
+                           
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="publish_option">Publish option</label>
+                                        <select id="publish_option" name="publish_option" class="form-select">
+                                            @php($oldPub = old('publish_option', 'draft'))
+                                            <option value="draft" {{ $oldPub === 'draft' ? 'selected' : '' }}>Save as draft</option>
+                                            <option value="now" {{ $oldPub === 'now' ? 'selected' : '' }}>Publish now</option>
+                                            <option value="schedule" {{ $oldPub === 'schedule' ? 'selected' : '' }}>Schedule for later</option>
+                                        </select>
+                                        <div class="form-text">Drafts are visible only to you and admins.</div>
+                                    </div>
+                                    <div class="col-md-6" id="publish_date_wrapper" style="display:{{ old('publish_option') === 'schedule' ? 'block' : 'none' }};">
+                                        <label class="form-label" for="publish_date">Publish date</label>
+                                        <input type="datetime-local" id="publish_date" name="publish_date"
+                                            class="form-control"
+                                            value="{{ old('publish_date') }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="action-bar d-flex justify-content-between align-items-center">
+                                <a href="{{ route('educator.courses.crud.index') }}" class="btn btn-link text-muted text-decoration-none">
+                                    <i class="bi bi-arrow-left me-1"></i> Cancel
+                                </a>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="bi bi-check-lg me-1"></i> Create course
                                     </button>
                                 </div>
-                                <div id="lfResList" class="small mt-2 text-muted">
-                                    No links added
-                                </div>
                             </div>
+                        </div>
+                    </form>
 
-                            <!-- Notes -->
-                            <div class="col-12">
-                                <label class="form-label">Notes (optional)</label>
-                                <textarea id="lfNotes" class="form-control" rows="2" placeholder="Key points, chapters, timecodes..."></textarea>
-                            </div>
-                        </form>
+                    <div class="alert alert-info d-flex">
+                        <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                        <div>
+                            After creating the course, you’ll be taken to the content editor where you can add sections, lessons and media.
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline-primary" data-bs-dismiss="modal">
-                            Close
-                        </button>
-                        <button class="btn btn-primary" id="btnSaveLesson">
-                            <i class="bi bi-check2-circle me-1"></i> Save
-                        </button>
-                    </div>
+
                 </div>
             </div>
         </div>
-
-        <!-- Toast container -->
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
-            <div id="toast" class="toast text-bg-success border-0" role="alert" aria-live="assertive"
-                aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body" id="toastBody">Saved</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                        aria-label="Close"></button>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     @push('scripts')
         <script>
-            $("#price").on("input", function() {
+            (function () {
+                const categorySelect = document.getElementById('course_category_id');
+                const subjectSelect = document.getElementById('subject');
+                const subjectHelp = document.getElementById('subject_help');
+                const subjectsUrl = (categoryId) =>
+                    @json(url('/api/categories')) + '/' + encodeURIComponent(categoryId) + '/subjects';
 
-                let value = parseFloat(this.value) || 0;
-
-                if (value < 0) {
-                    value = 0;
-                    this.value = 0;
+                function setSubjectsLoading() {
+                    if (!subjectSelect) return;
+                    subjectSelect.innerHTML = '<option value="" selected disabled>Loading subjects…</option>';
+                    subjectSelect.disabled = true;
+                    if (subjectHelp) subjectHelp.textContent = 'Loading subjects for the selected category…';
                 }
 
-                $("#sumPrice").html("$" + value.toFixed(2));
-            });
+                function setSubjectsEmptyForNoCategory() {
+                    if (!subjectSelect) return;
+                    subjectSelect.innerHTML = '<option value="" selected disabled>Select a category first…</option>';
+                    subjectSelect.disabled = false;
+                    if (subjectHelp) subjectHelp.textContent = 'Subjects load after a category is selected.';
+                }
+
+                function renderSubjects(subjects, preselectId) {
+                    if (!subjectSelect) return;
+                    subjectSelect.innerHTML = '';
+                    if (!subjects || subjects.length === 0) {
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.disabled = true;
+                        opt.selected = true;
+                        opt.textContent = 'No subjects in this category yet';
+                        subjectSelect.appendChild(opt);
+                        subjectSelect.disabled = true;
+                        if (subjectHelp) subjectHelp.textContent = 'There are no subjects under this category.';
+                        return;
+                    }
+
+                    const placeholder = document.createElement('option');
+                    placeholder.value = '';
+                    placeholder.disabled = true;
+                    placeholder.textContent = 'Select a subject…';
+                    if (!preselectId) placeholder.selected = true;
+                    subjectSelect.appendChild(placeholder);
+
+                    subjects.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.name;
+                        opt.textContent = s.name;
+                        if (preselectId && String(preselectId) === String(s.name)) {
+                            opt.selected = true;
+                        }
+                        subjectSelect.appendChild(opt);
+                    });
+                    subjectSelect.disabled = false;
+                    if (subjectHelp) subjectHelp.textContent = 'Choose the subject most relevant to this course.';
+                }
+
+                function loadSubjectsForCategory(categoryId, preselectId) {
+                    if (!categoryId) {
+                        setSubjectsEmptyForNoCategory();
+                        return;
+                    }
+                    setSubjectsLoading();
+                    fetch(subjectsUrl(categoryId), {
+                            method: 'GET',
+                            headers: { 'Accept': 'application/json' }
+                        })
+                        .then(r => {
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return r.json();
+                        })
+                        .then(data => renderSubjects(data.subjects || [], preselectId))
+                        .catch(err => {
+                            console.error('Failed to load subjects:', err);
+                            subjectSelect.innerHTML = '<option value="" selected disabled>Could not load subjects</option>';
+                            subjectSelect.disabled = true;
+                            if (subjectHelp) subjectHelp.textContent = 'Could not load subjects. Try changing the category again.';
+                        });
+                }
+
+                if (categorySelect && subjectSelect) {
+                    categorySelect.addEventListener('change', function () {
+                        loadSubjectsForCategory(this.value, null);
+                    });
+
+                    const initialCategory = categorySelect.value;
+                    const oldSubjectId = subjectSelect.dataset.oldValue || null;
+                    if (initialCategory) {
+                        loadSubjectsForCategory(initialCategory, oldSubjectId);
+                    } else {
+                        setSubjectsEmptyForNoCategory();
+                    }
+                }
+
+                const publishOption = document.getElementById('publish_option');
+                const publishDateWrapper = document.getElementById('publish_date_wrapper');
+                if (publishOption && publishDateWrapper) {
+                    publishOption.addEventListener('change', function () {
+                        publishDateWrapper.style.display = this.value === 'schedule' ? 'block' : 'none';
+                    });
+                }
+
+                const isFree = document.getElementById('is_free');
+                const price = document.getElementById('price');
+                const togglePriceState = () => {
+                    if (!isFree || !price) return;
+                    if (isFree.checked) {
+                        price.value = 0;
+                        price.setAttribute('disabled', 'disabled');
+                    } else {
+                        price.removeAttribute('disabled');
+                    }
+                };
+                if (isFree) {
+                    isFree.addEventListener('change', togglePriceState);
+                    togglePriceState();
+                }
+
+                document.querySelectorAll('.form-check.toggle-card input[type="checkbox"]').forEach(cb => {
+                    const card = cb.closest('.toggle-card');
+                    if (!card) return;
+                    cb.addEventListener('change', () => {
+                        card.classList.toggle('active', cb.checked);
+                    });
+                });
+
+                const thumbInput = document.getElementById('thumbnail');
+                const thumbImg = document.getElementById('thumb-preview-img');
+                const thumbEmpty = document.getElementById('thumb-preview-empty');
+                if (thumbInput && thumbImg && thumbEmpty) {
+                    thumbInput.addEventListener('change', function () {
+                        const file = this.files && this.files[0];
+                        if (!file) {
+                            thumbImg.style.display = 'none';
+                            thumbImg.src = '';
+                            thumbEmpty.style.display = 'inline';
+                            return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            thumbImg.src = e.target.result;
+                            thumbImg.style.display = 'inline';
+                            thumbEmpty.style.display = 'none';
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                const aiBtn = document.getElementById('generate-ai');
+                if (aiBtn) {
+                    aiBtn.addEventListener('click', function () {
+                        aiBtn.disabled = true;
+                        const originalLabel = aiBtn.innerHTML;
+                        aiBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Generating…';
+
+                        const form = document.querySelector('#create-form');
+                        const formData = new FormData(form);
+                        formData.append('_token', '{{ csrf_token() }}');
+
+                        fetch('{{ route('educator.generate.course.content') }}', {
+                                method: 'POST',
+                                body: formData,
+                                headers: { 'Accept': 'application/json' }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const titleInput = document.querySelector('input[name="title"]');
+                                    const descInput = document.querySelector('textarea[name="description"]');
+                                    if (titleInput && data.title) titleInput.value = data.title;
+                                    if (descInput && data.description) descInput.value = data.description;
+                                } else {
+                                    alert('Error: ' + (data.message || 'Could not generate content.'));
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                alert('An error occurred while generating content.');
+                            })
+                            .finally(() => {
+                                aiBtn.disabled = false;
+                                aiBtn.innerHTML = originalLabel;
+                            });
+                    });
+                }
+            })();
         </script>
     @endpush
+
 </x-educator-layout>

@@ -91,7 +91,7 @@
                 async function fetchCourses(page = 1) {
                     const params = collectFilterParams();
                     const queryString = new URLSearchParams(params).toString();
-                    const url = `{{ url('/api/courses') }}?page=${page}&${queryString}`;
+                    const url = `{{ url('/api/courses') }}?page=${page}&render_component=1&${queryString}`;
 
                     try {
                         const response = await fetch(url, {
@@ -104,95 +104,17 @@
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
 
-                        const data = await response.json(); // Assuming JSON response
+                        const data = await response.json();
 
-                        // Clear existing courses
-                        courseGrid.innerHTML = '';
+                        courseGrid.innerHTML = typeof data.html === 'string' ? data.html : '';
 
-                        // Update course count
                         courseCount.textContent = data.total;
 
-                        // Render new courses
-                        data.data.forEach(course => {
-                            const courseCardHtml = `
-                            <div class="col-lg-4 col-md-6">
-                                <div class="listing-course-card">
-                                    <div class="course-thumbnail">
-                                        ${course.thumbnail ?
-                                            `<img src="/storage/${course.thumbnail}" alt="${course.title}">` :
-                                            '<i class="fas fa-book-open fs-1 text-muted"></i>'
-                                        }
-                                        ${(!course.is_free && course.price > 0) ?
-                                            '<span class="course-badge badge-premium">Premium</span>' : ''
-                                        }
-                                    </div>
-                                    <div class="course-body">
-                                        ${course.difficulty ? `
-                                                                            <span class="difficulty-badge difficulty-${course.difficulty.toLowerCase()}">
-                                                                                ${course.difficulty.charAt(0).toUpperCase() + course.difficulty.slice(1)}
-                                                                            </span>
-                                                                        ` : ''}
-                                        <h5 class="course-title mt-2">${course.title}</h5>
-                                        <div class="course-meta">
-                                            <span><i class="fas fa-clock"></i> ${course.duration || '–'}</span>
-                                            <span><i class="fas fa-video"></i> ${course.lessons_count} lessons</span>
-                                            ${course.avg_rating > 0 ? `
-                                                                                <span>
-                                                                                    <i class="fas fa-star text-warning"></i> ${parseFloat(course.avg_rating).toFixed(1)}
-                                                                                </span>
-                                                                            ` : ''}
-                                        </div>
-                                        <p class="course-description">
-                                            ${course.description.length > 120 ?
-                                                course.description.substring(0, 120) + '...' :
-                                                course.description
-                                            }
-                                        </p>
-                                        <div class="educator-info">
-                                            <small class="text-muted">
-                                                By ${course.educator ? course.educator.name : 'Unknown'}
-                                            </small>
-                                        </div>
-                                        <div class="course-footer">
-                                            <span class="course-price">
-                                                ${course.is_free ? 'Free' : '$' + parseFloat(course.price).toFixed(2)}
-                                            </span>
-                                            <a href="/course/${course.slug}" class="enroll-btn">
-                                                Enroll Now
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                            courseGrid.insertAdjacentHTML('beforeend', courseCardHtml);
-                        });
-
-                        // Update pagination links
                         renderPagination(data);
 
                     } catch (error) {
                         console.error('Error fetching courses:', error);
                     }
-                }
-
-                // Helper function to generate star ratings HTML
-                function generateStarRating(avgRating) {
-                    let starsHtml = '';
-                    const fullStars = Math.floor(avgRating);
-                    const halfStar = Math.ceil(avgRating - fullStars);
-                    const emptyStars = 5 - fullStars - halfStar;
-
-                    for (let i = 0; i < fullStars; i++) {
-                        starsHtml += '<i class="fas fa-star"></i>';
-                    }
-                    if (halfStar) {
-                        starsHtml += '<i class="fas fa-star-half-alt"></i>';
-                    }
-                    for (let i = 0; i < emptyStars; i++) {
-                        starsHtml += '<i class="far fa-star"></i>';
-                    }
-                    return starsHtml;
                 }
 
                 // Function to render pagination links

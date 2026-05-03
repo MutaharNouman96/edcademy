@@ -31,8 +31,7 @@ if (! function_exists('cartTotalItems')) {
 if (! function_exists('cartTotal')) {
     function cartTotal()
     {
-        $identifier = Auth::check() ? Auth::id() : Session::getId();
-
+        $identifier = get_cart_identifier();
         // 1. Find the order first
         $order = Order::where('user_id', $identifier)
             ->where('status', 'cart')

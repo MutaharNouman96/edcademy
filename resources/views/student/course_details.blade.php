@@ -49,7 +49,12 @@
                                                     class="list-group-item list-group-item-action d-flex align-items-center ps-4 py-2 {{ $lesson->id == $currentLesson->id ? 'active-lesson' : '' }}">
                                                     <i class="bi bi-play-circle me-2"></i>
                                                     <div>
-                                                        <p class="mb-0">{{ $lesson->title }}</p>
+                                                        <p class="mb-0">
+                                                            {{ $lesson->title }}
+                                                            <span class="badge bg-secondary ms-2 text-capitalize" style="font-size: 0.75em;">
+                                                                {{ $lesson->type }}
+                                                            </span>
+                                                        </p>
                                                     </div>
                                                     &nbsp;&nbsp;
                                                     (<small
@@ -59,6 +64,7 @@
                                         </div>
                                     </div>
                                 </div>
+                           
                             @endforeach
                         @else
                             <div class="accordion-item mb-2">
@@ -82,9 +88,42 @@
                                     <div class="col-md-8">
                                         <h4 class="fw-bold mb-3">Current Lesson: {{ $currentLesson->title }}</h4>
                                         <div class="video-thumbnail mb-3 position-relative">
-                                            <iframe src="{{ $currentLesson->video_link }}" frameborder="0"
-                                                allowfullscreen class="img-fluid rounded"
-                                                style="width: 100%; height: 350px;"></iframe>
+                                            @if ($currentLesson->type === 'video' && $currentLesson->lesson_video_path)
+                                                <iframe src="{{ $currentLesson->lesson_video_path }}" frameborder="0"
+                                                    allowfullscreen class="img-fluid rounded"
+                                                    style="width: 100%; height: 350px;"></iframe>
+                                            @elseif ($currentLesson->type === 'worksheet' && $currentLesson->worksheets_path)
+                                                @php
+                                                    $extension = strtolower(pathinfo($currentLesson->worksheets_path, PATHINFO_EXTENSION));
+                                                @endphp
+                                                @if ($extension === 'pdf')
+                                                    <iframe src="{{ $currentLesson->worksheets_path }}" frameborder="0"
+                                                        class="img-fluid rounded"
+                                                        style="width: 100%; height: 350px;"></iframe>
+                                                    <div class="mt-2"><a href="{{ $currentLesson->worksheets_path }}" target="_blank" class="btn btn-sm btn-outline-primary">Open PDF in new tab</a></div>
+                                                @else
+                                                    <a href="{{ $currentLesson->worksheets_path }}" class="btn btn-sm btn-outline-success mt-3" download>
+                                                        Download Worksheet
+                                                    </a>
+                                                @endif
+                                            @elseif ($currentLesson->type === 'material' && $currentLesson->materials_path)
+                                                @php
+                                                    $extension = strtolower(pathinfo($currentLesson->materials_path, PATHINFO_EXTENSION));
+                                                @endphp
+                                                @if ($extension === 'pdf')
+                                                    <iframe src="{{ $currentLesson->materials_path }}" frameborder="0"
+                                                        class="img-fluid rounded"
+                                                        style="width: 100%; height: 350px;"></iframe>
+                                                    <div class="mt-2"><a href="{{ $currentLesson->materials_path }}" target="_blank" class="btn btn-sm btn-outline-primary">Open PDF in new tab</a></div>
+                                                @else
+                                                    <a href="{{ $currentLesson->materials_path }}" class="btn btn-sm btn-outline-success mt-3" download>
+                                                        Download Material
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <div class="alert alert-warning">No preview available for this lesson type.</div>
+                                            @endif
+                                           
                                             <div class="video-duration">{{ gmdate('i:s', $currentLesson->duration) }}
                                             </div>
                                         </div>
