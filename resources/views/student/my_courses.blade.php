@@ -299,7 +299,6 @@
                                         <i class="bi bi-journal-bookmark me-1"></i>{{ $lesson->course->title }}
                                     </div>
                                 @endif
-
                                 <div class="d-flex align-items-center gap-3 mc-meta mb-3">
                                     @if ($lesson->duration)
                                         <span><i class="bi bi-clock me-1"></i>{{ $lesson->duration }} min</span>
@@ -321,7 +320,7 @@
                                         @php
                                             $worksheetFile = isset($lesson->worksheets)
                                                 ? asset('storage/' . $lesson->worksheets)
-                                                : '#';
+                                                : '#!';
                                         @endphp
                                         <a href="{{ $worksheetFile }}" class="btn btn-mc-action btn-mc-action-worksheet" download>
                                             <i class="bi bi-download me-1"></i> Download Worksheet

@@ -480,7 +480,6 @@
 
     <!-- Backdrop for mobile slide-in sidebar -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-
     <div class="shell">
         <!-- Sidebar -->
         <aside class="sidebar" id="studentSidebar">
@@ -605,7 +604,6 @@
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') close();
             });
-
             window.addEventListener('resize', function() {
                 if (window.innerWidth >= MOBILE_BP) close();
             });
