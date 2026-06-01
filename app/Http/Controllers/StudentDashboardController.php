@@ -270,10 +270,47 @@ class StudentDashboardController extends Controller
                 'duration' => $lesson->duration,
                 'id' => $lesson->id,
                 'course_id' => $lesson->course->id,
+                'thumbnail' => $this->resolveLessonThumbnail($lesson),
             ];
         }
 
         return view('student.new_videos', compact('newVideosFeed'));
+    }
+
+    /**
+     * Resolve a thumbnail for a lesson, falling back through the lesson's own
+     * thumbnail, a derived YouTube thumbnail, and finally the course thumbnail.
+     */
+    private function resolveLessonThumbnail(Lesson $lesson): ?string
+    {
+        if (!empty($lesson->thumbnail)) {
+            return str_starts_with($lesson->thumbnail, 'http')
+                ? $lesson->thumbnail
+                : asset('storage/' . ltrim($lesson->thumbnail, '/'));
+        }
+
+        if ($youtube = $this->youtubeThumbnail($lesson->video_link)) {
+            return $youtube;
+        }
+
+        if ($lesson->course && !empty($lesson->course->thumbnail)) {
+            return asset($lesson->course->thumbnail);
+        }
+
+        return null;
+    }
+
+    private function youtubeThumbnail(?string $url): ?string
+    {
+        if (!$url) {
+            return null;
+        }
+
+        if (preg_match('~(?:youtu\.be/|youtube\.com/(?:watch\?v=|embed/|shorts/|v/))([\w-]{11})~', $url, $m)) {
+            return "https://img.youtube.com/vi/{$m[1]}/hqdefault.jpg";
+        }
+
+        return null;
     }
 
     // public function analytics()
@@ -479,12 +516,13 @@ class StudentDashboardController extends Controller
 
         $data['educator'] = User::where('id', $data['course']->user_id)->first();
         $data['course_chapters'] = CourseSection::where('course_id', $course_id)->get();
-        $data['course_lessons'] = Lesson::where('course_id', $course_id)->get();
+        // Students only ever see admin-verified (active) lessons.
+        $data['course_lessons'] = Lesson::where('course_id', $course_id)->active()->get();
 
         if ($lesson_id) {
-            $data['currentLesson'] = Lesson::where('id', $lesson_id)->where('course_id', $course_id)->first();
+            $data['currentLesson'] = Lesson::where('id', $lesson_id)->where('course_id', $course_id)->active()->first();
         } else {
-            $data['currentLesson'] = Lesson::where('course_id', $course_id)->orderBy('id')->first();
+            $data['currentLesson'] = Lesson::where('course_id', $course_id)->active()->orderBy('id')->first();
         }
 
         if ($data['currentLesson']) {

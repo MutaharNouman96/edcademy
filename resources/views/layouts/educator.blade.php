@@ -30,44 +30,62 @@
 
     <body>
         <!-- Top Header -->
-        <header class="header py-2">
-            <div class="container-fluid px-4">
-                <div class="d-flex align-items-center justify-content-between">
+        <header class="header">
+            <div class="container-fluid px-3 px-lg-4">
+                <div class="d-flex align-items-center justify-content-between gap-2" style="min-height: 64px;">
                     <div class="d-flex align-items-center gap-2 gap-md-3">
-                        <button class="btn btn-outline-secondary d-md-none" type="button"
+                        <button class="btn btn-icon-toggle d-md-none" type="button"
                             data-bs-toggle="offcanvas" data-bs-target="#educatorSidebar"
                             aria-controls="educatorSidebar" aria-label="Open menu">
-                            <i class="bi bi-list fs-4"></i>
+                            <i class="bi bi-list"></i>
                         </button>
                         <a href="{{ route('educator.dashboard') }}" class="text-decoration-none brand">
-                            <i class="bi bi-mortarboard-fill me-2"></i>Ed‑Cademy
+                            <span class="brand-logo"><i class="bi bi-mortarboard-fill"></i></span>
+                            <span class="brand-text">Ed‑Cademy</span>
                         </a>
-                        <span class="d-none d-md-inline text-muted">Educator Dashboard</span>
+                        <span class="d-none d-lg-inline header-subtitle">Educator Dashboard</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <a class="btn btn-sm btn-outline-primary" href="{{ route('educator.courses.crud.create') }}">
+                        <a class="btn btn-sm btn-primary d-none d-sm-inline-flex align-items-center"
+                            href="{{ route('educator.courses.crud.create') }}">
                             <i class="bi bi-plus-lg me-1"></i> New Course
                         </a>
-                        <a class="btn btn-sm btn-outline-primary" href="{{ route('website.index') }}">
-                            <i class="bi bi-globe me-1"></i> Go to website
+                        <a class="btn btn-sm btn-outline-primary d-none d-lg-inline-flex align-items-center"
+                            href="{{ route('website.index') }}">
+                            <i class="bi bi-globe me-1"></i> Website
                         </a>
                         <div class="dropdown">
-                            <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->first_name }}
+                            <button class="btn btn-user dropdown-toggle d-flex align-items-center gap-2"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="user-avatar">{{ strtoupper(substr(Auth::user()->first_name, 0, 1)) }}</span>
+                                <span class="d-none d-md-inline">{{ Auth::user()->first_name }}</span>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('educator.settings') }}"> View Public
-                                        Profile
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li class="d-sm-none">
+                                    <a class="dropdown-item" href="{{ route('educator.courses.crud.create') }}">
+                                        <i class="bi bi-plus-lg me-2"></i>New Course
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item" href="#">Account Settings</a></li>
-                                <li><a class="dropdown-item" href="#">Switch to Student View</a></li>
+                                <li class="d-lg-none">
+                                    <a class="dropdown-item" href="{{ route('website.index') }}">
+                                        <i class="bi bi-globe me-2"></i>Go to website
+                                    </a>
+                                </li>
+                                <li class="d-sm-none">
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('educator.settings') }}">
+                                        <i class="bi bi-person me-2"></i>View Public Profile
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Account Settings</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-arrow-left-right me-2"></i>Switch to Student View</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item text-danger" href="javascript:void(0)"
-                                        onclick="document.getElementById('logout').submit()">Sign out</a></li>
+                                        onclick="document.getElementById('logout').submit()"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li>
                                 <form action="{{ route('logout') }}" id="logout" method="post">@csrf</form>
                             </ul>
                         </div>
@@ -82,71 +100,78 @@
                 <aside id="educatorSidebar"
                     class="sidebar offcanvas-md offcanvas-start col-12 col-md-3 col-lg-2 p-0"
                     tabindex="-1" aria-labelledby="educatorSidebarLabel">
-                    <div class="offcanvas-header border-bottom d-md-none">
-                        <h5 class="offcanvas-title" id="educatorSidebarLabel">Menu</h5>
+                    <div class="offcanvas-header d-md-none">
+                        <a href="{{ route('educator.dashboard') }}" class="text-decoration-none brand">
+                            <span class="brand-logo"><i class="bi bi-mortarboard-fill"></i></span>
+                            <span class="brand-text">Ed‑Cademy</span>
+                        </a>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
                             data-bs-target="#educatorSidebar" aria-label="Close"></button>
                     </div>
-                    <div class="offcanvas-body p-3 d-flex flex-column">
-                        <nav class="nav flex-column gap-1">
+                    <div class="offcanvas-body d-flex flex-column">
+                        <nav class="nav flex-column">
+                            <span class="nav-section-label">Main</span>
                             <a class="nav-link @if (request()->is('educator-panel/dashboard')) active @endif"
-                                href="{{ route('educator.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>
-                                Overview</a>
+                                href="{{ route('educator.dashboard') }}"><i class="bi bi-speedometer2"></i>
+                                <span>Overview</span></a>
                             <a class="nav-link @if (request()->is('educator-panel/courses', 'educator/courses-crud/*')) active @endif"
                                 href="{{ route('educator.courses.crud.index') }}"><i
-                                    class="bi bi-journal-code me-2"></i> My Courses</a>
+                                    class="bi bi-journal-code"></i> <span>My Courses</span></a>
                             <a class="nav-link @if (request()->is('educator-panel/video-stats')) active @endif"
                                 href="{{ route('educator.video-stats.index') }}"><i
-                                    class="bi bi-camera-video me-2"></i>
-                                Videos & Stats</a>
+                                    class="bi bi-camera-video"></i>
+                                <span>Videos &amp; Stats</span></a>
                             <a class="nav-link @if (request()->is('educator-panel/sessions*')) active @endif"
-                                href="{{ route('educator.sessions.index') }}"><i class="bi bi-calendar3 me-2"></i>
-                                Sessions/Bookings</a>
+                                href="{{ route('educator.sessions.index') }}"><i class="bi bi-calendar3"></i>
+                                <span>Sessions/Bookings</span></a>
                             <a class="nav-link @if (request()->is('educator-panel/session-schedule*')) active @endif"
                                 href="{{ route('educator.session-schedule.index') }}"><i
-                                    class="bi bi-calendar2-range me-2"></i>
-                                Session availability</a>
-                            <hr>
+                                    class="bi bi-calendar2-range"></i>
+                                <span>Session availability</span></a>
+
+                            <span class="nav-section-label">Finance</span>
                             <a class="nav-link @if (request()->is('educator-panel/payouts')) active @endif"
-                                href="{{ route('educator.payouts.index') }}"><i class="bi bi-bank me-2"></i>
-                                Payouts</a>
+                                href="{{ route('educator.payouts.index') }}"><i class="bi bi-bank"></i>
+                                <span>Payouts</span></a>
                             <a class="nav-link @if (request()->is('educator-panel/payments*')) active @endif"
-                                href="{{ route('educator.payments.index') }}"><i class="bi bi-cash-coin me-2"></i>
-                                Earned Payments</a>
-                            <hr>
+                                href="{{ route('educator.payments.index') }}"><i class="bi bi-cash-coin"></i>
+                                <span>Earned Payments</span></a>
+
+                            <span class="nav-section-label">Engagement</span>
                             <a class="nav-link @if (request()->is('educator-panel/reviews*')) active @endif"
-                                href="{{ route('educator.reviews.index') }}"><i class="bi bi-star-half me-2"></i>
-                                Reviews</a>
-                            <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots me-2"></i>
-                                Messages</a>
+                                href="{{ route('educator.reviews.index') }}"><i class="bi bi-star-half"></i>
+                                <span>Reviews</span></a>
+                            <a class="nav-link" href="{{ route('chat.index') }}"><i class="bi bi-chat-dots"></i>
+                                <span>Messages</span></a>
                             <a class="nav-link" href="{{ route('educator.resources.index') }}"><i
-                                    class="bi bi-folder2-open me-2"></i>
-                                Resources</a>
+                                    class="bi bi-folder2-open"></i>
+                                <span>Resources</span></a>
                             <a class="nav-link" href="{{ route('educator.schedule.index') }}"><i
-                                    class="bi bi-calendar-event me-2"></i>
-                                Schedule</a>
+                                    class="bi bi-calendar-event"></i>
+                                <span>Schedule</span></a>
                             <a class="nav-link" href="{{ route('educator.settings') }}"><i
-                                    class="bi bi-gear me-2"></i>
-                                Settings</a>
+                                    class="bi bi-gear"></i>
+                                <span>Settings</span></a>
                         </nav>
-                        <hr />
-                        <div class="p-3 rounded mt-auto" style="background: var(--light-cyan);">
-                            <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
-                                <div>
-                                    <strong>Finish payouts setup</strong>
-                                    <p class="mb-2 small">Connect Stripe/PayPal to receive earnings.</p>
-                                    <button class="btn btn-sm btn-primary w-100"><i
-                                            class="bi bi-link-45deg me-1"></i>
-                                        Connect Payouts</button>
+                        @unless (Auth::user()->canReceivePayouts())
+                            <div class="payout-card mt-auto">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <div>
+                                        <strong>Finish payouts setup</strong>
+                                        <p class="mb-2 small">Connect Stripe/PayPal to receive earnings.</p>
+                                        <a href="{{ route('stripe.connect') }}" class="btn btn-sm btn-primary w-100"><i
+                                                class="bi bi-link-45deg me-1"></i>
+                                            Connect Payouts</a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endunless
                     </div>
                 </aside>
 
                 <!-- Main -->
-                <main class="col-12 col-md-9 col-lg-10 p-4">
+                <main class="col-12 col-md-9 col-lg-10 p-3 p-lg-4 main-content">
                     @if (session('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}

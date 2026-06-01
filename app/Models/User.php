@@ -34,6 +34,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'role',
+        'commission_rate',
+        'stripe_connect_id',
+        'stripe_payouts_enabled',
         'profile_picture',
         'bio',
         'education',
@@ -59,7 +62,33 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'stripe_payouts_enabled' => 'boolean',
+        'commission_rate' => 'decimal:2',
     ];
+
+    /**
+     * Default platform commission percentage applied when an educator has no
+     * explicit override configured.
+     */
+    const DEFAULT_COMMISSION_RATE = 25;
+
+    /**
+     * Effective platform commission percentage for this educator. Falls back
+     * to the platform default when no per-educator value is set.
+     */
+    public function commissionRate(): float
+    {
+        return (float) ($this->commission_rate ?? self::DEFAULT_COMMISSION_RATE);
+    }
+
+    /**
+     * Whether the educator has fully completed Stripe Connect onboarding
+     * (connected account exists and Stripe has enabled payouts).
+     */
+    public function canReceivePayouts(): bool
+    {
+        return ! empty($this->stripe_connect_id) && (bool) $this->stripe_payouts_enabled;
+    }
 
 
     public function isAdmin()

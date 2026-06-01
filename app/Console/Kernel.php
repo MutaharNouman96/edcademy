@@ -26,6 +26,12 @@ class Kernel extends ConsoleKernel
                  ->weeklyOn(1, '10:00') // Monday at 10:00 AM
                  ->withoutOverlapping()
                  ->runInBackground();
+
+        // Send batched admin notifications every 12 hours.
+        $schedule->command('admin:notifications-digest')
+                 ->twiceDaily(0, 12)
+                 ->withoutOverlapping()
+                 ->runInBackground();
     }
 
     /**

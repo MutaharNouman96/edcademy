@@ -11,6 +11,7 @@ class EducatorPayout extends Model
 
     protected $casts = [
         'processed_at' => 'datetime',
+        'stripe_response' => 'array',
     ];
 
     protected $fillable = [
@@ -20,6 +21,8 @@ class EducatorPayout extends Model
         'status',
         'processed_at',
         'processed_by',
+        'stripe_payout_id',
+        'stripe_response',
         'description',
     ];
     public function educator()

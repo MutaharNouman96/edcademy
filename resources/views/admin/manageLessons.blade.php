@@ -138,6 +138,7 @@
                     <th>Type</th>
                     <th>Access</th>
                     <th>Status</th>
+                    <th>Active</th>
                     <th>Duration</th>
                     <th>Materials</th>
                     <th>Created</th>
@@ -188,6 +189,18 @@
                             </span>
                         </td>
                         <td>
+                            {{-- Admin verification toggle: only active lessons are visible publicly --}}
+                            <form method="POST" action="{{ route('admin.lessons.active', $lesson->id) }}" class="d-inline">
+                                @csrf
+                                @method('PATCH')
+                                <div class="form-check form-switch m-0">
+                                    <input type="checkbox" class="form-check-input" role="switch"
+                                        onchange="this.form.submit()" {{ $lesson->active ? 'checked' : '' }}
+                                        title="{{ $lesson->active ? 'Active (visible) — click to deactivate' : 'Inactive (hidden) — click to activate' }}">
+                                </div>
+                            </form>
+                        </td>
+                        <td>
                             @if($lesson->duration)
                             {{ $lesson->duration }} min
                             @else
@@ -227,7 +240,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="text-center text-muted">No lessons found</td>
+                        <td colspan="11" class="text-center text-muted">No lessons found</td>
                     </tr>
                     @endforelse
                 </tbody>

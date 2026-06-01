@@ -58,54 +58,74 @@ class LessonController extends Controller
         try {
             // Handle video upload
             if ($request->hasFile('video_path')) {
-                $vimeoService = new VimeoService();
-                $uploadResponse = $vimeoService->uploadVideo($request);
-                if (empty($uploadResponse['success']) || $uploadResponse['success'] !== true) {
+                $file = $request->file('video_path');
+                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $s3Path = 'lessons/videos/' . $fileName;
+
+                // Store on S3 (use your configured disk, usually 's3')
+                $uploaded = Storage::disk('s3')->put($s3Path, file_get_contents($file), 'public');
+
+                if (!$uploaded) {
                     return response()->json([
-                        'error' => $uploadResponse['message'] ?? 'Video upload failed',
-                        'errors' => $uploadResponse['errors'] ?? null,
+                        'error' => 'Video upload failed',
                     ], 422);
                 }
-                $data['video_path'] = $uploadResponse['link'];
+
+                // Save the S3 file url to data
+                $data['video_path'] = Storage::disk('s3')->url($s3Path);
             }
+
+
 
             // Handle materials upload
             if ($request->hasFile('materials')) {
-                $materials = [];
+                $materialsPaths = [];
                 foreach ($request->file('materials') as $file) {
                     $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
-                    $destinationFolder = public_path('storage/lessons/materials');
-                    // Ensure directory exists
-                    if (!File::exists($destinationFolder)) {
-                        File::makeDirectory($destinationFolder, 0755, true);
-                    }
 
-                    $fullPath = $destinationFolder . '/' . $fileName;
-
+                    // Generate the watermarked PDF content
                     $docService  = new DocumentService();
                     $watermarkedContent = $docService->generateWatermarkedPdf(
                         $file->getRealPath()
                     );
 
-                    File::put($fullPath, $watermarkedContent);
+                    // Define the S3 path
+                    $s3Path = 'lessons/materials/' . $fileName;
 
-                    $destinationPath = public_path('storage/lessons/materials');
-                    $file->move($destinationPath, $fileName);
-                    $materials = $fileName;
-                    $materialsPaths[] = "storage/lessons/materials/" . $fileName;
+                    // Upload the watermarked PDF to S3. 
+                    $uploaded = Storage::disk('s3')->put($s3Path, $watermarkedContent, 'public');
+
+                    if (!$uploaded) {
+                        return response()->json([
+                            'error' => 'Material upload failed',
+                        ], 422);
+                    }
+
+                    // Store the S3 file url in the materials paths array
+                    $materialsPaths[] = Storage::disk('s3')->url($s3Path);
                 }
+                // Store material URLs as JSON in the data array
+                $data['materials'] = json_encode($materialsPaths);
             }
 
-            // Handle worksheets upload
+            // Handle worksheets upload to S3
             if ($request->hasFile('worksheets')) {
-                $worksheets = [];
+                $worksheetsPaths = [];
                 foreach ($request->file('worksheets') as $file) {
                     $fileName = time() . rand(1000, 9999) . '_' . $file->getClientOriginalName();
-                    $destinationPath = public_path('storage/lessons/worksheets');
-                    $file->move($destinationPath, $fileName);
-                    $worksheets = $fileName;
-                    $data['worksheets'] = 'storage/lessons/worksheets/' . $worksheets;
+                    $s3Path = 'lessons/worksheets/' . $fileName;
+                    $uploaded = Storage::disk('s3')->put($s3Path, file_get_contents($file), 'public');
+
+                    if (!$uploaded) {
+                        return response()->json([
+                            'error' => 'Worksheet upload failed',
+                        ], 422);
+                    }
+
+                    $worksheetsPaths[] = Storage::disk('s3')->url($s3Path);
                 }
+                // Store worksheet URLs as JSON in the data array; adjust if you want a different structure
+                $data['worksheets'] = json_encode($worksheetsPaths);
             }
 
             // Encode resources if present
@@ -119,7 +139,8 @@ class LessonController extends Controller
                 'message' => 'Lesson created successfully.',
                 'lesson' => $lesson
             ], 201);
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

@@ -88,7 +88,8 @@ class CourseController extends Controller
 
     protected function coursesIndexQuery(Request $request): Builder
     {
-        $query = Course::active()->published()->with('educator', 'category', 'reviews', 'lessons');
+        // Eager-load only admin-verified (active) lessons so listing counts stay accurate.
+        $query = Course::active()->published()->with(['educator', 'category', 'reviews', 'lessons' => fn ($q) => $q->active()]);
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;

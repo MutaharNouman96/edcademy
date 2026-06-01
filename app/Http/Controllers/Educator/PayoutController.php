@@ -83,6 +83,7 @@ class PayoutController extends Controller
                     'source'       => 'Order #' . $p->order_id,
                     'amount'       => number_format($p->net_amount, 2),
                     'status'       => ucfirst($p->status),
+                    'payout_status' => ucfirst($p->payout_status),
                 ];
             })
         );

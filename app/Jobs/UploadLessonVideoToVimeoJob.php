@@ -9,8 +9,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class UploadLessonVideoToVimeoJob implements ShouldQueue
 {
@@ -39,7 +39,7 @@ class UploadLessonVideoToVimeoJob implements ShouldQueue
         }
 
         $relative = $lesson->video_temp_path;
-        $absolute = storage_path('app/' . $relative);
+        $absolute = public_path('storage/' . $relative);
         if (!is_file($absolute)) {
             Log::warning('UploadLessonVideoToVimeoJob: temp file missing', ['lesson' => $this->lessonId, 'path' => $relative]);
 
@@ -60,6 +60,8 @@ class UploadLessonVideoToVimeoJob implements ShouldQueue
         $lesson->video_temp_path = null;
         $lesson->save();
 
-        Storage::disk('local')->delete($relative);
+        if (is_file($absolute)) {
+            File::delete($absolute);
+        }
     }
 }

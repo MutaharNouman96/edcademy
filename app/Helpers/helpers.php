@@ -1,7 +1,8 @@
 <?php
 
-
+use App\Models\Course;
 use App\Models\Order;
+use App\Models\UserPurchasedItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
@@ -138,6 +139,14 @@ if (!function_exists('get_cart_identifier')) {
         function money($value)
         {
             return round((float) $value, 2);
+        }
+    }
+
+
+    if (!function_exists('is_course_purchased')) {
+        function is_course_purchased($course_id)
+        {
+            return UserPurchasedItem::where('user_id', Auth::id())->where('purchasable_id', $course_id)->where('purchasable_type', Course::class)->exists();
         }
     }
 }

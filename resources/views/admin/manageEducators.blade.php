@@ -38,6 +38,7 @@
                     <th>Educator</th>
                     <th>Email</th>
                     <th>Status</th>
+                    <th>Commission</th>
                     <th>Joined</th>
                     <th class="text-end">Actions</th>
                 </tr>
@@ -52,6 +53,9 @@
                             <span class="badge text-bg-{{ $educator->educatorProfile->status === 'approved' ? 'success' : ($educator->educatorProfile->status === 'pending' ? 'warning' : 'danger') }}">
                                 {{ ucfirst($educator->educatorProfile->status) }}
                             </span>
+                        </td>
+                        <td>
+                            <span class="chip soft">{{ rtrim(rtrim(number_format($educator->commission_rate ?? \App\Models\User::DEFAULT_COMMISSION_RATE, 2), '0'), '.') }}%</span>
                         </td>
                         <td>{{ $educator->created_at->format('M d, Y') }}</td>
                         <td class="text-end">
@@ -81,7 +85,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted">No educators found</td>
+                        <td colspan="7" class="text-center text-muted">No educators found</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -30,7 +30,8 @@ class WebsiteController extends Controller
 
     public function index()
     {
-        $trendingCourses = Course::active()->published()->orderByDesc("publish_date")->with("educator", "category", "reviews", "lessons")->limit(6)->get();
+        // Eager-load only admin-verified (active) lessons so listing counts/previews stay accurate.
+        $trendingCourses = Course::active()->published()->orderByDesc("publish_date")->with(["educator", "category", "reviews", "lessons" => fn ($query) => $query->active()])->limit(6)->get();
 
         $bestReviewedCourses = Course::active()->published()->BestReviewed()->limit(3)->get();
 
@@ -39,7 +40,7 @@ class WebsiteController extends Controller
         $featuredEducators =
             User::verifiedEducator()->with("educatorProfile")->limit(4)->get();
 
-        $latestCourses = Course::active()->published()->orderByDesc("publish_date")->with("educator", "category", "reviews", "lessons")->limit(4)->get();
+        $latestCourses = Course::active()->published()->orderByDesc("publish_date")->with(["educator", "category", "reviews", "lessons" => fn ($query) => $query->active()])->limit(4)->get();
 
         $totalStudents = User::where("role", "student")->where("email_verified_at", "!=", null)->count();
         $availableCourses = Course::active()->published()->count();
@@ -65,7 +66,8 @@ class WebsiteController extends Controller
 
     public function courses()
     {
-        $courses = Course::active()->published()->orderByDesc("publish_date")->with("educator", "category", "reviews", "lessons")->paginate(12);
+        // Eager-load only admin-verified (active) lessons so listing counts/previews stay accurate.
+        $courses = Course::active()->published()->orderByDesc("publish_date")->with(["educator", "category", "reviews", "lessons" => fn ($query) => $query->active()])->paginate(12);
 
         $courseCategories = CourseCategory::all();
         $chunks = $courseCategories->chunk(5);
@@ -78,7 +80,8 @@ class WebsiteController extends Controller
 
     public function course(Course $course)
     {
-        $course = $course->load("educator", "category", "reviews", "lessons");
+        // Only surface admin-verified (active) lessons.
+        $course = $course->load(["educator", "category", "reviews", "lessons" => fn ($query) => $query->active()]);
 
         return view("website.course", compact("course"));
     }

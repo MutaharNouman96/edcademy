@@ -163,6 +163,25 @@
 
             <div class="kpi-card mb-4">
                 <div class="p-4">
+                    <h5 class="mb-3"><i class="bi bi-percent me-2"></i>Commission</h5>
+                    <label class="form-label fw-semibold">Platform Commission (%)</label>
+                    <div class="input-group">
+                        <input type="number" name="commission_rate"
+                            value="{{ old('commission_rate', $educator->commission_rate ?? \App\Models\User::DEFAULT_COMMISSION_RATE) }}"
+                            class="form-control @error('commission_rate') is-invalid @enderror"
+                            min="0" max="100" step="0.01" placeholder="{{ \App\Models\User::DEFAULT_COMMISSION_RATE }}">
+                        <span class="input-group-text">%</span>
+                        @error('commission_rate') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <small class="text-muted">
+                        Percentage the platform keeps from this educator's sales.
+                        Leave blank to use the default ({{ \App\Models\User::DEFAULT_COMMISSION_RATE }}%).
+                    </small>
+                </div>
+            </div>
+
+            <div class="kpi-card mb-4">
+                <div class="p-4">
                     <h6 class="mb-2">Account Info</h6>
                     <dl class="row mb-0 small">
                         <dt class="col-5 text-muted">Joined:</dt>

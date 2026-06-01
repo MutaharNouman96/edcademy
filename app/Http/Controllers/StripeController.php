@@ -11,12 +11,15 @@ use App\Models\OrderItem;
 use App\Models\Cart;
 use App\Models\Course;
 use App\Models\EducatorPayment;
+use App\Models\EducatorPayout;
 use App\Models\Lesson;
 use App\Models\UserPurchasedItem;
 use App\Services\EmailService;
 use App\Services\ActivityNotificationService;
 use App\Mail\PaymentCancelledMail;
 use App\Mail\StudentCourseEnrollmentMail;
+use App\Jobs\ReleaseEducatorPayoutJob;
+use App\Models\Earning;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -112,11 +115,14 @@ class StripeController extends Controller
         ]);
 
         $paymentId = $order->id . (Str::uuid());
+        $payoutIds = [];
         foreach ($order->items as $item) {
-            $commission = money(
-                $item->total * setting('platform_commission', 0) / 100
-            );
             $itemEducatorId = $item->model == "App\Models\Lesson" ? Lesson::find($item->item_id)->with('course')->first()->course->user_id : Course::find($item->item_id)->user_id;
+
+            // Commission is taken at the educator's configured rate (defaults to 25%).
+            $commissionRate = optional(\App\Models\User::find($itemEducatorId))->commissionRate()
+                ?? \App\Models\User::DEFAULT_COMMISSION_RATE;
+            $commission = money($item->total * $commissionRate / 100);
             UserPurchasedItem::firstOrCreate([
                 'user_id' => auth()->id(),
                 'purchasable_id' => $item->item_id,
@@ -165,7 +171,7 @@ class StripeController extends Controller
                 }
             }
 
-            EducatorPayment::firstOrCreate([
+            $educatorPayment = EducatorPayment::firstOrCreate([
                 'educator_id' => $itemEducatorId,
                 'order_id' => $order->id,
                 'order_item_id' => $item->id,
@@ -176,7 +182,43 @@ class StripeController extends Controller
                 'payment_id' => $paymentId,
                 'status' => 'completed',
             ]);
+
+            // Queue the educator payout for the net (post-commission) amount.
+            // The payout is held as "pending" and released by a delayed job.
+            $payout = EducatorPayout::firstOrCreate(
+                [
+                    'payment_id'  => $educatorPayment->id,
+                    'educator_id' => $itemEducatorId,
+                ],
+                [
+                    'amount'      => $educatorPayment->net_amount,
+                    'status'      => 'pending',
+                    'description' => "Payout for {$item->model} #{$item->item_id} (Order #{$order->id})",
+                ]
+            );
+            $payoutIds[] = $payout->id;
+
+            //add to earning
+            Earning::create([
+                'educator_id' => $itemEducatorId,
+                'payment_id' => $educatorPayment->id,
+                'gross_amount' => $item->total,
+                'source_type' => 'order',
+                'platform_commission' => $commission,
+                'net_amount' => $item->total - $commission,
+                'currency' => setting('currency', 'USD'),
+                'status' => 'approved',
+                'description' => "Earning generated from payment #{$paymentId}",
+                'earned_at' => now(),
+            ]);
         }
+
+        // Release the educator payouts 2 minutes after the purchase completes.
+        if (! empty($payoutIds)) {
+            ReleaseEducatorPayoutJob::dispatch($payoutIds, 'stripe')
+                ->delay(now()->addMinutes(2));
+        }
+
         EmailService::send(
             $order->user->email,
             new OrderInvoiceMail($order),

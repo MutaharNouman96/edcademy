@@ -15,7 +15,22 @@ class TempVideoUploadController extends Controller
     private const ALLOWED_EXTENSIONS = ['mp4', 'mov', 'avi', 'wmv', 'webm', 'mkv'];
 
     /**
-     * Single-file or Dropzone chunked upload into storage/app/temp_upload.
+     * Final S3 folder for lesson videos. Videos are pushed straight here on
+     * upload — we no longer keep a local "temp_upload" copy nor a deferred
+     * (video_temp_path / Vimeo) processing step.
+     */
+    private const S3_VIDEO_DIR = 'lessons/videos';
+
+    /**
+     * Local scratch folder used ONLY to reassemble Dropzone chunks before the
+     * file is streamed to S3. Cleaned up immediately after the S3 upload.
+     */
+    private const CHUNK_DIR = 'temp_upload/chunks';
+
+    /**
+     * Single-file or Dropzone chunked upload. In both cases the resulting video
+     * is uploaded directly to S3 and the response returns the S3 object key as
+     * "path" (plus a temporary preview "url").
      */
     public function store(Request $request)
     {
@@ -33,6 +48,7 @@ class TempVideoUploadController extends Controller
         $chunkIndex = $request->input('dzchunkindex');
         $totalChunks = $request->input('dztotalchunkcount');
 
+        // Chunked upload path (handled per-chunk; final chunk assembles + uploads to S3).
         if ($dzUuid !== null && $chunkIndex !== null && $totalChunks !== null) {
             return $this->storeChunk($request, $file, (string) $dzUuid, (int) $chunkIndex, (int) $totalChunks);
         }
@@ -42,13 +58,22 @@ class TempVideoUploadController extends Controller
             return response()->json(['message' => 'File exceeds 2 GB limit.'], 422);
         }
 
-        $originalName = $file->getClientOriginalName();
-        $safeBase = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'video';
-        $relative = 'temp_upload/' . Str::uuid() . '_' . $safeBase . '.' . $ext;
+        // Single-shot upload: stream the uploaded temp file straight to S3.
+        $stream = fopen($file->getRealPath(), 'rb');
 
-        Storage::disk('local')->put($relative, file_get_contents($file->getRealPath()));
+        try {
+            $payload = $this->uploadStreamToS3($stream, $ext);
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }
 
-        return response()->json($this->responsePayload($relative));
+        if ($payload === null) {
+            return response()->json(['message' => 'Video upload to storage failed. Please try again.'], 500);
+        }
+
+        return response()->json($payload);
     }
 
     private function storeChunk(Request $request, $file, string $dzUuid, int $chunkIndex, int $totalChunks): \Illuminate\Http\JsonResponse
@@ -57,21 +82,27 @@ class TempVideoUploadController extends Controller
             return response()->json(['message' => 'Invalid chunk parameters.'], 422);
         }
 
-        $chunkDir = 'temp_upload/chunks/' . $dzUuid;
-        Storage::disk('local')->put(
-            $chunkDir . '/' . $chunkIndex,
+        $chunkDirRelative = self::CHUNK_DIR . '/' . $dzUuid;
+        $chunkDirAbs = public_path('storage/' . $chunkDirRelative);
+        if (!File::isDirectory($chunkDirAbs)) {
+            File::makeDirectory($chunkDirAbs, 0755, true);
+        }
+
+        File::put(
+            $chunkDirAbs . '/' . $chunkIndex,
             file_get_contents($file->getRealPath())
         );
 
+        // Not the last chunk yet — just acknowledge receipt.
         if ($chunkIndex !== $totalChunks - 1) {
             return response()->json(['status' => 'chunk_received']);
         }
 
         $totalSize = 0;
         for ($i = 0; $i < $totalChunks; $i++) {
-            $p = storage_path('app/' . $chunkDir . '/' . $i);
+            $p = $chunkDirAbs . '/' . $i;
             if (!is_file($p)) {
-                Storage::disk('local')->deleteDirectory($chunkDir);
+                File::deleteDirectory($chunkDirAbs);
 
                 return response()->json(['message' => 'Missing chunk ' . $i], 422);
             }
@@ -79,43 +110,35 @@ class TempVideoUploadController extends Controller
         }
 
         if ($totalSize > self::MAX_BYTES) {
-            Storage::disk('local')->deleteDirectory($chunkDir);
+            File::deleteDirectory($chunkDirAbs);
 
             return response()->json(['message' => 'File exceeds 2 GB limit.'], 422);
         }
 
         $ext = strtolower($file->getClientOriginalExtension() ?: '');
         if (!in_array($ext, self::ALLOWED_EXTENSIONS, true)) {
-            Storage::disk('local')->deleteDirectory($chunkDir);
+            File::deleteDirectory($chunkDirAbs);
 
             return response()->json(['message' => 'Invalid video type.'], 422);
         }
 
-        $originalName = $file->getClientOriginalName();
-        $safeBase = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'video';
-        $relative = 'temp_upload/' . Str::uuid() . '_' . $safeBase . '.' . $ext;
-        $finalFull = storage_path('app/' . $relative);
-
-        $dir = dirname($finalFull);
-        if (!File::isDirectory($dir)) {
-            File::makeDirectory($dir, 0755, true);
-        }
-
-        $out = fopen($finalFull, 'wb');
+        // Reassemble all chunks into a single local scratch file.
+        $assembledFull = public_path('storage/' . self::CHUNK_DIR . '/' . $dzUuid . '.' . $ext);
+        $out = fopen($assembledFull, 'wb');
         if ($out === false) {
-            Storage::disk('local')->deleteDirectory($chunkDir);
+            File::deleteDirectory($chunkDirAbs);
 
             return response()->json(['message' => 'Could not create output file.'], 500);
         }
 
         try {
             for ($i = 0; $i < $totalChunks; $i++) {
-                $chunkPath = storage_path('app/' . $chunkDir . '/' . $i);
+                $chunkPath = $chunkDirAbs . '/' . $i;
                 $in = fopen($chunkPath, 'rb');
                 if ($in === false) {
                     fclose($out);
-                    @unlink($finalFull);
-                    Storage::disk('local')->deleteDirectory($chunkDir);
+                    @unlink($assembledFull);
+                    File::deleteDirectory($chunkDirAbs);
 
                     return response()->json(['message' => 'Could not read chunk ' . $i], 500);
                 }
@@ -126,21 +149,61 @@ class TempVideoUploadController extends Controller
             fclose($out);
         }
 
-        Storage::disk('local')->deleteDirectory($chunkDir);
+        // Per-chunk pieces are no longer needed.
+        File::deleteDirectory($chunkDirAbs);
 
-        return response()->json($this->responsePayload($relative));
+        // Stream the assembled file to S3, then drop the local scratch copy.
+        $stream = fopen($assembledFull, 'rb');
+
+        try {
+            $payload = $this->uploadStreamToS3($stream, $ext);
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            @unlink($assembledFull);
+        }
+
+        if ($payload === null) {
+            return response()->json(['message' => 'Video upload to storage failed. Please try again.'], 500);
+        }
+
+        return response()->json($payload);
     }
 
     /**
-     * @return array{path: string, full_path: string, url: string}
+     * Push an open file stream to S3 under the lesson videos directory.
+     *
+     * @return array{path: string, url: string}|null  null on failure
      */
-    private function responsePayload(string $relative): array
+    private function uploadStreamToS3($stream, string $ext): ?array
     {
-        $full = storage_path('app/' . $relative);
+        if (!is_resource($stream)) {
+            return null;
+        }
 
+        $key = self::S3_VIDEO_DIR . '/' . Str::uuid() . '.' . $ext;
+
+        $uploaded = Storage::disk('s3')->put($key, $stream);
+
+        if (!$uploaded || !Storage::disk('s3')->exists($key)) {
+            return null;
+        }
+
+        return $this->responsePayload($key);
+    }
+
+    /**
+     * The "path" is the S3 object key persisted on the lesson (video_storage_path),
+     * "url" is a short-lived signed URL purely for the in-form preview.
+     *
+     * @return array{path: string, url: string}
+     */
+    private function responsePayload(string $key): array
+    {
         return [
-            'path' => $relative,
-            'full_path' => $full,
+            'path' => $key,
+            'url' => Storage::disk('s3')->temporaryUrl($key, now()->addMinutes(30)),
         ];
     }
 }

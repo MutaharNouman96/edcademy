@@ -23,6 +23,7 @@ use App\Http\Controllers\NotificationSettingController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\StripeConnectController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\StudentDashboardController;
@@ -82,6 +83,30 @@ Route::get('/stripe/cancel', [StripeController::class, 'cancel']);
 
 Route::post('paypal/create', [PaypalController::class, 'create'])->name('web.paypal.create');
 Route::post('/paypal/capture', [PayPalController::class, 'capture'])->name('paypal.capture');
+
+/*
+|--------------------------------------------------------------------------
+| Stripe Connect (Express) marketplace
+|--------------------------------------------------------------------------
+*/
+
+// Vendor onboarding lifecycle (must be authenticated).
+Route::middleware('auth')->group(function () {
+    Route::get('/stripe/connect', [StripeConnectController::class, 'redirectToStripe'])->name('stripe.connect');
+    Route::get('/stripe/connect/refresh', [StripeConnectController::class, 'refresh'])->name('stripe.connect.refresh');
+    Route::get('/stripe/connect/completed', [StripeConnectController::class, 'handleCompleted'])->name('stripe.connect.completed');
+});
+
+// Destination-charge checkout + result pages.
+Route::post('/checkout', [StripeConnectController::class, 'checkout'])->name('checkout');
+
+Route::get('/checkout/success', function () {
+    return redirect()->route('dashboard')->with('success', 'Payment completed successfully.');
+})->name('checkout.success');
+
+Route::get('/checkout/cancel', function () {
+    return redirect()->route('dashboard')->with('error', 'Payment was cancelled.');
+})->name('checkout.cancel');
 
 Route::get('how-it-works', [WebsiteController::class, 'how_it_works'])->name('web.how.it.works');
 
@@ -223,7 +248,11 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::delete('courses/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteCourse'])->name('courses.delete');
 
-        Route::get('courses/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'showCourse'])->name('courses.show');
+        Route::get('courses/{id}/purchases', [App\Http\Controllers\Admin\CourseController::class, 'purchases'])->name('courses.purchases');
+        Route::get('courses/{id}/revenue', [App\Http\Controllers\Admin\CourseController::class, 'revenue'])->name('courses.revenue');
+        Route::get('courses/{id}/reviews', [App\Http\Controllers\Admin\CourseController::class, 'reviews'])->name('courses.reviews');
+        Route::get('courses/{id}/content', [App\Http\Controllers\Admin\CourseController::class, 'content'])->name('courses.content');
+        Route::get('courses/{id}', [App\Http\Controllers\Admin\CourseController::class, 'show'])->name('courses.show');
 
         Route::post('courses/{id}/approve', [App\Http\Controllers\Admin\CourseController::class, 'approve'])->name('courses.approve');
 
@@ -233,6 +262,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('lessons', [App\Http\Controllers\Admin\DashboardController::class, 'manageLessons'])->name('manage.lessons');
 
         Route::patch('lessons/{id}/status', [App\Http\Controllers\Admin\DashboardController::class, 'updateLessonStatus'])->name('lessons.status');
+
+        // Admin verification toggle for a lesson (lessons.active flag).
+        Route::patch('lessons/{id}/active', [App\Http\Controllers\Admin\DashboardController::class, 'toggleLessonActive'])->name('lessons.active');
 
         Route::post('lessons/{id}/approve-vimeo', [App\Http\Controllers\Admin\DashboardController::class, 'approveLessonVimeo'])->name('lessons.approve-vimeo');
 
@@ -261,10 +293,10 @@ Route::middleware(['auth', 'role:admin'])
     });
 
 // Educator routes
-Route::get('educator-panel/dashboard', [EducatorDashboardController::class, 'index'])->name('educator.dashboard')->middleware(['auth', 'role:educator']);
+Route::get('educator-panel/dashboard', [EducatorDashboardController::class, 'index'])->name('educator.dashboard')->middleware(['auth', 'role:educator', 'educator.stripe.connected']);
 
 
-Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verified'])
+Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verified', 'educator.stripe.connected'])
     ->prefix('educator-panel')
     ->group(function () {
        
@@ -354,7 +386,7 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
         Route::get('resources', [EducatorDashboardController::class, 'resources'])->name('educator.resources.index');
 
         Route::prefix('settings')
-        ->withoutMiddleware(['verified', 'educator.profile.verified'])
+        ->withoutMiddleware(['verified', 'educator.profile.verified', 'educator.stripe.connected'])
         ->group(function () {
             Route::get('/', [ProfileSettingController::class, 'index'])->name('educator.settings');
 

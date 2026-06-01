@@ -13,7 +13,9 @@ class CourseController extends Controller
         $course = Course::with([
             'category',
             'educator',
-            'sections.lessons',
+            // Only surface admin-verified (active) lessons in the curriculum.
+            'sections.lessons' => fn ($query) => $query->active(),
+            'lessons' => fn ($query) => $query->active(),
             'reviews',
         ])
             ->withAvg('reviews', 'rating')
@@ -33,7 +35,8 @@ class CourseController extends Controller
             ->take(4)
             ->get();
 
-        $freeVideo = Lesson::where("course_id", $course->id)->where("free", true)->first();
+        // Preview clip must also be an admin-verified (active) lesson.
+        $freeVideo = Lesson::where("course_id", $course->id)->where("free", true)->active()->first();
 
         // Students enrolled count
         $studentsEnrolled = $course->coursePurchases()->count();

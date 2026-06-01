@@ -22,6 +22,18 @@
 
     <!-- Main -->
 
+    @if(request('stripe') === 'required' || ($user->isEducator() && ! $user->canReceivePayouts()))
+        <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2" id="stripeSetupAlert">
+            <div>
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Action required:</strong> Complete your Stripe payout setup (add your IBAN / bank details) to start receiving payments and unlock the educator panel.
+            </div>
+            <a href="{{ route('stripe.connect') }}" class="btn btn-sm btn-warning">
+                <i class="bi bi-link-45deg me-1"></i> Set up payouts
+            </a>
+        </div>
+    @endif
+
     <div class="card shadow-sm">
         <div class="section-header">
             <h2 class="section-title"><i class="bi bi-gear"></i> Profile & Account Settings</h2>
@@ -40,12 +52,12 @@
                         type="button" role="tab" aria-controls="tab-security" aria-selected="false"><i
                             class="bi bi-shield-lock me-1"></i> Security</button>
                 </li>
-                <li class="nav-item" role="presentation">
+                {{-- <li class="nav-item" role="presentation">
                     <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#tab-payments"
                         type="button" role="tab" aria-controls="tab-payments" aria-selected="false"><i
                             class="bi bi-bank me-1"></i>
                         Payments</button>
-                </li>
+                </li> --}}
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="availability-tab" data-bs-toggle="tab"
                         data-bs-target="#tab-availability" type="button" role="tab"
@@ -279,7 +291,7 @@
                 </div>
 
                 <!-- Payments -->
-                <div class="tab-pane fade" id="tab-payments" role="tabpanel">
+                {{-- <div class="tab-pane fade" id="tab-payments" role="tabpanel">
                     <form id="formPayout" class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label">Default currency</label>
@@ -338,7 +350,7 @@
                                 Payments</button>
                         </div>
                     </form>
-                </div>
+                </div> --}}
 
                 <!-- Availability -->
                 <div class="tab-pane fade" id="tab-availability" role="tabpanel">
@@ -659,7 +671,7 @@
                 <!-- Connections -->
                 <div class="tab-pane fade" id="tab-connections" role="tabpanel">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        {{-- <div class="col-md-6">
                             <div class="p-3 border rounded-3 bg-white h-100">
                                 <h6><i class="bi bi-calendar4-week me-1"></i> Google Calendar</h6>
                                 <p class="help mb-2">Sync your availability and accept bookings
@@ -679,15 +691,24 @@
                                 <button id="btnConnectZoom" class="btn btn-sm btn-outline-primary"><i
                                         class="bi bi-link-45deg me-1"></i> Connect</button>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="col-md-6">
                             <div class="p-3 border rounded-3 bg-white h-100">
-                                <h6><i class="bi bi-credit-card-2-front me-1"></i> Stripe Connect</h6>
-                                <p class="help mb-2">Faster payouts and instant verification.</p>
-                                <div id="stripeConn" class="mb-2"><span class="badge text-bg-warning">Not
-                                        connected</span></div>
-                                <button id="btnConnectStripe" class="btn btn-sm btn-outline-primary"><i
-                                        class="bi bi-link-45deg me-1"></i> Connect</button>
+                                <h6><i class="bi bi-credit-card-2-front me-1"></i> Stripe Connect &amp; Payouts</h6>
+                                <p class="help mb-2">Add your IBAN / bank details through Stripe to receive your earnings. This is required before you can be paid.</p>
+                                <div id="stripeConn" class="mb-2">
+                                    @if($user->canReceivePayouts())
+                                        <span class="badge text-bg-success">Connected &amp; payouts enabled</span>
+                                    @elseif($user->stripe_connect_id)
+                                        <span class="badge text-bg-warning">Setup incomplete</span>
+                                    @else
+                                        <span class="badge text-bg-warning">Not connected</span>
+                                    @endif
+                                </div>
+                                <a href="{{ route('stripe.connect') }}" class="btn btn-sm {{ $user->canReceivePayouts() ? 'btn-outline-secondary' : 'btn-outline-primary' }}">
+                                    <i class="bi bi-link-45deg me-1"></i>
+                                    {{ $user->canReceivePayouts() ? 'Manage payout details' : 'Connect & add IBAN' }}
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -947,10 +968,10 @@
 
                 initSubjectsChips();
                 initWeekGrid();
-                wireSecurity();
-                wirePayments();
-                wireAvailability();
-                wireForms();
+                // wireSecurity();
+                // wirePayments();
+                // wireAvailability();
+                // wireForms();
             });
 
             // ===== Profile: subjects chips =====
@@ -1335,11 +1356,20 @@
                         '<span class="badge text-bg-success">Connected</span>';
                     showToast('Zoom connected (demo).', 'success');
                 });
-                document.getElementById('btnConnectStripe').addEventListener('click', () => {
-                    document.getElementById('stripeConn').innerHTML =
-                        '<span class="badge text-bg-success">Connected</span>';
-                    showToast('Stripe connected (demo).', 'success');
-                });
+
+                // When Stripe payout setup is required, open the Connections tab
+                // automatically so the educator can start onboarding right away.
+                const stripeRequired = new URLSearchParams(window.location.search).get('stripe') === 'required';
+                if (stripeRequired) {
+                    const connTabBtn = document.getElementById('connections-tab');
+                    if (connTabBtn && window.bootstrap) {
+                        new bootstrap.Tab(connTabBtn).show();
+                    }
+                    const alertEl = document.getElementById('stripeSetupAlert');
+                    if (alertEl) {
+                        alertEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
             }
         </script>
 

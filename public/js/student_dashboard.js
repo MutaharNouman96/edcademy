@@ -1,34 +1,44 @@
-// ---------- Sample Data (replace with API sources) ----------
-// const myCourses = [
-//   { id: 1, title: 'Calculus I — Limits & Derivatives', subject: 'Math', progress: 0.72, hours: 6.2, last: '2d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Math', newVideos: 1 },
-//   { id: 2, title: 'Physics: Mechanics (GCSE)', subject: 'Physics', progress: 0.36, hours: 3.1, last: '5h ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Physics', newVideos: 0 },
-//   { id: 3, title: 'IELTS Speaking Mastery', subject: 'English', progress: 0.58, hours: 4.4, last: '1d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=IELTS', newVideos: 2 },
-//   { id: 4, title: 'Organic Chemistry Basics', subject: 'Chemistry', progress: 0.21, hours: 1.0, last: '6d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Chem', newVideos: 0 },
-//   { id: 5, title: 'Algebra II — Functions', subject: 'Math', progress: 0.93, hours: 7.0, last: '3h ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Algebra', newVideos: 0 },
-//   { id: 6, title: 'Essay Writing Bootcamp', subject: 'English', progress: 0.49, hours: 2.9, last: '4d ago', thumb: 'https://via.placeholder.com/320x180/ffffff/6f42c1?text=Writing', newVideos: 1 }
-// ];
-
-// const newVideos = [
-//   { course: 'IELTS Speaking Mastery', lesson: 'Band 7+ Part 2', when: '2 hours ago', duration: '9m', id: 'nv1' },
-//   { course: 'Calculus I — Limits & Derivatives', lesson: 'L\'Hôpital Rule Basics', when: 'Yesterday', duration: '12m', id: 'nv2' },
-//   { course: 'Essay Writing Bootcamp', lesson: 'Upgrade your Thesis', when: '2 days ago', duration: '7m', id: 'nv3' }
-// ];
-
 (function () {
-  // This bundle is included from the student layout; only run on the dashboard page.
+  'use strict';
+
+  // Guard: only run on the dashboard page (coursesGrid element is unique to it)
   const coursesGridEl = document.getElementById('coursesGrid');
   if (!coursesGridEl) return;
 
-  const safeMyCourses = Array.isArray(window.myCourses) ? window.myCourses : [];
-  const safeNewVideos = Array.isArray(window.newVideos) ? window.newVideos : [];
-  const safeCourseCompletionData = Array.isArray(window.courseCompletionData) ? window.courseCompletionData : [];
-  const safeWatchTimeLabels = Array.isArray(window.watchTimeLabels) ? window.watchTimeLabels : [];
-  const safeWatchTimeData = Array.isArray(window.watchTimeData) ? window.watchTimeData : [];
+  // ── Data from PHP ────────────────────────────────────────────────────────
+  const myCourses            = Array.isArray(window.myCourses)            ? window.myCourses            : [];
+  const newVideos            = Array.isArray(window.newVideos)            ? window.newVideos            : [];
+  const courseCompletionData = Array.isArray(window.courseCompletionData) ? window.courseCompletionData : [];
+  const watchTimeLabels      = Array.isArray(window.watchTimeLabels)      ? window.watchTimeLabels      : [];
+  const watchTimeData        = Array.isArray(window.watchTimeData)        ? window.watchTimeData        : [];
 
-  const courseDetailsUrlTemplate =
+  const courseDetailsUrlTpl =
     document.getElementById('dashboard-data')?.dataset?.courseDetailsUrl || '#';
 
-  // ---------- Populate UI ----------
+  function courseUrl(id) {
+    return courseDetailsUrlTpl.replace('_COURSE_ID_', id);
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  function esc(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Subject → colour pair (deterministic by first char code)
+  const subjectPalettes = [
+    ['#7c3aed','#ede9fe'], ['#2563eb','#dbeafe'], ['#059669','#d1fae5'],
+    ['#d97706','#fef3c7'], ['#db2777','#fce7f3'], ['#0891b2','#cffafe'],
+  ];
+  function subjectColour(subject) {
+    const idx = (subject?.charCodeAt(0) || 0) % subjectPalettes.length;
+    return subjectPalettes[idx];
+  }
+
+  // ── Render: Course grid ─────────────────────────────────────────────────
   function renderCourses(list) {
     const grid = document.getElementById('coursesGrid');
     if (!grid) return;
@@ -36,152 +46,139 @@
     if (!list || list.length === 0) {
       grid.innerHTML = `
         <div class="col-12">
-          <div class="alert alert-light border mb-0">
-            You don’t have any courses yet.
+          <div class="empty-state">
+            <div class="empty-state-ico"><i class="bi bi-journal-x"></i></div>
+            <div class="fw-semibold mb-1">No courses yet</div>
+            <div class="empty-state-text mb-3">Browse our catalogue and enrol in something new!</div>
+            <a href="/courses" class="btn btn-primary" style="border-radius:12px;">
+              <i class="bi bi-compass me-1"></i> Browse Courses
+            </a>
           </div>
         </div>`;
       return;
     }
 
-    grid.innerHTML = list
-      .map((c) => {
-        const progressPct = Math.round((Number(c.progress) || 0) * 100);
-        const hours = Number(c.hours) || 0;
-        const title = c.title || 'Course';
-        const subject = c.subject || 'General';
-        const last = c.last || 'Never';
-        const thumb = c.thumb || '';
-        const courseUrl = courseDetailsUrlTemplate.replace('_COURSE_ID_', c.id);
+    grid.innerHTML = list.map((c) => {
+      const pct     = Math.round((Number(c.progress) || 0) * 100);
+      const hours   = (Number(c.hours) || 0).toFixed(1);
+      const title   = esc(c.title   || 'Untitled Course');
+      const subject = esc(c.subject || 'General');
+      const last    = esc(c.last    || 'Never');
+      const url     = courseUrl(c.id);
+      const [fg, bg] = subjectColour(c.subject);
 
-        return `
-          <div class="col-sm-6 col-xl-4">
-            <div class="card course-card h-100 border-0">
-              <img src="${thumb}" class="card-img-top rounded-top" alt="${title}">
-              <div class="card-body d-flex flex-column">
-                <h6 class="mb-1">${title}</h6>
-                <div class="small text-muted mb-2">${subject} • Last viewed ${last}</div>
-                <div class="progress mb-2">
-                  <div class="progress-bar bg-primary" role="progressbar"
-                    style="width:${progressPct}%"
-                    aria-valuenow="${progressPct}" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <div class="d-flex justify-content-between small mb-3">
-                  <span>${progressPct}% complete</span>
-                  <span>${hours.toFixed(1)} h watched</span>
-                </div>
-                <div class="mt-auto d-flex gap-2">
-                  <a class="btn btn-sm btn-primary w-100" href="${courseUrl}">
-                    <i class="bi bi-play-fill me-1"></i> Resume
-                  </a>
-                  <button class="btn btn-sm btn-outline-primary" title="Course menu" type="button">
-                    <i class="bi bi-three-dots"></i>
-                  </button>
-                </div>
+      const thumbHtml = c.thumb
+        ? `<img class="c-thumb" src="${esc(c.thumb)}" alt="${title}" loading="lazy">`
+        : `<div class="c-thumb-placeholder"><i class="bi bi-play-circle"></i></div>`;
+
+      const newBadge = Number(c.newVideos) > 0
+        ? `<span class="c-new-badge">${parseInt(c.newVideos)} new</span>`
+        : '';
+
+      const completedLabel = pct >= 100
+        ? `<span style="color:#059669;font-weight:700;font-size:.78rem;"><i class="bi bi-check-circle-fill me-1"></i>Completed</span>`
+        : `<span class="c-prog-pct">${pct}%</span><span class="c-prog-text ms-1">complete</span>`;
+
+      return `
+        <div class="col-sm-6 col-xl-4">
+          <div class="card c-card position-relative">
+            ${thumbHtml}
+            ${newBadge}
+            <div class="c-body d-flex flex-column h-100">
+              <span class="c-subject" style="background:${bg};color:${fg}">${subject}</span>
+              <div class="c-title">${title}</div>
+              <div class="c-meta"><i class="bi bi-clock me-1"></i>Last viewed ${last}</div>
+              <div class="c-prog-bar">
+                <div class="c-prog-fill" style="width:${pct}%"></div>
               </div>
-              ${
-                Number(c.newVideos) > 0
-                  ? `<span class="position-absolute top-0 end-0 m-2 badge text-bg-warning">${parseInt(
-                      c.newVideos,
-                      10
-                    )} new</span>`
-                  : ''
-              }
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>${completedLabel}</div>
+                <span class="c-prog-text">${hours} h watched</span>
+              </div>
+              <div class="mt-auto">
+                <a class="btn-resume d-block text-center text-decoration-none" href="${url}">
+                  <i class="bi bi-play-fill me-1"></i>${pct >= 100 ? 'Review' : 'Resume'}
+                </a>
+              </div>
             </div>
-          </div>`;
-      })
-      .join('');
+          </div>
+        </div>`;
+    }).join('');
   }
 
+  // ── Render: New Videos ──────────────────────────────────────────────────
   function renderNewVideos() {
-    const ul = document.getElementById('newVideosList');
-    if (!ul) return;
+    const container = document.getElementById('newVideosList');
+    if (!container) return;
 
-    if (!safeNewVideos || safeNewVideos.length === 0) {
-      ul.innerHTML = `
-        <li class="list-group-item text-muted small">
-          No new videos yet.
-        </li>`;
+    if (!newVideos || newVideos.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state m-1">
+          <div class="empty-state-ico"><i class="bi bi-camera-video-off"></i></div>
+          <div class="fw-semibold mb-1">No new videos yet</div>
+          <div class="empty-state-text">New lessons from your enrolled courses will show up here.</div>
+        </div>`;
       return;
     }
 
-    ul.innerHTML = safeNewVideos
-      .map((n) => {
-        const courseUrl = courseDetailsUrlTemplate.replace('_COURSE_ID_', n.course_id);
-        return `
-          <li class="list-group-item d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-3">
-              <div class="rounded border d-flex align-items-center justify-content-center" style="width:56px;height:36px;background:var(--primary-50);color:var(--primary)">
-                <i class="bi bi-camera-video"></i>
-              </div>
-              <div>
-                <div class="fw-semibold">${n.lesson} <span class="text-muted">• ${n.duration ?? ''}</span></div>
-                <div class="small text-muted">${n.course} • ${n.when}</div>
-              </div>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <a class="btn btn-sm btn-primary" href="${courseUrl}">
-                <i class="bi bi-play-fill me-1"></i> Watch
-              </a>
-            </div>
-          </li>`;
-      })
-      .join('');
+    container.innerHTML = newVideos.map((n) => {
+      const url      = courseUrl(n.course_id);
+      const lesson   = esc(n.lesson  || 'Untitled Lesson');
+      const course   = esc(n.course  || '');
+      const when     = esc(n.when    || '');
+      const duration = n.duration ? `<span class="video-dur ms-2"><i class="bi bi-clock me-1"></i>${esc(n.duration)}</span>` : '';
+      const [fg, bg] = subjectColour(n.course);
+
+      return `
+        <div class="video-item">
+          <div class="video-thumb" style="background:${bg};color:${fg}">
+            <i class="bi bi-camera-video"></i>
+          </div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="video-title text-truncate">${lesson}</div>
+            <div class="video-meta">${course} &bull; ${when}${duration}</div>
+          </div>
+          <a class="btn-watch text-decoration-none" href="${url}">
+            <i class="bi bi-play-fill me-1"></i>Watch
+          </a>
+        </div>`;
+    }).join('');
   }
 
-// function renderCerts(){
-//   const ul = document.getElementById('certList');
-//   ul.innerHTML = certificates.map(c => `
-//     <li class="list-group-item d-flex align-items-center justify-content-between">
-//       <div>
-//         <div class="fw-semibold">${c.course}</div>
-//         <div class="small text-muted">Issued ${c.date}</div>
-//       </div>
-//       <div class="btn-group btn-group-sm">
-//         <button class="btn btn-outline-primary"><i class="bi bi-download"></i></button>
-//         <button class="btn btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i></button>
-//       </div>
-//     </li>`).join('');
-// }
-
-
-// function renderPayments(){
-//   const tbody = document.getElementById('paymentsTable');
-//   console.log('====================================');
-//   console.log('Payments on dashboard', payments);
-//   console.log('====================================');
-//   tbody.innerHTML = payments.map(p => `
-//     <tr>
-//       <td>${p.date}</td>
-//       <td>${p.course}</td>
-//       <td>${p.method}</td>
-//       <td class="text-end">$${parseFloat(p.amount).toFixed(2)}</td>
-//     </tr>`).join('');
-//   const total = payments.reduce((a,b)=>a+parseFloat(b.amount),0);
-//   document.getElementById('kpiSpend').textContent = `$${parseFloat(total).toFixed(2)}`;
-// }
-
-  renderCourses(safeMyCourses);
-  renderNewVideos();
-// renderCerts();
-// renderPayments();
-
-  // Search courses
-  const courseSearchEl = document.getElementById('courseSearch');
-  courseSearchEl?.addEventListener('input', (e) => {
-    const q = (e.target.value || '').toLowerCase();
+  // ── Global Search (hero search box) ────────────────────────────────────
+  const globalSearchEl = document.getElementById('globalSearch');
+  globalSearchEl?.addEventListener('input', (e) => {
+    const q = (e.target.value || '').toLowerCase().trim();
     renderCourses(
-      safeMyCourses.filter(
-        (c) =>
-          (c.title || '').toLowerCase().includes(q) ||
-          (c.subject || '').toLowerCase().includes(q)
-      )
+      q
+        ? myCourses.filter(c =>
+            (c.title   || '').toLowerCase().includes(q) ||
+            (c.subject || '').toLowerCase().includes(q))
+        : myCourses
     );
   });
 
-// ---------- Charts ----------
-// Completion per course bar chart
+  // ── Course search (section filter) ─────────────────────────────────────
+  const courseSearchEl = document.getElementById('courseSearch');
+  courseSearchEl?.addEventListener('input', (e) => {
+    const q = (e.target.value || '').toLowerCase().trim();
+    renderCourses(
+      q
+        ? myCourses.filter(c =>
+            (c.title   || '').toLowerCase().includes(q) ||
+            (c.subject || '').toLowerCase().includes(q))
+        : myCourses
+    );
+  });
+
+  // ── Chart helpers ───────────────────────────────────────────────────────
+  const PURPLE      = '#7c3aed';
+  const PURPLE_FILL = 'rgba(124,58,237,.12)';
+
+  // Completion bar chart
   const compCtx = document.getElementById('completionBar');
-  let courseOrder = [...safeCourseCompletionData];
+  let courseOrder = [...courseCompletionData];
+
   function drawCompletion(sort = 'desc') {
     if (!compCtx || typeof Chart === 'undefined') return;
 
@@ -190,92 +187,135 @@
         ? a.completion_percentage - b.completion_percentage
         : b.completion_percentage - a.completion_percentage
     );
-    const labels = courseOrder.map((c) => (c.course_title || '').split(' — ')[0]);
-    const data = courseOrder.map((c) => c.completion_percentage);
 
-    // Destroy existing chart if it exists
+    const labels = courseOrder.map(c =>
+      (c.course_title || '').length > 22
+        ? (c.course_title || '').slice(0, 20) + '…'
+        : (c.course_title || '')
+    );
+    const data = courseOrder.map(c => c.completion_percentage);
+
     Chart.getChart(compCtx)?.destroy();
 
     new Chart(compCtx, {
       type: 'bar',
       data: {
         labels,
-        datasets: [
-          { label: 'Completion %', data, backgroundColor: 'rgba(111,66,193,.6)' },
-        ],
+        datasets: [{
+          label: 'Completion %',
+          data,
+          backgroundColor: data.map(v =>
+            v >= 100 ? 'rgba(16,185,129,.7)' :
+            v >= 60  ? 'rgba(124,58,237,.65)' :
+                       'rgba(124,58,237,.35)'
+          ),
+          borderRadius: 8,
+          borderSkipped: false,
+        }],
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, max: 100 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.parsed.y}% complete`,
+            },
+          },
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+          y: {
+            beginAtZero: true, max: 100,
+            grid: { color: 'rgba(0,0,0,.04)' },
+            ticks: { callback: v => v + '%', font: { size: 11 } },
+          },
+        },
       },
     });
   }
+
   drawCompletion();
 
   document.getElementById('progressSort')?.addEventListener('change', (e) => {
-    Chart.getChart(compCtx)?.destroy();
     drawCompletion(e.target.value);
   });
 
-// Watch time line
+  document.getElementById('refreshProgress')?.addEventListener('click', () => {
+    location.reload();
+  });
+
+  // Watch time line chart
   const watchCtx = document.getElementById('watchLine');
-// const labels = Array.from({length: 14}, (_, i) => `D-${14-i}`);
-// const mins = labels.map(()=> Math.floor(10 + Math.random()*40));
   if (watchCtx && typeof Chart !== 'undefined') {
     new Chart(watchCtx, {
       type: 'line',
       data: {
-        labels: safeWatchTimeLabels,
-        datasets: [
-          {
-            label: 'Minutes',
-            data: safeWatchTimeData,
-            tension: 0.35,
-            borderColor: '#6f42c1',
-            backgroundColor: 'rgba(111,66,193,.12)',
-            fill: true,
-            pointRadius: 0,
-          },
-        ],
+        labels: watchTimeLabels,
+        datasets: [{
+          label: 'Minutes',
+          data: watchTimeData,
+          tension: 0.4,
+          borderColor: PURPLE,
+          backgroundColor: PURPLE_FILL,
+          fill: true,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          borderWidth: 2.5,
+        }],
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.parsed.y} min`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              maxTicksLimit: 7,
+              font: { size: 10 },
+              maxRotation: 0,
+            },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(0,0,0,.04)' },
+            ticks: { font: { size: 10 }, callback: v => v + 'm' },
+          },
+        },
       },
     });
   }
 
-// KPIs from data (re-calculating to ensure accuracy if needed, though most should come from backend now)
-// If your backend provides these directly, you might remove these lines.
-// For now, re-calculating from `myCourses` as a fallback or if not all KPIs are directly passed.
-  const kpiEnrolledEl = document.getElementById('kpiEnrolled');
-  const kpiHoursEl = document.getElementById('kpiHours');
+  // ── KPI overrides from client-side data ─────────────────────────────────
+  // The server already renders these; JS below only corrects them if needed.
+  const kpiEnrolledEl   = document.getElementById('kpiEnrolled');
+  const kpiHoursEl      = document.getElementById('kpiHours');
   const kpiCompletionEl = document.getElementById('kpiCompletion');
 
-  if (kpiEnrolledEl) kpiEnrolledEl.textContent = safeMyCourses.length;
-  const totalHoursWatchedFromCourses = safeMyCourses.reduce(
-    (sum, course) => sum + (Number(course.hours) || 0),
-    0
-  );
-  if (kpiHoursEl) kpiHoursEl.textContent = totalHoursWatchedFromCourses.toFixed(1) + ' h';
+  if (kpiEnrolledEl && myCourses.length) {
+    kpiEnrolledEl.textContent = myCourses.length;
+  }
 
-  const totalProgress = safeMyCourses.reduce(
-    (sum, course) => sum + (Number(course.progress) || 0),
-    0
-  );
-  const avgCompletion =
-    safeMyCourses.length > 0 ? Math.round((totalProgress / safeMyCourses.length) * 100) : 0;
-  if (kpiCompletionEl) kpiCompletionEl.textContent = avgCompletion + '%';
+  const totalHours = myCourses.reduce((s, c) => s + (Number(c.hours) || 0), 0);
+  if (kpiHoursEl && totalHours > 0) {
+    kpiHoursEl.innerHTML = `${totalHours.toFixed(1)}<span style="font-size:1rem;font-weight:600"> h</span>`;
+  }
 
-// Refresh progress (demo)
-  document.getElementById('refreshProgress')?.addEventListener('click', () => {
-  // pretend new data: nudge progresses randomly
-  // myCourses.forEach(c=> c.progress = Math.min(1, Math.max(0, c.progress + (Math.random()*.1 - .05))));
-  // Chart.getChart(compCtx)?.destroy();
-  // drawCompletion(document.getElementById('progressSort').value);
-  // renderCourses(myCourses);
-  location.reload(); // Refresh the page to get new data
-  });
+  const avgCompletion = myCourses.length
+    ? Math.round(myCourses.reduce((s, c) => s + (Number(c.progress) || 0), 0) / myCourses.length * 100)
+    : 0;
+  if (kpiCompletionEl && myCourses.length) {
+    kpiCompletionEl.innerHTML = `${avgCompletion}<span style="font-size:1rem;font-weight:600">%</span>`;
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  renderCourses(myCourses);
+  renderNewVideos();
 })();

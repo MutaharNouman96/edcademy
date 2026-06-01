@@ -3,9 +3,9 @@
     <div class="course-hero">
         <div class="container hero-content">
             @isset($course->category->name)
-                 <span class="course-category">{{ $course->category->name }}</span>
+                <span class="course-category">{{ $course->category->name }}</span>
             @endisset
-           
+
 
             <h1 class="course-title">{{ $course->title }}</h1>
 
@@ -69,35 +69,41 @@
                             <div class="section-header {{ $loop->first ? 'active' : '' }}"
                                 onclick="toggleSection(this)">
                                 <div class="section-info w-100">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                         <h5 style="margin: 0; display: flex; align-items: center; gap: 10px;">
                                             <i class="fas fa-chevron-down"></i>
                                             {{ $section->title }}
                                         </h5>
-                                        <div style="text-align: right;  " class="d-flex w-auto gap-4 align-items-center">
+                                        <div style="text-align: right;  "
+                                            class="d-flex w-auto gap-4 align-items-center">
                                             @php
                                                 $sectionTotal = $section->lessons->sum('price');
                                             @endphp
-                                            @if($sectionTotal > 0)
-                                                <div style="font-weight: 700; color: var(--primary-cyan);">${{ number_format($sectionTotal, 2) }}</div>
+                                            @if ($sectionTotal > 0)
+                                                <div style="font-weight: 700; color: var(--primary-cyan);">
+                                                    ${{ number_format($sectionTotal, 2) }}</div>
                                             @endif
                                             <div class="d-flex gap-2">
-                                                <form action="{{ route('order.addToOrderCart') }}" method="post" class="add-to-cart-form">
+                                                <form action="{{ route('order.addToOrderCart') }}" method="post"
+                                                    class="add-to-cart-form">
                                                     @csrf
                                                     <input type="hidden" name="item_id" value="{{ $section->id }}">
                                                     <input type="hidden" name="model" value="App\Models\Section">
                                                     <input type="hidden" name="responseType" value="json">
-                                                    <button type="submit" class="btn btn-outline-primary" title="Add to Cart">
-                                                        <i class="fas fa-cart-plus"></i>  
+                                                    <button type="submit" class="btn btn-outline-primary"
+                                                        title="Add to Cart">
+                                                        <i class="fas fa-cart-plus"></i>
                                                     </button>
                                                 </form>
-                                                <form action="{{ route('order.addToOrderCart') }}" method="post" class="buy-now-form">
+                                                <form action="{{ route('order.addToOrderCart') }}" method="post"
+                                                    class="buy-now-form">
                                                     @csrf
                                                     <input type="hidden" name="item_id" value="{{ $section->id }}">
                                                     <input type="hidden" name="model" value="App\Models\Section">
                                                     <input type="hidden" name="action" value="buy_now">
                                                     <button type="submit" class="btn btn-primary" title="Buy Now">
-                                                        <i class="fas fa-shopping-bag"></i>  
+                                                        <i class="fas fa-shopping-bag"></i>
                                                     </button>
                                                 </form>
                                             </div>
@@ -233,7 +239,8 @@
                                     <!-- Thumbnail -->
                                     <div class="course-thumbnail">
                                         @if ($moreCourse->thumbnail != null)
-                                            <img src="{{ $moreCourse->thumbnail_path }}" alt="{{ $moreCourse->title }}">
+                                            <img src="{{ $moreCourse->thumbnail_path }}"
+                                                alt="{{ $moreCourse->title }}">
                                         @else
                                             <i class="fas fa-book-open fs-1 text-muted"></i>
                                         @endif
@@ -258,7 +265,8 @@
 
                                         <!-- Meta -->
                                         <div class="course-meta">
-                                            <span><i class="fas fa-clock"></i> {{ $moreCourse->duration ?? '–' }}</span>
+                                            <span><i class="fas fa-clock"></i>
+                                                {{ $moreCourse->duration ?? '–' }}</span>
                                             <span><i class="fas fa-video"></i> {{ $moreCourse->lessons->count() }}
                                                 lessons</span>
 
@@ -294,33 +302,69 @@
                 <div class="purchase-card">
                     <div class="course-preview-img " style="cursor: pointer" data-bs-toggle="modal"
                         data-bs-target="#previewModal">
-                        <img src="{{  $course->thumbnail_path }}" class="img-fluid rounded" alt="">
+                        <img src="{{ $course->thumbnail_path }}" class="img-fluid rounded" alt="">
                     </div>
 
                     <div class="price-section">
                         <span class="current-price">${{ $course->price }}</span>
                     </div>
 
-                    <form action="{{ route('order.addToOrderCart') }}" method="post">
-                        @csrf
-                        <input type="hidden" name="item_id" value="{{ $course->id }}">
-                        <input type="hidden" name="model" value="App\Models\Course">
-                        <input type="hidden" name="action" value="buy_now">
 
-                        <button class="buy-btn" type="submit">
-                            <i class="fas fa-shopping-bag me-2"></i>Buy Now
-                        </button>
-                    </form>
+                    @guest
+                        <form action="{{ route('order.addToOrderCart') }}" method="post">
+                            @csrf
+                            <input type="hidden" name="item_id" value="{{ $course->id }}">
+                            <input type="hidden" name="model" value="App\Models\Course">
+                            <input type="hidden" name="action" value="buy_now">
 
-                    <form action="{{ route('order.addToOrderCart') }}" method="post" class="add-to-cart-form">
-                        @csrf
-                        <input type="hidden" name="item_id" value="{{ $course->id }}">
-                        <input type="hidden" name="model" value="App\Models\Course">
-                        <input type="hidden" name="responseType" value="json">
-                        <button class="cart-btn">
-                            <i class="fas fa-cart-plus me-2"></i>Add to Cart
-                        </button>
-                    </form>
+                            <button class="buy-btn" type="submit">
+                                <i class="fas fa-shopping-bag me-2"></i>Buy Now
+                            </button>
+                        </form>
+
+                        <form action="{{ route('order.addToOrderCart') }}" method="post" class="add-to-cart-form">
+                            @csrf
+                            <input type="hidden" name="item_id" value="{{ $course->id }}">
+                            <input type="hidden" name="model" value="App\Models\Course">
+                            <input type="hidden" name="responseType" value="json">
+                            <button class="cart-btn">
+                                <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                            </button>
+                        </form>
+                    @else
+                        @php
+                            $purchased = is_course_purchased($course->id);
+                        @endphp
+
+                        @if ($purchased)
+                            <a href="{{ route('student.course_details', ['course_id' => $course->id]) }}"
+                                class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                            </a>
+                        @else
+                            <form action="{{ route('order.addToOrderCart') }}" method="post">
+                                @csrf
+                                <input type="hidden" name="item_id" value="{{ $course->id }}">
+                                <input type="hidden" name="model" value="App\Models\Course">
+                                <input type="hidden" name="action" value="buy_now">
+
+                                <button class="buy-btn" type="submit">
+                                    <i class="fas fa-shopping-bag me-2"></i>Buy Now
+                                </button>
+                            </form>
+
+                            <form action="{{ route('order.addToOrderCart') }}" method="post" class="add-to-cart-form">
+                                @csrf
+                                <input type="hidden" name="item_id" value="{{ $course->id }}">
+                                <input type="hidden" name="model" value="App\Models\Course">
+                                <input type="hidden" name="responseType" value="json">
+                                <button class="cart-btn">
+                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                </button>
+                            </form>
+                        @endif
+                    @endguest
+
 
                     {{-- <div style="text-align: center; margin: 15px 0; color: #666; font-size: 0.9rem;">
                         <i class="fas fa-clock me-1"></i> Sale ends in 2 days

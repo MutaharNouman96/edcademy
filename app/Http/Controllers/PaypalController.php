@@ -195,10 +195,12 @@ class PaypalController extends Controller
 
             $paymentId = $order->id . (Str::uuid());
             foreach ($order->items as $item) {
-                $commission = money(
-                    $item->total * setting('platform_commission', 0) / 100
-                );
                 $itemEducatorId = $item->model == "App\Models\Lesson" ? Lesson::find($item->item_id)->with('course')->first()->course->user_id : Course::find($item->item_id)->user_id;
+
+                // Commission is taken at the educator's configured rate (defaults to 25%).
+                $commissionRate = optional(\App\Models\User::find($itemEducatorId))->commissionRate()
+                    ?? \App\Models\User::DEFAULT_COMMISSION_RATE;
+                $commission = money($item->total * $commissionRate / 100);
                 UserPurchasedItem::firstOrCreate([
                     'user_id' => auth()->id(),
                     'purchasable_id' => $item->id,

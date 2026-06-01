@@ -300,7 +300,8 @@
                                         @php($oldType = old('type', $course->type ?: 'module'))
                                         <option value="module" {{ $oldType === 'module' ? 'selected' : '' }}>
                                             Module-based</option>
-                                        <option value="video" {{ $oldType === 'video' ? 'selected' : '' }}>Video course
+                                        <option value="video" {{ $oldType === 'video' ? 'selected' : '' }}>Video
+                                            course
                                         </option>
                                         <option value="live" {{ $oldType === 'live' ? 'selected' : '' }}>Live course
                                         </option>
@@ -312,7 +313,8 @@
                                     <label class="form-label" for="difficulty">Difficulty</label>
                                     <select id="difficulty" name="difficulty" class="form-select">
                                         @php($oldDifficulty = old('difficulty', $course->difficulty))
-                                        <option value="" {{ $oldDifficulty ? '' : 'selected' }}>Select difficulty…
+                                        <option value="" {{ $oldDifficulty ? '' : 'selected' }}>Select
+                                            difficulty…
                                         </option>
                                         <option value="beginner" {{ $oldDifficulty === 'beginner' ? 'selected' : '' }}>
                                             Beginner</option>
@@ -382,11 +384,13 @@
                                 <div class="col-md-7">
                                     <label class="form-label" for="thumbnail">Upload image</label>
                                     <input type="file" id="thumbnail" name="thumbnail"
-                                        class="form-control @error('thumbnail') is-invalid @enderror" accept="image/*">
+                                        class="form-control @error('thumbnail') is-invalid @enderror"
+                                        accept="image/*">
                                     @error('thumbnail')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <div class="form-text">JPG, PNG or WEBP. Leave empty to keep the current image.</div>
+                                    <div class="form-text">JPG, PNG or WEBP. Leave empty to keep the current image.
+                                    </div>
                                     @if ($course->thumbnail)
                                         <div class="form-text mt-1">
                                             Current: <span class="text-dark">{{ basename($course->thumbnail) }}</span>
@@ -400,7 +404,8 @@
                                             <img id="thumb-preview-img"
                                                 src="{{ str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : asset('storage/' . $course->thumbnail) }}"
                                                 alt="Thumbnail preview">
-                                            <span id="thumb-preview-empty" style="display:none">No image selected</span>
+                                            <span id="thumb-preview-empty" style="display:none">No image
+                                                selected</span>
                                         @else
                                             <span id="thumb-preview-empty">No image selected</span>
                                             <img id="thumb-preview-img" src="" alt="Thumbnail preview"
@@ -427,8 +432,8 @@
                                     <label class="form-label" for="price">Price (USD)</label>
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
-                                        <input type="number" step="0.01" min="0" id="price" name="price"
-                                            class="form-control @error('price') is-invalid @enderror"
+                                        <input type="number" step="0.01" min="0" id="price"
+                                            name="price" class="form-control @error('price') is-invalid @enderror"
                                             value="{{ old('price', $course->price ?? 0) }}" placeholder="0.00">
                                         @error('price')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -437,9 +442,11 @@
                                     <div class="form-text">Use 0 if you'll mark this course as free.</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-check toggle-card {{ old('is_free', $course->is_free) ? 'active' : '' }}">
-                                        <input class="form-check-input" type="checkbox" id="is_free" name="is_free"
-                                            value="1" {{ old('is_free', $course->is_free) ? 'checked' : '' }}>
+                                    <div
+                                        class="form-check toggle-card {{ old('is_free', $course->is_free) ? 'active' : '' }}">
+                                        <input class="form-check-input" type="checkbox" id="is_free"
+                                            name="is_free" value="1"
+                                            {{ old('is_free', $course->is_free) ? 'checked' : '' }}>
                                         <label class="form-check-label fw-semibold" for="is_free">
                                             <i class="bi bi-unlock-fill text-success me-1"></i> This is a free course
                                         </label>
@@ -462,9 +469,11 @@
                         <div class="card-body">
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-6">
-                                    <div class="form-check toggle-card {{ old('drip', $course->drip) ? 'active' : '' }}">
-                                        <input class="form-check-input" type="checkbox" id="drip" name="drip"
-                                            value="1" {{ old('drip', $course->drip) ? 'checked' : '' }}>
+                                    <div
+                                        class="form-check toggle-card {{ old('drip', $course->drip) ? 'active' : '' }}">
+                                        <input class="form-check-input" type="checkbox" id="drip"
+                                            name="drip" value="1"
+                                            {{ old('drip', $course->drip) ? 'checked' : '' }}>
                                         <label class="form-check-label fw-semibold" for="drip">
                                             <i class="bi bi-calendar2-event text-primary me-1"></i> Enable drip content
                                         </label>
@@ -474,7 +483,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="drip_duration">Drip interval</label>
-                                    <input type="text" id="drip_duration" name="drip_duration" class="form-control"
+                                    <input type="text" id="drip_duration" name="drip_duration"
+                                        class="form-control"
                                         value="{{ old('drip_duration', $course->drip_duration) }}"
                                         placeholder="e.g. 1 lesson per 3 days">
                                 </div>
@@ -542,11 +552,13 @@
                                     <label class="form-label" for="publish_option">Publish option</label>
                                     <select id="publish_option" name="publish_option" class="form-select">
                                         @php($oldPub = old('publish_option', $course->publish_option ?: 'draft'))
-                                        <option value="draft" {{ $oldPub === 'draft' ? 'selected' : '' }}>Save as draft
+                                        <option value="draft" {{ $oldPub === 'draft' ? 'selected' : '' }}>Save as
+                                            draft
                                         </option>
                                         <option value="now" {{ $oldPub === 'now' ? 'selected' : '' }}>Publish now
                                         </option>
-                                        <option value="schedule" {{ $oldPub === 'schedule' ? 'selected' : '' }}>Schedule
+                                        <option value="schedule" {{ $oldPub === 'schedule' ? 'selected' : '' }}>
+                                            Schedule
                                             for later</option>
                                     </select>
                                     <div class="form-text">Drafts are visible only to you and admins.</div>
@@ -635,6 +647,11 @@
                                                             class="badge bg-{{ $lesson->status == 'Published' ? 'success' : 'warning' }}">
                                                             {{ $lesson->status }}
                                                         </span>
+                                                        @if ($lesson->type)
+                                                            <span
+                                                                class="badge bg-{{ $lesson->type == 'video' ? 'primary' : 'success' }} text-capitalize">{{ $lesson->type }}</span>
+                                                        @endif
+
                                                     </div>
                                                 </div>
                                                 <div>
@@ -831,7 +848,8 @@
                             <div class="tab-content p-3 bg-light">
                                 <div class="tab-pane fade show active" id="videoUpload" role="tabpanel"
                                     aria-labelledby="video-tab">
-                                    <input type="hidden" name="video_temp_path" id="video_temp_path"
+                                    {{-- Holds the S3 object key returned by the direct-to-S3 video upload. --}}
+                                    <input type="hidden" name="video_storage_path" id="video_storage_path"
                                         value="">
                                     <div id="addLessonVideoZone" class="dropzone"></div>
                                     <div id="videoUploadLoader" class="small text-primary mt-2 d-none">
@@ -1032,7 +1050,8 @@
 
                         <!-- Preview -->
                         <div class="form-check mt-3">
-                            <input class="form-check-input" type="checkbox" id="edit_preview" name="preview">
+                            <input class="form-check-input" type="checkbox" id="edit_preview" name="preview"
+                                value="1">
                             <label class="form-check-label fw-semibold" for="edit_preview">
                                 <i class="bi bi-eye-fill text-primary me-1"></i> Allow Preview
                             </label>
@@ -1062,7 +1081,7 @@
 
         <script>
             // ----- Edit course form: category->subject AJAX, toggles, thumbnail preview, AI generate -----
-            (function () {
+            (function() {
                 const categorySelect = document.getElementById('course_category_id');
                 const subjectSelect = document.getElementById('subject');
                 const subjectHelp = document.getElementById('subject_help');
@@ -1102,9 +1121,9 @@
                             subjectSelect.appendChild(keep);
                         }
                         subjectSelect.disabled = false;
-                        if (subjectHelp) subjectHelp.textContent = preselectName
-                            ? 'No active subjects under this category. Keeping the existing subject value.'
-                            : 'There are no subjects under this category.';
+                        if (subjectHelp) subjectHelp.textContent = preselectName ?
+                            'No active subjects under this category. Keeping the existing subject value.' :
+                            'There are no subjects under this category.';
                         return;
                     }
 
@@ -1148,7 +1167,9 @@
                     setSubjectsLoading();
                     fetch(subjectsUrl(categoryId), {
                             method: 'GET',
-                            headers: { 'Accept': 'application/json' }
+                            headers: {
+                                'Accept': 'application/json'
+                            }
                         })
                         .then(r => {
                             if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -1157,14 +1178,16 @@
                         .then(data => renderSubjects(data.subjects || [], preselectName))
                         .catch(err => {
                             console.error('Failed to load subjects:', err);
-                            subjectSelect.innerHTML = '<option value="" selected disabled>Could not load subjects</option>';
+                            subjectSelect.innerHTML =
+                                '<option value="" selected disabled>Could not load subjects</option>';
                             subjectSelect.disabled = true;
-                            if (subjectHelp) subjectHelp.textContent = 'Could not load subjects. Try changing the category again.';
+                            if (subjectHelp) subjectHelp.textContent =
+                                'Could not load subjects. Try changing the category again.';
                         });
                 }
 
                 if (categorySelect && subjectSelect) {
-                    categorySelect.addEventListener('change', function () {
+                    categorySelect.addEventListener('change', function() {
                         loadSubjectsForCategory(this.value, null);
                     });
 
@@ -1180,7 +1203,7 @@
                 const publishOption = document.getElementById('publish_option');
                 const publishDateWrapper = document.getElementById('publish_date_wrapper');
                 if (publishOption && publishDateWrapper) {
-                    publishOption.addEventListener('change', function () {
+                    publishOption.addEventListener('change', function() {
                         publishDateWrapper.style.display = this.value === 'schedule' ? 'block' : 'none';
                     });
                 }
@@ -1201,7 +1224,8 @@
                     togglePriceState();
                 }
 
-                document.querySelectorAll('.course-edit-page .form-check.toggle-card input[type="checkbox"]').forEach(cb => {
+                document.querySelectorAll('.course-edit-page .form-check.toggle-card input[type="checkbox"]').forEach(
+                cb => {
                     const card = cb.closest('.toggle-card');
                     if (!card) return;
                     cb.addEventListener('change', () => {
@@ -1213,11 +1237,11 @@
                 const thumbImg = document.getElementById('thumb-preview-img');
                 const thumbEmpty = document.getElementById('thumb-preview-empty');
                 if (thumbInput && thumbImg && thumbEmpty) {
-                    thumbInput.addEventListener('change', function () {
+                    thumbInput.addEventListener('change', function() {
                         const file = this.files && this.files[0];
                         if (!file) return;
                         const reader = new FileReader();
-                        reader.onload = function (e) {
+                        reader.onload = function(e) {
                             thumbImg.src = e.target.result;
                             thumbImg.style.display = 'inline';
                             thumbEmpty.style.display = 'none';
@@ -1228,10 +1252,11 @@
 
                 const aiBtn = document.getElementById('generate-ai');
                 if (aiBtn) {
-                    aiBtn.addEventListener('click', function () {
+                    aiBtn.addEventListener('click', function() {
                         aiBtn.disabled = true;
                         const originalLabel = aiBtn.innerHTML;
-                        aiBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Generating…';
+                        aiBtn.innerHTML =
+                            '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Generating…';
 
                         const form = document.getElementById('edit-form');
                         const formData = new FormData(form);
@@ -1240,13 +1265,16 @@
                         fetch('{{ route('educator.generate.course.content') }}', {
                                 method: 'POST',
                                 body: formData,
-                                headers: { 'Accept': 'application/json' }
+                                headers: {
+                                    'Accept': 'application/json'
+                                }
                             })
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
                                     const titleInput = document.querySelector('#edit-form input[name="title"]');
-                                    const descInput = document.querySelector('#edit-form textarea[name="description"]');
+                                    const descInput = document.querySelector(
+                                        '#edit-form textarea[name="description"]');
                                     if (titleInput && data.title) titleInput.value = data.title;
                                     if (descInput && data.description) descInput.value = data.description;
                                 } else {
@@ -1479,7 +1507,7 @@
                     } catch (e) {}
                     addLessonMaterialDropzone = null;
                 }
-                const vh = document.getElementById('video_temp_path');
+                const vh = document.getElementById('video_storage_path');
                 const wh = document.getElementById('worksheet_storage_path');
                 const mh = document.getElementById('material_storage_path');
                 if (vh) vh.value = '';
@@ -1500,63 +1528,63 @@
                 const videoEl = document.getElementById('addLessonVideoZone');
                 if (videoEl) {
                     addLessonVideoDropzone = new Dropzone(videoEl, {
-                    url: tempVideoUploadUrl,
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    paramName: 'file',
-                    maxFiles: 1,
-                    maxFilesize: 2048,
-                    acceptedFiles: 'video/mp4,video/quicktime,video/x-msvideo,video/x-ms-wmv,video/webm,video/x-matroska',
-                    chunking: true,
-                    forceChunking: true,
-                    chunkSize: 2000000,
-                    addRemoveLinks: true,
-                    dictDefaultMessage: 'Drop video here or click to upload (up to 2 GB)',
-                    init: function() {
-                        this.on('addedfile', file => {
-                            showVideoPreviewFromDropzoneFile(file, 'add');
-                        });
-                        this.on('removedfile', () => clearAddVideoPreview());
-                        this.on('maxfilesexceeded', file => {
-                            this.removeAllFiles();
-                            this.addFile(file);
-                        });
-                        this.on('sending', () => setAddLessonUploadPart('video', true));
-                        this.on('uploadprogress', () => setAddLessonUploadPart('video', true));
-                        this.on('success', (file, res) => {
-                            setAddLessonUploadPart('video', false);
-                            if (res && res.path) {
-                                const h = document.getElementById('video_temp_path');
-                                const d = document.getElementById('videoTempPathDisplay');
-                                if (h) h.value = res.path;
-                                if (d) {
-                                    d.innerHTML =
-                                        'Video is uploaded. It will be reviewed by us before publishing to the platform.';
-
-                                }
-                            }
-                        });
-                        this.on('error', (file, err, xhr) => {
-                            setAddLessonUploadPart('video', false);
-                            let msg = 'Upload failed';
-                            if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
-                                msg = xhr.responseJSON.message;
-                            } else if (err && err.message) {
-                                msg = err.message;
-                            } else if (typeof err === 'string') {
-                                msg = err;
-                            }
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Upload error',
-                                text: msg
+                        url: tempVideoUploadUrl,
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        paramName: 'file',
+                        maxFiles: 1,
+                        maxFilesize: 2048,
+                        acceptedFiles: 'video/mp4,video/quicktime,video/x-msvideo,video/x-ms-wmv,video/webm,video/x-matroska',
+                        chunking: true,
+                        forceChunking: true,
+                        chunkSize: 2000000,
+                        addRemoveLinks: true,
+                        dictDefaultMessage: 'Drop video here or click to upload (up to 2 GB)',
+                        init: function() {
+                            this.on('addedfile', file => {
+                                showVideoPreviewFromDropzoneFile(file, 'add');
                             });
-                        });
-                        this.on('canceled', () => setAddLessonUploadPart('video', false));
-                    }
-                });
+                            this.on('removedfile', () => clearAddVideoPreview());
+                            this.on('maxfilesexceeded', file => {
+                                this.removeAllFiles();
+                                this.addFile(file);
+                            });
+                            this.on('sending', () => setAddLessonUploadPart('video', true));
+                            this.on('uploadprogress', () => setAddLessonUploadPart('video', true));
+                            this.on('success', (file, res) => {
+                                setAddLessonUploadPart('video', false);
+                                if (res && res.path) {
+                                    const h = document.getElementById('video_storage_path');
+                                    const d = document.getElementById('videoTempPathDisplay');
+                                    if (h) h.value = res.path;
+                                    if (d) {
+                                        d.innerHTML =
+                                            'Video is uploaded. It will be reviewed by us before publishing to the platform.';
+
+                                    }
+                                }
+                            });
+                            this.on('error', (file, err, xhr) => {
+                                setAddLessonUploadPart('video', false);
+                                let msg = 'Upload failed';
+                                if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+                                    msg = xhr.responseJSON.message;
+                                } else if (err && err.message) {
+                                    msg = err.message;
+                                } else if (typeof err === 'string') {
+                                    msg = err;
+                                }
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Upload error',
+                                    text: msg
+                                });
+                            });
+                            this.on('canceled', () => setAddLessonUploadPart('video', false));
+                        }
+                    });
                 }
 
                 const wsEl = document.getElementById('addLessonWorksheetZone');
@@ -1570,9 +1598,9 @@
                         paramName: 'file',
                         maxFiles: 1,
                         maxFilesize: 50,
-                        acceptedFiles: '.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        acceptedFiles: '.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-powerpoint, application/vnd.openxmlformats-officedocument.presentationml.presentation,image/png, image/jpeg,   image/webp',
                         addRemoveLinks: true,
-                        dictDefaultMessage: 'Drop worksheet (PDF or Word) or click',
+                        dictDefaultMessage: 'Drop worksheet or click (PDF, Word, Excel, PowerPoint, Images)',
                         init: function() {
                             this.on('addedfile', file => showWorksheetLocalPreview(file));
                             this.on('removedfile', () => {
@@ -1641,9 +1669,9 @@
                         paramName: 'file',
                         maxFiles: 1,
                         maxFilesize: 50,
-                        acceptedFiles: '.pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                        acceptedFiles: '.pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/png, image/jpeg, image/gif, image/webp',
                         addRemoveLinks: true,
-                        dictDefaultMessage: 'Drop material (PDF or PowerPoint) or click',
+                        dictDefaultMessage: 'Drop material (PDF, Images or PowerPoint) or click',
                         init: function() {
                             this.on('addedfile', file => showMaterialLocalPreview(file));
                             this.on('removedfile', () => {
@@ -1716,14 +1744,14 @@
                 const el = document.getElementById('editLessonVideoZone');
                 if (!el || typeof Dropzone === 'undefined') return;
                 destroyEditLessonDropzone();
-                const hidden = document.getElementById('edit_video_temp_path');
-                if (hidden && lesson && lesson.video_temp_path) {
-                    hidden.value = lesson.video_temp_path;
+                // Start blank: a value is only set if the educator uploads a replacement video.
+                const hidden = document.getElementById('edit_video_storage_path');
+                if (hidden) {
+                    hidden.value = '';
                 }
                 const disp = document.getElementById('editVideoTempPathDisplay');
-                if (disp && lesson && lesson.video_temp_path) {
-                    disp.innerHTML = 'Current file (relative): <code class="text-break">' + lesson
-                        .video_temp_path + '</code>';
+                if (disp) {
+                    disp.innerHTML = '';
                 }
                 editLessonVideoDropzone = new Dropzone(el, {
                     url: tempVideoUploadUrl,
@@ -1754,7 +1782,7 @@
                         this.on('success', (file, res) => {
                             setEditLessonModalVideoUploading(false);
                             if (res && res.path) {
-                                const h = document.getElementById('edit_video_temp_path');
+                                const h = document.getElementById('edit_video_storage_path');
                                 const d = document.getElementById('editVideoTempPathDisplay');
                                 if (h) h.value = res.path;
                                 if (d) {
@@ -1809,7 +1837,7 @@
             function setLessonType(type) {
                 document.getElementById('lesson_type').value = type;
                 if (type !== 'video') {
-                    const h = document.getElementById('video_temp_path');
+                    const h = document.getElementById('video_storage_path');
                     if (h) h.value = '';
                     if (addLessonVideoDropzone) {
                         addLessonVideoDropzone.removeAllFiles(true);
@@ -2033,18 +2061,25 @@
                                 `<div class="alert alert-success py-2 small mb-2">On Vimeo: <a href="${lesson.video_path}" target="_blank" rel="noopener">Open player link</a></div>`;
                         }
                         let tempBlock = '';
-                        if (lesson.video_temp_path) {
-                            tempBlock =
-                                `<div class="alert alert-warning py-2 small mb-2">Pending admin approval for Vimeo. Temp: <code class="small">${lesson.video_temp_path}</code></div>`;
-                        }
+                        
                         editLessonFileType.innerHTML = vimeoBlock + tempBlock +
-                            `<p class="small text-muted mb-2">Upload a replacement file below. Vimeo is updated only after an admin approves.</p>
-                            <input type="hidden" name="video_temp_path" id="edit_video_temp_path" value="">
+                            `
+                            {{-- Holds the S3 object key of a freshly uploaded replacement video. --}}
+                            <input type="hidden" name="video_storage_path" id="edit_video_storage_path" value="">
                             <div id="editLessonVideoZone" class="dropzone"></div>
                             <div id="editVideoUploadLoader" class="small text-primary mt-2 d-none">
                                 <span class="spinner-border spinner-border-sm me-1" role="status"></span> Uploading video…
                             </div>
-                            <div id="editVideoTempPathDisplay" class="form-text small mt-2"></div>
+                            <div id="editVideoTempPathDisplay" class="form-text small mt-2">
+                                <span id="editVideoPathInfo">
+                                    ${
+                                        lesson.lesson_video_path 
+                                            ? `<span class="text-success">Video: <a href="${lesson.lesson_video_path}" target="_blank" rel="noopener">Open video link</a></span>`
+                                            : `<span class="text-muted">No video uploaded yet.</span>`
+                                    }
+                                </span>
+                            </div>
+                       
                             <div id="editLessonVideoPreviewWrap" class="mt-3 d-none">
                                 <label class="form-label small fw-semibold mb-1">Preview</label>
                                 <video id="editLessonVideoPreview" class="w-100 rounded border" controls
@@ -2328,7 +2363,9 @@
                         const modalEl = document.getElementById('editLessonModal');
                         const modal = bootstrap.Modal.getInstance(modalEl);
                         if (modal) modal.hide();
-                        showLessonSuccess(data.message || 'Lesson updated successfully!');
+                        showLessonSuccess(data.message || 'Lesson updated successfully!', () => {
+                            location.reload();
+                        });
                     })
                     .catch(error => {
                         const errs = error.errors || error.error;
@@ -2355,12 +2392,15 @@
             });
 
 
-            function showLessonSuccess(message) {
+            function showLessonSuccess(message, callback = null) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
                     text: message
                 });
+                if (callback) {
+                    setTimeout(callback, 700);
+                }
             }
 
 

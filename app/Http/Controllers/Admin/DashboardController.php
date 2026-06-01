@@ -17,6 +17,7 @@ use App\Services\ActivityNotificationService;
 use App\Mail\EducatorApprovalMail;
 use App\Mail\EducatorRejectionMail;
 use App\Jobs\UploadLessonVideoToVimeoJob;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -25,6 +26,7 @@ class DashboardController extends Controller
         // Handle time range filtering
         $timeRange = $request->get('time_range', 'this_month');
         $dateRange = $this->getDateRange($timeRange);
+        $timeRangeLabel = $this->formatTimeRangeLabel($timeRange);
 
         // Handle segment filtering
         $segment = $request->get('segment', 'all_users');
@@ -47,6 +49,8 @@ class DashboardController extends Controller
         $newUsersCurrentPeriod = (clone $userQuery)->whereBetween('created_at', [$currentStart, $currentEnd])->count();
         $newUsersPreviousPeriod = (clone $userQuery)->whereBetween('created_at', [$previousStart, $previousEnd])->count();
         $usersGrowth = $newUsersPreviousPeriod > 0 ? (($newUsersCurrentPeriod - $newUsersPreviousPeriod) / $newUsersPreviousPeriod) * 100 : 0;
+        $usersGrowthMeta = $this->buildGrowthMeta($usersGrowth, 'vs previous period');
+        $newUsersRatio = $totalUsers > 0 ? min(100, round(($newUsersCurrentPeriod / $totalUsers) * 100)) : 0;
 
         // Active Educators - only show if segment is educators-related
         if (in_array($segment, ['all_users', 'educators', 'premium_educators'])) {
@@ -67,6 +71,7 @@ class DashboardController extends Controller
             $newEducatorsPreviousPeriod = 0;
         }
         $educatorsGrowth = $newEducatorsPreviousPeriod > 0 ? (($newEducatorsCurrentPeriod - $newEducatorsPreviousPeriod) / $newEducatorsPreviousPeriod) * 100 : 0;
+        $educatorsGrowthMeta = $this->buildGrowthMeta($educatorsGrowth, 'new educators');
 
         // Revenue (completed orders) - filtered by date range, segment and region
         $orderQuery = Order::where('status', 'completed')->where('is_active', true);
@@ -94,6 +99,8 @@ class DashboardController extends Controller
                                                     });
 
         $revenueGrowth = $revenuePreviousPeriod > 0 ? (($revenueCurrentPeriod - $revenuePreviousPeriod) / $revenuePreviousPeriod) * 100 : 0;
+        $revenueGrowthMeta = $this->buildGrowthMeta($revenueGrowth, 'vs previous period');
+        $revenuePeriodRatio = $totalRevenue > 0 ? min(100, round(($revenueCurrentPeriod / $totalRevenue) * 100)) : 0;
 
         // Pending payouts (from completed payments with net_amount > 0)
         $pendingPayouts = Payment::where('status', 'completed')
@@ -152,6 +159,7 @@ class DashboardController extends Controller
         // New educators (recently registered educators)
         $newEducatorsList = User::where('role', 'educator')
                                ->with('educatorProfile')
+                               ->withCount('courses')
                                ->latest()
                                ->take(4)
                                ->get()
@@ -162,20 +170,26 @@ class DashboardController extends Controller
                                        'email' => $educator->email,
                                        'status' => $educator->educatorProfile ? ucfirst($educator->educatorProfile->status) : 'Pending',
                                        'joined' => $educator->created_at->format('M d, Y'),
-                                       'courses_count' => $educator->courses ? $educator->courses->count() : 0
+                                       'courses_count' => $educator->courses_count
                                    ];
                                });
 
         return view('admin.dashboard', compact(
+            'timeRangeLabel',
             'totalUsers',
             'newUsersCurrentPeriod',
             'usersGrowth',
+            'usersGrowthMeta',
+            'newUsersRatio',
             'activeEducators',
             'newEducatorsCurrentPeriod',
             'educatorsGrowth',
+            'educatorsGrowthMeta',
             'totalRevenue',
             'revenueCurrentPeriod',
             'revenueGrowth',
+            'revenueGrowthMeta',
+            'revenuePeriodRatio',
             'pendingPayouts',
             'totalDisputes',
             'flaggedContent',
@@ -184,6 +198,48 @@ class DashboardController extends Controller
             'recentPayments',
             'newEducatorsList'
         ));
+    }
+
+    private function formatTimeRangeLabel($timeRange)
+    {
+        return match ($timeRange) {
+            'last_7_days' => 'Last 7 days',
+            'last_30_days' => 'Last 30 days',
+            'quarter_to_date' => 'Quarter to date',
+            'year_to_date' => 'Year to date',
+            default => 'This month',
+        };
+    }
+
+    private function buildGrowthMeta($value, $suffix = '')
+    {
+        $rounded = round(abs($value), 1);
+        $label = $rounded . '%';
+        if ($suffix !== '') {
+            $label .= ' ' . $suffix;
+        }
+
+        if ($value > 0) {
+            return [
+                'class' => 'up',
+                'icon' => 'bi-arrow-up-right',
+                'label' => $label,
+            ];
+        }
+
+        if ($value < 0) {
+            return [
+                'class' => 'down',
+                'icon' => 'bi-arrow-down-right',
+                'label' => $label,
+            ];
+        }
+
+        return [
+            'class' => 'flat',
+            'icon' => 'bi-dash',
+            'label' => '0% ' . ($suffix !== '' ? $suffix : 'change'),
+        ];
     }
 
     private function getDateRange($timeRange)
@@ -392,7 +448,7 @@ class DashboardController extends Controller
                 );
             }
         } catch (\Exception $e) {
-            \Log::error('Failed to send educator status update email: ' . $e->getMessage());
+            Log::error('Failed to send educator status update email: ' . $e->getMessage());
         }
 
         return back()->with('success','Educator status updated');
@@ -448,9 +504,17 @@ class DashboardController extends Controller
             });
         }
 
-        $courses = $query->latest()->paginate(10);
+        $courses = $query->latest()->paginate(10)->appends($request->query());
 
-        return view('admin.manageCourses', compact('courses'));
+        // Global (unfiltered) counts for the summary cards.
+        $stats = [
+            'total' => Course::count(),
+            'published' => Course::where('status', 'published')->count(),
+            'pending' => Course::where('approval_status', 'pending')->count(),
+            'approved' => Course::where('approval_status', 'approved')->count(),
+        ];
+
+        return view('admin.manageCourses', compact('courses', 'stats'));
     }
 
     public function updateCourseStatus(Request $request, $id)
@@ -473,8 +537,7 @@ class DashboardController extends Controller
 
     public function showCourse($id)
     {
-        $course = Course::with(['educator', 'category', 'sections.lessons'])->findOrFail($id);
-        return view('admin.showCourse', compact('course'));
+        return app(CourseController::class)->show($id);
     }
 
     public function manageLessons(Request $request)
@@ -545,6 +608,21 @@ class DashboardController extends Controller
         $lesson = Lesson::with(['course.educator', 'courseSection'])->findOrFail($id);
 
         return view('admin.showLesson', compact('lesson'));
+    }
+
+    /**
+     * Admin verification toggle for a single lesson. Flips the lessons.active
+     * flag that gates whether the lesson is visible on the public site / to
+     * students.
+     */
+    public function toggleLessonActive($id)
+    {
+        $lesson = Lesson::findOrFail($id);
+        $lesson->update(['active' => !$lesson->active]);
+
+        return back()->with('success', $lesson->active
+            ? 'Lesson activated and is now visible.'
+            : 'Lesson deactivated and is now hidden.');
     }
 
     /**

@@ -60,6 +60,7 @@ class EducatorController extends Controller
             'additional_documents'     => 'nullable|array|max:5',
             'additional_documents.*'    => 'file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
             'status'                   => 'required|in:pending,approved,rejected',
+            'commission_rate'          => 'nullable|numeric|min:0|max:100',
         ]);
 
         DB::beginTransaction();
@@ -69,11 +70,14 @@ class EducatorController extends Controller
 
             // Create user
             $user = User::create([
-                'first_name' => $request->first_name,
-                'last_name'  => $request->last_name,
-                'email'      => $request->email,
-                'password'   => Hash::make($plainPassword),
-                'role'       => 'educator',
+                'first_name'      => $request->first_name,
+                'last_name'       => $request->last_name,
+                'email'           => $request->email,
+                'password'        => Hash::make($plainPassword),
+                'role'            => 'educator',
+                'commission_rate' => $request->filled('commission_rate')
+                    ? $request->commission_rate
+                    : User::DEFAULT_COMMISSION_RATE,
             ]);
 
             // File uploads
@@ -176,15 +180,19 @@ class EducatorController extends Controller
             'additional_documents.*'    => 'file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
             'intro_video'              => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:51200',
             'status'                   => 'required|in:pending,approved,rejected',
+            'commission_rate'          => 'nullable|numeric|min:0|max:100',
         ]);
 
         DB::beginTransaction();
         try {
             // Update user
             $educator->update([
-                'first_name' => $request->first_name,
-                'last_name'  => $request->last_name,
-                'email'      => $request->email,
+                'first_name'      => $request->first_name,
+                'last_name'       => $request->last_name,
+                'email'           => $request->email,
+                'commission_rate' => $request->filled('commission_rate')
+                    ? $request->commission_rate
+                    : User::DEFAULT_COMMISSION_RATE,
             ]);
 
             $profile = $educator->educatorProfile;

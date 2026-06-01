@@ -69,6 +69,7 @@ class Kernel extends HttpKernel
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'api.auth' => \App\Http\Middleware\APIRequestAuth::class,
         'educator.profile.verified' => \App\Http\Middleware\EducatorProfileVerified::class,
+        'educator.stripe.connected' => \App\Http\Middleware\EnsureEducatorStripeConnected::class,
 
     ];
 }

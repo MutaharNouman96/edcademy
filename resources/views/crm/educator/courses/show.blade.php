@@ -46,7 +46,7 @@
                 <!-- Course Thumbnail -->
                 @if ($course->thumbnail)
                     <div class="card shadow-sm mb-4">
-                        <img src="{{ asset('storage/' . $course->thumbnail) }}" class="card-img-top"
+                        <img src="{{  $course->thumbnail }}" class="card-img-top"
                             alt="{{ $course->title }}">
                     </div>
                 @endif

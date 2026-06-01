@@ -8,15 +8,46 @@
       --accent: #00b3a4;      /* subtle cyan accent for badges/charts */
     }
     body { background: var(--bg); }
-    .brand { color: var(--primary); font-weight: 700; }
-    .header { position: sticky; top: 0; z-index: 1020; background: #fff; border-bottom: 1px solid rgba(0,0,0,.06); }
+    .min-w-0 { min-width: 0; }
+    .brand { color: var(--primary); font-weight: 700; font-size: 1.15rem; white-space: nowrap; }
+    .header { position: sticky; top: 0; z-index: 1030; background: #fff; border-bottom: 1px solid rgba(0,0,0,.06); }
+
+    /* Sidebar (desktop default) */
     .sidebar {
       position: sticky; top: 58px; height: calc(100dvh - 58px); overflow-y: auto;
       background: #fff; border-right: 1px solid rgba(0,0,0,.06);
     }
-    .sidebar .nav-link { color: #4b5563; border-radius: .5rem; }
+    .sidebar .nav-link { color: #4b5563; border-radius: .5rem; padding: .6rem .85rem; display: flex; align-items: center; transition: background .15s ease, color .15s ease; }
     .sidebar .nav-link.active { background: var(--primary-50); color: var(--primary-dark); font-weight: 600; }
     .sidebar .nav-link:hover { background: rgba(111,66,193,.08); color: var(--primary-dark); }
+
+    /* Hamburger / toggle button */
+    .sidebar-toggle, .sidebar-close { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+
+    /* Backdrop behind the mobile slide-in sidebar */
+    .sidebar-backdrop {
+      position: fixed; inset: 0; background: rgba(17,24,39,.5);
+      -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+      z-index: 1040; opacity: 0; visibility: hidden;
+      transition: opacity .3s ease, visibility .3s ease;
+    }
+    .sidebar-backdrop.show { opacity: 1; visibility: visible; }
+
+    /* Mobile: turn the sidebar into a slide-in off-canvas drawer */
+    @media (max-width: 767.98px) {
+      .sidebar {
+        position: fixed; top: 0; left: 0; bottom: 0;
+        height: 100dvh; width: 280px; max-width: 84vw;
+        z-index: 1050; overflow-y: auto;
+        border-right: 1px solid rgba(0,0,0,.06);
+        box-shadow: 0 0 48px rgba(0,0,0,.18);
+        border-radius: 0 18px 18px 0;
+        transform: translateX(-100%);
+        transition: transform .3s cubic-bezier(.4,0,.2,1);
+      }
+      .sidebar.show { transform: translateX(0); }
+      body.sidebar-open { overflow: hidden; }
+    }
     .btn-primary { background: var(--primary); border-color: var(--primary); }
     .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
     .btn-outline-primary { color: var(--primary); border-color: var(--primary); }

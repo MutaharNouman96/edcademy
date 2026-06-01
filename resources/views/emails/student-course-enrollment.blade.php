@@ -70,7 +70,7 @@
                                 <h4 class="course-title">{{ $course->title }}</h4>
                             </div>
                             <div class="course-meta">
-                                <strong>Instructor:</strong> {{ $course->user->full_name }} •
+                                <strong>Instructor:</strong> {{ $course->educator->full_name }} •
                                 <strong>Level:</strong> {{ ucfirst($course->level ?? 'All Levels') }}
                             </div>
                             <p class="course-description">{{ Str::limit($course->description, 120) }}</p>

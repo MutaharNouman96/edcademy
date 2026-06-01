@@ -31,4 +31,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'connect_client_id' => env('STRIPE_CONNECT_CLIENT_ID'),
+        // Application fee charged by the platform on marketplace (destination) charges.
+        'application_fee_percent' => env('STRIPE_APPLICATION_FEE_PERCENT', 10),
+    ],
+
 ];

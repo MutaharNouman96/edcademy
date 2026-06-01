@@ -6,12 +6,12 @@ use App\Events\EducatorRegistered;
 use App\Models\User;
 use App\Models\EducatorProfile;
 use App\Services\EmailService;
-use App\Mail\AdminNotificationMail;
 use App\Mail\EducatorWelcomeMail;
 use App\Models\EducatorAdditionalDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 
@@ -64,7 +64,7 @@ class EducatorController extends Controller
             try {
                 $user->sendEmailVerificationNotification();
             } catch (\Exception $e) {
-                \Log::error('Failed to send email verification notification: ' . $e->getMessage());
+                Log::error('Failed to send email verification notification: ' . $e->getMessage());
             }
 
             // File uploads
@@ -122,7 +122,10 @@ class EducatorController extends Controller
             Session::flash('success', 'Your application has been submitted successfully!');
             auth()->login($user);
 
-            return redirect()->route('educator.dashboard')->with('success', 'Your application has been submitted successfully!');
+            // Educators must verify their email first; once verified they are
+            // routed to the mandatory Stripe payout setup screen.
+            return redirect()->route('verification.notice')
+                ->with('success', 'Your application has been submitted! Please verify your email to continue, then set up your payouts.');
         } catch (\Exception $e) {
             DB::rollBack();
             // dd($e->getMessage());
@@ -131,36 +134,10 @@ class EducatorController extends Controller
                 ->withInput();
         }
 
-        // Send notification to admin about new educator registration
-        // try {
-        //     $adminEmails = User::where('role', 'admin')->pluck('email')->toArray();
-        //     foreach ($adminEmails as $adminEmail) {
-        //         EmailService::send(
-        //             $adminEmail,
-        //             new AdminNotificationMail(
-        //                 'info',
-        //                 [
-        //                     'educator_name' => $user->full_name,
-        //                     'educator_email' => $user->email,
-        //                     'registration_date' => $user->created_at->format('M j, Y g:i A'),
-        //                     'primary_subject' => $request->primary_subject,
-        //                     'hourly_rate' => '$' . $request->hourly_rate,
-        //                     'status' => 'Pending Verification',
-        //                 ],
-        //                 'New Educator Registration Requires Review - Ed-Cademy',
-        //                 'A new educator has registered and requires verification.',
-        //             ),
-        //             'emails',
-        //         );
-        //     }
-        // } catch (\Exception $e) {
-        //     \Log::error('Failed to send admin notification for educator registration: ' . $e->getMessage());
-        // }
-
         try {
             event(new EducatorRegistered($user));
         } catch (\Exception $e) {
-            \Log::error('Educator registration event failed: ' . $e->getMessage());
+            Log::error('Educator registration event failed: ' . $e->getMessage());
         }
     }
 }

@@ -70,6 +70,9 @@
                             }}">
                                 {{ $lesson->status ?? 'Draft' }}
                             </span>
+                            <span class="badge text-bg-{{ $lesson->active ? 'success' : 'secondary' }}">
+                                {{ $lesson->active ? 'Active' : 'Inactive' }}
+                            </span>
                         </div>
                         @if($lesson->duration)
                         <p class="text-muted mb-0"><i class="bi bi-clock me-1"></i>{{ $lesson->duration }} minutes</p>
@@ -90,20 +93,6 @@
                 @if($lesson->type === 'video')
                 <div class="mb-4">
                     <h5 class="section-title mb-3">Video Content</h5>
-
-                    @if($lesson->video_temp_path && !$lesson->video_path)
-                    <div class="alert alert-warning">
-                        <i class="bi bi-hourglass-split me-2"></i>
-                        <strong>Pending Vimeo upload.</strong> File is on disk at:
-                        <code class="d-block mt-2 small text-break">{{ storage_path('app/'.$lesson->video_temp_path) }}</code>
-                        <form method="POST" action="{{ route('admin.lessons.approve-vimeo', $lesson->id) }}" class="mt-3 mb-0">
-                            @csrf
-                            <button type="submit" class="btn btn-brand btn-sm">
-                                <i class="bi bi-cloud-upload me-1"></i> Approve &amp; send to Vimeo
-                            </button>
-                        </form>
-                    </div>
-                    @endif
 
                     @if($lesson->video_path && str_contains($lesson->video_path, 'vimeo.com'))
                     <div class="ratio ratio-16x9 mb-3">
@@ -258,6 +247,16 @@
                         <button type="submit" class="btn btn-outline-{{ $lesson->status === 'Published' ? 'warning' : 'success' }} w-100">
                             <i class="bi bi-{{ $lesson->status === 'Published' ? 'eye-slash' : 'eye' }} me-1"></i>
                             {{ $lesson->status === 'Published' ? 'Unpublish' : 'Publish' }} Lesson
+                        </button>
+                    </form>
+
+                    {{-- Admin verification toggle: only active lessons are shown publicly --}}
+                    <form method="POST" action="{{ route('admin.lessons.active', $lesson->id) }}" class="d-inline">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-outline-{{ $lesson->active ? 'secondary' : 'success' }} w-100">
+                            <i class="bi bi-{{ $lesson->active ? 'x-circle' : 'check2-circle' }} me-1"></i>
+                            {{ $lesson->active ? 'Deactivate (hide) Lesson' : 'Activate (verify) Lesson' }}
                         </button>
                     </form>
                 </div>

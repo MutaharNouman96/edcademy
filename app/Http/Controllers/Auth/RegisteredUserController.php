@@ -10,12 +10,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use App\Models\Guardian;
 use App\Services\EmailService;
 use App\Mail\StudentWelcomeMail;
-use App\Mail\AdminNotificationMail;
 
 class RegisteredUserController extends Controller
 {
@@ -75,32 +75,7 @@ class RegisteredUserController extends Controller
                 'emails'
             );
         } catch (\Exception $e) {
-            \Log::error('Failed to send student welcome email: ' . $e->getMessage());
-        }
-
-        // Send notification to admin about new student registration
-        try {
-            $adminEmails = User::where('role', 'admin')->pluck('email')->toArray();
-            foreach ($adminEmails as $adminEmail) {
-                EmailService::send(
-                    $adminEmail,
-                    new AdminNotificationMail(
-                        'info',
-                        [
-                            'user_name' => $user->full_name,
-                            'user_email' => $user->email,
-                            'user_type' => 'Student',
-                            'registration_date' => $user->created_at->format('M j, Y g:i A'),
-                            'account_type' => $request->signupType === 'kid' ? 'Minor (with guardian)' : 'Adult',
-                        ],
-                        'New Student Registration - Ed-Cademy',
-                        'A new student has registered on the platform.'
-                    ),
-                    'emails'
-                );
-            }
-        } catch (\Exception $e) {
-            \Log::error('Failed to send admin notification for student registration: ' . $e->getMessage());
+            Log::error('Failed to send student welcome email: ' . $e->getMessage());
         }
 
         event(new Registered($user));

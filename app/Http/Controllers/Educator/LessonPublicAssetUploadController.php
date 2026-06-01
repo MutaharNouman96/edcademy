@@ -20,14 +20,14 @@ class LessonPublicAssetUploadController extends Controller
         }
 
         $rules = $kind === 'worksheets'
-            ? ['file' => 'required|file|mimes:pdf,doc,docx|max:102400']
-            : ['file' => 'required|file|mimes:pdf,ppt,pptx|max:102400'];
+            ? ['file' => 'required|file|mimes:pdf,doc,docx,xlsx,xls,ppt,pptx,png,jpg,jpeg,gif,webp|max:102400']
+            : ['file' => 'required|file|mimes:pdf,ppt,pptx,png,jpg,jpeg,gif,webp|max:102400'];
 
         $validated = $request->validate($rules);
         $file = $validated['file'];
 
         $ext = strtolower($file->getClientOriginalExtension() ?: '');
-        $allowed = $kind === 'worksheets' ? ['pdf', 'doc', 'docx'] : ['pdf', 'ppt', 'pptx'];
+        $allowed = $kind === 'worksheets' ? ['pdf', 'doc', 'docx', 'xlsx', 'xls', 'ppt', 'pptx', 'png', 'jpg', 'jpeg', 'gif', 'webp'] : ['pdf', 'ppt', 'pptx', 'png', 'jpg', 'jpeg', 'gif', 'webp'];
         if (!in_array($ext, $allowed, true)) {
             return response()->json(['message' => 'Invalid file type.'], 422);
         }
