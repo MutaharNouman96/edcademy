@@ -117,6 +117,22 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        // ReleaseEducatorPayoutJob — success outcomes (completed batches, run started).
+        'release_payout_success' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/release_payout_success.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+        ],
+
+        // ReleaseEducatorPayoutJob — failures (transfer errors, no eligible payments, etc.).
+        'release_payout_failure' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/release_payout_failure.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+        ],
     ],
 
 ];

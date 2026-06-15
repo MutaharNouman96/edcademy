@@ -749,6 +749,46 @@ footer {
     margin-bottom: 15px;
 }
 
+.listing-course-card .course-educator {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+
+.listing-course-card .course-educator-name {
+    color: #555;
+    font-weight: 600;
+}
+
+.educator-type-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    text-transform: capitalize;
+    display: inline-block;
+}
+
+.educator-type-teacher {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.educator-type-tutor {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.glass-landing--Educator-info h4 {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
 .listing-course-card .course-footer {
     display: flex;
     justify-content: space-between;

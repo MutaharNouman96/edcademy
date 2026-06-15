@@ -476,3 +476,40 @@ body {
         padding: 1rem;
     }
 }
+
+/* ============ Payout module ============ */
+.payout-next-release {
+    background: var(--light-cyan);
+    border-radius: var(--radius);
+    padding: 0.65rem 1rem;
+    border: 1px solid rgba(0, 107, 125, 0.12);
+}
+
+.payout-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.payout-request-card .form-label {
+    font-size: 0.875rem;
+}
+
+.payout-stat-box {
+    border: 1px solid rgba(12, 43, 50, 0.08);
+    border-radius: var(--radius);
+    padding: 1rem;
+    background: #fafbfc;
+    height: 100%;
+}
+
+.payout-stat-box.border-success {
+    border-color: rgba(25, 135, 84, 0.35);
+    background: rgba(25, 135, 84, 0.04);
+}
+
+.text-dark-cyan {
+    color: var(--dark-cyan);
+}

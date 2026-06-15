@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\CoursePurchase;
-use App\Models\ProgressTracking;
+use App\Services\StudentCourseProgressService;
+use App\Services\StudentPaymentService;
 use Carbon\Carbon;
 use App\Models\Course;
 use App\Models\CourseSection;
@@ -18,6 +19,11 @@ use Illuminate\Http\Request;
 
 class StudentDashboardController extends Controller
 {
+    public function __construct(
+        private readonly StudentCourseProgressService $progressService,
+        private readonly StudentPaymentService $paymentService,
+    ) {}
+
     public function index()
     {
         $user = Auth::user();
@@ -31,7 +37,15 @@ class StudentDashboardController extends Controller
 
         $courseIds = $courseIdsFromCoursePurchases->merge($courseIdsFromUserPurchasedItems)->unique()->values();
 
-        $enrolledCourses = $courseIds->count();
+        // Count every active purchased item (courses + lessons/worksheets), not just courses.
+        $purchasedLessonCount = UserPurchasedItem::query()
+            ->where('user_id', $user->id)
+            ->where('active', true)
+            ->where('purchasable_type', Lesson::class)
+            ->distinct('purchasable_id')
+            ->count('purchasable_id');
+
+        $enrolledCourses = $courseIds->count() + $purchasedLessonCount;
 
         // Watch time (last 30 days) in seconds
         $watchedTime = LessonVideoView::query()
@@ -46,7 +60,7 @@ class StudentDashboardController extends Controller
         // Aggregate per-course totals
         $lessonCountsByCourse = Lesson::query()->whereIn('course_id', $courseIds)->selectRaw('course_id, COUNT(*) as total_lessons')->groupBy('course_id')->pluck('total_lessons', 'course_id');
 
-        $completedLessonsByCourse = ProgressTracking::query()->where('student_id', $user->id)->whereIn('course_id', $courseIds)->selectRaw('course_id, COUNT(DISTINCT lesson_id) as completed_lessons')->groupBy('course_id')->pluck('completed_lessons', 'course_id');
+        $completedLessonsByCourse = $this->progressService->getCompletedLessonsCountByCourse($user->id, $courseIds->all());
 
         $watchTimeSecondsByCourse = LessonVideoView::query()->where('lesson_video_views.user_id', $user->id)->join('lessons', 'lesson_video_views.lesson_id', '=', 'lessons.id')->whereIn('lessons.course_id', $courseIds)->selectRaw('lessons.course_id as course_id, SUM(lesson_video_views.watch_time) as watch_time_seconds')->groupBy('lessons.course_id')->pluck('watch_time_seconds', 'course_id');
 
@@ -98,7 +112,7 @@ class StudentDashboardController extends Controller
         }
 
         // KPI: average completion across enrolled courses (0..100)
-        $completionRate = count($completionPercentages) > 0 ? (int) round(array_sum($completionPercentages) / count($completionPercentages)) : 0;
+        $completionRate = $this->progressService->getAverageCompletionRate($user->id, $courseIds->all(), $lessonCountsByCourse);
 
         // Watch time line (last 14 days, minutes/day)
         $start = Carbon::now()->subDays(13)->startOfDay();
@@ -235,12 +249,40 @@ class StudentDashboardController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $purchases = $user->purchases()->where('active', true)->with('purchasable')->get();
-        $courses = $purchases->where('purchasable_type', Course::class)->pluck('purchasable')->filter(); // Filter out any null courses
 
-        $lessons = $purchases->where('purchasable_type', Lesson::class)->pluck('purchasable');
+        $courses = $purchases->where('purchasable_type', Course::class)->pluck('purchasable')->filter()->values(); // Filter out any null courses
 
-        $videoLessons = $lessons->where('type', 'video');
-        $worksheetLessons = $lessons->where('type', 'worksheet');
+        $lessons = $purchases->where('purchasable_type', Lesson::class)->pluck('purchasable')->filter();
+
+        $videoLessons = $lessons->where('type', 'video')->values();
+        $worksheetLessons = $lessons->where('type', 'worksheet')->values();
+
+        // Attach progress + watch time to each course card so the UI is meaningful.
+        $courseIds = $courses->pluck('id')->all();
+
+        $lessonCountsByCourse = Lesson::query()
+            ->whereIn('course_id', $courseIds)
+            ->selectRaw('course_id, COUNT(*) as total_lessons')
+            ->groupBy('course_id')
+            ->pluck('total_lessons', 'course_id');
+
+        $completedLessonsByCourse = $this->progressService->getCompletedLessonsCountByCourse($user->id, $courseIds);
+
+        $watchSecondsByCourse = LessonVideoView::query()
+            ->where('lesson_video_views.user_id', $user->id)
+            ->join('lessons', 'lesson_video_views.lesson_id', '=', 'lessons.id')
+            ->whereIn('lessons.course_id', $courseIds)
+            ->selectRaw('lessons.course_id as course_id, SUM(lesson_video_views.watch_time) as watch_time_seconds')
+            ->groupBy('lessons.course_id')
+            ->pluck('watch_time_seconds', 'course_id');
+
+        foreach ($courses as $course) {
+            $totalLessons = (int) ($lessonCountsByCourse[$course->id] ?? 0);
+            $completedLessons = (int) ($completedLessonsByCourse[$course->id] ?? 0);
+
+            $course->progress = $totalLessons > 0 ? round(min(1, max(0, $completedLessons / $totalLessons)), 2) : 0;
+            $course->hours_watched = round(((int) ($watchSecondsByCourse[$course->id] ?? 0)) / 3600, 1);
+        }
 
         return view('student.my_courses', [
             'courses' => $courses,
@@ -248,6 +290,7 @@ class StudentDashboardController extends Controller
             'worksheetLessons' => $worksheetLessons,
             'lessons' => $lessons,
             'stats' => [
+                'total' => $courses->count() + $videoLessons->count() + $worksheetLessons->count(),
                 'courses' => $courses->count(),
                 'videos' => $videoLessons->count(),
                 'worksheets' => $worksheetLessons->count(),
@@ -374,7 +417,7 @@ class StudentDashboardController extends Controller
         $courses = [];
         foreach ($enrolledCoursesData as $purchase) {
             $course = $purchase->course;
-            $completedLessonsCount = ProgressTracking::where('student_id', $user->id)->where('course_id', $course->id)->distinct('lesson_id')->count();
+            $completedLessonsCount = (int) ($this->progressService->getCompletedLessonsCountByCourse($user->id, [$course->id])[$course->id] ?? 0);
             $totalLessonsCount = $course->lessons->count();
             $progress = $totalLessonsCount > 0 ? round($completedLessonsCount / $totalLessonsCount, 2) : 0;
 
@@ -453,30 +496,12 @@ class StudentDashboardController extends Controller
     public function payments()
     {
         $user = Auth::user();
-        $purchasedItems = UserPurchasedItem::where('user_id', $user->id)->where('purchasable_type', \App\Models\Course::class)->with('purchasable')->latest()->get();
+        $history = $this->paymentService->getPaymentHistory($user);
 
-        $paymentData = [];
-        foreach ($purchasedItems as $item) {
-            $purchasable = $item->purchasable;
-
-            $title = 'N/A';
-            $price = null; // or 0 if you prefer
-
-            if ($purchasable instanceof \App\Models\Course) {
-                $title = $purchasable->title;
-                $price = $purchasable->price;
-            } elseif ($purchasable instanceof \App\Models\Lesson) {
-                $title = $purchasable->title;
-            }
-
-            $paymentData[] = [
-                'date' => Carbon::parse($item->created_at)->format('Y-m-d'),
-                'item_title' => $title,
-                'type' => class_basename($purchasable),
-                'amount' => $price,
-            ];
-        }
-        return view('student.payments', compact('paymentData'));
+        return view('student.payments', [
+            'payments'   => $history['payments'],
+            'stats'      => $history['stats'],
+        ]);
     }
 
     public function wishlist()
@@ -531,22 +556,70 @@ class StudentDashboardController extends Controller
 
             $lesson = $data['currentLesson'];
 
-            $hasAccess = UserPurchasedItem::where('user_id', $user->id)
-                ->where('active', true)
-                ->where(function ($q) use ($lesson) {
-                    $q->where(function ($q) use ($lesson) {
-                        $q->where('purchasable_type', Lesson::class)->where('purchasable_id', $lesson->id);
-                    })->orWhere(function ($q) use ($lesson) {
-                        $q->where('purchasable_type', Course::class)->where('purchasable_id', $lesson->course_id);
-                    });
-                })
-                ->exists();
+            abort_if(
+                !$this->progressService->studentHasLessonAccess($user, $lesson),
+                403,
+                'You do not have access to this lesson. Please purchase the course or the lesson first.'
+            );
 
-            abort_if(!$hasAccess, 403, 'You do not have access to this lesson. Please purchase the course or the lesson first.');
+            $this->progressService->recordLessonView($user, $lesson);
+
             $data['comments'] = LessonVideoComment::where('lesson_id', $data['currentLesson']->id)->with('user')->latest()->get();
         }
 
+        $data['completedLessonIds'] = $this->progressService
+            ->getCompletedLessonIds($user->id, (int) $course_id)
+            ->all();
+
+        $totalLessons = $data['course_lessons']->count();
+        $data['progressPct'] = $this->progressService->getCourseProgressPercentage(
+            $user->id,
+            (int) $course_id,
+            $totalLessons
+        );
+
         return view('student.course_details', $data);
+    }
+
+    public function recordLessonProgress(Request $request)
+    {
+        $request->validate([
+            'lesson_id' => 'required|exists:lessons,id',
+            'watch_time' => 'nullable|integer|min:0',
+            'completed' => 'nullable|boolean',
+        ]);
+
+        $user = Auth::user();
+        $lesson = Lesson::findOrFail($request->lesson_id);
+
+        abort_if(
+            !$this->progressService->studentHasLessonAccess($user, $lesson),
+            403,
+            'You do not have access to this lesson.'
+        );
+
+        if ($request->filled('watch_time')) {
+            $result = $this->progressService->recordVideoWatch(
+                $user,
+                $lesson,
+                (int) $request->watch_time,
+                (bool) $request->boolean('completed')
+            );
+        } else {
+            $result = ['progress' => $this->progressService->recordLessonView($user, $lesson)];
+        }
+
+        $totalLessons = Lesson::where('course_id', $lesson->course_id)->active()->count();
+
+        return response()->json([
+            'success' => true,
+            'progress_pct' => $this->progressService->getCourseProgressPercentage(
+                $user->id,
+                $lesson->course_id,
+                $totalLessons
+            ),
+            'lesson_completed' => $this->progressService->isLessonCompleted($user->id, $lesson->id),
+        ]);
     }
 
     public function storeLessonComment(Request $request)
@@ -585,19 +658,11 @@ class StudentDashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Access check: lesson OR parent course purchased
-        $hasAccess = UserPurchasedItem::where('user_id', $user->id)
-            ->where('active', true)
-            ->where(function ($q) use ($lesson) {
-                $q->where(function ($q) use ($lesson) {
-                    $q->where('purchasable_type', Lesson::class)->where('purchasable_id', $lesson->id);
-                })->orWhere(function ($q) use ($lesson) {
-                    $q->where('purchasable_type', Course::class)->where('purchasable_id', $lesson->course_id);
-                });
-            })
-            ->exists();
-
-        abort_if(!$hasAccess, 403, 'You do not have access to this lesson. Please purchase the course or the lesson first.');
+        abort_if(
+            !$this->progressService->studentHasLessonAccess($user, $lesson),
+            403,
+            'You do not have access to this lesson. Please purchase the course or the lesson first.'
+        );
 
         return view('student.lesson_details', compact('lesson'));
     }

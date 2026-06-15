@@ -130,12 +130,15 @@
                                 <span>Session availability</span></a>
 
                             <span class="nav-section-label">Finance</span>
-                            <a class="nav-link @if (request()->is('educator-panel/payouts')) active @endif"
+                            <a class="nav-link @if (request()->routeIs('educator.payouts.*') || request()->is('educator-panel/payouts')) active @endif"
                                 href="{{ route('educator.payouts.index') }}"><i class="bi bi-bank"></i>
                                 <span>Payouts</span></a>
-                            <a class="nav-link @if (request()->is('educator-panel/payments*')) active @endif"
+                            <a class="nav-link @if (request()->routeIs('educator.payout-requests.*')) active @endif"
+                                href="{{ route('educator.payout-requests.index') }}"><i class="bi bi-send-check"></i>
+                                <span>Payout Requests</span></a>
+                            <a class="nav-link @if (request()->routeIs('educator.payments.*')) active @endif"
                                 href="{{ route('educator.payments.index') }}"><i class="bi bi-cash-coin"></i>
-                                <span>Earned Payments</span></a>
+                                <span>My Sales</span></a>
 
                             <span class="nav-section-label">Engagement</span>
                             <a class="nav-link @if (request()->is('educator-panel/reviews*')) active @endif"
@@ -158,11 +161,14 @@
                                 <div class="d-flex align-items-start gap-2">
                                     <i class="bi bi-exclamation-triangle-fill"></i>
                                     <div>
-                                        <strong>Finish payouts setup</strong>
-                                        <p class="mb-2 small">Connect Stripe/PayPal to receive earnings.</p>
-                                        <a href="{{ route('stripe.connect') }}" class="btn btn-sm btn-primary w-100"><i
+                                        <strong>Payouts not set up</strong>
+                                        <p class="mb-2 small">You can still add content. Connect Stripe to receive earnings.</p>
+                                        <a href="{{ route('stripe.connect') }}" class="btn btn-sm btn-primary w-100 mb-2"><i
                                                 class="bi bi-link-45deg me-1"></i>
                                             Connect Payouts</a>
+                                        <a href="{{ route('educator.dashboard') }}" class="btn btn-sm btn-outline-light w-100"><i
+                                                class="bi bi-headset me-1"></i>
+                                            Get admin help</a>
                                     </div>
                                 </div>
                             </div>

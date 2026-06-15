@@ -2,26 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\OrderInvoiceMail;
-use Illuminate\Http\Request;
-use Stripe\Stripe;
-use Stripe\Checkout\Session as StripeSession;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Cart;
-use App\Models\Course;
-use App\Models\EducatorPayment;
-use App\Models\EducatorPayout;
-use App\Models\Lesson;
-use App\Models\UserPurchasedItem;
-use App\Services\EmailService;
-use App\Services\ActivityNotificationService;
 use App\Mail\PaymentCancelledMail;
-use App\Mail\StudentCourseEnrollmentMail;
-use App\Jobs\ReleaseEducatorPayoutJob;
-use App\Models\Earning;
+use App\Models\Order;
+use App\Services\CheckoutService;
+use App\Services\EmailService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Stripe\Checkout\Session as StripeSession;
+use Stripe\Stripe;
 
 class StripeController extends Controller
 {
@@ -36,7 +25,6 @@ class StripeController extends Controller
             'order_id' => 'required',
         ]);
         $order = Order::find($request->order_id);
-        // dd($order, $user);
 
         if ($order->user_id != $user->id) {
             return back()->with('error', 'You are not authorized to make this payment.');
@@ -48,11 +36,6 @@ class StripeController extends Controller
             return back()->with('error', 'Your cart is empty.');
         }
 
-        $amount = $orderItems->sum('total');
-
-
-
-        // 3. Create stripe session
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
         $lineItems = [];
@@ -65,7 +48,7 @@ class StripeController extends Controller
                         'name' => $ci->model . ' #' . $ci->item_id,
                     ],
                 ],
-                'quantity' => 1
+                'quantity' => 1,
             ];
         }
 
@@ -83,162 +66,37 @@ class StripeController extends Controller
         return redirect($session->url);
     }
 
-
     /**
      * Step 2:
      * If payment succeeded → Stripe redirects here.
      * Verify session → update order as paid → clear cart → show receipt
      */
-    public function success(Request $request)
+    public function success(Request $request, CheckoutService $checkoutService)
     {
         if (! $request->session_id) {
-            abort(404, "Invalid payment session.");
+            abort(404, 'Invalid payment session.');
         }
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
-        // Retrieve the session from stripe
         $session = StripeSession::retrieve($request->session_id);
 
         $order = Order::find($session->metadata->order_id);
 
         if (! $order) {
-            abort(404, "Order not found.");
+            abort(404, 'Order not found.');
         }
 
-        // Update order to paid
-        $order->update([
-            'status' => 'paid',
-            'transaction_id' => $session->payment_intent,
-            'payment_details' => json_encode($session),
-            'payment_method' => "stripe:" . ($session->payment_method_types[0] ?? null),
-        ]);
-
-        $paymentId = $order->id . (Str::uuid());
-        $payoutIds = [];
-        foreach ($order->items as $item) {
-            $itemEducatorId = $item->model == "App\Models\Lesson" ? Lesson::find($item->item_id)->with('course')->first()->course->user_id : Course::find($item->item_id)->user_id;
-
-            // Commission is taken at the educator's configured rate (defaults to 25%).
-            $commissionRate = optional(\App\Models\User::find($itemEducatorId))->commissionRate()
-                ?? \App\Models\User::DEFAULT_COMMISSION_RATE;
-            $commission = money($item->total * $commissionRate / 100);
-            UserPurchasedItem::firstOrCreate([
-                'user_id' => auth()->id(),
-                'purchasable_id' => $item->item_id,
-                'purchasable_type' => $item->model,
-                'active' => true,
-            ]);
-
-            // Log enrollment activity
-            if ($item->model === 'App\Models\Course') {
-                $course = Course::find($item->item_id);
-                if ($course) {
-                    // ActivityNotificationService::logAndNotify(
-                    //     auth()->user(),
-                    //     'enroll_course',
-                    //     'Course',
-                    //     $course->id,
-                    //     $course->title,
-                    //     null,
-                    //     [
-                    //         'enrolled_at' => now(),
-                    //         'price_paid' => $item->total,
-                    //         'educator_id' => $course->user_id
-                    //     ],
-                    //     "Enrolled in course '{$course->title}'",
-                    //     ['payment_amount' => $item->total, 'educator_name' => $course->educator->full_name]
-                    // );
-                }
-            } elseif ($item->model === 'App\Models\Lesson') {
-                $lesson = Lesson::find($item->item_id);
-                if ($lesson) {
-                    // ActivityNotificationService::logAndNotify(
-                    //     auth()->user(),
-                    //     'enroll_lesson',
-                    //     'Lesson',
-                    //     $lesson->id,
-                    //     $lesson->title,
-                    //     null,
-                    //     [
-                    //         'enrolled_at' => now(),
-                    //         'price_paid' => $item->total,
-                    //         'course_id' => $lesson->course_id
-                    //     ],
-                    //     "Enrolled in lesson '{$lesson->title}'",
-                    //     ['payment_amount' => $item->total, 'course_name' => $lesson->course->title ?? 'Unknown']
-                    // );
-                }
-            }
-
-            $educatorPayment = EducatorPayment::firstOrCreate([
-                'educator_id' => $itemEducatorId,
-                'order_id' => $order->id,
-                'order_item_id' => $item->id,
-                'gross_amount' => $item->total,
-                'currency' => setting('currency', 'USD'),
-                'platform_commission' => $commission,
-                'net_amount' => $item->total - $commission,
-                'payment_id' => $paymentId,
-                'status' => 'completed',
-            ]);
-
-            // Queue the educator payout for the net (post-commission) amount.
-            // The payout is held as "pending" and released by a delayed job.
-            $payout = EducatorPayout::firstOrCreate(
-                [
-                    'payment_id'  => $educatorPayment->id,
-                    'educator_id' => $itemEducatorId,
-                ],
-                [
-                    'amount'      => $educatorPayment->net_amount,
-                    'status'      => 'pending',
-                    'description' => "Payout for {$item->model} #{$item->item_id} (Order #{$order->id})",
-                ]
-            );
-            $payoutIds[] = $payout->id;
-
-            //add to earning
-            Earning::create([
-                'educator_id' => $itemEducatorId,
-                'payment_id' => $educatorPayment->id,
-                'gross_amount' => $item->total,
-                'source_type' => 'order',
-                'platform_commission' => $commission,
-                'net_amount' => $item->total - $commission,
-                'currency' => setting('currency', 'USD'),
-                'status' => 'approved',
-                'description' => "Earning generated from payment #{$paymentId}",
-                'earned_at' => now(),
-            ]);
-        }
-
-        // Release the educator payouts 2 minutes after the purchase completes.
-        if (! empty($payoutIds)) {
-            ReleaseEducatorPayoutJob::dispatch($payoutIds, 'stripe')
-                ->delay(now()->addMinutes(2));
-        }
-
-        EmailService::send(
-            $order->user->email,
-            new OrderInvoiceMail($order),
-            'emails'
+        $checkoutService->completePaidOrder(
+            $order,
+            $session->payment_intent,
+            'stripe:' . ($session->payment_method_types[0] ?? 'card'),
+            $session,
+            'stripe',
         );
-
-        // Send course enrollment confirmation email
-        try {
-            EmailService::send(
-                $order->user->email,
-                new StudentCourseEnrollmentMail($order),
-                'emails'
-            );
-        } catch (\Exception $e) {
-            \Log::error('Failed to send course enrollment email: ' . $e->getMessage());
-        }
 
         return redirect()->route('payment.success', $order->id);
     }
-
 
     /**
      * Step 3:
@@ -253,7 +111,6 @@ class StripeController extends Controller
             if ($order) {
                 $order->update(['status' => 'cancelled']);
 
-                // Send payment cancelled email
                 try {
                     EmailService::send(
                         $order->user->email,
@@ -261,7 +118,7 @@ class StripeController extends Controller
                         'emails'
                     );
                 } catch (\Exception $e) {
-                    \Log::error('Failed to send payment cancelled email: ' . $e->getMessage());
+                    Log::error('Failed to send payment cancelled email: ' . $e->getMessage());
                 }
             }
         }

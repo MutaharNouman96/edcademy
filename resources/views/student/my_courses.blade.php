@@ -164,18 +164,29 @@
 
     {{-- ── Stats ──────────────────────────────────────────────── --}}
     <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4">
+        <div class="col-6 col-md-3">
+            <div class="card mc-kpi">
+                <div class="mc-kpi-body">
+                    <span class="mc-kpi-ico mc-kpi-ico-purple"><i class="bi bi-bag-check"></i></span>
+                    <div>
+                        <div class="mc-kpi-value">{{ $stats['total'] }}</div>
+                        <div class="mc-kpi-label">Items Purchased</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
             <div class="card mc-kpi">
                 <div class="mc-kpi-body">
                     <span class="mc-kpi-ico mc-kpi-ico-purple"><i class="bi bi-journal-richtext"></i></span>
                     <div>
                         <div class="mc-kpi-value">{{ $stats['courses'] }}</div>
-                        <div class="mc-kpi-label">Courses Purchased</div>
+                        <div class="mc-kpi-label">Courses</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-4">
+        <div class="col-6 col-md-3">
             <div class="card mc-kpi">
                 <div class="mc-kpi-body">
                     <span class="mc-kpi-ico mc-kpi-ico-blue"><i class="bi bi-play-circle"></i></span>
@@ -186,7 +197,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-4">
+        <div class="col-6 col-md-3">
             <div class="card mc-kpi">
                 <div class="mc-kpi-body">
                     <span class="mc-kpi-ico mc-kpi-ico-amber"><i class="bi bi-file-earmark-text"></i></span>
@@ -199,148 +210,205 @@
         </div>
     </div>
 
-    {{-- ── Tabs ───────────────────────────────────────────────── --}}
-    <ul class="nav mc-tabs mb-4" role="tablist">
+    {{-- ── Filter tabs ────────────────────────────────────────── --}}
+    <ul class="nav mc-tabs mb-4" role="tablist" id="mc-filters">
         <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#courses">
-                <i class="bi bi-grid me-1"></i> My Courses
+            <button type="button" class="nav-link active" data-filter="all">
+                <i class="bi bi-grid-1x2 me-1"></i> All <span class="opacity-75">({{ $stats['total'] }})</span>
             </button>
         </li>
         <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lessons">
-                <i class="bi bi-collection-play me-1"></i> My Lessons
+            <button type="button" class="nav-link" data-filter="course">
+                <i class="bi bi-journal-richtext me-1"></i> Courses <span class="opacity-75">({{ $stats['courses'] }})</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link" data-filter="video">
+                <i class="bi bi-play-circle me-1"></i> Videos <span class="opacity-75">({{ $stats['videos'] }})</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link" data-filter="worksheet">
+                <i class="bi bi-file-earmark-text me-1"></i> Worksheets <span class="opacity-75">({{ $stats['worksheets'] }})</span>
             </button>
         </li>
     </ul>
 
-    <div class="tab-content">
+    {{-- ── Unified grid (sorted: courses → videos → worksheets) ── --}}
+    @if ($stats['total'] > 0)
+        <div class="row g-3" id="mc-grid">
 
-        {{-- COURSES TAB --}}
-        <div class="tab-pane fade show active" id="courses">
-            <div class="row g-3">
-                @forelse($courses as $course)
-                    <div class="col-sm-6 col-lg-4">
-                        <div class="card mc-card">
-                            @if ($course->thumbnail)
-                                <img src="{{ $course->thumbnail }}" class="mc-thumb" alt="{{ $course->title }}">
-                            @else
-                                <div class="mc-thumb-placeholder">
-                                    <i class="bi bi-book"></i>
+            {{-- COURSES --}}
+            @foreach ($courses as $course)
+                <div class="col-sm-6 col-lg-4 mc-item" data-type="course">
+                    <div class="card mc-card">
+                        @if ($course->thumbnail)
+                            <img src="{{ $course->thumbnail }}" class="mc-thumb" alt="{{ $course->title }}">
+                        @else
+                            <div class="mc-thumb-placeholder">
+                                <i class="bi bi-book"></i>
+                            </div>
+                        @endif
+
+                        <div class="mc-card-body d-flex flex-column">
+                            <span class="mc-subject">{{ $course->subject ?? 'General' }}</span>
+                            <h6 class="mc-title">{{ $course->title }}</h6>
+
+                            <div class="mc-prog-bar">
+                                <div class="mc-prog-fill" style="width: {{ round(($course->progress ?? 0) * 100) }}%"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mc-prog-text mb-3">
+                                <span><span class="mc-prog-pct">{{ round(($course->progress ?? 0) * 100) }}%</span> complete</span>
+                                <span><i class="bi bi-clock me-1"></i>{{ $course->hours_watched ?? 0 }} h</span>
+                            </div>
+
+                            <div class="mt-auto">
+                                <a href="{{ route('student.course_details', $course->id) }}" class="btn btn-mc-resume">
+                                    <i class="bi bi-play-fill me-1"></i> Resume
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+
+            {{-- VIDEO LESSONS --}}
+            @foreach ($videoLessons as $lesson)
+                <div class="col-sm-6 col-lg-4 mc-item" data-type="video">
+                    <div class="card mc-card">
+                        <div class="mc-card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="mc-type-badge mc-type-video"><i class="bi bi-play-circle-fill"></i> Video</span>
+                                @if ($lesson->preview)
+                                    <span class="text-info small fw-semibold"><i class="bi bi-eye me-1"></i>Preview</span>
+                                @endif
+                            </div>
+
+                            <div class="mc-lesson-thumb mc-lesson-thumb-video mb-3">
+                                <i class="bi bi-play-circle-fill"></i>
+                            </div>
+
+                            <h6 class="mc-title">{{ $lesson->title }}</h6>
+
+                            @if ($lesson->course)
+                                <div class="mc-meta mb-2">
+                                    <i class="bi bi-journal-bookmark me-1"></i>{{ $lesson->course->title }}
                                 </div>
                             @endif
-
-                            <div class="mc-card-body d-flex flex-column">
-                                <span class="mc-subject">{{ $course->subject->name ?? 'General' }}</span>
-                                <h6 class="mc-title">{{ $course->title }}</h6>
-
-                                <div class="mc-prog-bar">
-                                    <div class="mc-prog-fill" style="width: {{ round($course->progress * 100) }}%"></div>
-                                </div>
-                                <div class="d-flex justify-content-between mc-prog-text mb-3">
-                                    <span><span class="mc-prog-pct">{{ round($course->progress * 100) }}%</span> complete</span>
-                                    <span><i class="bi bi-clock me-1"></i>{{ $course->hours_watched }} h</span>
-                                </div>
-
-                                <div class="mt-auto">
-                                    <a href="{{ route('student.course_details', $course->id) }}" class="btn btn-mc-resume">
-                                        <i class="bi bi-play-fill me-1"></i> Resume
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-12">
-                        <div class="mc-empty">
-                            <div class="mc-empty-ico"><i class="bi bi-journal-x"></i></div>
-                            <div class="fw-semibold mb-1">No courses purchased yet</div>
-                            <div class="mc-empty-text">Explore our catalog and start your learning journey today.</div>
-                            <a href="{{ route('web.courses') }}" class="btn btn-mc-resume d-inline-block px-4" style="width:auto;">
-                                <i class="bi bi-compass me-1"></i> Browse Courses
-                            </a>
-                        </div>
-                    </div>
-                @endforelse
-            </div>
-        </div>
-
-        {{-- LESSONS TAB --}}
-        <div class="tab-pane fade" id="lessons">
-            <div class="row g-3">
-                @forelse($lessons as $lesson)
-                    <div class="col-sm-6 col-lg-4">
-                        <div class="card mc-card">
-                            <div class="mc-card-body d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    @if ($lesson->type === 'video')
-                                        <span class="mc-type-badge mc-type-video"><i class="bi bi-play-circle-fill"></i> Video</span>
-                                    @else
-                                        <span class="mc-type-badge mc-type-worksheet"><i class="bi bi-file-earmark-fill"></i> Worksheet</span>
-                                    @endif
-                                    @if ($lesson->preview)
-                                        <span class="text-info small fw-semibold"><i class="bi bi-eye me-1"></i>Preview</span>
-                                    @endif
-                                </div>
-
-                                @if ($lesson->type === 'video')
-                                    <div class="mc-lesson-thumb mc-lesson-thumb-video mb-3">
-                                        <i class="bi bi-play-circle-fill"></i>
-                                    </div>
-                                @else
-                                    <div class="mc-lesson-thumb mc-lesson-thumb-worksheet mb-3">
-                                        <i class="bi bi-file-earmark-fill"></i>
-                                    </div>
+                            <div class="d-flex align-items-center gap-3 mc-meta mb-3">
+                                @if ($lesson->duration)
+                                    <span><i class="bi bi-clock me-1"></i>{{ $lesson->duration }} min</span>
                                 @endif
+                                @if ($lesson->price && !$lesson->free)
+                                    <span class="fw-semibold text-dark">${{ number_format($lesson->price, 2) }}</span>
+                                @elseif($lesson->free)
+                                    <span class="mc-free-badge">Free</span>
+                                @endif
+                            </div>
 
-                                <h6 class="mc-title">{{ $lesson->title }}</h6>
-
+                            <div class="mt-auto">
                                 @if ($lesson->course)
-                                    <div class="mc-meta mb-2">
-                                        <i class="bi bi-journal-bookmark me-1"></i>{{ $lesson->course->title }}
-                                    </div>
+                                    <a href="{{ route('student.course_details', ['course_id' => $lesson->course->id, 'lesson_id' => $lesson->id]) }}"
+                                        class="btn btn-mc-action btn-mc-action-video">
+                                        <i class="bi bi-play-fill me-1"></i> Watch Video
+                                    </a>
                                 @endif
-                                <div class="d-flex align-items-center gap-3 mc-meta mb-3">
-                                    @if ($lesson->duration)
-                                        <span><i class="bi bi-clock me-1"></i>{{ $lesson->duration }} min</span>
-                                    @endif
-                                    @if ($lesson->price && !$lesson->free)
-                                        <span class="fw-semibold text-dark">${{ number_format($lesson->price, 2) }}</span>
-                                    @elseif($lesson->free)
-                                        <span class="mc-free-badge">Free</span>
-                                    @endif
-                                </div>
-
-                                <div class="mt-auto">
-                                    @if ($lesson->type === 'video')
-                                        <a href="{{ route('student.course_details', ['course_id' => $lesson->course->id, 'lesson_id' => $lesson->id]) }}"
-                                            class="btn btn-mc-action btn-mc-action-video">
-                                            <i class="bi bi-play-fill me-1"></i> Watch Video
-                                        </a>
-                                    @elseif($lesson->type === 'worksheet')
-                                        @php
-                                            $worksheetFile = isset($lesson->worksheets)
-                                                ? asset('storage/' . $lesson->worksheets)
-                                                : '#!';
-                                        @endphp
-                                        <a href="{{ $worksheetFile }}" class="btn btn-mc-action btn-mc-action-worksheet" download>
-                                            <i class="bi bi-download me-1"></i> Download Worksheet
-                                        </a>
-                                    @endif
-                                </div>
                             </div>
                         </div>
                     </div>
-                @empty
-                    <div class="col-12">
-                        <div class="mc-empty">
-                            <div class="mc-empty-ico"><i class="bi bi-collection-play"></i></div>
-                            <div class="fw-semibold mb-1">No lessons available</div>
-                            <div class="mc-empty-text">Your purchased lessons will appear here.</div>
+                </div>
+            @endforeach
+
+            {{-- WORKSHEET LESSONS --}}
+            @foreach ($worksheetLessons as $lesson)
+                <div class="col-sm-6 col-lg-4 mc-item" data-type="worksheet">
+                    <div class="card mc-card">
+                        <div class="mc-card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="mc-type-badge mc-type-worksheet"><i class="bi bi-file-earmark-fill"></i> Worksheet</span>
+                                @if ($lesson->preview)
+                                    <span class="text-info small fw-semibold"><i class="bi bi-eye me-1"></i>Preview</span>
+                                @endif
+                            </div>
+
+                            <div class="mc-lesson-thumb mc-lesson-thumb-worksheet mb-3">
+                                <i class="bi bi-file-earmark-fill"></i>
+                            </div>
+
+                            <h6 class="mc-title">{{ $lesson->title }}</h6>
+
+                            @if ($lesson->course)
+                                <div class="mc-meta mb-2">
+                                    <i class="bi bi-journal-bookmark me-1"></i>{{ $lesson->course->title }}
+                                </div>
+                            @endif
+                            <div class="d-flex align-items-center gap-3 mc-meta mb-3">
+                                @if ($lesson->price && !$lesson->free)
+                                    <span class="fw-semibold text-dark">${{ number_format($lesson->price, 2) }}</span>
+                                @elseif($lesson->free)
+                                    <span class="mc-free-badge">Free</span>
+                                @endif
+                            </div>
+
+                            <div class="mt-auto">
+                                @if ($lesson->worksheets)
+                                    <a href="{{ $lesson->worksheets_path }}" class="btn btn-mc-action btn-mc-action-worksheet" download>
+                                        <i class="bi bi-download me-1"></i> Download Worksheet
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     </div>
-                @endforelse
-            </div>
+                </div>
+            @endforeach
         </div>
 
-    </div>
+        {{-- Shown by JS when the active filter has no items --}}
+        <div class="mc-empty d-none" id="mc-filter-empty">
+            <div class="mc-empty-ico"><i class="bi bi-funnel"></i></div>
+            <div class="fw-semibold mb-1">Nothing here yet</div>
+            <div class="mc-empty-text">You don't have any items in this category.</div>
+        </div>
+    @else
+        {{-- Global empty state --}}
+        <div class="mc-empty">
+            <div class="mc-empty-ico"><i class="bi bi-journal-x"></i></div>
+            <div class="fw-semibold mb-1">No purchases yet</div>
+            <div class="mc-empty-text">Explore our catalog and start your learning journey today.</div>
+            <a href="{{ route('web.courses') }}" class="btn btn-mc-resume d-inline-block px-4" style="width:auto;">
+                <i class="bi bi-compass me-1"></i> Browse Courses
+            </a>
+        </div>
+    @endif
+
+    @push('scripts')
+        <script>
+            (function () {
+                const filterBar = document.getElementById('mc-filters');
+                const grid = document.getElementById('mc-grid');
+                if (!filterBar || !grid) return;
+
+                const items = Array.from(grid.querySelectorAll('.mc-item'));
+                const emptyNote = document.getElementById('mc-filter-empty');
+
+                function applyFilter(type) {
+                    let visible = 0;
+                    items.forEach(function (el) {
+                        const show = type === 'all' || el.dataset.type === type;
+                        el.style.display = show ? '' : 'none';
+                        if (show) visible++;
+                    });
+                    if (emptyNote) emptyNote.classList.toggle('d-none', visible > 0);
+                }
+
+                filterBar.querySelectorAll('button[data-filter]').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        filterBar.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        applyFilter(btn.dataset.filter);
+                    });
+                });
+            })();
+        </script>
+    @endpush
 </x-student-layout>

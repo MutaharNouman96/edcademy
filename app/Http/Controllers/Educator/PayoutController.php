@@ -3,172 +3,180 @@
 namespace App\Http\Controllers\Educator;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\EducatorPayout;
-use App\Models\EducatorBank;
-use App\Models\EducatorPayment;
-use App\Models\Educator;
+use App\Models\EducatorPayoutRequest;
+use App\Models\Payment;
+use App\Models\PayoutBatch;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class PayoutController extends Controller
 {
     /**
-     * Main payout dashboard
+     * Payout dashboard — earnings summary, pending payments, batch history,
+     * and the on-page payout request form.
      */
-    public function index()
-    {
-        return view('crm.educator.payout.index');
-    }
-
-    /**
-     * KPIs
-     */
-    public function kpis()
+    public function index(): View
     {
         $educatorId = Auth::id();
+        $currency   = setting('currency', 'USD');
 
-        $escrow = EducatorPayment::where('educator_id', $educatorId)
-            ->where('status', 'processing')
-            ->sum('net_amount');
+        $paymentsQuery = Payment::query()->where('educator_id', $educatorId);
 
-        $available = EducatorPayment::where('educator_id', $educatorId)
-            ->where('status', 'available')
-            ->sum('net_amount');
+        $pendingPayments = (clone $paymentsQuery)
+            ->where('is_payout_processed', false)
+            ->whereNull('payout_batch_id')
+            ->where('status', config('payout.eligible_payment_status', 'approved'))
+            ->with(['student', 'course'])
+            ->latest()
+            ->get();
 
-        $paidThisMonth = EducatorPayout::where('educator_id', $educatorId)
+        $processingPayments = (clone $paymentsQuery)
+            ->where('is_payout_processed', false)
+            ->whereNotNull('payout_batch_id')
+            ->with(['student', 'course', 'payoutBatch'])
+            ->latest()
+            ->get();
+
+        $pendingBalance = $this->sumPayable($pendingPayments);
+        $processingBalance = $this->sumPayable($processingPayments);
+
+        $paidThisMonth = PayoutBatch::where('educator_id', $educatorId)
+            ->where('status', 'completed')
             ->whereMonth('processed_at', now()->month)
             ->whereYear('processed_at', now()->year)
-            ->sum('amount');
+            ->sum('total_net_amount');
 
-        $paidCount = EducatorPayout::where('educator_id', $educatorId)
+        $paidThisMonthCount = PayoutBatch::where('educator_id', $educatorId)
+            ->where('status', 'completed')
             ->whereMonth('processed_at', now()->month)
+            ->whereYear('processed_at', now()->year)
             ->count();
 
-        $lifetime = EducatorPayout::where('educator_id', $educatorId)
-            ->sum('amount');
+        $lifetimePaid = PayoutBatch::where('educator_id', $educatorId)
+            ->where('status', 'completed')
+            ->sum('total_net_amount');
 
-        return response()->json([
-            'escrow'        => number_format($escrow, 2),
-            'available'     => number_format($available, 2),
-            'paid_month'    => number_format($paidThisMonth, 2),
-            'paid_count'    => $paidCount,
-            'lifetime'      => number_format($lifetime, 2),
+        $totalEarned = (clone $paymentsQuery)
+            ->where('status', config('payout.eligible_payment_status', 'approved'))
+            ->get()
+            ->sum(fn (Payment $p) => $this->payableAmount($p));
+
+        $payoutBatches = PayoutBatch::where('educator_id', $educatorId)
+            ->latest()
+            ->paginate(10, ['*'], 'batches');
+
+        $recentRequests = EducatorPayoutRequest::where('educator_id', $educatorId)
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $openPayoutRequest = EducatorPayoutRequest::where('educator_id', $educatorId)
+            ->open()
+            ->latest()
+            ->first();
+
+        return view('crm.educator.payout.index', [
+            'currency'            => $currency,
+            'pendingBalance'      => $pendingBalance,
+            'processingBalance'   => $processingBalance,
+            'paidThisMonth'       => $paidThisMonth,
+            'paidThisMonthCount'  => $paidThisMonthCount,
+            'lifetimePaid'        => $lifetimePaid,
+            'totalEarned'         => $totalEarned,
+            'pendingPayments'     => $pendingPayments,
+            'processingPayments'  => $processingPayments,
+            'payoutBatches'       => $payoutBatches,
+            'recentRequests'      => $recentRequests,
+            'openPayoutRequest'   => $openPayoutRequest,
+            'nextPayoutDate'      => $this->nextScheduledPayoutDate(),
+            'scheduleLabel'       => $this->scheduleLabel(),
+            'canReceivePayouts'   => Auth::user()->canReceivePayouts(),
         ]);
     }
 
     /**
-     * Upcoming releases (payments still processing)
+     * Net amount payable for a single payment row.
      */
-    public function upcoming(Request $request)
+    public static function payableAmount(Payment $payment): float
     {
-        $educatorId = Auth::id();
-
-        $query = EducatorPayment::where('educator_id', $educatorId)
-            ->whereIn('payout_status', ['processing', 'pending']);
-
-        if ($request->filled('from')) {
-            $query->whereDate('created_at', '>=', $request->from);
+        if ($payment->net_amount !== null && (float) $payment->net_amount > 0) {
+            return (float) $payment->net_amount;
         }
 
-        if ($request->filled('to')) {
-            $query->whereDate('created_at', '<=', $request->to);
+        $commission = (float) ($payment->platform_commission ?? 0);
+
+        if ($commission <= 0 && $payment->educator_id) {
+            $educator = User::find($payment->educator_id);
+            $rate     = $educator?->commissionRate() ?? User::DEFAULT_COMMISSION_RATE;
+            $commission = round((float) $payment->gross_amount * $rate / 100, 2);
         }
 
-        return response()->json(
-            $query->latest()->get()->map(function ($p) {
-                return [
-                    'release_date' => $p->created_at->day <= 15
-                        ? $p->created_at->copy()->day(15)->format('d M Y')
-                        : $p->created_at->copy()->day(30)->format('d M Y'),
-                    'source'       => 'Order #' . $p->order_id,
-                    'amount'       => number_format($p->net_amount, 2),
-                    'status'       => ucfirst($p->status),
-                    'payout_status' => ucfirst($p->payout_status),
-                ];
-            })
-        );
+        return round((float) $payment->gross_amount - $commission, 2);
+    }
+
+    private function sumPayable($payments): float
+    {
+        return round($payments->sum(fn (Payment $p) => $this->payableAmount($p)), 2);
+    }
+
+    private function scheduleLabel(): string
+    {
+        return match (config('payout.schedule', 'twice_monthly')) {
+            'every_two_minutes' => 'Every 2 minutes (testing)',
+            'hourly'            => 'Hourly',
+            'daily'             => 'Daily at ' . config('payout.run_at', '00:00'),
+            'weekly'            => 'Weekly (Mondays at ' . config('payout.run_at', '00:00') . ')',
+            'monthly'           => 'Monthly on day ' . config('payout.monthly_day', 1),
+            default             => 'Twice a month (days '
+                . implode(' & ', config('payout.twice_monthly_days', [1, 16])) . ')',
+        };
+    }
+
+    private function nextScheduledPayoutDate(): ?Carbon
+    {
+        $schedule = config('payout.schedule', 'twice_monthly');
+        $runAt    = config('payout.run_at', '00:00');
+        $now      = now();
+
+        $candidates = match ($schedule) {
+            'every_two_minutes' => [$now->copy()->addMinutes(2)],
+            'hourly'            => [$now->copy()->addHour()->startOfHour()],
+            'daily'             => [$now->copy()->addDay()->setTimeFromTimeString($runAt)],
+            'weekly'            => [$now->copy()->next(Carbon::MONDAY)->setTimeFromTimeString($runAt)],
+            'monthly'           => $this->monthlyCandidates($now, [config('payout.monthly_day', 1)], $runAt),
+            default             => $this->monthlyCandidates($now, config('payout.twice_monthly_days', [1, 16]), $runAt),
+        };
+
+        foreach ($candidates as $date) {
+            if ($date->isFuture()) {
+                return $date;
+            }
+        }
+
+        return $candidates[0] ?? null;
     }
 
     /**
-     * Payout history
+     * @param  array<int>  $days
+     * @return array<int, Carbon>
      */
-    public function history(Request $request)
+    private function monthlyCandidates(Carbon $from, array $days, string $runAt): array
     {
-        $educatorId = Auth::id();
+        $candidates = [];
 
-        $query = EducatorPayout::with('payment')
-            ->where('educator_id', $educatorId);
+        foreach ([0, 1] as $monthOffset) {
+            $month = $from->copy()->addMonths($monthOffset);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            foreach ($days as $day) {
+                $safeDay = min((int) $day, $month->daysInMonth);
+                $candidates[] = $month->copy()->day($safeDay)->setTimeFromTimeString($runAt);
+            }
         }
 
-        if ($request->filled('search')) {
-            $query->where('description', 'like', '%' . $request->search . '%');
-        }
+        usort($candidates, fn (Carbon $a, Carbon $b) => $a <=> $b);
 
-        return response()->json(
-            $query->latest()->get()->map(function ($p) {
-                return [
-                    'date'     => optional($p->processed_at)->format('d M Y'),
-                    'ref'      => 'PAY-' . $p->id,
-                    'method'   => 'Bank Transfer',
-                    'amount'   => number_format($p->amount, 2),
-                    'fees'     => '—',
-                    'net'      => number_format($p->amount, 2),
-                    'status'   => ucfirst($p->status),
-                    'note'     => $p->description,
-                ];
-            })
-        );
-    }
-
-    /**
-     * Bank accounts list
-     */
-    public function banks()
-    {
-        return response()->json(
-            EducatorBank::where('educator_id', Auth::id())->get()
-        );
-    }
-
-    /**
-     * Store / Update bank (used by modal)
-     */
-    public function saveBank(Request $request)
-    {
-        $request->validate([
-            'bank_name'     => 'required|string',
-            'account_name'  => 'required|string',
-            'iban'          => 'required|string',
-        ]);
-
-        EducatorBank::updateOrCreate(
-            [
-                'id' => $request->id,
-                'educator_id' => Auth::id(),
-            ],
-            [
-                'bank_name' => $request->bank_name,
-                'account_name' => $request->account_name,
-                'iban' => $request->iban,
-                'approval_status' => '0',
-            ]
-        );
-
-        return response()->json(['success' => true]);
-    }
-
-    /**
-     * Delete bank
-     */
-    public function deleteBank($id)
-    {
-        EducatorBank::where('id', $id)
-            ->where('educator_id', Auth::id())
-            ->delete();
-
-        return response()->json(['success' => true]);
+        return $candidates;
     }
 }

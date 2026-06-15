@@ -3,494 +3,236 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Earning;
-use App\Models\Payout;
-use App\Models\EducatorPayout;
+use App\Http\Controllers\Educator\PayoutController as EducatorPayoutHelper;
+use App\Jobs\ReleaseEducatorPayoutJob;
+use App\Models\EducatorPayoutRequest;
+use App\Models\Payment;
+use App\Models\PayoutBatch;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
-use App\Services\EmailService;
-use App\Services\ActivityNotificationService;
-use App\Mail\EducatorPayoutMail;
+use Illuminate\View\View;
 
+/**
+ * Admin payout hub — payments (earnings), released batches, and payout requests.
+ * Earnings are derived from the Payment model (legacy Earning model removed from UI).
+ */
 class PayoutController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Main payouts dashboard with tabbed views.
+     */
+    public function index(Request $request): View
     {
-        // Handle different views: earnings, payouts, educator_payouts
-        $view = $request->get('view', 'earnings');
+        $view = $request->get('view', 'payments');
 
-        switch ($view) {
-            case 'payouts':
-                return $this->managePayouts($request);
-            case 'educator_payouts':
-                return $this->manageEducatorPayouts($request);
-            case 'earnings':
-            default:
-                return $this->manageEarnings($request);
-        }
+        $educators = User::where('role', 'educator')->select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+        $summary   = $this->paymentSummary();
+        $schedule  = $this->scheduleInfo();
+
+        return match ($view) {
+            'batches'  => $this->paymentsView($request, $educators, $summary, $schedule, 'batches'),
+            'requests' => $this->paymentsView($request, $educators, $summary, $schedule, 'requests'),
+            default    => $this->paymentsView($request, $educators, $summary, $schedule, 'payments'),
+        };
     }
 
-    private function manageEarnings(Request $request)
+    /**
+     * Build shared view data for all tabs.
+     */
+    private function paymentsView(Request $request, $educators, array $summary, array $schedule, string $currentView): View
     {
-        $query = Earning::with(['educator', 'course', 'session']);
+        $data = compact('educators', 'summary', 'schedule', 'currentView');
 
-        // Filter by status
-        if ($request->filled('status')) {
-            if (in_array($request->status, ['pending', 'approved', 'paid', 'cancelled'])) {
-                $query->where('status', $request->status);
-            }
+        if ($currentView === 'payments') {
+            $data['payments'] = $this->filteredPayments($request)->paginate(15)->withQueryString();
         }
 
-        // Filter by source type
-        if ($request->filled('source_type')) {
-            $query->where('source_type', $request->source_type);
+        if ($currentView === 'batches') {
+            $data['batches'] = $this->filteredBatches($request)->paginate(15)->withQueryString();
         }
 
-        // Filter by educator
+        if ($currentView === 'requests') {
+            $data['payoutRequests'] = $this->filteredPayoutRequests($request)->paginate(15)->withQueryString();
+            $data['pendingRequestCount'] = EducatorPayoutRequest::where('status', EducatorPayoutRequest::STATUS_PENDING)->count();
+            $data['inProgressRequestCount'] = EducatorPayoutRequest::where('status', EducatorPayoutRequest::STATUS_IN_PROGRESS)->count();
+        }
+
+        return view('admin.managePayouts', $data);
+    }
+
+    /**
+     * Platform-wide payment totals (replaces legacy Earning aggregates).
+     */
+    private function paymentSummary(): array
+    {
+        $approved = Payment::where('status', config('payout.eligible_payment_status', 'approved'))->get();
+
+        $net = fn (Payment $p) => EducatorPayoutHelper::payableAmount($p);
+
+        return [
+            'total_gross'      => round($approved->sum('gross_amount'), 2),
+            'total_net'        => round($approved->sum($net), 2),
+            'pending_payout'   => round($approved->where('is_payout_processed', false)->whereNull('payout_batch_id')->sum($net), 2),
+            'processing'       => round($approved->where('is_payout_processed', false)->whereNotNull('payout_batch_id')->sum($net), 2),
+            'paid_out'         => round($approved->where('is_payout_processed', true)->sum($net), 2),
+            'payment_count'    => $approved->count(),
+            'pending_count'    => $approved->where('is_payout_processed', false)->whereNull('payout_batch_id')->count(),
+            'batch_completed'  => PayoutBatch::where('status', 'completed')->count(),
+            'batch_failed'     => PayoutBatch::where('status', 'failed')->count(),
+        ];
+    }
+
+    private function scheduleInfo(): array
+    {
+        return [
+            'label'                  => $this->scheduleLabel(),
+            'approval_delay_minutes' => config('payout.approval_delay_minutes', 2),
+            'processor'              => config('payout.processor', 'stripe'),
+        ];
+    }
+
+    private function scheduleLabel(): string
+    {
+        return match (config('payout.schedule', 'twice_monthly')) {
+            'every_two_minutes' => 'Every 2 minutes (testing)',
+            'hourly'            => 'Hourly',
+            'daily'             => 'Daily at ' . config('payout.run_at', '00:00'),
+            'weekly'            => 'Weekly (Mondays)',
+            'monthly'           => 'Monthly on day ' . config('payout.monthly_day', 1),
+            default             => 'Twice a month (days ' . implode(' & ', config('payout.twice_monthly_days', [1, 16])) . ')',
+        };
+    }
+
+    private function filteredPayments(Request $request)
+    {
+        $query = Payment::with(['educator', 'student', 'course', 'payoutBatch'])
+            ->whereNotNull('educator_id');
+
         if ($request->filled('educator_id')) {
             $query->where('educator_id', $request->educator_id);
         }
 
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->where('earned_at', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->where('earned_at', '<=', $request->date_to . ' 23:59:59');
+        if ($request->filled('payout_status')) {
+            match ($request->payout_status) {
+                'pending'    => $query->where('is_payout_processed', false)->whereNull('payout_batch_id'),
+                'processing' => $query->where('is_payout_processed', false)->whereNotNull('payout_batch_id'),
+                'paid'       => $query->where('is_payout_processed', true),
+                'failed'     => $query->where('payout_status', 'failed'),
+                default      => null,
+            };
         }
 
-        // Search by description or educator name
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
         if ($request->filled('q')) {
             $search = $request->q;
             $query->where(function ($q) use ($search) {
-                $q->where('description', 'like', '%' . $search . '%')
-                  ->orWhereHas('educator', function ($educatorQuery) use ($search) {
-                      $educatorQuery->where('first_name', 'like', '%' . $search . '%')
-                                    ->orWhere('last_name', 'like', '%' . $search . '%')
-                                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%']);
-                  });
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhereHas('educator', fn ($eq) => $eq->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%"))
+                    ->orWhereHas('course', fn ($cq) => $cq->where('title', 'like', "%{$search}%"));
             });
         }
 
-        $earnings = $query->latest('earned_at')->paginate(15);
-
-        // Get summary statistics
-        $totalEarnings = Earning::sum('net_amount');
-        $pendingEarnings = Earning::where('status', 'pending')->sum('net_amount');
-        $approvedEarnings = Earning::where('status', 'approved')->sum('net_amount');
-        $paidEarnings = Earning::where('status', 'paid')->sum('net_amount');
-
-        // Get educators for filter dropdown
-        $educators = User::where('role', 'educator')->select('id', 'first_name', 'last_name')->get();
-
-        return view('admin.managePayouts', compact(
-            'earnings',
-            'totalEarnings',
-            'pendingEarnings',
-            'approvedEarnings',
-            'paidEarnings',
-            'educators'
-        ), ['currentView' => 'earnings']);
+        return $query->latest();
     }
 
-    private function managePayouts(Request $request)
+    private function filteredBatches(Request $request)
     {
-        $query = Payout::with('educator');
+        $query = PayoutBatch::with('educator');
 
-        // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Filter by educator
         if ($request->filled('educator_id')) {
             $query->where('educator_id', $request->educator_id);
         }
 
-        // Filter by date range
         if ($request->filled('date_from')) {
-            $query->where('created_at', '>=', $request->date_from);
+            $query->whereDate('created_at', '>=', $request->date_from);
         }
+
         if ($request->filled('date_to')) {
-            $query->where('created_at', '<=', $request->date_to . ' 23:59:59');
+            $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $payouts = $query->latest()->paginate(15);
-
-        // Get educators for filter dropdown
-        $educators = User::where('role', 'educator')->select('id', 'first_name', 'last_name')->get();
-
-        return view('admin.managePayouts', compact('payouts', 'educators'), ['currentView' => 'payouts']);
+        return $query->latest();
     }
 
-    private function manageEducatorPayouts(Request $request)
+    private function filteredPayoutRequests(Request $request)
     {
-        $query = EducatorPayout::with('educator');
+        $query = EducatorPayoutRequest::with(['educator', 'payment.course', 'payoutBatch', 'resolver']);
 
-        // Filter by status
         if ($request->filled('status')) {
-            if (in_array($request->status, ['pending', 'completed', 'failed'])) {
-                $query->where('status', $request->status);
-            }
+            $query->where('status', $request->status);
         }
 
-        // Filter by educator
         if ($request->filled('educator_id')) {
             $query->where('educator_id', $request->educator_id);
         }
 
-        // Filter by payment_id
-        if ($request->filled('payment_id')) {
-            $query->where('payment_id', 'like', '%' . $request->payment_id . '%');
-        }
-
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->where('created_at', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->where('created_at', '<=', $request->date_to . ' 23:59:59');
-        }
-
-        $educatorPayouts = $query->latest()->paginate(15);
-
-        // Get educators for filter dropdown
-        $educators = User::where('role', 'educator')->select('id', 'first_name', 'last_name')->get();
-
-        return view('admin.managePayouts', compact('educatorPayouts', 'educators'), ['currentView' => 'educator_payouts']);
-    }
-
-    public function show(Payout $payout)
-    {
-        $payout->load(['educator', 'earning']);
-        return view('admin.payoutDetail', compact('payout'));
-    }
-
-    public function process(Request $request, Payout $payout)
-    {
-        $request->validate([
-            'status' => 'required|in:completed,failed',
-            'processed_by' => 'required|string|max:255',
-            'notes' => 'nullable|string'
-        ]);
-
-        $oldStatus = $payout->status;
-        $payout->update([
-            'status' => $request->status,
-            'processed_at' => now(),
-            'processed_by' => $request->processed_by,
-            'description' => $request->notes
-        ]);
-
-        // Log activity
-        ActivityNotificationService::logAndNotify(
-            auth()->user(),
-            'process_payout',
-            'Payout',
-            $payout->id,
-            "Payout #{$payout->id} for {$payout->educator->full_name}",
-            ['status' => $oldStatus],
-            ['status' => $request->status, 'processed_by' => $request->processed_by],
-            "Processed payout #{$payout->id} - Status changed from {$oldStatus} to {$request->status}",
-            ['amount' => $payout->amount, 'notes' => $request->notes]
-        );
-
-        // Update related earnings if payout is completed
-        if ($request->status === 'completed') {
-            Earning::where('payout_id', $payout->id)
-                ->update([
-                    'status' => 'paid',
-                    'paid_at' => now()
-                ]);
-
-            // Send success email to educator
-            try {
-                EmailService::send(
-                    $payout->educator->email,
-                    new EducatorPayoutMail($payout, true),
-                    'emails'
-                );
-            } catch (\Exception $e) {
-                \Log::error('Failed to send payout success email: ' . $e->getMessage());
-            }
-        } elseif ($request->status === 'failed') {
-            // Send failure email to educator
-            try {
-                EmailService::send(
-                    $payout->educator->email,
-                    new EducatorPayoutMail($payout, false),
-                    'emails'
-                );
-            } catch (\Exception $e) {
-                \Log::error('Failed to send payout failure email: ' . $e->getMessage());
-            }
-        }
-
-        return back()->with('success', 'Payout processed successfully');
-    }
-
-    public function updateEarningStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,approved,paid,cancelled'
-        ]);
-
-        $earning = Earning::findOrFail($id);
-        $earning->update(['status' => $request->status]);
-
-        if ($request->status === 'paid') {
-            $earning->update(['paid_at' => now()]);
-        }
-
-        return back()->with('success', 'Earning status updated successfully');
-    }
-
-    public function bulkUpdateEarnings(Request $request)
-    {
-        $request->validate([
-            'earning_ids' => 'required|array',
-            'status' => 'required|in:pending,approved,paid,cancelled'
-        ]);
-
-        Earning::whereIn('id', $request->earning_ids)
-            ->update(['status' => $request->status]);
-
-        if ($request->status === 'paid') {
-            Earning::whereIn('id', $request->earning_ids)
-                ->update(['paid_at' => now()]);
-        }
-
-        return back()->with('success', 'Earnings updated successfully');
-    }
-
-    public function createPayout(Request $request)
-    {
-        $request->validate([
-            'educator_id' => 'required|exists:users,id',
-            'amount' => 'required|numeric|min:0',
-            'description' => 'nullable|string'
-        ]);
-
-        Payout::create([
-            'educator_id' => $request->educator_id,
-            'amount' => $request->amount,
-            'status' => 'pending',
-            'description' => $request->description
-        ]);
-
-        return back()->with('success', 'Payout created successfully');
-    }
-
-    // Generate upcoming payouts based on approved earnings
-    public function generateUpcomingPayouts()
-    {
-        // Get all approved earnings that haven't been paid yet and don't have a payout
-        $approvedEarnings = Earning::where('status', 'approved')
-            ->whereNull('payout_id')
-            ->with('educator')
-            ->get()
-            ->groupBy('educator_id');
-
-        $generatedPayouts = [];
-
-        foreach ($approvedEarnings as $educatorId => $earnings) {
-            $totalAmount = $earnings->sum('net_amount');
-
-            if ($totalAmount > 0) {
-                $payout = Payout::create([
-                    'educator_id' => $educatorId,
-                    'amount' => $totalAmount,
-                    'status' => 'pending',
-                    'description' => 'Auto-generated payout for ' . $earnings->count() . ' earnings'
-                ]);
-
-                // Link earnings to this payout
-                Earning::whereIn('id', $earnings->pluck('id'))
-                    ->update(['payout_id' => $payout->id]);
-
-                $generatedPayouts[] = $payout;
-            }
-        }
-
-        return back()->with('success', 'Generated ' . count($generatedPayouts) . ' upcoming payouts');
-    }
-
-    // View upcoming payouts (pending payouts)
-    public function upcomingPayouts(Request $request)
-    {
-        $query = Payout::with('educator')
-            ->where('status', 'pending');
-
-        // Filter by educator
-        if ($request->filled('educator_id')) {
-            $query->where('educator_id', $request->educator_id);
-        }
-
-        // Filter by amount range
-        if ($request->filled('min_amount')) {
-            $query->where('amount', '>=', $request->min_amount);
-        }
-        if ($request->filled('max_amount')) {
-            $query->where('amount', '<=', $request->max_amount);
-        }
-
-        // Search by educator name
         if ($request->filled('q')) {
             $search = $request->q;
-            $query->whereHas('educator', function ($q) use ($search) {
-                $q->where('first_name', 'like', '%' . $search . '%')
-                  ->orWhere('last_name', 'like', '%' . $search . '%')
-                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%']);
-            });
+            $query->whereHas('educator', fn ($eq) => $eq->where('first_name', 'like', "%{$search}%")
+                ->orWhere('last_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%"));
         }
 
-        $upcomingPayouts = $query->latest()->paginate(15);
-
-        // Get summary statistics
-        $totalUpcomingAmount = Payout::where('status', 'pending')->sum('amount');
-        $totalUpcomingCount = Payout::where('status', 'pending')->count();
-
-        // Get educators for filter dropdown
-        $educators = User::where('role', 'educator')->select('id', 'first_name', 'last_name')->get();
-
-        return view('admin.payouts.upcoming', compact(
-            'upcomingPayouts',
-            'totalUpcomingAmount',
-            'totalUpcomingCount',
-            'educators'
-        ));
+        return $query->latest();
     }
 
-    // Release/process multiple payouts
-    public function releasePayouts(Request $request)
+    /**
+     * Detail page for a single released/processing payout batch.
+     */
+    public function showBatch(PayoutBatch $batch): View
     {
-        $request->validate([
-            'payout_ids' => 'required|array',
-            'payout_ids.*' => 'exists:payouts,id',
-            'processed_by' => 'required|string|max:255',
-            'notes' => 'nullable|string'
-        ]);
+        $batch->load('educator');
 
-        $payouts = Payout::whereIn('id', $request->payout_ids)
-            ->where('status', 'pending')
+        $paymentIds = array_filter(explode(',', $batch->payment_ids ?? ''));
+        $payments   = Payment::with(['student', 'course'])
+            ->whereIn('id', $paymentIds)
             ->get();
 
-        $processedCount = 0;
+        $stripeResponse = json_decode($batch->stripe_response ?? '{}', true);
 
-        foreach ($payouts as $payout) {
-            $oldStatus = $payout->status;
-            $payout->update([
-                'status' => 'completed',
-                'processed_at' => now(),
-                'processed_by' => $request->processed_by,
-                'description' => $request->notes ?: $payout->description
-            ]);
-
-            // Log activity for each payout
-            ActivityNotificationService::logAndNotify(
-                auth()->user(),
-                'bulk_release_payout',
-                'Payout',
-                $payout->id,
-                "Bulk payout release #{$payout->id} for {$payout->educator->full_name}",
-                ['status' => $oldStatus],
-                ['status' => 'completed', 'processed_by' => $request->processed_by],
-                "Bulk released payout #{$payout->id} - Amount: ${$payout->amount}",
-                ['amount' => $payout->amount, 'bulk_operation' => true]
-            );
-
-            // Update related earnings to paid status
-            Earning::where('payout_id', $payout->id)
-                ->update([
-                    'status' => 'paid',
-                    'paid_at' => now()
-                ]);
-
-            // Send success email to educator
-            try {
-                EmailService::send(
-                    $payout->educator->email,
-                    new EducatorPayoutMail($payout, true),
-                    'emails'
-                );
-            } catch (\Exception $e) {
-                \Log::error('Failed to send bulk payout email: ' . $e->getMessage());
-            }
-
-            $processedCount++;
-        }
-
-        return back()->with('success', 'Successfully released ' . $processedCount . ' payouts');
+        return view('admin.payout-batches.show', compact('batch', 'payments', 'stripeResponse'));
     }
 
-    // Release single payout
-    public function releasePayout(Request $request, Payout $payout)
+    /**
+     * Manually trigger the scheduled release job for all educators now.
+     */
+    public function runScheduledRelease(Request $request): RedirectResponse
     {
-        $request->validate([
-            'processed_by' => 'required|string|max:255',
-            'notes' => 'nullable|string'
-        ]);
-
-        if ($payout->status !== 'pending') {
-            return back()->with('error', 'Only pending payouts can be released');
-        }
-
-        $oldStatus = $payout->status;
-        $payout->update([
-            'status' => 'completed',
-            'processed_at' => now(),
-            'processed_by' => $request->processed_by,
-            'description' => $request->notes ?: $payout->description
-        ]);
-
-        // Log activity
-        ActivityNotificationService::logAndNotify(
-            auth()->user(),
-            'release_payout',
-            'Payout',
-            $payout->id,
-            "Payout #{$payout->id} for {$payout->educator->full_name}",
-            ['status' => $oldStatus],
-            ['status' => 'completed', 'processed_by' => $request->processed_by],
-            "Released payout #{$payout->id} - Amount: ${$payout->amount}",
-            ['amount' => $payout->amount, 'notes' => $request->notes]
+        ReleaseEducatorPayoutJob::dispatch(
+            processedBy: 'admin_manual_' . $request->user()->id,
+            triggeredByUserId: $request->user()->id,
         );
 
-        // Update related earnings to paid status
-        Earning::where('payout_id', $payout->id)
-            ->update([
-                'status' => 'paid',
-                'paid_at' => now()
-            ]);
-
-        // Send success email to educator
-        try {
-            EmailService::send(
-                $payout->educator->email,
-                new EducatorPayoutMail($payout, true),
-                'emails'
-            );
-        } catch (\Exception $e) {
-            \Log::error('Failed to send payout release email: ' . $e->getMessage());
-        }
-
-        return back()->with('success', 'Payout released successfully');
+        return back()->with('success', 'Scheduled payout release job has been queued.');
     }
 
-    // Get payout details with earnings
-    public function getPayoutDetails(Payout $payout)
+    /**
+     * Queue an immediate release for a single educator (admin override).
+     */
+    public function runEducatorRelease(Request $request, User $educator): RedirectResponse
     {
-        $payout->load(['educator', 'earning']);
-        $earnings = Earning::where('payout_id', $payout->id)
-            ->with(['course', 'session'])
-            ->get();
+        abort_unless($educator->role === 'educator', 404);
 
-        return response()->json([
-            'payout' => $payout,
-            'earnings' => $earnings,
-            'total_earnings' => $earnings->count(),
-            'total_amount' => $earnings->sum('net_amount')
-        ]);
+        ReleaseEducatorPayoutJob::dispatch(
+            educatorId: $educator->id,
+            processedBy: 'admin_manual_' . $request->user()->id,
+            triggeredByUserId: $request->user()->id,
+        );
+
+        return back()->with('success', "Payout release queued for {$educator->full_name}.");
     }
 }

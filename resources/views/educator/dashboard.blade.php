@@ -19,6 +19,8 @@
             complete.
         </div>
     @endif
+
+    @include('educator.partials.payout-setup-alert', ['openPayoutRequest' => $openPayoutRequest ?? null])
     <section id="section-overview" class="mb-4">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
             <h2 class="h4 mb-0">Overview</h2>

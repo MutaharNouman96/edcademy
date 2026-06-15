@@ -10,6 +10,7 @@ use App\Models\VideoStat;
 use App\Models\Earning;
 use App\Models\Lesson;
 use App\Models\LessonVideoView;
+use App\Models\EducatorPayoutRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -140,8 +141,11 @@ class DashboardController extends Controller
         $latestCourses = Course::where('user_id', $educatorId)->active()->published()->orderByDesc("publish_date")->with("educator", "category", "reviews", "lessons")->limit(4)->get();
         $latestVideos = Lesson::where('type', 'video')->whereIn('course_id', $courseIds)->published()->with("course", "lesson_video_views", "lesson_video_comments")->limit(4)->get();
 
-        
-
+        $openPayoutRequest = EducatorPayoutRequest::query()
+            ->where('educator_id', $educatorId)
+            ->open()
+            ->latest()
+            ->first();
 
         return view('educator.dashboard', compact(
             'totalCourses',
@@ -155,7 +159,8 @@ class DashboardController extends Controller
             'earnedTotal',
             'latestCourses',
             'latestVideos',
-            'revenueChartData'
+            'revenueChartData',
+            'openPayoutRequest'
         ));
     }
 

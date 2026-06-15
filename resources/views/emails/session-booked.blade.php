@@ -63,7 +63,7 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Duration:</span>
-                    <span class="detail-value">{{ $session->duration ?? 60 }} minutes</span>
+                    <span class="detail-value">{{ $session->duration_minutes ?? 60 }} minutes</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Platform:</span>
@@ -83,7 +83,7 @@
                     <li>Please join the session 5 minutes early to test your connection</li>
                     <li>Have a stable internet connection and working camera/microphone</li>
                     <li>Prepare any materials or questions you want to discuss</li>
-                    <li>Both parties will receive reminders 24 hours before the session</li>
+                    <li>Both parties will receive a reminder 30 minutes before the session</li>
                 </ul>
             </div>
 

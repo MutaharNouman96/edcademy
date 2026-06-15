@@ -45,11 +45,11 @@
                 @endif
             </div>
 
-            <p>This is a friendly reminder that you have a session scheduled for <strong>tomorrow</strong>.</p>
+            <p>This is a friendly reminder that your session is <strong>starting soon</strong>. Please get ready to join.</p>
 
             <div class="countdown">
-                <span class="countdown-number">24</span>
-                <span class="countdown-text">HOURS TO GO</span>
+                <span class="countdown-number">30</span>
+                <span class="countdown-text">MINUTES TO GO</span>
             </div>
 
             <div class="session-details">
@@ -68,7 +68,7 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Duration:</span>
-                    <span class="detail-value">{{ $session->duration ?? 60 }} minutes</span>
+                    <span class="detail-value">{{ $session->duration_minutes ?? 60 }} minutes</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Platform:</span>

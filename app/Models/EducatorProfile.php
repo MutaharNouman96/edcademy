@@ -12,6 +12,7 @@ class EducatorProfile extends Model
     protected $fillable = [
         'user_id',
         'primary_subject',
+        'educator_type',
         'teaching_levels',
         'hourly_rate',
         'max_sessions_per_day',

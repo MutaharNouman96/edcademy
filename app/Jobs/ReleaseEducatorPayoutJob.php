@@ -2,26 +2,37 @@
 
 namespace App\Jobs;
 
-use App\Mail\EducatorPayoutReleasedMail;
-use App\Models\EducatorPayout;
+use App\Http\Controllers\Educator\PayoutController;
+use App\Mail\AdminPayoutBatchProcessedMail;
+use App\Mail\EducatorPayoutBatchReleasedMail;
+use App\Models\EducatorPayoutRequest;
+use App\Models\Payment;
+use App\Models\PayoutBatch;
+use App\Models\User;
 use App\Services\EmailService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Stripe\Exception\ApiErrorException;
-use Stripe\StripeClient;
+use Illuminate\Support\Str;
 
 /**
- * Releases educator payouts a short while after a course purchase.
+ * Releases educator payouts on a configurable schedule (defaults to twice a
+ * month — see config/payout.php and app/Console/Kernel.php).
  *
- * The job is dispatched with a delay (2 minutes) right after the payouts are
- * created during checkout. When it executes it moves the net (post-commission)
- * funds to each educator's connected Stripe account via a Stripe Transfer,
- * stores the Stripe response against the payout, updates its status and then
- * notifies the educator by email.
+ * Can also be dispatched manually when an admin approves an EducatorPayoutRequest
+ * (delayed by config payout.approval_delay_minutes, default 2 minutes).
+ *
+ * Flow:
+ *   1. Collect eligible Payment rows (optionally scoped to one educator / ids).
+ *   2. Group by educator and sum into a PayoutBatch.
+ *   3. Process the transfer (dummy while Stripe sandbox is active).
+ *   4. Mark payments processed; resolve linked payout request if any.
+ *   5. Email the educator and admin with the outcome.
  */
 class ReleaseEducatorPayoutJob implements ShouldQueue
 {
@@ -35,128 +46,349 @@ class ReleaseEducatorPayoutJob implements ShouldQueue
     public int $timeout = 120;
 
     /**
-     * @param  array<int, int>  $payoutIds  Ids of the educator_payout rows to release.
-     * @param  string  $processedBy  The processor that released the payout (e.g. "stripe").
+     * @param  int|null  $educatorId  Limit to one educator (required for admin-approved requests).
+     * @param  string|null  $processedBy  Label stored on the batch (defaults to config).
+     * @param  int|null  $educatorPayoutRequestId  Linked EducatorPayoutRequest to resolve on completion.
+     * @param  array<int>|null  $paymentIds  Optional subset of payment ids to include.
+     * @param  int|null  $triggeredByUserId  Admin user id when manually triggered.
      */
+    public int $educatorId;
+    public string $processedBy;
+    public int $educatorPayoutRequestId;
+    public array $paymentIds;
+    public int $triggeredByUserId;
+
     public function __construct(
-        public array $payoutIds,
-        public string $processedBy = 'stripe'
+        $educatorId,
+        $processedBy,
+        $educatorPayoutRequestId,
+        $paymentIds,
+        $triggeredByUserId,
     ) {
+        $this->educatorId = $educatorId;
+        $this->processedBy = $processedBy;
+        $this->educatorPayoutRequestId = $educatorPayoutRequestId;
+        $this->paymentIds = $paymentIds;
+        $this->triggeredByUserId = $triggeredByUserId;
     }
 
     public function handle(): void
     {
-        if (empty($this->payoutIds)) {
+        $processedBy = $this->processedBy ?? config('payout.processor', 'stripe');
+
+        // STEP 1 — Load eligible payments and group by educator.
+        $paymentsByEducator = $this->eligiblePayments()->groupBy('educator_id');
+
+        if ($paymentsByEducator->isEmpty()) {
+            $this->logFailure('No payments eligible for payout.', [
+                'educator_id'  => $this->educatorId,
+                'payment_ids'  => $this->paymentIds,
+                'request_id'   => $this->educatorPayoutRequestId,
+            ]);
+
+            if ($this->educatorPayoutRequestId) {
+                $this->failLinkedRequest('No eligible payments found at processing time.');
+            }
+
             return;
         }
 
-        // Only release payouts that are still pending so the job is idempotent
-        // and safe to retry.
-        $payouts = EducatorPayout::with(['educator', 'payment'])
-            ->whereIn('id', $this->payoutIds)
-            ->where('status', 'pending')
+        $this->logSuccess('Payout run started.', [
+            'educators'      => $paymentsByEducator->count(),
+            'total_payments' => $paymentsByEducator->flatten()->count(),
+            'request_id'     => $this->educatorPayoutRequestId,
+            'triggered_by'   => $this->triggeredByUserId,
+            'processed_by'   => $processedBy,
+        ]);
+
+        // STEP 2 — Process one batch per educator in this run.
+        foreach ($paymentsByEducator as $educatorId => $payments) {
+            $this->releaseForEducator((int) $educatorId, $payments, $processedBy);
+        }
+    }
+
+    /**
+     * Payments still owed to educators: approved status, not yet batched/processed.
+     * Scoped by constructor educatorId / paymentIds when provided.
+     */
+    private function eligiblePayments(): EloquentCollection
+    {
+        return Payment::query()
+            ->whereNotNull('educator_id')
+            ->where('is_payout_processed', false)
+            ->whereNull('payout_batch_id')
+            ->where('status', config('payout.eligible_payment_status', 'approved'))
+            ->when($this->educatorId, fn($query) => $query->where('educator_id', $this->educatorId))
+            ->when($this->paymentIds, fn($query) => $query->whereIn('id', $this->paymentIds))
+            ->orderBy('created_at')
             ->get();
+    }
 
-        if ($payouts->isEmpty()) {
+    /**
+     * @param  \Illuminate\Support\Collection<int, Payment>  $payments
+     */
+    private function releaseForEducator(int $educatorId, $payments, string $processedBy): void
+    {
+        $payments = $payments->sortBy('created_at')->values();
+        $educator = User::find($educatorId);
+
+        // STEP 2a — Aggregate payable totals for this educator's batch.
+        $paymentIds      = $payments->pluck('id')->all();
+        $totalAmount     = round($payments->sum(fn(Payment $p) => (float) $p->gross_amount), 2);
+        $totalCommission = round($payments->sum(fn(Payment $p) => (float) $p->gross_amount - PayoutController::payableAmount($p)), 2);
+        $totalNetAmount  = round($payments->sum(fn(Payment $p) => PayoutController::payableAmount($p)), 2);
+        $currency        = $payments->first()->currency ?: setting('currency', 'USD');
+        $startDate       = $payments->first()->created_at;
+        $endDate         = $payments->last()->created_at;
+
+        if ($totalNetAmount <= 0 || ! $educator) {
+            $this->logFailure('Skipping educator — zero balance or missing user.', [
+                'educator_id'     => $educatorId,
+                'total_net_amount'=> $totalNetAmount,
+                'educator_found'  => (bool) $educator,
+            ]);
+
             return;
         }
 
-        $stripe = new StripeClient(config('services.stripe.secret'));
+        // STEP 2b — Create batch + tag payments atomically (idempotent guard).
+        $batch = DB::transaction(function () use (
+            $educatorId,
+            $paymentIds,
+            $payments,
+            $totalAmount,
+            $totalCommission,
+            $totalNetAmount,
+            $currency,
+            $startDate,
+            $endDate,
+            $processedBy
+        ) {
+            $batch = PayoutBatch::create([
+                'educator_id'      => $educatorId,
+                'payment_ids'      => implode(',', $paymentIds),
+                'status'           => 'processing',
+                'start_date'       => $startDate,
+                'end_date'         => $endDate,
+                'total_amount'     => $totalAmount,
+                'total_commission' => $totalCommission,
+                'total_net_amount' => $totalNetAmount,
+                'currency'         => $currency,
+                'processed_by'     => $processedBy,
+                'description'      => $this->buildBatchDescription($educatorId, $payments->count()),
+                'notes'            => $this->educatorPayoutRequestId
+                    ? "Triggered by payout request #{$this->educatorPayoutRequestId}"
+                    : null,
+            ]);
 
-        $released = collect();
+            Payment::whereIn('id', $paymentIds)->update([
+                'payout_batch_id' => $batch->id,
+                'payout_status'   => 'processing',
+            ]);
 
-        foreach ($payouts as $payout) {
-            $educator = $payout->educator;
+            return $batch;
+        });
 
-            // The educator cannot be paid until they have completed Stripe
-            // Connect onboarding (connected account + payouts enabled).
-            if (! $educator || ! $educator->canReceivePayouts()) {
-                $payout->update([
-                    'status'          => 'failed',
-                    'processed_at'    => now(),
-                    'processed_by'    => $this->processedBy,
-                    'stripe_response' => [
-                        'error' => 'Educator has not completed Stripe Connect onboarding.',
-                    ],
-                ]);
+        // STEP 3 — Execute transfer inside try/catch; reconcile on success/failure.
+        try {
+            $result = $this->processPayoutBatch($batch, $educator);
 
-                Log::warning('Educator payout skipped: account not ready', [
-                    'payout_id'   => $payout->id,
-                    'educator_id' => optional($educator)->id,
-                ]);
-
-                continue;
+            if (! ($result['success'] ?? false)) {
+                throw new \RuntimeException($result['error'] ?? 'Payout processing failed.');
             }
 
-            $currency = strtolower($payout->payment->currency ?? setting('currency', 'USD'));
-            $amountInCents = (int) round($payout->amount * 100);
-
-            try {
-                // Move the net amount from the platform balance to the educator's
-                // connected account. Stripe then pays it out to their IBAN/bank
-                // according to the connected account's payout schedule.
-                $transfer = $stripe->transfers->create([
-                    'amount'           => $amountInCents,
-                    'currency'         => $currency,
-                    'destination'      => $educator->stripe_connect_id,
-                    'transfer_group'   => 'payout_' . $payout->id,
-                    'metadata'         => [
-                        'educator_payout_id' => $payout->id,
-                        'educator_id'        => $educator->id,
-                        'payment_id'         => $payout->payment_id,
-                    ],
+            // STEP 4 — Success: finalize batch + payments, resolve request, notify.
+            DB::transaction(function () use ($batch, $paymentIds, $result, $processedBy) {
+                $batch->update([
+                    'status'          => 'completed',
+                    'processed_by'    => $processedBy,
+                    'processed_at'    => now(),
+                    'stripe_response' => json_encode($result),
                 ]);
 
-                $payout->update([
-                    'status'           => 'completed',
-                    'processed_at'     => now(),
-                    'processed_by'     => $this->processedBy,
-                    'stripe_payout_id' => $transfer->id,
-                    'stripe_response'  => $transfer->toArray(),
+                Payment::whereIn('id', $paymentIds)->update([
+                    'is_payout_processed' => true,
+                    'payout_status'       => 'paid',
                 ]);
 
-                $released->push($payout);
-            } catch (ApiErrorException $e) {
-                $payout->update([
+                if ($this->educatorPayoutRequestId) {
+                    EducatorPayoutRequest::where('id', $this->educatorPayoutRequestId)->update([
+                        'status'          => EducatorPayoutRequest::STATUS_RESOLVED,
+                        'payout_batch_id' => $batch->id,
+                        'resolved_at'     => now(),
+                        'resolved_by'     => $this->triggeredByUserId,
+                    ]);
+                }
+            });
+
+            $this->sendSuccessNotifications($educator, $batch->fresh(), $payments);
+
+            $this->logSuccess('Payout batch completed.', [
+                'educator_id'   => $educatorId,
+                'educator_email'=> $educator->email,
+                'batch_id'      => $batch->id,
+                'amount'        => $totalNetAmount,
+                'currency'      => $currency,
+                'payment_count' => count($paymentIds),
+                'payment_ids'   => $paymentIds,
+                'processor_ref' => $result['reference'] ?? null,
+                'request_id'    => $this->educatorPayoutRequestId,
+            ]);
+        } catch (\Throwable $e) {
+            // STEP 5 — Failure: mark batch failed, detach payments for retry, notify.
+            DB::transaction(function () use ($batch, $paymentIds, $e) {
+                $batch->update([
                     'status'          => 'failed',
                     'processed_at'    => now(),
-                    'processed_by'    => $this->processedBy,
-                    'stripe_response' => [
-                        'error'        => $e->getMessage(),
-                        'stripe_code'  => $e->getStripeCode(),
-                        'http_status'  => $e->getHttpStatus(),
-                    ],
+                    'stripe_response' => json_encode(['error' => $e->getMessage()]),
                 ]);
 
-                Log::error('Stripe educator payout transfer failed', [
-                    'payout_id'   => $payout->id,
-                    'educator_id' => $educator->id,
-                    'error'       => $e->getMessage(),
+                Payment::whereIn('id', $paymentIds)->update([
+                    'payout_batch_id' => null,
+                    'payout_status'   => 'failed',
                 ]);
-            }
+            });
+
+            $this->sendFailureNotifications($educator, $batch->fresh(), $e->getMessage());
+            $this->failLinkedRequest($e->getMessage());
+
+            $this->logFailure('Payout batch failed.', [
+                'educator_id'   => $educatorId,
+                'educator_email'=> $educator->email ?? null,
+                'batch_id'      => $batch->id,
+                'amount'        => $totalNetAmount,
+                'currency'      => $currency,
+                'payment_count' => count($paymentIds),
+                'payment_ids'   => $paymentIds,
+                'error'         => $e->getMessage(),
+                'request_id'    => $this->educatorPayoutRequestId,
+            ]);
+        }
+    }
+
+    private function buildBatchDescription(int $educatorId, int $count): string
+    {
+        $source = $this->educatorPayoutRequestId
+            ? "admin-approved request #{$this->educatorPayoutRequestId}"
+            : 'scheduled release';
+
+        return "Payout batch for educator #{$educatorId} ({$count} payment(s) via {$source}).";
+    }
+
+    /**
+     * Dummy Stripe transfer — replace with real API call when going live.
+     *
+     * @return array{success: bool, reference?: string, amount?: float, currency?: string, mode?: string, error?: string}
+     */
+    private function processPayoutBatch(PayoutBatch $batch, User $educator): array
+    {
+        if (! $educator->canReceivePayouts()) {
+            return [
+                'success' => false,
+                'error'   => 'Educator has not completed Stripe Connect onboarding.',
+            ];
         }
 
-        // Notify each educator once with a consolidated summary of the payouts
-        // that were successfully released.
-        $released->groupBy('educator_id')->each(function ($educatorPayouts) {
-            $educator = $educatorPayouts->first()->educator;
+        return [
+            'success'      => true,
+            'reference'    => 'dummy_' . strtoupper(Str::random(24)),
+            'amount'       => (float) $batch->total_net_amount,
+            'currency'     => $batch->currency,
+            'mode'         => 'sandbox',
+            'processed_at' => now()->toIso8601String(),
+        ];
+    }
 
-            if (! $educator || ! $educator->email) {
-                return;
-            }
-
-            try {
+    /** STEP 4a — Email educator (success) and admin inbox. */
+    private function sendSuccessNotifications(User $educator, PayoutBatch $batch, $payments): void
+    {
+        try {
+            if ($educator->email) {
                 EmailService::send(
                     $educator->email,
-                    new EducatorPayoutReleasedMail($educator, $educatorPayouts->values()),
+                    new EducatorPayoutBatchReleasedMail($educator, $batch, $payments),
                     'emails'
                 );
-            } catch (\Throwable $e) {
-                Log::error('Failed to send educator payout released email', [
-                    'educator_id' => $educator->id,
-                    'error'       => $e->getMessage(),
-                ]);
             }
-        });
+        } catch (\Throwable $e) {
+            $this->logFailure('Educator success email failed.', [
+                'educator_id' => $educator->id,
+                'batch_id'    => $batch->id,
+                'error'       => $e->getMessage(),
+            ]);
+        }
+
+        $this->notifyAdmin($batch, $educator, true);
+    }
+
+    /** STEP 5a — Email educator (failure is admin-only) and admin inbox. */
+    private function sendFailureNotifications(User $educator, PayoutBatch $batch, string $error): void
+    {
+        $this->notifyAdmin($batch, $educator, false, $error);
+    }
+
+    private function notifyAdmin(PayoutBatch $batch, User $educator, bool $success, ?string $error = null): void
+    {
+        $adminEmail = config('payout.admin_notification_email');
+
+        if (! $adminEmail) {
+            return;
+        }
+
+        try {
+            EmailService::send(
+                $adminEmail,
+                new AdminPayoutBatchProcessedMail($batch, $educator, $success, $error),
+                'emails'
+            );
+        } catch (\Throwable $e) {
+            $this->logFailure('Admin notification email failed.', [
+                'batch_id'    => $batch->id,
+                'educator_id' => $educator->id,
+                'success'     => $success,
+                'error'       => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /** Write to storage/logs/release_payout_success-*.log */
+    private function logSuccess(string $message, array $context = []): void
+    {
+        Log::channel('release_payout_success')->info($message, $context);
+    }
+
+    /** Write to storage/logs/release_payout_failure-*.log */
+    private function logFailure(string $message, array $context = []): void
+    {
+        Log::channel('release_payout_failure')->error($message, $context);
+    }
+
+    /** Mark a linked payout request as closed when processing cannot proceed. */
+    private function failLinkedRequest(string $reason): void
+    {
+        if (! $this->educatorPayoutRequestId) {
+            return;
+        }
+
+        $request = EducatorPayoutRequest::find($this->educatorPayoutRequestId);
+
+        if (! $request) {
+            return;
+        }
+
+        $note = trim(($request->admin_notes ?? '') . "\n[Auto] Processing failed: {$reason}");
+
+        $request->update([
+            'status'      => EducatorPayoutRequest::STATUS_CLOSED,
+            'admin_notes' => $note,
+            'resolved_at' => now(),
+            'resolved_by' => $this->triggeredByUserId,
+        ]);
+
+        $this->logFailure('Linked payout request closed after processing failure.', [
+            'request_id'  => $request->id,
+            'educator_id' => $request->educator_id,
+            'reason'      => $reason,
+        ]);
     }
 }

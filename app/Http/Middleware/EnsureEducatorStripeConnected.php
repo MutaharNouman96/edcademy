@@ -6,12 +6,9 @@ use Closure;
 use Illuminate\Http\Request;
 
 /**
- * Forces educators to finish Stripe Connect onboarding before they can use the
- * educator panel. Educators who have not connected (and had payouts enabled by
- * Stripe) are redirected to their settings page to complete the setup.
- *
- * The settings page and the Stripe Connect onboarding routes must be excluded
- * from this middleware so the educator has somewhere to actually complete it.
+ * Previously forced educators to finish Stripe Connect onboarding before using
+ * the educator panel. Payout setup is now optional at login; educators see a
+ * dashboard reminder instead. This middleware is kept for optional use only.
  */
 class EnsureEducatorStripeConnected
 {

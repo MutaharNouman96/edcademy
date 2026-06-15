@@ -119,7 +119,7 @@ class StripeConnectController extends Controller
             }
 
             return redirect()
-                ->route('educator.settings', ['stripe' => 'required'])
+                ->route('educator.settings')
                 ->with('error', 'Your Stripe onboarding is incomplete. Please finish adding your IBAN/bank details to receive payouts.');
         } catch (ApiErrorException $e) {
             Log::error('Stripe Connect status check failed', [

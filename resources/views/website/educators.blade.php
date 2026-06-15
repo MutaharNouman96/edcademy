@@ -159,7 +159,12 @@
                                 @endif
                             </div>
                             <div class="educator-body">
-                                <h3 class="educator-name">{{ $educator->first_name . ' ' . $educator->last_name }}</h3>
+                                <h3 class="educator-name">
+                                    {{ $educator->first_name . ' ' . $educator->last_name }}
+                                    @if ($educator->educatorProfile?->educator_type)
+                                        <span class="educator-type-badge educator-type-{{ $educator->educatorProfile->educator_type }}">{{ ucfirst($educator->educatorProfile->educator_type) }}</span>
+                                    @endif
+                                </h3>
                                 <p class="educator-subject">
                                     {{ $educator->educatorProfile->primary_subject ?? 'N/A' }}
                                 </p>
@@ -354,7 +359,10 @@
                                         ${educator.is_online ? '<div class="online-indicator"></div>' : ''}
                                     </div>
                                     <div class="educator-body">
-                                        <h3 class="educator-name">${educator.name}</h3>
+                                        <h3 class="educator-name">
+                                            ${educator.name}
+                                            ${educator.educator_profile && educator.educator_profile.educator_type ? `<span class="educator-type-badge educator-type-${educator.educator_profile.educator_type}">${educator.educator_profile.educator_type.charAt(0).toUpperCase() + educator.educator_profile.educator_type.slice(1)}</span>` : ''}
+                                        </h3>
                                         <p class="educator-subject">
                                             ${educator.educator_profile ? educator.educator_profile.main_subject : 'N/A'}
                                         </p>
@@ -800,6 +808,29 @@
                 font-weight: 700;
                 color: #333;
                 margin-bottom: 5px;
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .educator-type-badge {
+                font-size: 0.7rem;
+                font-weight: 600;
+                padding: 3px 10px;
+                border-radius: 12px;
+                text-transform: capitalize;
+                vertical-align: middle;
+            }
+
+            .educator-type-teacher {
+                background: #e3f2fd;
+                color: #1565c0;
+            }
+
+            .educator-type-tutor {
+                background: #f3e5f5;
+                color: #7b1fa2;
             }
 
             .educator-subject {

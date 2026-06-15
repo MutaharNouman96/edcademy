@@ -2,37 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\OrderInvoiceMail;
-use App\Models\Course;
-use App\Models\EducatorPayment;
-use App\Models\Lesson;
+use App\Models\Order;
+use App\Services\CheckoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\Order;
-use App\Models\UserPurchasedItem;
-use App\Services\EmailService;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class PaypalController extends Controller
 {
     protected $paypal_base_url;
-    //
+
     public function __construct()
     {
-        $this->paypal_base_url = (env('PAYPAL_MODE') == "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com");
+        $this->paypal_base_url = (env('PAYPAL_MODE') == 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com');
     }
-
 
     public function create(Request $request)
     {
-        // 1. --- CRITICAL: THE TRY-CATCH BLOCK FOR JSON RESPONSE ---
         try {
             $validated = Validator::make($request->all(), [
                 'order_id' => 'required',
                 'description' => 'nullable|string',
-
             ]);
 
             if ($validated->fails()) {
@@ -43,40 +34,29 @@ class PaypalController extends Controller
                 ]);
             }
 
-            // 2. --- CRITICAL: PAYPAL ORDER CREATION ---
-            // Get the access token
             $accessToken = $this->getAccessToken();
             $cartOrder = Order::where('id', $request->order_id)->first();
 
-            if (!$cartOrder) {
+            if (! $cartOrder) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Order not found',
                 ]);
             }
-            //get the order amount
-            $amount = $cartOrder->total;
 
-            // Create the order on PayPal's server
+            $amount = $cartOrder->total;
             $order = $this->requestPayPalOrder($accessToken, $amount);
 
-            //update the order transaction id and other details
             $cartOrder->transaction_id = $order['id'];
-
             $cartOrder->payment_method = 'paypal';
             $cartOrder->note = $request->description;
-
             $cartOrder->save();
 
-
-            // 4. SUCCESS: Return the Order ID and other data as JSON
             return response()->json([
                 'success' => true,
-                'id' => $order['id']
+                'id' => $order['id'],
             ], 201);
         } catch (\Throwable $e) {
-            // 5. FAILURE: Log the error and return a JSON error response
-            // This prevents Laravel's default behavior of returning an HTML error page.
             Log::error('PayPal Order Creation Failed:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -90,12 +70,7 @@ class PaypalController extends Controller
         }
     }
 
-    /**
-     * Helper to get the PayPal Access Token.
-     * This is the most common point of failure.
-     * @return string
-     */
-    protected function getAccessToken()
+    protected function getAccessToken(): string
     {
         $response = Http::asForm()
             ->withBasicAuth(env('PAYPAL_CLIENT_ID'), env('PAYPAL_SECRET'))
@@ -103,7 +78,6 @@ class PaypalController extends Controller
                 'grant_type' => 'client_credentials',
             ]);
 
-        // Check if the request failed (e.g., 401 Unauthorized due to bad credentials)
         if ($response->failed()) {
             throw new \Exception('Failed to retrieve PayPal access token.', $response->status());
         }
@@ -111,13 +85,7 @@ class PaypalController extends Controller
         return $response->json()['access_token'];
     }
 
-    /**
-     * Helper to create the order with PayPal.
-     * @param string $accessToken
-     * @param string $amount
-     * @return array
-     */
-    protected function requestPayPalOrder($accessToken, $amount)
+    protected function requestPayPalOrder(string $accessToken, $amount): array
     {
         $response = Http::withHeaders([
             'Authorization' => "Bearer {$accessToken}",
@@ -129,14 +97,12 @@ class PaypalController extends Controller
                     'amount' => [
                         'currency_code' => 'USD',
                         'value' => number_format($amount, 2, '.', ''),
-                    ]
-                ]
+                    ],
+                ],
             ],
-            // Add application context details here for return/cancel URLs if needed
         ]);
 
         if ($response->failed()) {
-            // PayPal's API returns a JSON error body for bad requests (400, 422, etc.)
             $errorDetails = $response->json();
             $errorMessage = $errorDetails['details'][0]['description'] ?? ($errorDetails['message'] ?? 'Unknown API error');
             throw new \Exception("PayPal Order API failed: {$errorMessage}", $response->status());
@@ -145,21 +111,17 @@ class PaypalController extends Controller
         return $response->json();
     }
 
-
-
-    public function capture(Request $request)
+    public function capture(Request $request, CheckoutService $checkoutService)
     {
         $request->validate([
             'orderID' => 'required|string',
         ]);
 
         try {
-            //  Get PayPal Access Token
             $accessToken = $this->getAccessToken();
 
-            //  Capture Payment
             $response = Http::withToken($accessToken)
-                ->post(config('services.paypal.base_url') . "/v2/checkout/orders/{$request->orderID}/capture");
+                ->post($this->paypal_base_url . "/v2/checkout/orders/{$request->orderID}/capture");
 
             if (! $response->successful()) {
                 Log::error('PayPal Capture Failed', $response->json());
@@ -171,11 +133,8 @@ class PaypalController extends Controller
             }
 
             $paypalData = $response->json();
-
-            //  Payment Status
             $status = $paypalData['status'] ?? 'FAILED';
 
-            //  Save Order
             $order = Order::where('transaction_id', $request->orderID)->first();
 
             if (! $order) {
@@ -185,53 +144,36 @@ class PaypalController extends Controller
                 ], 404);
             }
 
-            $order->update([
-                'payment_method'  => 'paypal',
-                'status'          => $status === 'COMPLETED' ? 'paid' : 'failed',
-                'transaction_id'  => $request->orderID,
-                'payment_details' => json_encode($paypalData),
-                'is_active'       => $status === 'COMPLETED',
-            ]);
-
-            $paymentId = $order->id . (Str::uuid());
-            foreach ($order->items as $item) {
-                $itemEducatorId = $item->model == "App\Models\Lesson" ? Lesson::find($item->item_id)->with('course')->first()->course->user_id : Course::find($item->item_id)->user_id;
-
-                // Commission is taken at the educator's configured rate (defaults to 25%).
-                $commissionRate = optional(\App\Models\User::find($itemEducatorId))->commissionRate()
-                    ?? \App\Models\User::DEFAULT_COMMISSION_RATE;
-                $commission = money($item->total * $commissionRate / 100);
-                UserPurchasedItem::firstOrCreate([
-                    'user_id' => auth()->id(),
-                    'purchasable_id' => $item->id,
-                    'purchasable_type' => $item->model,
-                    'active' => true,
+            if ($status !== 'COMPLETED') {
+                $order->update([
+                    'payment_method' => 'paypal',
+                    'status' => 'failed',
+                    'transaction_id' => $request->orderID,
+                    'payment_details' => json_encode($paypalData),
+                    'is_active' => false,
                 ]);
-                EducatorPayment::firstOrCreate([
-                    'educator_id' => $itemEducatorId,
-                    'order_id' => $order->id,
-                    'order_item_id' => $item->id,
-                    'gross_amount' => $item->total,
-                    'currency' => setting('currency', 'USD'),
-                    'platform_commission' => $commission,
-                    'net_amount' => $item->total - $commission,
-                    'payment_id' => $paymentId,
-                    'status' => 'completed',
-                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'status' => $status,
+                    'message' => 'Payment was not completed',
+                ], 422);
             }
-            EmailService::send(
-                $order->user->email,
-                new OrderInvoiceMail($order),
-                'emails'
+
+            $checkoutService->completePaidOrder(
+                $order,
+                $request->orderID,
+                'paypal',
+                $paypalData,
+                'stripe',
             );
 
             return response()->json([
                 'success' => true,
-                'status'  => $status,
-                'order'   => $order,
+                'status' => $status,
+                'order' => $order->fresh(),
             ]);
         } catch (\Throwable $e) {
-
             Log::error('PayPal Capture Exception', [
                 'error' => $e->getMessage(),
             ]);

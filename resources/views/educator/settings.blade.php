@@ -22,15 +22,71 @@
 
     <!-- Main -->
 
-    @if(request('stripe') === 'required' || ($user->isEducator() && ! $user->canReceivePayouts()))
+    @php
+        $openPayoutRequest = ($user->isEducator() && ! $user->canReceivePayouts())
+            ? \App\Models\EducatorPayoutRequest::query()
+                ->where('educator_id', $user->id)
+                ->open()
+                ->latest()
+                ->first()
+            : null;
+    @endphp
+
+    @if ($user->isEducator() && ! $user->canReceivePayouts())
         <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2" id="stripeSetupAlert">
             <div>
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <strong>Action required:</strong> Complete your Stripe payout setup (add your IBAN / bank details) to start receiving payments and unlock the educator panel.
+                <strong>Payout setup recommended:</strong> Connect Stripe and add your IBAN / bank details to receive earnings from your courses.
             </div>
-            <a href="{{ route('stripe.connect') }}" class="btn btn-sm btn-warning">
-                <i class="bi bi-link-45deg me-1"></i> Set up payouts
-            </a>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('stripe.connect') }}" class="btn btn-sm btn-warning">
+                    <i class="bi bi-link-45deg me-1"></i> Set up payouts
+                </a>
+                @if ($openPayoutRequest)
+                    <span class="badge text-bg-info align-self-center">
+                        Assistance request {{ $openPayoutRequest->status === 'in_progress' ? 'in progress' : 'pending' }}
+                    </span>
+                @else
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                        data-bs-target="#payoutAssistModal">
+                        <i class="bi bi-headset me-1"></i> Ask admin for help
+                    </button>
+                @endif
+            </div>
+        </div>
+    @endif
+
+    @if ($user->isEducator() && ! $user->canReceivePayouts() && ! $openPayoutRequest)
+        <div class="modal fade" id="payoutAssistModal" tabindex="-1" aria-labelledby="payoutAssistModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('educator.payout-requests.store') }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="payoutAssistModalLabel">
+                                <i class="bi bi-headset me-2"></i>Request payout assistance
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted small">
+                                Tell us what you need help with. An admin can guide you through Stripe Connect and payout setup.
+                            </p>
+                            <label class="form-label" for="payoutAssistMessage">Message (optional)</label>
+                            <textarea class="form-control" id="payoutAssistMessage" name="message" rows="4"
+                                maxlength="2000"
+                                placeholder="e.g. I need help adding my IBAN / bank account for payouts.">{{ old('message') }}</textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-1"></i> Send request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     @endif
 
@@ -695,7 +751,7 @@
                         <div class="col-md-6">
                             <div class="p-3 border rounded-3 bg-white h-100">
                                 <h6><i class="bi bi-credit-card-2-front me-1"></i> Stripe Connect &amp; Payouts</h6>
-                                <p class="help mb-2">Add your IBAN / bank details through Stripe to receive your earnings. This is required before you can be paid.</p>
+                                <p class="help mb-2">Add your IBAN / bank details through Stripe to receive your earnings when students purchase your content.</p>
                                 <div id="stripeConn" class="mb-2">
                                     @if($user->canReceivePayouts())
                                         <span class="badge text-bg-success">Connected &amp; payouts enabled</span>
@@ -1357,17 +1413,11 @@
                     showToast('Zoom connected (demo).', 'success');
                 });
 
-                // When Stripe payout setup is required, open the Connections tab
-                // automatically so the educator can start onboarding right away.
-                const stripeRequired = new URLSearchParams(window.location.search).get('stripe') === 'required';
-                if (stripeRequired) {
+                // When opening settings, optionally focus the Connections tab via hash.
+                if (window.location.hash === '#tab-connections') {
                     const connTabBtn = document.getElementById('connections-tab');
                     if (connTabBtn && window.bootstrap) {
                         new bootstrap.Tab(connTabBtn).show();
-                    }
-                    const alertEl = document.getElementById('stripeSetupAlert');
-                    if (alertEl) {
-                        alertEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 }
             }

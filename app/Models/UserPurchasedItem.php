@@ -25,6 +25,28 @@ class UserPurchasedItem extends MorphPivot
         return $this->morphTo(); // to course or lesson
     }
 
+    /**
+     * Human-readable label for payment history / invoices.
+     */
+    public function displayTitle(): string
+    {
+        $item = $this->purchasable;
+
+        if (! $item) {
+            return 'Purchase #' . $this->id;
+        }
+
+        return $item->title ?? ('Item #' . $this->purchasable_id);
+    }
+
+    /**
+     * Best-effort price from the underlying purchasable record.
+     */
+    public function displayPrice(): float
+    {
+        return (float) ($this->purchasable?->price ?? 0);
+    }
+
     public function educator()
     {
         return $this->hasOneThrough(

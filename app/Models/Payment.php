@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends Model
 {
     use HasFactory;
+    protected $table = 'payments';
+
 
     protected $fillable = [
         'educator_id',
@@ -24,6 +26,13 @@ class Payment extends Model
         'transaction_id',
         'status',
         'notes',
+
+        //payout related fields
+        'is_payout_processed',
+        'payout_batch_id',
+        'payout_status',
+        'is_payout_requested',
+        'payout_requested_at',
     ];
 
     public function student()
@@ -46,5 +55,14 @@ class Payment extends Model
         return $this->belongsTo(PaymentMethod::class, 'payment_method', 'name');
     }
 
-    protected $table = 'payments';
+    public function payoutBatch()
+    {
+        return $this->belongsTo(PayoutBatch::class, 'payout_batch_id');
+    }
+
+    protected $casts = [
+        'is_payout_processed'  => 'boolean',
+        'is_payout_requested'  => 'boolean',
+        'payout_requested_at'  => 'datetime',
+    ];
 }

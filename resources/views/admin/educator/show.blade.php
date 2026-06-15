@@ -70,6 +70,9 @@
                                 <span
                                     class="badge bg-primary">{{ $educator->courses ? $educator->courses->count() : 0 }}
                                     Courses</span>
+                                @if ($profile && $profile->educator_type)
+                                    <span class="badge bg-info text-dark">{{ ucfirst($profile->educator_type) }}</span>
+                                @endif
                             </div>
                             <p class="text-muted mb-0">{{ $educator->email }}</p>
                         </div>
@@ -132,6 +135,10 @@
                                 <div class="col-md-6">
                                     <strong>Primary Subject:</strong>
                                     <p class="mt-1">{{ $profile->primary_subject ?? 'N/A' }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Educator Type:</strong>
+                                    <p class="mt-1">{{ $profile->educator_type ? ucfirst($profile->educator_type) : 'N/A' }}</p>
                                 </div>
                                 <div class="col-md-6">
                                     <strong>Teaching Levels:</strong>

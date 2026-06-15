@@ -26,6 +26,7 @@ use App\Http\Controllers\StripeController;
 use App\Http\Controllers\StripeConnectController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\WebsiteController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Mail\OrderInvoiceMail;
 use App\Models\Order;
@@ -271,32 +272,29 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('lessons/{id}', [App\Http\Controllers\Admin\DashboardController::class, 'showLesson'])->name('lessons.show');
 
         Route::get('payouts', [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
-        Route::get('payout/{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name('payouts.show');
-        Route::post('process/payout/{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'process'])->name('payouts.process');
+        Route::get('payout-batches/{batch}', [App\Http\Controllers\Admin\PayoutController::class, 'showBatch'])->name('payout-batches.show');
+        Route::post('payouts/run-release', [App\Http\Controllers\Admin\PayoutController::class, 'runScheduledRelease'])->name('payouts.run-release');
+        Route::post('payouts/educator/{educator}/release', [App\Http\Controllers\Admin\PayoutController::class, 'runEducatorRelease'])->name('payouts.educator-release');
 
-        // Payout generation and management
-        Route::get('payouts/upcoming', [App\Http\Controllers\Admin\PayoutController::class, 'upcomingPayouts'])->name('payouts.upcoming');
-        Route::post('payouts/generate-upcoming', [App\Http\Controllers\Admin\PayoutController::class, 'generateUpcomingPayouts'])->name('payouts.generate-upcoming');
-        Route::post('payouts/release', [App\Http\Controllers\Admin\PayoutController::class, 'releasePayouts'])->name('payouts.release');
-        Route::post('payouts/{payout}/release', [App\Http\Controllers\Admin\PayoutController::class, 'releasePayout'])->name('payouts.release-single');
-        Route::get('payouts/{payout}/details', [App\Http\Controllers\Admin\PayoutController::class, 'getPayoutDetails'])->name('payouts.details');
-
-        // Additional payout management routes
-        Route::patch('earnings/{id}/status', [App\Http\Controllers\Admin\PayoutController::class, 'updateEarningStatus'])->name('earnings.status');
-        Route::post('earnings/bulk-update', [App\Http\Controllers\Admin\PayoutController::class, 'bulkUpdateEarnings'])->name('earnings.bulk-update');
-        Route::post('payouts/create', [App\Http\Controllers\Admin\PayoutController::class, 'createPayout'])->name('payouts.create');
+        Route::get('educator-payout-requests', [App\Http\Controllers\Admin\EducatorPayoutRequestController::class, 'index'])->name('educator-payout-requests.index');
+        Route::get('educator-payout-requests/{educatorPayoutRequest}', [App\Http\Controllers\Admin\EducatorPayoutRequestController::class, 'show'])->name('educator-payout-requests.show');
+        Route::put('educator-payout-requests/{educatorPayoutRequest}', [App\Http\Controllers\Admin\EducatorPayoutRequestController::class, 'update'])->name('educator-payout-requests.update');
+        Route::post('educator-payout-requests/{educatorPayoutRequest}/approve', [App\Http\Controllers\Admin\EducatorPayoutRequestController::class, 'approve'])->name('educator-payout-requests.approve');
 
         Route::resource('earnings', App\Http\controllers\Admin\EarningController::class)->only(['index', 'show']);
 
-        // Financial Reports
         Route::get('financial-reports', [App\Http\Controllers\Admin\FinancialReportsController::class, 'index'])->name('financial-reports.index');
     });
 
 // Educator routes
-Route::get('educator-panel/dashboard', [EducatorDashboardController::class, 'index'])->name('educator.dashboard')->middleware(['auth', 'role:educator', 'educator.stripe.connected']);
+Route::middleware(['auth', 'role:educator'])->prefix('educator-panel')->group(function () {
+    Route::get('dashboard', [EducatorDashboardController::class, 'index'])->name('educator.dashboard');
+    Route::post('payout-requests', [\App\Http\Controllers\Educator\PayoutRequestController::class, 'store'])
+        ->name('educator.payout-requests.store');
+});
 
 
-Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verified', 'educator.stripe.connected'])
+Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verified'])
     ->prefix('educator-panel')
     ->group(function () {
        
@@ -327,15 +325,8 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
 
         Route::get('payouts', [PayoutController::class, 'index'])->name('educator.payouts.index');
 
-        Route::prefix('payouts')->group(function () {
-            Route::get('/kpis', [PayoutController::class, 'kpis']);
-            Route::get('/upcoming', [PayoutController::class, 'upcoming']);
-            Route::get('/history', [PayoutController::class, 'history']);
-
-            Route::get('/banks', [PayoutController::class, 'banks']);
-            Route::post('/banks/save', [PayoutController::class, 'saveBank']);
-            Route::delete('/banks/{id}', [PayoutController::class, 'deleteBank']);
-        });
+        Route::get('payout-requests', [\App\Http\Controllers\Educator\PayoutRequestController::class, 'index'])
+            ->name('educator.payout-requests.index');
 
         Route::resource('courses', \App\Http\Controllers\Educator\CoursesController::class)->names('educator.courses');
 
@@ -385,8 +376,9 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
 
         Route::get('resources', [EducatorDashboardController::class, 'resources'])->name('educator.resources.index');
 
+
         Route::prefix('settings')
-        ->withoutMiddleware(['verified', 'educator.profile.verified', 'educator.stripe.connected'])
+        ->withoutMiddleware(['verified', 'educator.profile.verified'])
         ->group(function () {
             Route::get('/', [ProfileSettingController::class, 'index'])->name('educator.settings');
 
@@ -464,9 +456,15 @@ Route::middleware(['auth', 'role:student'])
         Route::delete('wishlist/{course_id}', [StudentDashboardController::class, 'removeWishlistCourse'])->name('wishlist.remove');
 
         Route::post('lesson-comment', [StudentDashboardController::class, 'storeLessonComment'])->name('lesson_comment.store');
+        Route::post('lesson-progress', [StudentDashboardController::class, 'recordLessonProgress'])->name('lesson_progress.store');
     });
 
-Route::post('book-session', [WebsiteController::class, 'bookSession'])->name('book.session');
+// -------------------------------------------------------------------------
+// Session booking (student -> educator, paid via Stripe, hosted on Zoom)
+// -------------------------------------------------------------------------
+Route::post('book-session', [BookingController::class, 'createCheckout'])->name('book.session');
+Route::get('booking/payment/success', [BookingController::class, 'paymentSuccess'])->name('booking.payment.success');
+Route::get('booking/payment/cancel', [BookingController::class, 'paymentCancel'])->name('booking.payment.cancel');
 
 Route::middleware(['guest'])->group(function () {
     Route::get('student/signup', fn() => view('student.signup'))->name('student.signup');

@@ -39,4 +39,14 @@ return [
         'application_fee_percent' => env('STRIPE_APPLICATION_FEE_PERCENT', 10),
     ],
 
+    // Zoom Server-to-Server OAuth app credentials, used to programmatically
+    // create meetings for booked 1-on-1 sessions.
+    'zoom' => [
+        'account_id'    => env('ZOOM_ACCOUNT_ID'),
+        'client_id'     => env('ZOOM_CLIENT_ID'),
+        'client_secret' => env('ZOOM_CLIENT_SECRET'),
+        // The Zoom user (email or "me") under which meetings are created.
+        'user_id'       => env('ZOOM_USER_ID', 'me'),
+    ],
+
 ];

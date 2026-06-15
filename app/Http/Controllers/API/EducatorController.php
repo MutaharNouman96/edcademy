@@ -109,6 +109,7 @@ class EducatorController extends Controller
                 'educator_profile' => $educator->educatorProfile ? [
                     'is_featured' => $educator->educatorProfile->featured ?? false,
                     'main_subject' => $educator->educatorProfile->primary_subject ?? 'N/A',
+                    'educator_type' => $educator->educatorProfile->educator_type ?? null,
                     'teaching_style' => $educator->educatorProfile->preferred_teaching_style ?? null,
                     'years_experience' => '0', // Not available in database yet
                     'teaching_levels' => $educator->educatorProfile->teaching_levels ?

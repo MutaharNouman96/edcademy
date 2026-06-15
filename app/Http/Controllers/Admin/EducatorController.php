@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\EducatorProfile;
+use App\Models\EducatorAdditionalDocument;
 use App\Models\Payment;
 use App\Models\Earning;
 use App\Models\SessionCall;
@@ -50,6 +51,7 @@ class EducatorController extends Controller
             'last_name'                => 'required|string|max:255',
             'email'                    => 'required|email|unique:users,email',
             'primary_subject'          => 'required|string|max:255',
+            'educator_type'            => 'nullable|in:teacher,tutor',
             'teaching_levels'          => 'required|array',
             'hourly_rate'              => 'required|numeric|min:5',
             'certifications'           => 'nullable|string',
@@ -113,6 +115,7 @@ class EducatorController extends Controller
             EducatorProfile::create([
                 'user_id'                  => $user->id,
                 'primary_subject'          => $request->primary_subject,
+                'educator_type'            => $request->educator_type,
                 'teaching_levels'          => json_encode($request->teaching_levels),
                 'hourly_rate'              => $request->hourly_rate,
                 'certifications'           => $request->certifications,
@@ -123,6 +126,8 @@ class EducatorController extends Controller
                 'consent_verified'         => true,
                 'status'                   => $request->status,
             ]);
+
+            $this->storeAdditionalDocuments($request, $user->id);
 
             DB::commit();
 
@@ -152,7 +157,7 @@ class EducatorController extends Controller
     public function edit($id)
     {
         $educator = User::where('role', 'educator')
-            ->with('educatorProfile')
+            ->with(['educatorProfile', 'additionalDocuments'])
             ->findOrFail($id);
 
         return view('admin.educator.edit', compact('educator'));
@@ -170,14 +175,19 @@ class EducatorController extends Controller
             'last_name'                => 'required|string|max:255',
             'email'                    => 'required|email|unique:users,email,' . $educator->id,
             'primary_subject'          => 'required|string|max:255',
+            'educator_type'            => 'nullable|in:teacher,tutor',
             'teaching_levels'          => 'required|array',
             'hourly_rate'              => 'required|numeric|min:5',
             'certifications'           => 'nullable|string',
             'preferred_teaching_style' => 'nullable|string|max:255',
             'cv'                       => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
             'degree_proof'             => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
-            'additional_documents'     => 'nullable|array|max:5',
-            'additional_documents.*'    => 'file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
+            'additional_documents'              => 'nullable|array|max:5',
+            'additional_documents.*'            => 'file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
+            'replace_additional_documents'      => 'nullable|array',
+            'replace_additional_documents.*'    => 'file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6000',
+            'remove_additional_documents'       => 'nullable|array',
+            'remove_additional_documents.*'     => 'integer|exists:educator_additional_documents,id',
             'intro_video'              => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:51200',
             'status'                   => 'required|in:pending,approved,rejected',
             'commission_rate'          => 'nullable|numeric|min:0|max:100',
@@ -226,12 +236,17 @@ class EducatorController extends Controller
             }
 
             $profile->primary_subject          = $request->primary_subject;
+            $profile->educator_type            = $request->educator_type;
             $profile->teaching_levels           = json_encode($request->teaching_levels);
             $profile->hourly_rate               = $request->hourly_rate;
             $profile->certifications            = $request->certifications;
             $profile->preferred_teaching_style   = $request->preferred_teaching_style;
             $profile->status                    = $request->status;
             $profile->save();
+
+            $this->replaceAdditionalDocuments($request, $educator->id);
+            $this->removeAdditionalDocuments($request, $educator->id);
+            $this->storeAdditionalDocuments($request, $educator->id);
 
             DB::commit();
 
@@ -276,7 +291,7 @@ class EducatorController extends Controller
     {
         $educator = User::where('role', 'educator')->findOrFail($id);
         $payouts = Payment::where('educator_id', $id)
-            ->with('student')
+            ->with(['student', 'course'])
             ->latest()
             ->paginate(15);
 
@@ -311,5 +326,89 @@ class EducatorController extends Controller
             ->paginate(15);
 
         return view('admin.educator.sessions', compact('educator', 'sessions'));
+    }
+
+    private function replaceAdditionalDocuments(Request $request, int $educatorId): void
+    {
+        if (! $request->hasFile('replace_additional_documents')) {
+            return;
+        }
+
+        $dest = public_path('storage/educators/additional_documents');
+        if (! File::exists($dest)) {
+            File::makeDirectory($dest, 0755, true);
+        }
+
+        foreach ($request->file('replace_additional_documents') as $docId => $file) {
+            if (! $file || ! $file->isValid()) {
+                continue;
+            }
+
+            $document = EducatorAdditionalDocument::where('educator_id', $educatorId)->find($docId);
+            if (! $document) {
+                continue;
+            }
+
+            if ($document->document_path && File::exists(public_path($document->document_path))) {
+                File::delete(public_path($document->document_path));
+            }
+
+            $safeName = $educatorId . '_' . uniqid('', true) . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+            $file->move($dest, $safeName);
+
+            $document->update([
+                'document_path' => 'storage/educators/additional_documents/' . $safeName,
+                'document_type' => $file->getClientMimeType(),
+                'document_name' => $file->getClientOriginalName(),
+                'document_size' => (string) $file->getSize(),
+            ]);
+        }
+    }
+
+    private function storeAdditionalDocuments(Request $request, int $educatorId): void
+    {
+        if (! $request->hasFile('additional_documents')) {
+            return;
+        }
+
+        $dest = public_path('storage/educators/additional_documents');
+        if (! File::exists($dest)) {
+            File::makeDirectory($dest, 0755, true);
+        }
+
+        foreach ($request->file('additional_documents') as $file) {
+            if (! $file || ! $file->isValid()) {
+                continue;
+            }
+
+            $safeName = $educatorId . '_' . uniqid('', true) . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+            $file->move($dest, $safeName);
+
+            EducatorAdditionalDocument::create([
+                'educator_id'   => $educatorId,
+                'document_path' => 'storage/educators/additional_documents/' . $safeName,
+                'document_type' => $file->getClientMimeType(),
+                'document_name' => $file->getClientOriginalName(),
+                'document_size' => (string) $file->getSize(),
+            ]);
+        }
+    }
+
+    private function removeAdditionalDocuments(Request $request, int $educatorId): void
+    {
+        $ids = $request->input('remove_additional_documents', []);
+        if (empty($ids)) {
+            return;
+        }
+
+        EducatorAdditionalDocument::where('educator_id', $educatorId)
+            ->whereIn('id', $ids)
+            ->get()
+            ->each(function (EducatorAdditionalDocument $document) {
+                if ($document->document_path && File::exists(public_path($document->document_path))) {
+                    File::delete(public_path($document->document_path));
+                }
+                $document->delete();
+            });
     }
 }

@@ -471,9 +471,13 @@
                         </a>
 
                         <span class="nav-section-label">Finance</span>
-                        <a class="nav-link {{ request()->routeIs('admin.payouts.index') ? 'active' : '' }}"
+                        <a class="nav-link {{ request()->routeIs('admin.payouts.*') || request()->routeIs('admin.payout-batches.*') ? 'active' : '' }}"
                             href="{{ route('admin.payouts.index') }}">
                             <i class="bi bi-cash-coin"></i> <span>Payouts</span>
+                        </a>
+                        <a class="nav-link {{ request()->routeIs('admin.educator-payout-requests.*') ? 'active' : '' }}"
+                            href="{{ route('admin.payouts.index', ['view' => 'requests']) }}">
+                            <i class="bi bi-send-check"></i> <span>Payout Requests</span>
                         </a>
                         <a class="nav-link {{ request()->routeIs('admin.financial-reports.index') ? 'active' : '' }}"
                             href="{{ route('admin.financial-reports.index') }}">

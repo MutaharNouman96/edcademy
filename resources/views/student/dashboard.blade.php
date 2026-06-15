@@ -280,10 +280,10 @@
                 <div class="kpi-body">
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         <span class="kpi-ico kpi-ico-purple"><i class="bi bi-journal-richtext"></i></span>
-                        <span class="kpi-tag" style="background:var(--d-primary-50);color:var(--d-primary-dark)">Enrolled</span>
+                        <span class="kpi-tag" style="background:var(--d-primary-50);color:var(--d-primary-dark)">Purchased</span>
                     </div>
                     <div class="kpi-value" id="kpiEnrolled">{{ $enrolledCourses }}</div>
-                    <div class="kpi-label mt-1">Active courses</div>
+                    <div class="kpi-label mt-1">Items purchased</div>
                 </div>
             </div>
         </div>

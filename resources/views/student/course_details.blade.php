@@ -7,9 +7,8 @@
             ? $allLessonsSorted->search(fn($l) => $l->id === $currentLesson->id)
             : false;
         $currentIndex = $currentIndex === false ? -1 : $currentIndex;
-        $progressPct = $totalLessons > 0 && $currentIndex >= 0
-            ? (int) round((($currentIndex + 1) / $totalLessons) * 100)
-            : 0;
+        $completedLessonIds = $completedLessonIds ?? [];
+        $progressPct = (int) round($progressPct ?? 0);
         $upcomingLessons = $currentIndex >= 0
             ? $allLessonsSorted->slice($currentIndex + 1)->take(3)
             : collect();
@@ -216,10 +215,10 @@
                 <div class="cd-progress-wrap">
                     <div class="d-flex justify-content-between mb-1">
                         <span class="cd-progress-label">Your progress</span>
-                        <span class="cd-progress-pct">{{ $progressPct }}%</span>
+                        <span class="cd-progress-pct" id="cdProgressPct">{{ $progressPct }}%</span>
                     </div>
                     <div class="cd-progress">
-                        <div class="cd-progress-bar" style="width: {{ $progressPct }}%"></div>
+                        <div class="cd-progress-bar" id="cdProgressBar" style="width: {{ $progressPct }}%"></div>
                     </div>
                 </div>
 
@@ -244,11 +243,19 @@
                                 aria-labelledby="heading{{ $c->id }}" data-bs-parent="#chaptersAccordion">
                                 <div class="accordion-body p-0">
                                     @foreach ($chapterLessons as $lesson)
-                                        @php $isActiveLesson = $currentLesson && $lesson->id == $currentLesson->id; @endphp
+                                        @php
+                                            $isActiveLesson = $currentLesson && $lesson->id == $currentLesson->id;
+                                            $isCompletedLesson = in_array($lesson->id, $completedLessonIds, true);
+                                        @endphp
                                         <a href="{{ route('student.course_details', ['course_id' => $course->id, 'lesson_id' => $lesson->id]) }}"
-                                            class="cd-lesson-link {{ $isActiveLesson ? 'active' : '' }}">
+                                            class="cd-lesson-link {{ $isActiveLesson ? 'active' : '' }} {{ $isCompletedLesson ? 'completed' : '' }}"
+                                            data-lesson-id="{{ $lesson->id }}">
                                             <span class="cd-lesson-ico">
-                                                <i class="bi {{ $isActiveLesson ? 'bi-play-fill' : $lessonIcon($lesson->type) }}"></i>
+                                                @if ($isCompletedLesson && !$isActiveLesson)
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                @else
+                                                    <i class="bi {{ $isActiveLesson ? 'bi-play-fill' : $lessonIcon($lesson->type) }}"></i>
+                                                @endif
                                             </span>
                                             <span class="flex-grow-1 min-w-0">
                                                 <span class="cd-lesson-name">{{ $lesson->title }}</span>
@@ -439,6 +446,8 @@
                 display: inline-flex; align-items: center; justify-content: center; font-size: .9rem;
             }
             .cd-lesson-link.active .cd-lesson-ico { background: var(--cd-grad); color: #fff; border-color: transparent; }
+            .cd-lesson-link.completed .cd-lesson-ico { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
+            .cd-lesson-link.completed:not(.active) .cd-lesson-name { color: #374151; }
             .cd-lesson-name { display: block; font-size: .86rem; font-weight: 600; line-height: 1.3; }
             .cd-lesson-sub { display: block; font-size: .74rem; color: #9ca3af; }
 
@@ -575,6 +584,81 @@
                             .finally(() => { submitBtn.disabled = false; });
                     });
                 }
+
+                // ── Lesson progress tracking (video watch time) ──
+                @if ($currentLesson)
+                const progressUrl = @json(route('student.lesson_progress.store'));
+                const csrfToken = @json(csrf_token());
+                const lessonId = {{ $currentLesson->id }};
+                const lessonDuration = {{ (int) ($currentLesson->duration ?? 0) }};
+
+                const updateProgressUi = (pct) => {
+                    const bar = document.getElementById('cdProgressBar');
+                    const label = document.getElementById('cdProgressPct');
+                    const rounded = Math.round(Number(pct) || 0);
+                    if (bar) bar.style.width = rounded + '%';
+                    if (label) label.textContent = rounded + '%';
+                };
+
+                const markLessonLinkCompleted = () => {
+                    document.querySelectorAll(`.cd-lesson-link[data-lesson-id="${lessonId}"]`).forEach(link => {
+                        link.classList.add('completed');
+                        const ico = link.querySelector('.cd-lesson-ico i');
+                        if (ico && !link.classList.contains('active')) {
+                            ico.className = 'bi bi-check-circle-fill';
+                        }
+                    });
+                };
+
+                const sendProgress = (watchTime, completed = false) => {
+                    const body = new URLSearchParams({
+                        _token: csrfToken,
+                        lesson_id: String(lessonId),
+                        watch_time: String(Math.max(0, Math.floor(watchTime))),
+                        completed: completed ? '1' : '0',
+                    });
+
+                    fetch(progressUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body,
+                    })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) {
+                                updateProgressUi(data.progress_pct);
+                                if (data.lesson_completed) markLessonLinkCompleted();
+                            }
+                        })
+                        .catch(err => console.error('Progress tracking error:', err));
+                };
+
+                const videoEl = document.querySelector('.lesson-video-player video');
+                if (videoEl) {
+                    let lastSent = 0;
+                    const completionThreshold = lessonDuration > 0 ? lessonDuration * 0.8 : 0;
+
+                    const maybeSend = (forceCompleted = false) => {
+                        const current = Math.floor(videoEl.currentTime || 0);
+                        const completed = forceCompleted
+                            || (completionThreshold > 0 && current >= completionThreshold)
+                            || (videoEl.duration && current >= videoEl.duration - 2);
+
+                        if (forceCompleted || completed || current - lastSent >= 15) {
+                            sendProgress(current, completed);
+                            lastSent = current;
+                        }
+                    };
+
+                    videoEl.addEventListener('timeupdate', () => maybeSend(false));
+                    videoEl.addEventListener('ended', () => maybeSend(true));
+                    videoEl.addEventListener('pause', () => maybeSend(false));
+                }
+                @endif
             });
         </script>
     @endpush

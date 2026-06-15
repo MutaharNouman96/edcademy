@@ -58,6 +58,15 @@
                             @error('primary_subject') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-6">
+                            <label class="form-label fw-semibold">Educator Type</label>
+                            <select name="educator_type" class="form-select @error('educator_type') is-invalid @enderror">
+                                <option value="" {{ old('educator_type') === null || old('educator_type') === '' ? 'selected' : '' }}>Not set</option>
+                                <option value="teacher" {{ old('educator_type') === 'teacher' ? 'selected' : '' }}>Teacher</option>
+                                <option value="tutor" {{ old('educator_type') === 'tutor' ? 'selected' : '' }}>Tutor</option>
+                            </select>
+                            @error('educator_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">Hourly Rate ($) <span class="text-danger">*</span></label>
                             <input type="number" name="hourly_rate" value="{{ old('hourly_rate') }}" class="form-control @error('hourly_rate') is-invalid @enderror" min="5" step="0.01" required>
                             @error('hourly_rate') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -87,30 +96,126 @@
                 </div>
             </div>
 
-            <!-- Document Uploads -->
+            <!-- Documents & Media -->
+            @php
+                $documentRows = [
+                    [
+                        'key' => 'cv',
+                        'title' => 'CV / Resume',
+                        'filename' => null,
+                        'url' => null,
+                        'input_name' => 'cv',
+                        'accept' => '.pdf,.jpeg,.jpg,.png',
+                    ],
+                    [
+                        'key' => 'degree_proof',
+                        'title' => 'Degree Proof',
+                        'filename' => null,
+                        'url' => null,
+                        'input_name' => 'degree_proof',
+                        'accept' => '.pdf,.jpeg,.jpg,.png',
+                    ],
+                    [
+                        'key' => 'intro_video',
+                        'title' => 'Intro Video',
+                        'filename' => null,
+                        'url' => null,
+                        'input_name' => 'intro_video',
+                        'accept' => 'video/mp4,video/quicktime',
+                    ],
+                ];
+            @endphp
             <div class="kpi-card mb-4">
                 <div class="p-4">
                     <h5 class="mb-3"><i class="bi bi-file-earmark-arrow-up me-2"></i>Documents & Media</h5>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">CV / Resume</label>
-                            <input type="file" name="cv" class="form-control @error('cv') is-invalid @enderror" accept=".pdf,.jpeg,.jpg,.png">
-                            @error('cv') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            <small class="text-muted">PDF, JPEG, PNG (max 6MB)</small>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Degree Proof</label>
-                            <input type="file" name="degree_proof" class="form-control @error('degree_proof') is-invalid @enderror" accept=".pdf,.jpeg,.jpg,.png">
-                            @error('degree_proof') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            <small class="text-muted">PDF, JPEG, PNG (max 6MB)</small>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Intro Video</label>
-                            <input type="file" name="intro_video" class="form-control @error('intro_video') is-invalid @enderror" accept="video/mp4,video/quicktime">
-                            @error('intro_video') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            <small class="text-muted">MP4 or MOV (max 50MB)</small>
-                        </div>
+                    <p class="text-muted small mb-3">Use <strong>Update</strong> to choose a replacement file, then save the form.</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle doc-table mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 45%;">Document</th>
+                                    <th style="width: 25%;">Status</th>
+                                    <th class="text-end" style="width: 30%;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($documentRows as $row)
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ $row['title'] }}</div>
+                                            @if($row['filename'])
+                                                <div class="text-muted small text-truncate" style="max-width: 280px;" title="{{ $row['filename'] }}">{{ $row['filename'] }}</div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($row['filename'])
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle">Uploaded</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Not uploaded</span>
+                                            @endif
+                                            <div class="text-primary small mt-1 doc-pending-label" id="pending_{{ $row['key'] }}"></div>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-inline-flex gap-2">
+                                                @if($row['url'])
+                                                    <a href="{{ $row['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye me-1"></i>View
+                                                    </a>
+                                                @else
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                                        <i class="bi bi-eye me-1"></i>View
+                                                    </button>
+                                                @endif
+                                                <button type="button" class="btn btn-sm btn-outline-dark" data-doc-upload="upload_{{ $row['key'] }}">
+                                                    <i class="bi bi-arrow-repeat me-1"></i>Update
+                                                </button>
+                                            </div>
+                                            <input type="file"
+                                                id="upload_{{ $row['key'] }}"
+                                                name="{{ $row['input_name'] }}"
+                                                class="d-none doc-file-input"
+                                                accept="{{ $row['accept'] }}"
+                                                data-label="pending_{{ $row['key'] }}">
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">Add Additional Document</div>
+                                        <div class="text-muted small">Certificates, references, or other files</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-muted border">New upload</span>
+                                        <div class="text-primary small mt-1 doc-pending-label" id="pending_additional_new"></div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                                <i class="bi bi-eye me-1"></i>View
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-dark" data-doc-upload="upload_additional_new">
+                                                <i class="bi bi-upload me-1"></i>Update
+                                            </button>
+                                        </div>
+                                        <input type="file"
+                                            id="upload_additional_new"
+                                            name="additional_documents[]"
+                                            class="d-none doc-file-input"
+                                            accept=".pdf,.jpeg,.jpg,.png"
+                                            multiple
+                                            data-label="pending_additional_new">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
+
+                    @error('cv') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
+                    @error('degree_proof') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
+                    @error('intro_video') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
+                    @error('additional_documents') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
+                    @error('additional_documents.*') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
                 </div>
             </div>
         </div>
@@ -176,6 +281,44 @@
         border-color: var(--brand-700);
         color: #fff;
     }
+    .doc-table th {
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: var(--muted);
+    }
+    .doc-table td {
+        vertical-align: middle;
+    }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    document.querySelectorAll('[data-doc-upload]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var input = document.getElementById(btn.dataset.docUpload);
+            if (input) {
+                input.click();
+            }
+        });
+    });
+
+    document.querySelectorAll('.doc-file-input').forEach(function (input) {
+        input.addEventListener('change', function () {
+            var label = document.getElementById(input.dataset.label);
+            if (!label || !input.files.length) {
+                return;
+            }
+
+            if (input.files.length > 1) {
+                label.textContent = input.files.length + ' files selected (save to upload)';
+            } else {
+                label.textContent = input.files[0].name + ' (save to upload)';
+            }
+        });
+    });
+</script>
 @endpush
 </x-admin-layout>

@@ -50,14 +50,14 @@ class SendSessionReminders extends Command
                 // Send reminder to student
                 EmailService::send(
                     $booking->student->email,
-                    new SessionReminderMail($booking, false), // false = for student
+                    new SessionReminderMail($booking, true), // true = for student
                     'emails'
                 );
 
                 // Send reminder to educator
                 EmailService::send(
                     $booking->educator->email,
-                    new SessionReminderMail($booking, true), // true = for educator
+                    new SessionReminderMail($booking, false), // false = for educator
                     'emails'
                 );
 

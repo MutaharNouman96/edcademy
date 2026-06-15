@@ -65,7 +65,12 @@
                                         </div>
                                     @endif
                                     <div class="glass-landing--Educator-info mt-2">
-                                        <h4>{{ $educator->full_name }}</h4>
+                                        <h4>
+                                            {{ $educator->full_name }}
+                                            @if ($educator->educatorProfile?->educator_type)
+                                                <span class="educator-type-badge educator-type-{{ $educator->educatorProfile->educator_type }}">{{ ucfirst($educator->educatorProfile->educator_type) }}</span>
+                                            @endif
+                                        </h4>
                                         <div>
                                             {{ $educator->educatorProfile->primary_subject ?? '' }}
                                         </div>

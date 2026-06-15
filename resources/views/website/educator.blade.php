@@ -367,11 +367,6 @@ foreach ($starRatings as $star => $count) {
                         </div>
 
                         <form class="booking-form" id="booking-form">
-                            <div class="alert bg-success d-none" id="booking-alert">
-                                <div class="alert-success text-white">
-                                    Booking submitted.
-                                </div>
-                            </div>
                             <div class="mb-3">
                                 <label class="form-label">
                                     <i class="far fa-calendar me-2"></i>Select Date
@@ -608,13 +603,32 @@ foreach ($starRatings as $star => $count) {
             function bookSession(event) {
                 event.preventDefault();
                 const form = document.getElementById('booking-form');
+
+                // Basic client-side validation before hitting the server.
                 if (!bookingDateIso.value) {
-                    alert('Please select a date first.');
+                    Swal.fire({ icon: 'warning', title: 'Pick a date', text: 'Please select a date first.', confirmButtonColor: '#6f42c1' });
                     return;
                 }
+                if (!bookingTimeSelect.value) {
+                    Swal.fire({ icon: 'warning', title: 'Pick a time', text: 'Please choose an available time slot.', confirmButtonColor: '#6f42c1' });
+                    return;
+                }
+                if (!form.duration.value || !form.subject.value) {
+                    Swal.fire({ icon: 'warning', title: 'Missing details', text: 'Please choose a duration and subject.', confirmButtonColor: '#6f42c1' });
+                    return;
+                }
+
                 const formData = new FormData(form);
                 formData.set('date', bookingDateIso.value);
                 formData.append('educator_id', educatorId);
+
+                // Loading state while we create the checkout session.
+                Swal.fire({
+                    title: 'Preparing secure checkout...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading(),
+                });
 
                 fetch("{{ route('book.session') }}", {
                     method: 'POST',
@@ -624,30 +638,63 @@ foreach ($starRatings as $star => $count) {
                     },
                     body: formData
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('booking-alert').classList.remove('d-none');
-                        form.reset();
-                        bookingDateIso.value = '';
-                        bookingDateDisplay.value = '';
-                        bookingTimeSelect.innerHTML = '<option value="">Choose a date first</option>';
-                        bookingTimeSelect.disabled = true;
-                        timeSlotHint.textContent = 'Pick a date to see available times';
-                    } else {
-                        alert(data.message || 'Booking failed.');
+                .then(async response => ({ status: response.status, body: await response.json() }))
+                .then(({ status, body }) => {
+                    if (body.success && body.checkout_url) {
+                        // Redirect the student to Stripe Checkout.
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Redirecting to payment',
+                            text: body.message || 'Taking you to secure checkout...',
+                            timer: 1200,
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                        });
+                        setTimeout(() => { window.location.href = body.checkout_url; }, 1000);
+                        return;
                     }
+
+                    if (status === 401 && body.require_auth) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Please log in',
+                            text: body.message || 'You need to be logged in to book a session.',
+                            showCancelButton: true,
+                            confirmButtonText: 'Log in',
+                            confirmButtonColor: '#6f42c1',
+                        }).then(result => {
+                            if (result.isConfirmed) {
+                                window.location.href = "{{ route('login') }}";
+                            }
+                        });
+                        return;
+                    }
+
+                    Swal.fire({ icon: 'error', title: 'Could not book', text: body.message || 'Booking failed. Please try again.', confirmButtonColor: '#6f42c1' });
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An unexpected error occurred.');
+                    Swal.fire({ icon: 'error', title: 'Something went wrong', text: 'An unexpected error occurred. Please try again.', confirmButtonColor: '#6f42c1' });
                 });
             }
 
             // Contact educator
             function contactEducator() {
-                alert('Opening message form to contact Dr. Sarah Johnson...');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Contact Educator',
+                    text: 'Messaging will be available from your dashboard once your session is booked.',
+                    confirmButtonColor: '#6f42c1',
+                });
             }
+
+            // Surface server flash messages (e.g. cancelled payment) as a Swal popup.
+            @if(session('error'))
+                Swal.fire({ icon: 'error', title: 'Booking not completed', text: @json(session('error')), confirmButtonColor: '#6f42c1' });
+            @endif
+            @if(session('success'))
+                Swal.fire({ icon: 'success', title: 'Success', text: @json(session('success')), confirmButtonColor: '#6f42c1' });
+            @endif
 
             // View course buttons
             document.querySelectorAll('.view-btn').forEach(btn => {

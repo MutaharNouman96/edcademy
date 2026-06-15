@@ -1,97 +1,122 @@
-
 <x-admin-layout>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Manage Educators</h4>
-    <a href="{{ route('admin.educators.create') }}" class="btn btn-brand">
-        <i class="bi bi-person-plus me-1"></i>Add New Educator
-    </a>
-</div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Manage Educators</h4>
+        <a href="{{ route('admin.educators.create') }}" class="btn btn-brand">
+            <i class="bi bi-person-plus me-1"></i>Add New Educator
+        </a>
+    </div>
 
-<form method="GET" action="{{ route('admin.manage.educators') }}" class="filter-bar p-3 mb-4">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-4">
-            <label class="form-label fw-semibold">Status</label>
-            <select name="status" class="form-select">
-                <option value="">All</option>
-                <option value="approved" {{ request('status')=='approved'?'selected':'' }}>Approved</option>
-                <option value="pending" {{ request('status')=='pending'?'selected':'' }}>Pending</option>
-                <option value="rejected" {{ request('status')=='rejected'?'selected':'' }}>Rejected</option>
-            </select>
+    <form method="GET" action="{{ route('admin.manage.educators') }}" class="filter-bar p-3 mb-4">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All</option>
+                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Search</label>
+                <input type="text" name="q" value="{{ request('q') }}" class="form-control"
+                    placeholder="Name or email">
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button class="btn btn-brand">Apply Filters</button>
+            </div>
         </div>
-        <div class="col-md-4">
-            <label class="form-label fw-semibold">Search</label>
-            <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Name or email">
-        </div>
-        <div class="col-md-4 text-md-end">
-            <button class="btn btn-brand">Apply Filters</button>
+    </form>
+
+    <div class="kpi-card p-3">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Educator</th>
+                        <th>Educator Type</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Commission</th>
+                        <th>Joined</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($educators as $index => $educator)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $educator->full_name }}</td>
+                            <td>
+                                <span class="badge 
+                                    {{ 
+                                        $educator->educatorProfile->educator_type === 'teacher' ? 'text-bg-primary'
+                                        : ($educator->educatorProfile->educator_type === 'tutor' ? 'text-bg-info'
+                                        : 'text-bg-secondary')
+                                    }}">
+                                    {{
+                                        $educator->educatorProfile->educator_type
+                                            ? ucfirst($educator->educatorProfile->educator_type)
+                                            : 'Not set'
+                                    }}
+                                </span>
+                            </td>
+                       
+                            <td>{{ $educator->email }}</td>
+                            <td>
+                                <span
+                                    class="badge text-bg-{{ $educator->educatorProfile->status === 'approved' ? 'success' : ($educator->educatorProfile->status === 'pending' ? 'warning' : 'danger') }}">
+                                    {{ ucfirst($educator->educatorProfile->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <span
+                                    class="chip soft">{{ rtrim(rtrim(number_format($educator->commission_rate ?? \App\Models\User::DEFAULT_COMMISSION_RATE, 2), '0'), '.') }}%</span>
+                            </td>
+                            <td>{{ $educator->created_at->format('M d, Y') }}</td>
+                            <td class="text-end">
+                                <a href="{{ route('admin.educators.show', $educator->id) }}"
+                                    class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a href="{{ route('admin.educators.edit', $educator->id) }}"
+                                    class="btn btn-sm btn-outline-warning me-1">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <form method="POST" action="{{ route('admin.educators.status', $educator->id) }}"
+                                    class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <select name="status" onchange="this.form.submit()"
+                                        class="form-select form-select-sm d-inline w-auto">
+                                        <option value="approved"
+                                            {{ $educator->educatorProfile->status === 'approved' ? 'selected' : '' }}>
+                                            Approved
+                                        </option>
+                                        <option value="pending"
+                                            {{ $educator->educatorProfile->status === 'pending' ? 'selected' : '' }}>
+                                            Pending
+                                        </option>
+                                        <option value="rejected"
+                                            {{ $educator->educatorProfile->status === 'rejected' ? 'selected' : '' }}>
+                                            Rejected
+                                        </option>
+                                    </select>
+                                </form>
+
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No educators found</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
-</form>
-
-<div class="kpi-card p-3">
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Educator</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Commission</th>
-                    <th>Joined</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($educators as $index => $educator)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $educator->full_name }}</td>
-                        <td>{{ $educator->email }}</td>
-                        <td>
-                            <span class="badge text-bg-{{ $educator->educatorProfile->status === 'approved' ? 'success' : ($educator->educatorProfile->status === 'pending' ? 'warning' : 'danger') }}">
-                                {{ ucfirst($educator->educatorProfile->status) }}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="chip soft">{{ rtrim(rtrim(number_format($educator->commission_rate ?? \App\Models\User::DEFAULT_COMMISSION_RATE, 2), '0'), '.') }}%</span>
-                        </td>
-                        <td>{{ $educator->created_at->format('M d, Y') }}</td>
-                        <td class="text-end">
-                            <a href="{{ route('admin.educators.show', $educator->id) }}" class="btn btn-sm btn-outline-primary me-1">
-                                <i class="bi bi-eye"></i> View
-                            </a>
-                            <a href="{{ route('admin.educators.edit', $educator->id) }}" class="btn btn-sm btn-outline-warning me-1">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <form method="POST" action="{{ route('admin.educators.status', $educator->id) }}" class="d-inline">
-                                @csrf
-                                @method('PATCH')
-                                <select name="status" onchange="this.form.submit()" class="form-select form-select-sm d-inline w-auto">
-                                    <option value="approved" {{ $educator->educatorProfile->status === 'approved' ? 'selected' : '' }}>
-                                        Approved
-                                    </option>
-                                    <option value="pending" {{ $educator->educatorProfile->status === 'pending' ? 'selected' : '' }}>
-                                        Pending
-                                    </option>
-                                    <option value="rejected" {{ $educator->educatorProfile->status === 'rejected' ? 'selected' : '' }}>
-                                        Rejected
-                                    </option>
-                                </select>
-                            </form>
-
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center text-muted">No educators found</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-</div>
-</div>
 
     @push('styles')
         <style>
