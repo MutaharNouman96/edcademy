@@ -162,7 +162,8 @@
                                 <h3 class="educator-name">
                                     {{ $educator->first_name . ' ' . $educator->last_name }}
                                     @if ($educator->educatorProfile?->educator_type)
-                                        <span class="educator-type-badge educator-type-{{ $educator->educatorProfile->educator_type }}">{{ ucfirst($educator->educatorProfile->educator_type) }}</span>
+                                        <span
+                                            class="educator-type-badge educator-type-{{ $educator->educatorProfile->educator_type }}">{{ ucfirst($educator->educatorProfile->educator_type) }}</span>
                                     @endif
                                 </h3>
                                 <p class="educator-subject">
@@ -351,7 +352,9 @@
                         data.data.forEach(educator => {
                             console.log(educator);
                             const educatorCardHtml = `
+                            
                             <div class="col-lg-4 col-md-6">
+                            <a href="{{ url('/') }}/educator/${educator.id}" class="text-decoration-none">
                                 <div class="educator-card">
                                     <div class="educator-avatar-section" style="background-image: ${educator.profile_picture_url ? 'url(\'' + educator.profile_picture_url + '\')' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}">
                                         ${educator.profile_picture_url ?  '' : '<i class="fas fa-user-tie"></i>'}
@@ -376,11 +379,11 @@
                                             </span>
                                         </div>
                                         ${educator.educator_profile && educator.educator_profile.teaching_style ? `
-                                                            <div class="teaching-style-badge">
-                                                                <i class="fas fa-chalkboard-teacher"></i>
-                                                                ${educator.educator_profile.teaching_style}
-                                                            </div>
-                                                        ` : ''}
+                                                                    <div class="teaching-style-badge">
+                                                                        <i class="fas fa-chalkboard-teacher"></i>
+                                                                        ${educator.educator_profile.teaching_style}
+                                                                    </div>
+                                                                ` : ''}
                                         <div class="educator-stats">
                                             <span class="stat-item">
                                                 <i class="fas fa-user-graduate"></i>
@@ -400,11 +403,11 @@
                                             ${educator.educator_profile ? educator.educator_profile.bio : 'No bio available.'}
                                         </p>
                                         ${educator.educator_profile && educator.educator_profile.certifications ? `
-                                                            <div class="certifications-badge">
-                                                                <i class="fas fa-certificate"></i>
-                                                                ${educator.educator_profile.certifications}
-                                                            </div>
-                                                        ` : ''}
+                                                                    <div class="certifications-badge">
+                                                                        <i class="fas fa-certificate"></i>
+                                                                        ${educator.educator_profile.certifications}
+                                                                    </div>
+                                                                ` : ''}
                                         <div class="educator-footer">
                                             <div class="hourly-rate">
                                                 <span class="rate-label">Starting at</span>
@@ -414,8 +417,10 @@
                                                 <i class="fas fa-calendar-check me-1"></i>Book
                                             </a>
                                         </div>
+                                    </div>
+                            </a>
                                 </div>
-                            </div>
+
                         `;
                             educatorGrid.insertAdjacentHTML('beforeend', educatorCardHtml);
                         });

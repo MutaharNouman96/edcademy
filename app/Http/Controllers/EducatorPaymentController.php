@@ -26,7 +26,7 @@ class EducatorPaymentController extends Controller
             'paid_out'         => $allPayments->where('is_payout_processed', true)->sum(fn (Payment $p) => PayoutController::payableAmount($p)),
         ];
 
-        $payments = Payment::with(['student', 'course', 'payoutBatch'])
+        $payments = Payment::with([ 'course', 'payoutBatch'])
             ->where('educator_id', $educatorId)
             ->latest()
             ->paginate(20);

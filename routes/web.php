@@ -320,7 +320,7 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
             ->only(['index', 'show'])
             ->names('educator.earnings');
 
-        Route::get('/payments', [EducatorPaymentController::class, 'index'])->name('educator.payments.index');
+        Route::get('payments', [EducatorPaymentController::class, 'index'])->name('educator.payments.index');
         Route::get('/payments/{payment}', [EducatorPaymentController::class, 'show'])->name('educator.payments.show');
 
         Route::get('payouts', [PayoutController::class, 'index'])->name('educator.payouts.index');

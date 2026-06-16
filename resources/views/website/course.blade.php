@@ -210,6 +210,10 @@
                             <a
                                 href="{{ route('web.educator.show', $course->educator->id) }}">{{ $course->educator->full_name }}</a>
                             <p class="educator-subject">{{ $course->educator->educatorProfile->primary_subject }}</p>
+                            @if ($course->educator->educatorProfile?->educator_type)
+                                <span
+                                    class="educator-type-badge educator-type-{{ $course->educator->educatorProfile->educator_type }}">{{ ucfirst($course->educator->educatorProfile->educator_type) }}</span>
+                            @endif
 
                             <div class="educator-stats">
                                 <span><i class="fas fa-star"></i> {{ number_format($course->reviews_avg_rating, 1) }}

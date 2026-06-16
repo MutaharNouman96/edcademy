@@ -1,40 +1,61 @@
 <x-guest-layout>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link
-  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-  rel="stylesheet"
-/>
-    <div>
+    @php
+        $reviewCount = $educator_reviews->count();
+        $avgRatingValue = (float) $educatorAverageRating;
+    @endphp
+    <div class="educator-profile-page">
         <!-- Profile Header -->
         <div class="profile-header">
             <div class="container profile-content">
                 <div class="educator-main-info">
-                    <div style="position: relative;">
-                            <img src="{{ $educator->profile_picture_url }}" style="border-radius: 50%;width:200px;height:200px;object-fit:cover" class="img-fluid d-block mx-auto shadow" />
-                        {{-- <div class="online-badge"></div> --}}
+                    <div class="educator-avatar-wrap">
+                        <img src="{{ $educator->profile_picture_url }}" alt="{{ $educator->full_name }}" class="educator-avatar-img" />
+                        @if ($educator_profile?->featured ?? false)
+                            <span class="featured-pill">Featured</span>
+                        @endif
                     </div>
                     <div class="educator-info">
-                        <h1 class="text-dark">
-                            {{ $educator->full_name }}
-                        </h1>
-                        <p class="educator-subject text-dark">{{ $educator_profile->primary_subject }}</p>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <h1 class="text-dark mb-0">{{ $educator->full_name }}</h1>
+                            @if ($educator_profile?->educator_type)
+                                <span class="educator-type-badge educator-type-{{ $educator_profile->educator_type }}">
+                                    {{ ucfirst($educator_profile->educator_type) }}
+                                </span>
+                            @endif
+                        </div>
+                        <p class="educator-subject text-dark">
+                            {{ $educator_profile?->primary_subject ?? 'Educator' }}
+                        </p>
                         <div class="educator-meta">
                             <span class="rating-badge">
-                                <i class="fas fa-star"></i> {{ $educatorAverageRating }} ({{ $educator_reviews->count() }} reviews)
+                                <i class="fas fa-star"></i>
+                                {{ $reviewCount > 0 ? number_format($avgRatingValue, 1) : 'New' }}
+                                @if ($reviewCount > 0)
+                                    <span class="rating-count">({{ $reviewCount }} {{ Str::plural('review', $reviewCount) }})</span>
+                                @endif
                             </span>
                             <div class="meta-item">
                                 <i class="fas fa-user-graduate"></i>
-                                <span>{{ $studentCount }} Students</span>
+                                <span>{{ number_format($studentCount) }} {{ Str::plural('Student', $studentCount) }}</span>
                             </div>
                             <div class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                <span></span>
+                                <i class="fas fa-book"></i>
+                                <span>{{ $courses->count() }} {{ Str::plural('Course', $courses->count()) }}</span>
                             </div>
-                            <div class="meta-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Boston, MA</span>
-                            </div>
+                            @if ($educator_profile?->location)
+                                <div class="meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ $educator_profile->location }}</span>
+                                </div>
+                            @endif
                         </div>
+                        @if (count($teachingLevels))
+                            <div class="header-levels mt-3">
+                                @foreach ($teachingLevels as $level)
+                                    <span class="level-chip">{{ $level }}</span>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -82,7 +103,7 @@
                                 </h3>
                                 <div class="stats-grid">
                                     <div class="stat-box">
-                                        <div class="stat-number">{{$studentCount}}</div>
+                                        <div class="stat-number">{{ number_format($studentCount) }}</div>
                                         <div class="stat-label">Total Students</div>
                                     </div>
                                     <div class="stat-box">
@@ -90,10 +111,13 @@
                                         <div class="stat-label">Courses</div>
                                     </div>
                                     <div class="stat-box">
-                                        <div class="stat-number">{{ $educatorAverageRating }}</div>
+                                        <div class="stat-number">{{ $totalLessons }}</div>
+                                        <div class="stat-label">Lessons</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-number">{{ $reviewCount > 0 ? number_format($avgRatingValue, 1) : '—' }}</div>
                                         <div class="stat-label">Avg Rating</div>
                                     </div>
-
                                 </div>
                             </div>
 
@@ -103,42 +127,53 @@
                                     <i class="fas fa-user"></i>
                                     About Me
                                 </h3>
-                                <p style="line-height: 1.8; color: #666;">
-                                   {{ $educator_profile->bio ?? '' }}
-                                </p>
-
+                                @if (filled($educator_profile?->bio))
+                                    <p class="about-text">{{ $educator_profile->bio }}</p>
+                                @else
+                                    <p class="text-muted mb-0">This educator has not added a bio yet.</p>
+                                @endif
                             </div>
 
-                            <!-- Teaching Style -->
-                            <div class="content-card">
-                                <h3 class="section-title">
-                                    <i class="fas fa-chalkboard-teacher"></i>
-                                    Teaching Style
-                                </h3>
-                                <div class="mb-3">
-                                    @php
-                                        $teachingStyles = explode(' \\/ ', $educator_profile->preferred_teaching_style ?? '');
-                                    @endphp
-                                    @foreach ($teachingStyles as $style)
-                                        <span class="teaching-style-tag text-dark mb-2">
-                                            <i class="bi bi-arrow-right me-2 text-dark"></i>{{ trim(str_replace('"', '', $style)) }}
-                                        </span>
-                                    @endforeach
+                            @if (count($teachingStyles))
+                                <div class="content-card">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                        Teaching Style
+                                    </h3>
+                                    <div class="teaching-style-list">
+                                        @foreach ($teachingStyles as $style)
+                                            <span class="teaching-style-tag">{{ $style }}</span>
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
 
-                            <!-- Certifications -->
-                            <div class="content-card">
-                                <h3 class="section-title">
-                                    <i class="fas fa-certificate"></i>
-                                    Certifications & Qualifications
-                                </h3>
-                                <div class="certification-badge">
-                                    <i class="fas fa-graduation-cap"></i>
-                                    {{ $educator_profile->certifications ?? '' }}
+                            @if (count($teachingLevels))
+                                <div class="content-card">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-layer-group"></i>
+                                        Teaching Levels
+                                    </h3>
+                                    <div class="teaching-style-list">
+                                        @foreach ($teachingLevels as $level)
+                                            <span class="level-chip level-chip--large">{{ $level }}</span>
+                                        @endforeach
+                                    </div>
                                 </div>
+                            @endif
 
-                            </div>
+                            @if (filled($educator_profile?->certifications))
+                                <div class="content-card">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-certificate"></i>
+                                        Certifications & Qualifications
+                                    </h3>
+                                    <div class="certification-badge">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        {{ $educator_profile->certifications }}
+                                    </div>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Courses Tab -->
@@ -148,50 +183,59 @@
                                     <i class="fas fa-book"></i>
                                     Available Courses ({{ $courses->count() }})
                                 </h3>
-                                <div class="row g-4">
-                                    <!-- Courses -->
-                                    @foreach ($courses as $c)
-                                    <div class="col-md-6">
-                                        <div class="course-card">
-                                            <div class="course-thumbnail" style="background-image: url('{{ asset($c->thumbnail) }}')">
-
-                                                <i class="fas fa-calculator"></i>
-                                                <span class="course-price-badge bg-white">${{ $c->price ?? '' }}</span>
-                                            </div>
-                                            <div class="course-body">
-                                                <h5 class="course-title">{{ $c->title ?? '' }}</h5>
-                                                <?php
-                                                $course_students = DB::table('course_purchases')
-                                                ->where('course_id', $c->id)
-                                                ->distinct('course_purchases.student_id')
-                                                ->count();
-
-                                                $course_lessons = DB::table('lessons')
-                                                ->where('course_id', $c->id)
-                                                ->where('status', 'Published')
-                                                ->count();
-
-                                                $course_duration = DB::table('lessons')
-                                                ->where('course_id', $c->id)
-                                                ->where('status', 'Published')
-                                                ->sum('duration');
-                                                ?>
-                                                <div class="course-meta">
-                                                    <span><i class="fas fa-clock"></i> <?php echo $course_duration ?> hours</span>
-                                                    <span><i class="fas fa-user-graduate"></i> <?php echo $course_students ?> students</span>
-                                                </div>
-                                                <p class="course-desc">{{ $c->description ?? '' }}</p>
-                                                <div class="course-footer">
-                                                    <span class="lessons-count"><i class="fas fa-play-circle"></i> <?php echo $course_lessons ?>
-                                                        lessons</span>
-                                                    <button class="view-btn">View Course</button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                @if ($courses->isEmpty())
+                                    <div class="empty-state">
+                                        <i class="fas fa-book-open"></i>
+                                        <p>No published courses yet. Check back soon.</p>
                                     </div>
-                                    @endforeach
-
-                                </div>
+                                @else
+                                    <div class="row g-4">
+                                        @foreach ($courses as $course)
+                                            <div class="col-md-6">
+                                                <article class="course-card">
+                                                    <a href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}" class="course-thumbnail-link">
+                                                        <div class="course-thumbnail" @if ($course->thumbnail) style="background-image: url('{{ $course->thumbnail_path }}')" @endif>
+                                                            @unless ($course->thumbnail)
+                                                                <i class="fas fa-book-open"></i>
+                                                            @endunless
+                                                            <span class="course-price-badge">${{ number_format($course->price ?? 0, 2) }}</span>
+                                                        </div>
+                                                    </a>
+                                                    <div class="course-body">
+                                                        @if ($course->category?->name)
+                                                            <span class="course-category-pill">{{ $course->category->name }}</span>
+                                                        @endif
+                                                        <h5 class="course-title">
+                                                            <a href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}">
+                                                                {{ $course->title }}
+                                                            </a>
+                                                        </h5>
+                                                        <div class="course-meta">
+                                                            <span>
+                                                                <i class="fas fa-clock"></i>
+                                                                {{ $course->duration ?: ($course->total_lesson_duration ? round($course->total_lesson_duration / 60, 1) . ' hrs' : '—') }}
+                                                            </span>
+                                                            <span>
+                                                                <i class="fas fa-user-graduate"></i>
+                                                                {{ $course->enrolled_students }} students
+                                                            </span>
+                                                        </div>
+                                                        <p class="course-desc">{{ Str::limit($course->description, 120) }}</p>
+                                                        <div class="course-footer">
+                                                            <span class="lessons-count">
+                                                                <i class="fas fa-play-circle"></i>
+                                                                {{ $course->published_lessons_count }} lessons
+                                                            </span>
+                                                            <a href="{{ route('web.course.show', ['slug' => $course->slug, 'id' => $course->id]) }}" class="view-btn">
+                                                                View Course
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
                             </div>
                         </div>
 
@@ -202,52 +246,71 @@
                                     <i class="fas fa-video"></i>
                                     Sample Video Lessons
                                 </h3>
-                                <p class="text-muted mb-4">Preview some of my teaching style with these sample lessons
-                                </p>
+                                <p class="text-muted mb-4">Preview this educator's teaching style with recent lessons.</p>
 
-                                <div class="video-scroll-container">
-                                    <!-- Video 1 -->
-                                    @foreach ($recent_videos as $v)
-                                    <div class="video-card" data-video-url="{{ $v->video_link ?? '' }}">
-                                        <div class="video-thumbnail">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
-                                            </div>
-                                            <span class="video-duration">{{ $v->duration ?? '' }} mint</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">{{ $v->lesson_title ?? '' }}</h6>
-                                            <p class="video-lesson">{{ $v->course_title }} • {{ DB::table('course_sections')->where('id', $v->course_section_id)->first()->title }}</p>
-                                        </div>
+                                @if ($recent_videos->isEmpty())
+                                    <div class="empty-state">
+                                        <i class="fas fa-video-slash"></i>
+                                        <p>No sample lessons available yet.</p>
                                     </div>
-                                    @endforeach
-                                </div>
+                                @else
+                                    <div class="video-scroll-container">
+                                        @foreach ($recent_videos as $lesson)
+                                            <div class="video-card" data-video-url="{{ $lesson->lesson_video_path }}">
+                                                <div class="video-thumbnail" @if ($lesson->thumbnail) style="background-image: url('{{ asset('storage/' . $lesson->thumbnail) }}')" @endif>
+                                                    <div class="play-overlay">
+                                                        <i class="fas fa-play"></i>
+                                                    </div>
+                                                    @if ($lesson->duration)
+                                                        <span class="video-duration">{{ $lesson->duration }} min</span>
+                                                    @endif
+                                                </div>
+                                                <div class="video-info">
+                                                    <h6 class="video-title">{{ $lesson->title }}</h6>
+                                                    <p class="video-lesson">
+                                                        {{ $lesson->course?->title }}
+                                                        @if ($lesson->courseSection?->title)
+                                                            • {{ $lesson->courseSection->title }}
+                                                        @endif
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
                             </div>
 
-                            <!-- More Sample Lessons -->
-                            <div class="content-card">
-                                <h3 class="section-title">
-                                    <i class="fas fa-star"></i>
-                                    Popular Lessons
-                                </h3>
-                                <div class="video-scroll-container">
-                                    <!-- Popular -->
-                                    @foreach ($popular_videos as $v)
-                                    <div class="video-card" data-video-url="{{ $v->video_link ?? '' }}">
-                                        <div class="video-thumbnail">
-                                            <div class="play-overlay">
-                                                <i class="fas fa-play"></i>
+                            @if ($popular_videos->isNotEmpty())
+                                <div class="content-card">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-star"></i>
+                                        Popular Lessons
+                                    </h3>
+                                    <div class="video-scroll-container">
+                                        @foreach ($popular_videos as $lesson)
+                                            <div class="video-card" data-video-url="{{ $lesson->lesson_video_path }}">
+                                                <div class="video-thumbnail" @if ($lesson->thumbnail) style="background-image: url('{{ asset('storage/' . $lesson->thumbnail) }}')" @endif>
+                                                    <div class="play-overlay">
+                                                        <i class="fas fa-play"></i>
+                                                    </div>
+                                                    @if ($lesson->duration)
+                                                        <span class="video-duration">{{ $lesson->duration }} min</span>
+                                                    @endif
+                                                </div>
+                                                <div class="video-info">
+                                                    <h6 class="video-title">{{ $lesson->title }}</h6>
+                                                    <p class="video-lesson">
+                                                        {{ $lesson->course?->title }}
+                                                        @if ($lesson->courseSection?->title)
+                                                            • {{ $lesson->courseSection->title }}
+                                                        @endif
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <span class="video-duration">{{ $v->duration ?? '' }} mint</span>
-                                        </div>
-                                        <div class="video-info">
-                                            <h6 class="video-title">{{ $v->lesson_title ?? '' }}</h6>
-                                            <p class="video-lesson">{{ $v->course_title }} • {{ DB::table('course_sections')->where('id', $v->course_section_id)->first()->title }}</p>
-                                        </div>
+                                        @endforeach
                                     </div>
-                                    @endforeach
                                 </div>
-                            </div>
+                            @endif
                         </div>
 
                         <!-- Reviews Tab -->
@@ -255,104 +318,83 @@
                             <div class="content-card">
                                 <h3 class="section-title">
                                     <i class="fas fa-star"></i>
-                                    Student Reviews ({{ $educator_reviews->count() }})
+                                    Student Reviews ({{ $reviewCount }})
                                 </h3>
 
-                                <!-- Review Summary -->
-<?php
-// Calculate review counts for each star rating
-$starRatings = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
-
-foreach ($educator_reviews as $review) {
-    // Convert rating to integer here ↓↓↓ THIS is where you add it
-    $rating = intval($review->rating);
-
-    if (isset($starRatings[$rating])) {
-        $starRatings[$rating]++;
-    }
-}
-
-$totalReviews = $educator_reviews->count();
-
-// Calculate percentages
-$starPercentages = [];
-foreach ($starRatings as $star => $count) {
-    $starPercentages[$star] = $totalReviews > 0 ? round(($count / $totalReviews) * 100) : 0;
-}
-
-?>
-                                <div class="row mb-4">
-                                    <div class="col-md-4 text-center">
-                                        <div style="font-size: 3rem; font-weight: 700; color: var(--primary-cyan);">{{ number_format($educatorAverageRating, 1) }}
-                                        </div>
-                                        <div class="rating-stars"
-                                            style="font-size: 1.5rem; color: var(--accent-yellow); margin: 10px 0;">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($educatorAverageRating >= $i)
-                                                    <i class="fas fa-star"></i>
-                                                @elseif ($educatorAverageRating > ($i - 1) && $educatorAverageRating < $i)
-                                                    <i class="fas fa-star-half-alt"></i>
-                                                @else
-                                                    <i class="far fa-star"></i>
-                                                @endif
-                                            @endfor
-                                        </div>
-                                        <div class="text-muted">Based on {{ $educator_reviews->count() }} reviews</div>
+                                @if ($reviewCount === 0)
+                                    <div class="empty-state">
+                                        <i class="far fa-star"></i>
+                                        <p>No reviews yet. Be the first to book a session.</p>
                                     </div>
-                                    <div class="col-md-8">
-
-                                        @foreach ([5, 4, 3, 2, 1] as $star)
-                                            <div class="mb-2">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span style="width: 60px;">{{ $star }} stars</span>
-                                                    <div class="progress flex-grow-1" style="height: 10px;">
-                                                        <div class="progress">
-                                                            <div class="progress-bar" role="progressbar" style="width: {{ $starPercentages[$star] ?? 0 }}%;" aria-valuenow="{{ $starPercentages[$star] ?? 0 }}" aria-valuemin="0" aria-valuemax="100">{{ $starPercentages[$star] ?? 0 }}%</div>
-                                                          </div>
+                                @else
+                                    <div class="row mb-4 review-summary">
+                                        <div class="col-md-4 text-center">
+                                            <div class="review-score">{{ number_format($avgRatingValue, 1) }}</div>
+                                            <div class="rating-stars review-stars">
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    @if ($avgRatingValue >= $i)
+                                                        <i class="fas fa-star"></i>
+                                                    @elseif ($avgRatingValue > ($i - 1))
+                                                        <i class="fas fa-star-half-alt"></i>
+                                                    @else
+                                                        <i class="far fa-star"></i>
+                                                    @endif
+                                                @endfor
+                                            </div>
+                                            <div class="text-muted">Based on {{ $reviewCount }} reviews</div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            @foreach ([5, 4, 3, 2, 1] as $star)
+                                                <div class="rating-bar-row">
+                                                    <span class="rating-bar-label">{{ $star }} stars</span>
+                                                    <div class="progress rating-progress">
+                                                        <div class="progress-bar" role="progressbar"
+                                                            style="width: {{ $starPercentages[$star] ?? 0 }}%;"
+                                                            aria-valuenow="{{ $starPercentages[$star] ?? 0 }}"
+                                                            aria-valuemin="0" aria-valuemax="100"></div>
                                                     </div>
-                                                    <span style="width: 40px;">{{ $starPercentages[$star] }}%</span>
+                                                    <span class="rating-bar-value">{{ $starPercentages[$star] ?? 0 }}%</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    @foreach ($educator_reviews as $review)
+                                        <div class="review-item">
+                                            <div class="d-flex gap-3">
+                                                <div class="review-avatar">
+                                                    {{ strtoupper(substr($review->student?->first_name ?? 'S', 0, 1)) }}
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex justify-content-between align-items-start gap-3">
+                                                        <div>
+                                                            <h6 class="review-author mb-1">
+                                                                {{ $review->student?->full_name ?? 'Student' }}
+                                                            </h6>
+                                                            <div class="rating-stars review-item-stars">
+                                                                @for ($i = 1; $i <= 5; $i++)
+                                                                    @if ($i <= floor($review->rating))
+                                                                        <i class="fas fa-star"></i>
+                                                                    @elseif ($i - 0.5 <= $review->rating)
+                                                                        <i class="fas fa-star-half-alt"></i>
+                                                                    @else
+                                                                        <i class="far fa-star"></i>
+                                                                    @endif
+                                                                @endfor
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">{{ \Carbon\Carbon::parse($review->created_at)->format('M d, Y') }}</small>
+                                                    </div>
+                                                    @if (filled($review->comment))
+                                                        <p class="review-comment">{{ $review->comment }}</p>
+                                                    @endif
                                                 </div>
                                             </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-
-                                <hr class="my-4">
-
-                                <!-- Individual Reviews -->
-                                @foreach ($educator_reviews as $r)
-                                <div class="review-item" style="padding: 20px 0; border-bottom: 1px solid #e0e0e0;">
-                                    <div class="d-flex gap-3 mb-3">
-
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <h6 class="mb-1" style="font-weight: 700;">{{ DB::table('users')->where('id', $r->student_id)->first()->first_name }}</h6>
-                                                    <div class="rating-stars"
-                                                        style="color: var(--accent-yellow); font-size: 0.9rem;">
-                                                        @for ($i = 1; $i <= 5; $i++)
-                                                            @if ($i <= floor($r->rating))
-                                                                <i class="fas fa-star"></i>
-                                                            @elseif ($i - 0.5 == $r->rating)
-                                                                <i class="fas fa-star-half-alt"></i>
-                                                            @else
-                                                                <i class="far fa-star"></i>
-                                                            @endif
-                                                        @endfor
-                                                    </div>
-                                                </div>
-                                                <small class="text-muted">{{ \Carbon\Carbon::parse($r->created_at)->format('M d, Y') }}</small>
-                                            </div>
-                                            <p class="mt-3 mb-0" style="color: #666; line-height: 1.6;">
-                                               {{ $r->comment ?? '' }}
-                                            </p>
                                         </div>
-                                    </div>
-                                </div>
-                                @endforeach
-
-
-
+                                    @endforeach
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -408,11 +450,11 @@ foreach ($starRatings as $star => $count) {
                                 </label>
                                 <select class="form-select" name="subject" required>
                                     <option value="">Choose subject</option>
-                                    <option value="calculus">Calculus</option>
-                                    <option value="physics">Physics</option>
-                                    <option value="algebra">Linear Algebra</option>
-                                    <option value="statistics">Statistics</option>
-                                    <option value="other">Other</option>
+                                    @forelse ($bookingSubjects as $subject)
+                                        <option value="{{ Str::slug($subject) }}">{{ $subject }}</option>
+                                    @empty
+                                        <option value="general">General tutoring</option>
+                                    @endforelse
                                 </select>
                             </div>
 
@@ -458,23 +500,27 @@ foreach ($starRatings as $star => $count) {
 
                     <!-- Quick Stats Card -->
                     <div class="booking-card mt-3">
-                        <h6 style="font-weight: 700; margin-bottom: 15px;">Quick Stats</h6>
+                        <h6 class="quick-stats-title">Quick Stats</h6>
                         <ul class="features-list">
                             <li>
-                                <i class="fas fa-reply"></i>
-                                <span>Usually responds in 2 hours</span>
-                            </li>
-                            <li>
                                 <i class="fas fa-clock"></i>
-                                <span>Available Mon-Fri, 9am-6pm</span>
+                                <span>{{ $availabilitySummary }}</span>
                             </li>
+                            @if ($educator_profile?->location)
+                                <li>
+                                    <i class="fas fa-globe"></i>
+                                    <span>{{ $educator_profile->location }}</span>
+                                </li>
+                            @endif
+                            @if ($educator_profile?->primary_subject)
+                                <li>
+                                    <i class="fas fa-book"></i>
+                                    <span>Specializes in {{ $educator_profile->primary_subject }}</span>
+                                </li>
+                            @endif
                             <li>
-                                <i class="fas fa-globe"></i>
-                                <span>Boston, MA (EST)</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-language"></i>
-                                <span>English, Spanish</span>
+                                <i class="fas fa-video"></i>
+                                <span>{{ $totalLessons }} published lessons</span>
                             </li>
                         </ul>
                     </div>
@@ -696,14 +742,6 @@ foreach ($starRatings as $star => $count) {
                 Swal.fire({ icon: 'success', title: 'Success', text: @json(session('success')), confirmButtonColor: '#6f42c1' });
             @endif
 
-            // View course buttons
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const courseTitle = this.closest('.course-body').querySelector('.course-title').textContent;
-                    alert(`Viewing course: ${courseTitle}`);
-                });
-            });
-
             // Video play buttons
             document.querySelectorAll('.play-overlay').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -713,17 +751,32 @@ foreach ($starRatings as $star => $count) {
 
                     if (videoUrl) {
                         const videoFrame = document.getElementById('videoFrame');
-                        videoFrame.src = videoUrl;
+                        videoFrame.src = toEmbedUrl(videoUrl);
                         const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
                         videoModal.show();
-
-                        // Optional: Update modal title with video title
                         document.getElementById('videoModalLabel').textContent = `Playing: ${videoTitle}`;
                     } else {
-                        alert(`Video URL not found for: ${videoTitle}`);
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Preview unavailable',
+                            text: `No video is available for "${videoTitle}" yet.`,
+                            confirmButtonColor: '#6f42c1',
+                        });
                     }
                 });
             });
+
+            function toEmbedUrl(url) {
+                if (url.includes('youtube.com/watch')) {
+                    const videoId = new URL(url).searchParams.get('v');
+                    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+                }
+                if (url.includes('youtu.be/')) {
+                    const videoId = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+                    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+                }
+                return url;
+            }
 
             // Clear video src when modal is closed
             document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
@@ -734,10 +787,14 @@ foreach ($starRatings as $star => $count) {
     @endpush
     @push('styles')
         <style>
+            .educator-profile-page {
+                padding-bottom: 3rem;
+            }
+
             .profile-header {
                 background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--dark-cyan) 100%);
                 color: white;
-                padding: 40px 0 60px;
+                padding: 48px 0 72px;
                 position: relative;
             }
 
@@ -756,54 +813,52 @@ foreach ($starRatings as $star => $count) {
 
             .educator-main-info {
                 display: flex;
-                gap: 30px;
-                align-items: start;
+                gap: 32px;
+                align-items: center;
             }
 
-            .educator-avatar {
-                width: 150px;
-                height: 150px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 5px solid white;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            .educator-avatar-wrap {
+                position: relative;
                 flex-shrink: 0;
             }
 
-            .educator-avatar i {
-                font-size: 4rem;
-                color: rgba(255, 255, 255, 0.5);
+            .educator-avatar-img {
+                width: 180px;
+                height: 180px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 5px solid rgba(255, 255, 255, 0.95);
+                box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
             }
 
-            .online-badge {
+            .featured-pill {
                 position: absolute;
-                bottom: 10px;
-                right: 10px;
-                width: 20px;
-                height: 20px;
-                background: #4caf50;
-                border: 3px solid white;
-                border-radius: 50%;
+                bottom: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--accent-yellow);
+                color: #333;
+                font-size: 0.75rem;
+                font-weight: 700;
+                padding: 4px 12px;
+                border-radius: 999px;
+                white-space: nowrap;
             }
 
             .educator-info h1 {
-                font-size: 2.5rem;
+                font-size: 2.4rem;
                 font-weight: 700;
-                margin-bottom: 10px;
             }
 
             .educator-subject {
-                font-size: 1.3rem;
+                font-size: 1.15rem;
                 opacity: 0.95;
-                margin-bottom: 15px;
+                margin-bottom: 16px;
             }
 
             .educator-meta {
                 display: flex;
-                gap: 25px;
+                gap: 16px;
                 flex-wrap: wrap;
             }
 
@@ -811,6 +866,7 @@ foreach ($starRatings as $star => $count) {
                 display: flex;
                 align-items: center;
                 gap: 8px;
+                color: rgba(255, 255, 255, 0.95);
             }
 
             .rating-badge {
@@ -819,27 +875,57 @@ foreach ($starRatings as $star => $count) {
                 padding: 8px 15px;
                 border-radius: 20px;
                 font-weight: 700;
-                display: flex;
+                display: inline-flex;
                 align-items: center;
-                gap: 5px;
+                gap: 6px;
+            }
+
+            .rating-count {
+                font-weight: 600;
+            }
+
+            .header-levels,
+            .teaching-style-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .level-chip {
+                display: inline-flex;
+                align-items: center;
+                background: rgba(255, 255, 255, 0.18);
+                color: #fff;
+                border: 1px solid rgba(255, 255, 255, 0.35);
+                padding: 6px 12px;
+                border-radius: 999px;
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+
+            .level-chip--large {
+                background: #f3f7f8;
+                color: #35515a;
+                border-color: #dbe7ea;
             }
 
             .nav-tabs-custom {
                 background: white;
-                border-radius: 15px 15px 0 0;
-                margin-top: -30px;
+                border-radius: 16px 16px 0 0;
+                margin-top: -36px;
                 position: relative;
                 z-index: 2;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-                border-bottom: 2px solid #e0e0e0;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+                border-bottom: 2px solid #e8ecef;
+                padding: 0 8px;
             }
 
             .nav-tabs-custom .nav-link {
                 border: none;
-                color: #666;
+                color: #667085;
                 font-weight: 600;
-                padding: 20px 30px;
-                transition: all 0.3s;
+                padding: 18px 24px;
+                transition: all 0.25s ease;
             }
 
             .nav-tabs-custom .nav-link:hover {
@@ -854,16 +940,17 @@ foreach ($starRatings as $star => $count) {
 
             .content-card {
                 background: white;
-                border-radius: 15px;
-                padding: 30px;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-                margin-bottom: 30px;
+                border-radius: 16px;
+                padding: 28px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+                margin-bottom: 24px;
+                border: 1px solid #eef2f4;
             }
 
             .section-title {
-                font-size: 1.5rem;
+                font-size: 1.35rem;
                 font-weight: 700;
-                color: #333;
+                color: #1f2937;
                 margin-bottom: 20px;
                 display: flex;
                 align-items: center;
@@ -874,58 +961,83 @@ foreach ($starRatings as $star => $count) {
                 color: var(--primary-cyan);
             }
 
+            .about-text {
+                line-height: 1.8;
+                color: #5f6b7a;
+                margin-bottom: 0;
+            }
+
             .stats-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 20px;
-                margin-bottom: 30px;
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 16px;
             }
 
             .stat-box {
                 text-align: center;
-                padding: 20px;
-                background: #f8f9fa;
-                border-radius: 12px;
-                transition: all 0.3s;
+                padding: 20px 16px;
+                background: linear-gradient(180deg, #f8fbfc 0%, #f2f7f8 100%);
+                border-radius: 14px;
+                border: 1px solid #e7eef1;
+                transition: transform 0.25s ease, box-shadow 0.25s ease;
             }
 
             .stat-box:hover {
-                background: #e8f5f7;
                 transform: translateY(-3px);
+                box-shadow: 0 10px 24px rgba(0, 131, 143, 0.08);
             }
 
             .stat-number {
-                font-size: 2rem;
+                font-size: 1.9rem;
                 font-weight: 700;
                 color: var(--primary-cyan);
             }
 
             .stat-label {
-                color: #666;
+                color: #667085;
                 font-size: 0.9rem;
-                margin-top: 5px;
+                margin-top: 6px;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 48px 20px;
+                color: #7a8699;
+            }
+
+            .empty-state i {
+                font-size: 2.2rem;
+                color: #c5d0d6;
+                margin-bottom: 12px;
             }
 
             .course-card {
                 background: white;
-                border: 2px solid #e0e0e0;
-                border-radius: 15px;
+                border: 1px solid #e5eaee;
+                border-radius: 16px;
                 overflow: hidden;
-                transition: all 0.3s;
+                transition: all 0.25s ease;
                 height: 100%;
                 display: flex;
                 flex-direction: column;
             }
 
             .course-card:hover {
-                border-color: var(--primary-cyan);
-                transform: translateY(-5px);
-                box-shadow: 0 10px 25px rgba(0, 131, 143, 0.15);
+                border-color: rgba(0, 131, 143, 0.35);
+                transform: translateY(-4px);
+                box-shadow: 0 14px 30px rgba(0, 131, 143, 0.12);
+            }
+
+            .course-thumbnail-link {
+                display: block;
+                text-decoration: none;
             }
 
             .course-thumbnail {
                 height: 180px;
                 background: linear-gradient(135deg, var(--light-cyan) 0%, var(--primary-cyan) 100%);
+                background-size: cover;
+                background-position: center;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -933,19 +1045,20 @@ foreach ($starRatings as $star => $count) {
             }
 
             .course-thumbnail i {
-                font-size: 3rem;
-                color: rgba(255, 255, 255, 0.4);
+                font-size: 2.5rem;
+                color: rgba(255, 255, 255, 0.45);
             }
 
             .course-price-badge {
                 position: absolute;
-                top: 15px;
-                right: 15px;
-                background: var(--accent-yellow);
-                color: #333;
-                padding: 8px 15px;
-                border-radius: 20px;
+                top: 14px;
+                right: 14px;
+                background: rgba(255, 255, 255, 0.95);
+                color: #1f2937;
+                padding: 7px 14px;
+                border-radius: 999px;
                 font-weight: 700;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             }
 
             .course-body {
@@ -955,72 +1068,91 @@ foreach ($starRatings as $star => $count) {
                 flex-direction: column;
             }
 
-            .course-title {
-                font-size: 1.1rem;
+            .course-category-pill {
+                display: inline-block;
+                background: #eef7f8;
+                color: var(--primary-cyan);
+                font-size: 0.75rem;
                 font-weight: 700;
-                color: #333;
+                padding: 4px 10px;
+                border-radius: 999px;
                 margin-bottom: 10px;
+            }
+
+            .course-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .course-title a {
+                color: #1f2937;
+                text-decoration: none;
+            }
+
+            .course-title a:hover {
+                color: var(--primary-cyan);
             }
 
             .course-meta {
                 display: flex;
-                gap: 15px;
+                gap: 14px;
+                flex-wrap: wrap;
                 font-size: 0.85rem;
-                color: #666;
+                color: #667085;
                 margin-bottom: 10px;
             }
 
             .course-desc {
-                color: #666;
-                font-size: 0.9rem;
+                color: #667085;
+                font-size: 0.92rem;
                 line-height: 1.6;
                 flex-grow: 1;
-                margin-bottom: 15px;
+                margin-bottom: 14px;
             }
 
             .course-footer {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding-top: 15px;
-                border-top: 1px solid #f0f0f0;
+                padding-top: 14px;
+                border-top: 1px solid #eef2f4;
+                gap: 12px;
             }
 
             .lessons-count {
                 color: var(--primary-cyan);
                 font-weight: 600;
-                font-size: 0.9rem;
+                font-size: 0.88rem;
             }
 
             .view-btn {
                 background: var(--primary-cyan);
-                color: white;
+                color: white !important;
                 border: none;
-                padding: 8px 20px;
-                border-radius: 8px;
+                padding: 8px 16px;
+                border-radius: 10px;
                 font-weight: 600;
-                transition: all 0.3s;
+                text-decoration: none;
+                transition: all 0.25s ease;
+                white-space: nowrap;
             }
 
             .view-btn:hover {
                 background: var(--dark-cyan);
+                color: white !important;
             }
 
             .video-scroll-container {
                 display: flex;
-                gap: 20px;
+                gap: 18px;
                 overflow-x: auto;
-                padding-bottom: 20px;
+                padding-bottom: 12px;
                 scroll-behavior: smooth;
             }
 
             .video-scroll-container::-webkit-scrollbar {
                 height: 8px;
-            }
-
-            .video-scroll-container::-webkit-scrollbar-track {
-                background: #f0f0f0;
-                border-radius: 10px;
             }
 
             .video-scroll-container::-webkit-scrollbar-thumb {
@@ -1031,20 +1163,23 @@ foreach ($starRatings as $star => $count) {
             .video-card {
                 min-width: 280px;
                 background: white;
-                border: 2px solid #e0e0e0;
-                border-radius: 12px;
+                border: 1px solid #e5eaee;
+                border-radius: 14px;
                 overflow: hidden;
-                transition: all 0.3s;
+                transition: all 0.25s ease;
             }
 
             .video-card:hover {
-                border-color: var(--primary-cyan);
+                border-color: rgba(0, 131, 143, 0.35);
                 transform: translateY(-3px);
+                box-shadow: 0 10px 24px rgba(0, 131, 143, 0.1);
             }
 
             .video-thumbnail {
                 height: 160px;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background-size: cover;
+                background-position: center;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -1052,25 +1187,24 @@ foreach ($starRatings as $star => $count) {
             }
 
             .play-overlay {
-                width: 50px;
-                height: 50px;
-                background: rgba(255, 255, 255, 0.9);
+                width: 52px;
+                height: 52px;
+                background: rgba(255, 255, 255, 0.92);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
-                transition: all 0.3s;
+                transition: all 0.25s ease;
             }
 
             .play-overlay:hover {
-                transform: scale(1.1);
-                background: white;
+                transform: scale(1.08);
             }
 
             .play-overlay i {
                 color: var(--primary-cyan);
-                font-size: 1.5rem;
+                font-size: 1.4rem;
                 margin-left: 3px;
             }
 
@@ -1078,99 +1212,164 @@ foreach ($starRatings as $star => $count) {
                 position: absolute;
                 bottom: 10px;
                 right: 10px;
-                background: rgba(0, 0, 0, 0.8);
+                background: rgba(0, 0, 0, 0.75);
                 color: white;
                 padding: 4px 8px;
-                border-radius: 5px;
+                border-radius: 6px;
                 font-size: 0.75rem;
                 font-weight: 600;
             }
 
             .video-info {
-                padding: 15px;
+                padding: 14px 16px 16px;
             }
 
             .video-title {
                 font-weight: 600;
-                color: #333;
+                color: #1f2937;
                 font-size: 0.95rem;
-                margin-bottom: 5px;
+                margin-bottom: 4px;
             }
 
             .video-lesson {
-                font-size: 0.8rem;
-                color: #999;
+                font-size: 0.82rem;
+                color: #8a94a6;
+                margin-bottom: 0;
+            }
+
+            .review-summary {
+                align-items: center;
+            }
+
+            .review-score {
+                font-size: 3rem;
+                font-weight: 700;
+                color: var(--primary-cyan);
+                line-height: 1;
+            }
+
+            .review-stars {
+                font-size: 1.35rem;
+                color: var(--accent-yellow);
+                margin: 10px 0;
+            }
+
+            .rating-bar-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 10px;
+            }
+
+            .rating-bar-label,
+            .rating-bar-value {
+                width: 58px;
+                font-size: 0.88rem;
+                color: #667085;
+            }
+
+            .rating-progress {
+                flex: 1;
+                height: 10px;
+                background: #edf2f5;
+                border-radius: 999px;
+            }
+
+            .rating-progress .progress-bar {
+                background: var(--accent-yellow);
+                border-radius: 999px;
+            }
+
+            .review-item {
+                padding: 20px 0;
+                border-bottom: 1px solid #edf2f5;
+            }
+
+            .review-item:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .review-avatar {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, var(--primary-cyan), var(--dark-cyan));
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                flex-shrink: 0;
+            }
+
+            .review-author {
+                font-weight: 700;
+                color: #1f2937;
+            }
+
+            .review-item-stars {
+                color: var(--accent-yellow);
+                font-size: 0.88rem;
+            }
+
+            .review-comment {
+                margin: 12px 0 0;
+                color: #5f6b7a;
+                line-height: 1.65;
             }
 
             .booking-card {
                 position: sticky;
-                top: 20px;
+                top: 88px;
                 background: white;
-                border-radius: 15px;
-                padding: 25px;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+                border-radius: 16px;
+                padding: 24px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+                border: 1px solid #eef2f4;
             }
 
             .price-section {
                 text-align: center;
-                margin-bottom: 25px;
-                padding-bottom: 25px;
-                border-bottom: 2px solid #f0f0f0;
+                margin-bottom: 22px;
+                padding-bottom: 22px;
+                border-bottom: 1px solid #eef2f4;
             }
 
             .hourly-rate {
-                font-size: 2.5rem;
+                font-size: 2.3rem;
                 font-weight: 700;
                 color: var(--primary-cyan);
             }
 
             .hourly-rate small {
-                font-size: 1.2rem;
+                font-size: 1rem;
                 font-weight: 500;
             }
 
             .rate-label {
-                color: #666;
-                margin-top: 5px;
+                color: #667085;
+                margin-top: 6px;
+                margin-bottom: 0;
             }
 
             .booking-form .form-label {
                 font-weight: 600;
-                color: #333;
+                color: #344054;
                 margin-bottom: 8px;
             }
 
             .booking-form .form-control,
             .booking-form .form-select {
-                border: 2px solid #e0e0e0;
-                border-radius: 10px;
+                border: 1px solid #d7dee3;
+                border-radius: 12px;
                 padding: 12px;
-                transition: all 0.3s;
             }
 
             .booking-form .form-control:focus,
             .booking-form .form-select:focus {
                 border-color: var(--primary-cyan);
-                box-shadow: 0 0 0 3px rgba(0, 131, 143, 0.1);
-            }
-
-            .book-btn {
-                width: 100%;
-                padding: 15px;
-                background: var(--primary-cyan);
-                color: white;
-                border: none;
-                border-radius: 10px;
-                font-weight: 700;
-                font-size: 1.1rem;
-                transition: all 0.3s;
-                margin-top: 20px;
-            }
-
-            .book-btn:hover {
-                background: var(--dark-cyan);
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(0, 131, 143, 0.3);
+                box-shadow: 0 0 0 3px rgba(0, 131, 143, 0.12);
             }
 
             .contact-btn {
@@ -1179,9 +1378,9 @@ foreach ($starRatings as $star => $count) {
                 background: white;
                 color: var(--primary-cyan);
                 border: 2px solid var(--primary-cyan);
-                border-radius: 10px;
+                border-radius: 12px;
                 font-weight: 600;
-                transition: all 0.3s;
+                transition: all 0.25s ease;
                 margin-top: 10px;
             }
 
@@ -1193,44 +1392,51 @@ foreach ($starRatings as $star => $count) {
             .features-list {
                 list-style: none;
                 padding: 0;
-                margin-top: 20px;
+                margin-top: 16px;
+                margin-bottom: 0;
             }
 
             .features-list li {
                 padding: 10px 0;
                 display: flex;
-                align-items: center;
+                align-items: flex-start;
                 gap: 10px;
-                color: #666;
+                color: #5f6b7a;
             }
 
             .features-list i {
                 color: var(--primary-cyan);
+                margin-top: 3px;
+            }
+
+            .quick-stats-title {
+                font-weight: 700;
+                margin-bottom: 12px;
+                color: #1f2937;
             }
 
             .teaching-style-tag {
-                display: inline-block;
+                display: inline-flex;
+                align-items: center;
                 background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%);
                 color: white;
-                padding: 8px 15px;
-                border-radius: 20px;
-                font-size: 0.9rem;
+                padding: 8px 14px;
+                border-radius: 999px;
+                font-size: 0.88rem;
                 font-weight: 600;
-                margin-right: 10px;
-                margin-bottom: 10px;
             }
 
             .certification-badge {
-                background: #fff3e0;
+                background: #fff8eb;
                 border-left: 4px solid var(--accent-yellow);
-                padding: 15px;
-                border-radius: 8px;
-                margin-bottom: 15px;
+                padding: 16px;
+                border-radius: 10px;
+                color: #5f4b32;
             }
 
             .certification-badge i {
                 color: var(--accent-yellow);
-                margin-right: 10px;
+                margin-right: 8px;
             }
 
             @media (max-width: 768px) {
@@ -1239,17 +1445,28 @@ foreach ($starRatings as $star => $count) {
                     text-align: center;
                 }
 
-                .educator-avatar {
-                    width: 120px;
-                    height: 120px;
+                .educator-avatar-img {
+                    width: 140px;
+                    height: 140px;
                 }
 
                 .educator-info h1 {
-                    font-size: 1.8rem;
+                    font-size: 1.9rem;
+                }
+
+                .header-levels,
+                .educator-meta {
+                    justify-content: center;
                 }
 
                 .booking-card {
                     position: relative;
+                    top: 0;
+                }
+
+                .nav-tabs-custom .nav-link {
+                    padding: 14px 16px;
+                    font-size: 0.92rem;
                 }
             }
         </style>

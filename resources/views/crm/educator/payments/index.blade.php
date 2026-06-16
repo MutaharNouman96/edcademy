@@ -76,7 +76,6 @@
                     <tr>
                         <th>Date</th>
                         <th>Course / item</th>
-                        <th>Student</th>
                         <th class="text-end">Gross</th>
                         <th class="text-end">Net</th>
                         <th>Payment</th>
@@ -99,7 +98,7 @@
                                 <strong>{{ $payment->course?->title ?? 'Item #' . $payment->course_id }}</strong>
                                 <div class="small text-muted">#{{ $payment->id }}</div>
                             </td>
-                            <td>{{ $payment->student?->full_name ?? $payment->student?->first_name ?? '—' }}</td>
+                           
                             <td class="text-end">{{ $sym }}{{ number_format($payment->gross_amount, 2) }}</td>
                             <td class="text-end fw-semibold text-success">{{ $sym }}{{ number_format($net, 2) }}</td>
                             <td>

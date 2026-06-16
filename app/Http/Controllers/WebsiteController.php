@@ -23,6 +23,7 @@ use App\Mail\SessionBookedMail;
 use App\Models\Policy;
 use App\Models\EducatorProfile;
 use App\Models\EducatorSessionSchedule;
+use App\Models\Lesson;
 use Carbon\Carbon;
 
 class WebsiteController extends Controller
@@ -187,33 +188,83 @@ class WebsiteController extends Controller
     }
     public function educator($id)
     {
-        $educator = User::where("role", "educator")->where("id", $id)->firstOrFail();
-        $educator_profile = DB::table('educator_profiles')->where('user_id', $id)->first();
-        $educator_reviews = DB::table('educator_reviews')->where('educator_id', $id)->get();
-        $averageRating = DB::table('educator_reviews')->where('educator_id', $id)->avg('rating');
+        $educator = User::verifiedEducator()
+            ->with([
+                'educatorProfile',
+                'sessionSchedules' => fn ($query) => $query->orderBy('day_of_week')->orderBy('start_time'),
+            ])
+            ->findOrFail($id);
 
+        $educator_profile = $educator->educatorProfile;
 
+        $educator_reviews = EducatorReview::with('student')
+            ->where('educator_id', $id)
+            ->latest()
+            ->get();
+
+        $averageRating = $educator_reviews->avg('rating') ?? 0;
         $educatorAverageRating = number_format($averageRating, 2);
+
         $studentCount = DB::table('course_purchases')
-        ->join('courses', 'courses.id', 'course_purchases.course_id')
-        ->where('courses.user_id', $id)
-        ->distinct('course_purchases.student_id')
-        ->count();
+            ->join('courses', 'courses.id', '=', 'course_purchases.course_id')
+            ->where('courses.user_id', $id)
+            ->distinct()
+            ->count('course_purchases.student_id');
 
-        $recent_videos = DB::table('lessons')
-        ->join('courses', 'courses.id', 'lessons.course_id')
-        ->where('courses.user_id', $id)
-        ->select('courses.*', 'lessons.*', 'courses.title as course_title', 'lessons.title as lesson_title')
-        ->skip(0)->take(6)->get();
+        $courses = Course::query()
+            ->where('user_id', $id)
+            ->active()
+            ->published()
+            ->with(['category', 'reviews'])
+            ->withCount([
+                'lessons as published_lessons_count' => fn ($query) => $query->where('status', 'Published')->active(),
+            ])
+            ->withSum(
+                ['lessons as total_lesson_duration' => fn ($query) => $query->where('status', 'Published')->active()],
+                'duration'
+            )
+            ->orderByDesc('publish_date')
+            ->get();
 
-        $popular_videos = DB::table('lessons')
-        ->join('courses', 'courses.id', 'lessons.course_id')
-        ->select('courses.*', 'lessons.*', 'courses.title as course_title', 'lessons.title as lesson_title')
-        ->where('courses.user_id', $id)
-        ->where('lessons.popular', 1)
-        ->skip(0)->take(6)->get();
+        $enrollmentCounts = DB::table('course_purchases')
+            ->whereIn('course_id', $courses->pluck('id'))
+            ->selectRaw('course_id, COUNT(DISTINCT student_id) as enrolled_students')
+            ->groupBy('course_id')
+            ->pluck('enrolled_students', 'course_id');
 
-        $courses = DB::table('courses')->where('user_id', $id)->get();
+        $courses->each(function (Course $course) use ($enrollmentCounts) {
+            $course->enrolled_students = (int) ($enrollmentCounts[$course->id] ?? 0);
+        });
+
+        $lessonQuery = fn ($query) => $query
+            ->where('user_id', $id)
+            ->active()
+            ->published();
+
+        $recent_videos = Lesson::query()
+            ->active()
+            ->whereHas('course', $lessonQuery)
+            ->with(['course', 'courseSection'])
+            ->latest('published_at')
+            ->latest('id')
+            ->limit(6)
+            ->get();
+
+        $popular_videos = Lesson::query()
+            ->active()
+            ->where(function ($query) {
+                $query->where('popular', 1)->orWhere('popular', '1');
+            })
+            ->whereHas('course', $lessonQuery)
+            ->with(['course', 'courseSection'])
+            ->latest('published_at')
+            ->limit(6)
+            ->get();
+
+        $totalLessons = Lesson::query()
+            ->active()
+            ->whereHas('course', $lessonQuery)
+            ->count();
 
         $totalReviews = $educator_reviews->count();
         $starPercentages = [];
@@ -223,8 +274,89 @@ class WebsiteController extends Controller
             $starPercentages[$i] = ($totalReviews > 0) ? round(($starCount / $totalReviews) * 100) : 0;
         }
 
-        // dd("educator", $educator, '</br>' , "educator_profile", $educator_profile, '</br>' , "avgRating", $educatorAverageRating, '</br>' , "review_count", $educator_reviews_count, '</br>', "student_count", $studentCount);
-        return view("website.educator", compact("educator", "educator_profile", "educatorAverageRating", "educator_reviews", "studentCount", "courses", "recent_videos", "popular_videos", "starPercentages"));
+        $teachingStyles = $this->parseTeachingStyles($educator_profile?->preferred_teaching_style);
+        $teachingLevels = $this->decodeTeachingLevels($educator_profile?->teaching_levels);
+
+        $bookingSubjects = collect([$educator_profile?->primary_subject])
+            ->merge($courses->pluck('subject'))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $availabilitySummary = $this->formatAvailabilitySummary($educator->sessionSchedules);
+
+        return view('website.educator', compact(
+            'educator',
+            'educator_profile',
+            'educatorAverageRating',
+            'educator_reviews',
+            'studentCount',
+            'courses',
+            'recent_videos',
+            'popular_videos',
+            'starPercentages',
+            'teachingStyles',
+            'teachingLevels',
+            'bookingSubjects',
+            'availabilitySummary',
+            'totalLessons',
+        ));
+    }
+
+    private function parseTeachingStyles(?string $raw): array
+    {
+        if (blank($raw)) {
+            return [];
+        }
+
+        $parts = preg_split('/\s*\/\s*|,\s*/', $raw);
+
+        return array_values(array_filter(array_map('trim', $parts)));
+    }
+
+    private function decodeTeachingLevels(mixed $raw): array
+    {
+        if (blank($raw)) {
+            return [];
+        }
+
+        if (is_array($raw)) {
+            return array_values(array_filter($raw));
+        }
+
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? array_values(array_filter($decoded)) : [];
+    }
+
+    private function formatAvailabilitySummary($schedules): string
+    {
+        if ($schedules->isEmpty()) {
+            return 'Availability not set yet';
+        }
+
+        $dayNames = EducatorSessionSchedule::DAYS;
+        $grouped = $schedules->groupBy('day_of_week');
+
+        $segments = $grouped->map(function ($daySlots, $day) use ($dayNames) {
+            $label = $dayNames[$day] ?? 'Day ' . $day;
+            $times = $daySlots->map(function ($slot) {
+                $start = Carbon::parse($slot->start_time)->format('g:ia');
+                $end = Carbon::parse($slot->end_time)->format('g:ia');
+
+                return "{$start}–{$end}";
+            })->implode(', ');
+
+            return "{$label}: {$times}";
+        })->values();
+
+        if ($segments->count() <= 2) {
+            return $segments->implode(' · ');
+        }
+
+        $days = $grouped->keys()->sort()->map(fn ($day) => substr($dayNames[$day] ?? '', 0, 3))->implode('–');
+
+        return 'Available ' . $days;
     }
 
     public function cart()
