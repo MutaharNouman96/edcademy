@@ -630,7 +630,13 @@ class CourseCrudController extends Controller
         $uploaded = Storage::disk('s3')->put($s3Path, File::get($filePath));
 
         if (!$uploaded || !Storage::disk('s3')->exists($s3Path)) {
-            throw new \RuntimeException('Worksheet upload to storage failed. Please try again.');
+            $error = error_get_last();
+            $errorMessage = 'Worksheet upload to storage failed. Please try again.';
+            if ($error && isset($error['message'])) {
+                $errorMessage .= ' Error: ' . $error['message'];
+            }
+            throw new \RuntimeException($errorMessage);
+       
         }
 
         //delete the file from the local storage
@@ -648,7 +654,13 @@ class CourseCrudController extends Controller
         $uploaded = Storage::disk('s3')->put($s3Path, File::get($filePath));
 
         if (!$uploaded || !Storage::disk('s3')->exists($s3Path)) {
-            throw new \RuntimeException('Material upload to storage failed. Please try again.');
+            $error = error_get_last();
+            $errorMessage = 'Material upload to storage failed. Please try again.';
+            if ($error && isset($error['message'])) {
+                $errorMessage .= ' Error: ' . $error['message'];
+            }
+            throw new \RuntimeException($errorMessage);
+       
         }
 
         //delete the file from the local storage
