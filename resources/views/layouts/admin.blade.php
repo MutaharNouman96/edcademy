@@ -447,6 +447,14 @@
                             href="{{ route('admin.manage.courses') }}">
                             <i class="bi bi-book"></i> <span>Manage Courses</span>
                         </a>
+                        <a class="nav-link {{ request()->routeIs('admin.course-categories.*') ? 'active' : '' }}"
+                            href="{{ route('admin.course-categories.index') }}">
+                            <i class="bi bi-folder2-open"></i> <span>Course Categories</span>
+                        </a>
+                        <a class="nav-link {{ request()->routeIs('admin.subjects.*') ? 'active' : '' }}"
+                            href="{{ route('admin.subjects.index') }}">
+                            <i class="bi bi-tags"></i> <span>Subjects</span>
+                        </a>
                         <a class="nav-link {{ request()->routeIs('admin.manage.lessons') ? 'active' : '' }}"
                             href="{{ route('admin.manage.lessons') }}">
                             <i class="bi bi-collection-play"></i> <span>Manage Lessons</span>

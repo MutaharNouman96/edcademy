@@ -36,8 +36,9 @@ class CourseCrudController extends Controller
     {
         $categories = CourseCategory::all();
         $languages = Language::all();
+        $aiGenerationsRemaining = max(0, Course::AI_GENERATION_LIMIT - (int) session('course_ai_generation_count', 0));
 
-        return view('crm.educator.courses.create', compact('categories', 'languages'));
+        return view('crm.educator.courses.create', compact('categories', 'languages', 'aiGenerationsRemaining'));
     }
 
     /**
@@ -86,6 +87,7 @@ class CourseCrudController extends Controller
         $validated['user_id'] = auth()->id();
         $validated['is_free'] = $request->has('is_free');
         $validated['drip'] = $request->has('drip');
+        $validated['ai_generation_count'] = (int) session('course_ai_generation_count', 0);
 
         // Handle status based on publish option
         if ($validated['publish_option'] === 'now') {
@@ -112,6 +114,8 @@ class CourseCrudController extends Controller
         }
 
         $course = Course::create($validated);
+
+        session()->forget('course_ai_generation_count');
 
         //update slug
         $course->slug = Str::slug($course->title) . '-' . $course->id;
@@ -174,7 +178,9 @@ class CourseCrudController extends Controller
         $course = Course::findOrFail($course);
         $course->load('sections.lessons');
 
-        return view('crm.educator.courses.edit', compact('course', 'categories', 'languages', 'action'));
+        $aiGenerationsRemaining = $course->aiGenerationsRemaining();
+
+        return view('crm.educator.courses.edit', compact('course', 'categories', 'languages', 'action', 'aiGenerationsRemaining'));
     }
 
     public function update(Request $request, $course_id)

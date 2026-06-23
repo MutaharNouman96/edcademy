@@ -10,12 +10,14 @@ class Course extends Model
 {
     use HasFactory;
 
+    public const AI_GENERATION_LIMIT = 3;
 
     protected $fillable = [
         'course_category_id',
         'user_id',
         'title',
         'description',
+        'ai_generation_count',
         'subject',
         'level',
         'price',
@@ -202,6 +204,8 @@ class Course extends Model
         return $this->slug ?? Str::slug($this->title);
     }
 
-
-   
+    public function aiGenerationsRemaining(): int
+    {
+        return max(0, self::AI_GENERATION_LIMIT - (int) $this->ai_generation_count);
+    }
 }

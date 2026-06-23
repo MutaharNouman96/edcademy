@@ -9,7 +9,7 @@ class CourseCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'slug',  'parent_id'];
+    protected $fillable = ['name', 'slug', 'parent_id', 'description'];
 
     public function children()
     {
@@ -23,6 +23,11 @@ class CourseCategory extends Model
 
     public function courses()
     {
-        return $this->hasMany(Course::class);
+        return $this->hasMany(Course::class, 'course_category_id');
+    }
+
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class, 'category_id');
     }
 }

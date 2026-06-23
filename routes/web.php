@@ -16,6 +16,7 @@ use App\Http\Controllers\Educator\PayoutController;
 use App\Http\Controllers\Educator\SessionCallController;
 use App\Http\Controllers\Educator\VideoStatController;
 use App\Http\Controllers\EducatorController;
+use App\Http\Controllers\GenAIController;
 
 use App\Http\Controllers\Educator\Settings\{ProfileSettingController, SecuritySettingController, PaymentSettingController, PaymentMethodController, AvailabilitySettingController, PrivacySettingController, VerificationSettingController, ConnectionController, PreferenceController};
 use App\Http\Controllers\EducatorPaymentController;
@@ -178,6 +179,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('blogs/{blog}/edit', [App\Http\Controllers\Admin\BlogController::class, 'edit'])->name('blogs.edit');
         Route::put('blogs/{blog}', [App\Http\Controllers\Admin\BlogController::class, 'update'])->name('blogs.update');
         Route::delete('blogs/{blog}', [App\Http\Controllers\Admin\BlogController::class, 'destroy'])->name('blogs.destroy');
+
+        // Course categories & subjects
+        Route::resource('course-categories', App\Http\Controllers\Admin\CourseCategoryController::class)->except(['show']);
+        Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class)->except(['show']);
 
         // Admin settings (app + account)
         Route::get('settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
@@ -350,7 +355,7 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
 
         Route::get('reviews', [ReviewController::class, 'index'])->name('educator.reviews.index');
 
-        Route::post('generate-course-content', [\App\Http\Controllers\OpenAIController::class, 'generateCourseContent'])
+        Route::post('generate-course-content', [GenAIController::class, 'generateCourseContent'])
             ->name('educator.generate.course.content')
             ->middleware('throttle:5,1');
 

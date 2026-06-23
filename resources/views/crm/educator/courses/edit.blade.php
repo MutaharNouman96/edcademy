@@ -230,6 +230,7 @@
                     enctype="multipart/form-data" novalidate>
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="course_id" value="{{ $course->id }}">
 
                     <!-- Basic information -->
                     <div class="card form-card mb-4">
@@ -526,9 +527,14 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                                 <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <small class="text-muted">Tip: include who this course is for and what they'll
-                                        achieve.</small>
-                                    <button type="button" id="generate-ai" class="btn btn-outline-primary btn-sm">
+                                    <small class="text-muted">
+                                        Tip: include who this course is for and what they'll achieve.
+                                        <span id="ai-remaining" class="ms-1 {{ $aiGenerationsRemaining === 0 ? 'text-danger' : '' }}">
+                                            ({{ $aiGenerationsRemaining }} of {{ \App\Models\Course::AI_GENERATION_LIMIT }} AI generations remaining)
+                                        </span>
+                                    </small>
+                                    <button type="button" id="generate-ai" class="btn btn-outline-primary btn-sm"
+                                        @if($aiGenerationsRemaining === 0) disabled @endif>
                                         <i class="bi bi-stars me-1"></i> Generate with AI
                                     </button>
                                 </div>
@@ -1251,8 +1257,20 @@
                 }
 
                 const aiBtn = document.getElementById('generate-ai');
+                const aiRemaining = document.getElementById('ai-remaining');
+                const aiLimit = {{ \App\Models\Course::AI_GENERATION_LIMIT }};
+
+                function updateAiRemaining(remaining) {
+                    if (!aiRemaining) return;
+                    aiRemaining.textContent = `(${remaining} of ${aiLimit} AI generations remaining)`;
+                    aiRemaining.classList.toggle('text-danger', remaining === 0);
+                    if (aiBtn) aiBtn.disabled = remaining === 0;
+                }
+
                 if (aiBtn) {
                     aiBtn.addEventListener('click', function() {
+                        if (aiBtn.disabled) return;
+
                         aiBtn.disabled = true;
                         const originalLabel = aiBtn.innerHTML;
                         aiBtn.innerHTML =
@@ -1269,16 +1287,18 @@
                                     'Accept': 'application/json'
                                 }
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
+                            .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                            .then(({ ok, data }) => {
+                                if (ok && data.success) {
                                     const titleInput = document.querySelector('#edit-form input[name="title"]');
                                     const descInput = document.querySelector(
                                         '#edit-form textarea[name="description"]');
                                     if (titleInput && data.title) titleInput.value = data.title;
                                     if (descInput && data.description) descInput.value = data.description;
+                                    if (typeof data.remaining === 'number') updateAiRemaining(data.remaining);
                                 } else {
                                     alert('Error: ' + (data.message || 'Could not generate content.'));
+                                    if (typeof data.remaining === 'number') updateAiRemaining(data.remaining);
                                 }
                             })
                             .catch(err => {
@@ -1286,8 +1306,7 @@
                                 alert('An error occurred while generating content.');
                             })
                             .finally(() => {
-                                aiBtn.disabled = false;
-                                aiBtn.innerHTML = originalLabel;
+                                if (aiBtn) aiBtn.innerHTML = originalLabel;
                             });
                     });
                 }

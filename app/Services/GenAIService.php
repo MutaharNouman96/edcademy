@@ -2,26 +2,23 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
-
-class OpenAIService
+class GenAIService
 {
     protected $apiKey;
     protected $url;
 
     public function __construct()
     {
-        $this->apiKey = env('OPEN_AI_KEY');
-        $this->url = 'https://api.openai.com/v1/chat/completions';
+        $this->apiKey = env('DEEPSEEK_API_KEY');
+        $this->url = 'https://api.deepseek.com/v1/chat/completions';
     }
 
     public function generateCourseTitleAndDescription(array $formData)
     {
-        // Construct the prompt based on form data
         $prompt = $this->buildPrompt($formData);
 
         $data = [
-            'model' => 'gpt-4o-mini',
+            'model' => 'deepseek-chat',
             'messages' => [
                 [
                     'role' => 'system',
@@ -58,13 +55,11 @@ class OpenAIService
         $result = json_decode($response, true);
 
         if (isset($result['error'])) {
-            throw new \Exception('OpenAI API error: ' . $result['error']['message']);
+            throw new \Exception('DeepSeek API error: ' . $result['error']['message']);
         }
 
         $content = $result['choices'][0]['message']['content'] ?? 'No response';
 
-        // Parse the response to extract title and description
-        // Assuming the response is in a format like "Title: Something\nDescription: Something"
         $lines = explode("\n", $content);
         $title = '';
         $description = '';
@@ -108,7 +103,6 @@ class OpenAIService
         if (!empty($formData['duration'])) {
             $prompt .= "Duration: " . $formData['duration'] . "\n";
         }
-        // Add more fields as needed
 
         $prompt .= "\nPlease provide the title on one line starting with 'Title:', and the description starting with 'Description:'.";
 
