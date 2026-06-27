@@ -300,7 +300,9 @@ class CourseCrudController extends Controller
             $course->delete();
             return response()->json(['success' => true, 'message' => 'Course deleted successfully!']);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->respondWithException($e, 'destroy course', [
+                'course_id' => $course->id ?? null,
+            ]);
         }
     }
 
@@ -482,7 +484,11 @@ class CourseCrudController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->respondWithException($e, 'store lesson', [
+                'section_id' => $section->id,
+                'course_id' => $section->course_id,
+                'lesson_type' => $request->input('type'),
+            ]);
         }
 
         // return back()->with('success', 'Lesson added successfully!');
@@ -579,7 +585,10 @@ class CourseCrudController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->respondWithException($e, 'update lesson', [
+                'lesson_id' => $lesson->id,
+                'lesson_type' => $lesson->type,
+            ]);
         }
 
         // return back()->with('success', 'Lesson updated successfully!');
@@ -629,15 +638,7 @@ class CourseCrudController extends Controller
 
         $uploaded = Storage::disk('s3')->put($s3Path, File::get($filePath));
 
-        if (!$uploaded || !Storage::disk('s3')->exists($s3Path)) {
-            $error = error_get_last();
-            $errorMessage = 'Worksheet upload to storage failed. Please try again.';
-            if ($error && isset($error['message'])) {
-                $errorMessage .= ' Error: ' . $error['message'];
-            }
-            throw new \RuntimeException($errorMessage);
-       
-        }
+        $this->assertS3UploadSucceeded($uploaded, 'Worksheet', $filePath, $s3Path);
 
         //delete the file from the local storage
         unlink($filePath);
@@ -653,20 +654,73 @@ class CourseCrudController extends Controller
 
         $uploaded = Storage::disk('s3')->put($s3Path, File::get($filePath));
 
-        if (!$uploaded || !Storage::disk('s3')->exists($s3Path)) {
-            $error = error_get_last();
-            $errorMessage = 'Material upload to storage failed. Please try again.';
-            if ($error && isset($error['message'])) {
-                $errorMessage .= ' Error: ' . $error['message'];
-            }
-            throw new \RuntimeException($errorMessage);
-       
-        }
+        $this->assertS3UploadSucceeded($uploaded, 'Material', $filePath, $s3Path);
 
         //delete the file from the local storage
         unlink($filePath);
 
         return Storage::disk('s3')->url($s3Path);
+    }
+
+    /**
+     * Log an exception and return JSON the course edit UI can display.
+     */
+    private function respondWithException(\Throwable $e, string $operation, array $context = [], int $status = 500)
+    {
+        Log::error("[CourseCrudController] {$operation} failed", array_merge($context, [
+            'exception' => $e::class,
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]));
+
+        $message = "[{$operation}] {$e->getMessage()}";
+
+        if ($e->getPrevious()) {
+            $message .= ' (caused by: ' . $e->getPrevious()->getMessage() . ')';
+        }
+
+        if (!empty($context)) {
+            $message .= ' Context: ' . collect($context)
+                ->map(fn ($value, $key) => "{$key}=" . (is_scalar($value) ? $value : json_encode($value)))
+                ->implode(', ');
+        }
+
+        return response()->json(['message' => $message], $status);
+    }
+
+    /**
+     * @throws \RuntimeException
+     */
+    private function assertS3UploadSucceeded(bool $uploaded, string $assetLabel, string $localPath, string $s3Path): void
+    {
+        $existsOnS3 = Storage::disk('s3')->exists($s3Path);
+
+        if ($uploaded && $existsOnS3) {
+            return;
+        }
+
+        $details = [
+            'asset' => $assetLabel,
+            'local_path' => $localPath,
+            's3_key' => $s3Path,
+            'put_returned' => $uploaded ? 'true' : 'false',
+            'exists_on_s3' => $existsOnS3 ? 'true' : 'false',
+            'local_file_exists' => is_file($localPath) ? 'true' : 'false',
+            'local_file_size_bytes' => is_file($localPath) ? (string) filesize($localPath) : 'n/a',
+        ];
+
+        $phpError = error_get_last();
+        if ($phpError && isset($phpError['message'])) {
+            $details['php_error'] = $phpError['message'];
+        }
+
+        $detailString = collect($details)
+            ->map(fn ($value, $key) => "{$key}={$value}")
+            ->implode('; ');
+
+        throw new \RuntimeException("{$assetLabel} upload to S3 failed ({$detailString})");
     }
 
     /**

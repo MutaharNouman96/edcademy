@@ -406,7 +406,7 @@ class DashboardController extends Controller
             });
         }
 
-        $educators = $query->latest()->paginate(10);
+        $educators = $query->latest()->paginate(20);
 
         return view('admin.manageEducators', compact('educators'));
     }

@@ -115,6 +115,8 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{ $educators->links() }}
         </div>
     </div>
 

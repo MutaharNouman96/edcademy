@@ -22,6 +22,26 @@
                 background: #0f172a;
             }
 
+            #editLessonVideoUploadedLink {
+                word-break: break-all;
+                /* style like a button*/
+                background-color: #007bff;
+                color: white !important;
+                padding: 0.5rem 1rem;
+                border-radius: 0.25rem;
+                text-decoration: none;
+                font-size: 0.875rem;
+                font-weight: 500;
+                transition: background-color 0.3s ease;
+                display: inline-block;
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                margin-left: 0.5rem;
+                margin-right: 0.5rem;
+                text-align: center;
+                width: fit-content%;
+            }
+
             #addLessonWorksheetPreviewFrame,
             #addLessonMaterialPreviewFrame {
                 min-height: 240px;
@@ -1329,6 +1349,7 @@
             let editLessonVideoUploading = false;
             let addLessonVideoObjectUrl = null;
             let editLessonVideoObjectUrl = null;
+            let editLessonExistingVideoUrl = null;
             let addLessonWorksheetBlobUrl = null;
             let addLessonMaterialBlobUrl = null;
 
@@ -1380,19 +1401,58 @@
                 if (wrap) wrap.classList.add('d-none');
             }
 
-            function clearEditVideoPreview() {
+            function showExistingEditVideoUrl(url) {
+                editLessonExistingVideoUrl = url || null;
+                const wrap = document.getElementById('editLessonVideoPreviewWrap');
+                const uploaded = document.getElementById('editLessonVideoUploadedPreview');
+                const link = document.getElementById('editLessonVideoUploadedLink');
+                const vid = document.getElementById('editLessonVideoPreview');
+                const localNote = document.getElementById('editLessonVideoLocalPreviewNote');
+
+                if (!url || !wrap || !uploaded || !link) {
+                    if (uploaded) uploaded.classList.add('d-none');
+                    return;
+                }
+
+                link.href = url;
+                link.textContent = "Open in new tab";
+                uploaded.classList.remove('d-none');
+                if (vid) vid.classList.add('d-none');
+                if (localNote) localNote.classList.add('d-none');
+                wrap.classList.remove('d-none');
+            }
+
+            function hideExistingEditVideoUrl() {
+                const uploaded = document.getElementById('editLessonVideoUploadedPreview');
+                if (uploaded) uploaded.classList.add('d-none');
+            }
+
+            function clearEditLocalVideoPreview() {
                 if (editLessonVideoObjectUrl) {
                     URL.revokeObjectURL(editLessonVideoObjectUrl);
                     editLessonVideoObjectUrl = null;
                 }
-                const wrap = document.getElementById('editLessonVideoPreviewWrap');
                 const vid = document.getElementById('editLessonVideoPreview');
+                const localNote = document.getElementById('editLessonVideoLocalPreviewNote');
                 if (vid) {
                     vid.pause();
                     vid.removeAttribute('src');
                     vid.load();
+                    vid.classList.add('d-none');
                 }
-                if (wrap) wrap.classList.add('d-none');
+                if (localNote) localNote.classList.add('d-none');
+            }
+
+            function clearEditVideoPreview() {
+                clearEditLocalVideoPreview();
+                const wrap = document.getElementById('editLessonVideoPreviewWrap');
+
+                if (editLessonExistingVideoUrl) {
+                    showExistingEditVideoUrl(editLessonExistingVideoUrl);
+                } else if (wrap) {
+                    hideExistingEditVideoUrl();
+                    wrap.classList.add('d-none');
+                }
             }
 
             function showVideoPreviewFromDropzoneFile(file, which) {
@@ -1403,7 +1463,7 @@
                 if (isAdd) {
                     clearAddVideoPreview();
                 } else {
-                    clearEditVideoPreview();
+                    clearEditLocalVideoPreview();
                 }
                 const url = URL.createObjectURL(file);
                 if (isAdd) {
@@ -1423,8 +1483,16 @@
                     }
                     return;
                 }
+                if (!isAdd) {
+                    hideExistingEditVideoUrl();
+                }
+                vid.classList.remove('d-none');
                 vid.src = url;
                 vid.load();
+                if (!isAdd) {
+                    const localNote = document.getElementById('editLessonVideoLocalPreviewNote');
+                    if (localNote) localNote.classList.remove('d-none');
+                }
                 wrap.classList.remove('d-none');
             }
 
@@ -1749,7 +1817,10 @@
                 }
             }
 
-            function destroyEditLessonDropzone() {
+            function destroyEditLessonDropzone(resetExistingVideoUrl = true) {
+                if (resetExistingVideoUrl) {
+                    editLessonExistingVideoUrl = null;
+                }
                 clearEditVideoPreview();
                 if (editLessonVideoDropzone) {
                     try {
@@ -1762,7 +1833,7 @@
             function initEditLessonDropzone(lesson) {
                 const el = document.getElementById('editLessonVideoZone');
                 if (!el || typeof Dropzone === 'undefined') return;
-                destroyEditLessonDropzone();
+                destroyEditLessonDropzone(false);
                 // Start blank: a value is only set if the educator uploads a replacement video.
                 const hidden = document.getElementById('edit_video_storage_path');
                 if (hidden) {
@@ -1770,7 +1841,7 @@
                 }
                 const disp = document.getElementById('editVideoTempPathDisplay');
                 if (disp) {
-                    disp.innerHTML = '';
+                    disp.textContent = '';
                 }
                 editLessonVideoDropzone = new Dropzone(el, {
                     url: tempVideoUploadUrl,
@@ -1805,8 +1876,11 @@
                                 const d = document.getElementById('editVideoTempPathDisplay');
                                 if (h) h.value = res.path;
                                 if (d) {
-                                    d.innerHTML =
+                                    d.textContent =
                                         'Video is uploaded. It will be reviewed by us before publishing to the platform.';
+                                }
+                                if (res.url) {
+                                    showExistingEditVideoUrl(res.url);
                                 }
                             }
                         });
@@ -1825,6 +1899,10 @@
                         this.on('canceled', () => setEditLessonModalVideoUploading(false));
                     }
                 });
+
+                if (lesson.lesson_video_path) {
+                    showExistingEditVideoUrl(lesson.lesson_video_path);
+                }
             }
 
             document.getElementById('addLessonModal').addEventListener('hide.bs.modal', function(e) {
@@ -2079,9 +2157,9 @@
                             vimeoBlock =
                                 `<div class="alert alert-success py-2 small mb-2">On Vimeo: <a href="${lesson.video_path}" target="_blank" rel="noopener">Open player link</a></div>`;
                         }
-                        let tempBlock = '';
-                        
-                        editLessonFileType.innerHTML = vimeoBlock + tempBlock +
+
+                        editLessonExistingVideoUrl = lesson.lesson_video_path || null;
+                        editLessonFileType.innerHTML = vimeoBlock +
                             `
                             {{-- Holds the S3 object key of a freshly uploaded replacement video. --}}
                             <input type="hidden" name="video_storage_path" id="edit_video_storage_path" value="">
@@ -2089,21 +2167,19 @@
                             <div id="editVideoUploadLoader" class="small text-primary mt-2 d-none">
                                 <span class="spinner-border spinner-border-sm me-1" role="status"></span> Uploading video…
                             </div>
-                            <div id="editVideoTempPathDisplay" class="form-text small mt-2">
-                                <span id="editVideoPathInfo">
-                                    ${
-                                        lesson.lesson_video_path 
-                                            ? `<span class="text-success">Video: <a href="${lesson.lesson_video_path}" target="_blank" rel="noopener">Open video link</a></span>`
-                                            : `<span class="text-muted">No video uploaded yet.</span>`
-                                    }
-                                </span>
-                            </div>
-                       
+                            <div id="editVideoTempPathDisplay" class="form-text small mt-2"></div>
                             <div id="editLessonVideoPreviewWrap" class="mt-3 d-none">
                                 <label class="form-label small fw-semibold mb-1">Preview</label>
-                                <video id="editLessonVideoPreview" class="w-100 rounded border" controls
+                                <div id="editLessonVideoUploadedPreview" class="d-none">
+                                    <a id="editLessonVideoUploadedLink" href="#" target="_blank" rel="noopener"
+                                        class="small text-break link-primary"></a>
+                                    <div class="form-text small mt-1">Opens in a new tab so you can watch the uploaded video.</div>
+                                </div>
+                                <video id="editLessonVideoPreview" class="w-100 rounded border d-none" controls
                                     playsinline preload="metadata"></video>
-                                <div class="form-text small mt-1">Plays from your file before upload finishes.</div>
+                                <div id="editLessonVideoLocalPreviewNote" class="form-text small mt-1 d-none">
+                                    Plays from your file before upload finishes.
+                                </div>
                             </div>`;
                         setTimeout(() => initEditLessonDropzone(lesson), 50);
                         break;
