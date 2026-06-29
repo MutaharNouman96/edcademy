@@ -116,20 +116,19 @@
                     <!-- Step 2 -->
                     <div class="step hidden-step" id="step2">
                         <div class="mb-3">
-                            <label class="glass-landing--form-label">Primary Subject *</label>
-                            <select name="primary_subject"
-                                class="form-select glass-landing--form-select @error('primary_subject') is-invalid @enderror"
+                            <label class="glass-landing--form-label">Primary Subject(s) *</label>
+                            <select name="primary_subject[]" multiple
+                                class="select2 form-select glass-landing--form-select @error('primary_subject') is-invalid @enderror"
                                 required>
-                                <option value="">Select Subject</option>
                                 @foreach (['Mathematics', 'Science', 'English', 'Computer Science', 'Languages', 'Other'] as $subject)
                                     <option value="{{ $subject }}"
-                                        {{ old('primary_subject') == $subject ? 'selected' : '' }}>
+                                        {{ in_array($subject, old('primary_subject', [])) ? 'selected' : '' }}>
                                         {{ $subject }}
                                     </option>
                                 @endforeach
                             </select>
                             @error('primary_subject')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -202,10 +201,11 @@
                     <div class="step hidden-step" id="step3">
                         <div class="mb-3">
                             <label class="glass-landing--form-label">Upload CV (Max 5MB) *</label>
-                            <input name="cv" type="file"
-                                class="form-control glass-landing--form-input @error('cv') is-invalid @enderror"
-                                accept="image/*,application/pdf" required />
-                            @error('cv')
+                            <div id="cvDropzone" class="glass-landing--dropzone dropzone"
+                                data-type="cv" data-target="cv_temp"></div>
+                            <input type="hidden" name="cv_temp" id="cv_temp" value="{{ old('cv_temp') }}" />
+                            <small class="text-muted">Accepted: JPG, PNG, PDF — up to 5MB.</small>
+                            @error('cv_temp')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
@@ -213,31 +213,35 @@
                         <div class="mb-3">
                             <label class="glass-landing--form-label">Upload Degree / Certification Proof (Max
                                 5MB)</label>
-                            <input name="degree_proof" type="file"
-                                class="form-control glass-landing--form-input @error('degree_proof') is-invalid @enderror"
-                                accept="image/*,application/pdf" />
-                            @error('degree_proof')
+                            <div id="degreeDropzone" class="glass-landing--dropzone dropzone"
+                                data-type="degree_proof" data-target="degree_proof_temp"></div>
+                            <input type="hidden" name="degree_proof_temp" id="degree_proof_temp"
+                                value="{{ old('degree_proof_temp') }}" />
+                            <small class="text-muted">Accepted: JPG, PNG, PDF — up to 5MB.</small>
+                            @error('degree_proof_temp')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="glass-landing--form-label">Additional Documents (Optional)</label>
-                            <input type="file" name="additional_documents[]" multiple
-                                class="form-control glass-landing--form-input @error('additional_documents') is-invalid @enderror"
-                                max="5" multiple="multiple" accept="image/*,application/pdf" />
-                            @error('additional_documents')
+                            <div id="additionalDropzone" class="glass-landing--dropzone dropzone"
+                                data-type="additional_document"></div>
+                            <div id="additionalDocsContainer"></div>
+                            <small class="text-muted">Up to 10 files, each up to 5MB (JPG, PNG, GIF, WEBP, PDF).</small>
+                            @error('additional_documents_temp')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
                             <label class="glass-landing--form-label">Intro Video (Optional, Max 50MB)</label>
-                            <input name="intro_video" type="file"
-                                class="form-control glass-landing--form-input @error('intro_video') is-invalid @enderror"
-                                accept="video/*" />
-                            <small class="text-muted">Introduce yourself and your teaching style (max 2 min)</small>
-                            @error('intro_video')
+                            <div id="introVideoDropzone" class="glass-landing--dropzone dropzone"
+                                data-type="intro_video" data-target="intro_video_temp"></div>
+                            <input type="hidden" name="intro_video_temp" id="intro_video_temp"
+                                value="{{ old('intro_video_temp') }}" />
+                            <small class="text-muted">Introduce yourself and your teaching style (max 2 min) — up to 50MB.</small>
+                            @error('intro_video_temp')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
@@ -286,10 +290,40 @@
     </div>
 
     @push('styles')
+        <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" />
         <style>
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 overflow-x: hidden;
+            }
+
+            .glass-landing--dropzone.dropzone {
+                border: 2px dashed #cbd5e1;
+                border-radius: 8px;
+                background: #f8fafc;
+                min-height: 120px;
+                padding: 18px;
+                transition: border-color 0.2s, background 0.2s;
+            }
+
+            .glass-landing--dropzone.dropzone:hover {
+                border-color: #0891b2;
+                background: #f0f9ff;
+            }
+
+            .glass-landing--dropzone.dropzone.dz-drag-hover {
+                border-color: #0891b2;
+                background: #e0f7fa;
+            }
+
+            .glass-landing--dropzone .dz-message {
+                margin: 1.5em 0;
+                color: #64748b;
+                font-weight: 500;
+            }
+
+            .glass-landing--dropzone .dz-preview .dz-progress {
+                height: 8px;
             }
 
             .glass-landing--signup-hero {
@@ -534,11 +568,12 @@
                     }
                 } else if (stepIndex === 1) {
                     // Step 2: primary_subject, at least one teaching_level, hourly_rate
-                    const primarySubject = stepEl.querySelector('[name="primary_subject"]');
+                    const primarySubject = stepEl.querySelector('[name="primary_subject[]"]');
                     const teachingLevels = stepEl.querySelector('[name="teaching_levels[]"]');
                     const hourlyRate = stepEl.querySelector('[name="hourly_rate"]');
 
-                    if (!primarySubject?.value) {
+                    const selectedSubjects = primarySubject ? Array.from(primarySubject.selectedOptions).map(o => o.value) : [];
+                    if (selectedSubjects.length === 0) {
                         primarySubject?.classList.add('is-invalid');
                         valid = false;
                     } else {
@@ -561,15 +596,16 @@
                         hourlyRate?.classList.remove('is-invalid');
                     }
                 } else if (stepIndex === 2) {
-                    // Step 3: cv (file), consent (checkbox)
-                    const govtId = stepEl.querySelector('[name="cv"]');
+                    // Step 3: cv (uploaded to temp), consent (checkbox)
+                    const cvTemp = stepEl.querySelector('[name="cv_temp"]');
+                    const cvZone = document.getElementById('cvDropzone');
                     const consent = stepEl.querySelector('[name="consent"]');
 
-                    if (!govtId?.files?.length) {
-                        govtId?.classList.add('is-invalid');
+                    if (!cvTemp?.value) {
+                        cvZone?.classList.add('is-invalid');
                         valid = false;
                     } else {
-                        govtId?.classList.remove('is-invalid');
+                        cvZone?.classList.remove('is-invalid');
                     }
                     if (!consent?.checked) {
                         consent?.classList.add('is-invalid');
@@ -597,114 +633,152 @@
             });
 
 
-            // DOM helpers to fetch input/file lists
-            function getFileInput(name) {
-                return document.querySelector(`input[name="${name}"]`);
-            }
+        </script>
 
-            // Container for displaying file lists below respective inputs
-            function getOrCreateFileListContainer(input) {
-                let container = input.parentElement.querySelector('.attached-files-list');
-                if (!container) {
-                    container = document.createElement('ul');
-                    container.className = 'attached-files-list list-unstyled mt-2';
-                    input.parentElement.appendChild(container);
+        <!-- Dropzone: async upload each file to public/temp, keep the returned
+             temp path in a hidden input so the form submit only sends references. -->
+        <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+        <script>
+            Dropzone.autoDiscover = false;
+
+            (function() {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const uploadUrl = "{{ route('educator.signup.temp-upload') }}";
+                const deleteUrl = "{{ route('educator.signup.temp-upload.delete') }}";
+
+                const acceptedByType = {
+                    cv: 'image/jpeg,image/png,application/pdf',
+                    degree_proof: 'image/jpeg,image/png,application/pdf',
+                    additional_document: 'image/jpeg,image/png,image/gif,image/webp,application/pdf',
+                    intro_video: 'video/mp4,video/quicktime',
+                };
+
+                const MB = 1; // Dropzone maxFilesize is already in MB
+
+                function deleteTempFile(path) {
+                    if (!path) return;
+                    fetch(deleteUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-HTTP-Method-Override': 'DELETE',
+                        },
+                        body: JSON.stringify({
+                            path
+                        }),
+                    }).catch(() => {});
                 }
-                return container;
-            }
 
-            function formatFileSize(bytes) {
-                const mb = bytes / 1024 / 1024;
-                if (mb >= 1) return `${mb.toFixed(2)} MB`;
-                const kb = bytes / 1024;
-                return `${kb.toFixed(2)} KB`;
-            }
+                // Single-file dropzone bound to one hidden input.
+                function initSingle(elId, type, hiddenId, maxFilesizeMb) {
+                    const el = document.getElementById(elId);
+                    if (!el) return;
+                    const hidden = document.getElementById(hiddenId);
 
-            // For single file input (cv, degree_proof, intro_video)
-            function handleSingleFileChange(input) {
-                const container = getOrCreateFileListContainer(input);
-                container.innerHTML = '';
-                if (input.files && input.files.length > 0) {
-                    const file = input.files[0];
-                    const li = document.createElement('li');
-                    li.classList.add('d-flex', 'align-items-center', 'mb-1');
-                    li.innerHTML = `
-                        <span>${file.name} (${formatFileSize(file.size)})</span>
-                        <button type="button" class="btn btn-sm btn-link text-danger ms-2 file-remove-btn" title="Remove file"><i class="fas fa-times"></i></button>
-                    `;
-                    // Remove functionality
-                    li.querySelector('.file-remove-btn').addEventListener('click', function() {
-                        input.value = "";
-                        container.innerHTML = '';
+                    new Dropzone(el, {
+                        url: uploadUrl,
+                        method: 'post',
+                        paramName: 'file',
+                        maxFiles: 1,
+                        maxFilesize: maxFilesizeMb * MB,
+                        acceptedFiles: acceptedByType[type],
+                        addRemoveLinks: true,
+                        dictDefaultMessage: 'Drop file here or click to upload',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        params: {
+                            type
+                        },
+                        init: function() {
+                            const dz = this;
+                            dz.on('addedfile', function() {
+                                if (dz.files.length > 1) {
+                                    dz.removeFile(dz.files[0]);
+                                }
+                            });
+                            dz.on('success', function(file, response) {
+                                file._tempPath = response.path;
+                                if (hidden) hidden.value = response.path;
+                                el.classList.remove('is-invalid');
+                            });
+                            dz.on('removedfile', function(file) {
+                                deleteTempFile(file._tempPath);
+                                if (hidden) hidden.value = '';
+                            });
+                            dz.on('error', function(file, message) {
+                                const msg = typeof message === 'string' ? message : (message.message ||
+                                    'Upload failed');
+                                if (file.previewElement) {
+                                    file.previewElement.querySelectorAll('[data-dz-errormessage]')
+                                        .forEach(n => n.textContent = msg);
+                                }
+                            });
+                        },
                     });
-                    container.appendChild(li);
                 }
-            }
 
-            // For multiple file input (additional_documents[])
-            function handleMultipleFilesChange(input) {
-                const container = getOrCreateFileListContainer(input);
-                container.innerHTML = '';
-                const files = Array.from(input.files);
-                files.forEach((file, idx) => {
-                    const li = document.createElement('li');
-                    li.classList.add('d-flex', 'align-items-center', 'mb-1');
-                    li.innerHTML = `
-                        <span>${file.name} (${formatFileSize(file.size)})</span>
-                        <button type="button" class="btn btn-sm btn-link text-danger ms-2 file-remove-btn" title="Remove file" data-file-idx="${idx}"><i class="fas fa-times"></i></button>
-                    `;
-                    container.appendChild(li);
+                // Multi-file dropzone backed by a container of hidden inputs.
+                function initMultiple(elId, type, containerId, maxFiles, maxFilesizeMb) {
+                    const el = document.getElementById(elId);
+                    if (!el) return;
+                    const container = document.getElementById(containerId);
+
+                    new Dropzone(el, {
+                        url: uploadUrl,
+                        method: 'post',
+                        paramName: 'file',
+                        maxFiles: maxFiles,
+                        maxFilesize: maxFilesizeMb * MB,
+                        acceptedFiles: acceptedByType[type],
+                        addRemoveLinks: true,
+                        dictDefaultMessage: 'Drop files here or click to upload (up to ' + maxFiles + ')',
+                        dictMaxFilesExceeded: 'You can upload a maximum of ' + maxFiles + ' files.',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        params: {
+                            type
+                        },
+                        init: function() {
+                            const dz = this;
+                            dz.on('success', function(file, response) {
+                                file._tempPath = response.path;
+                                const input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = 'additional_documents_temp[]';
+                                input.value = response.path;
+                                input.dataset.path = response.path;
+                                container.appendChild(input);
+                            });
+                            dz.on('removedfile', function(file) {
+                                deleteTempFile(file._tempPath);
+                                if (file._tempPath) {
+                                    const input = container.querySelector(
+                                        'input[data-path="' + file._tempPath + '"]');
+                                    if (input) input.remove();
+                                }
+                            });
+                            dz.on('error', function(file, message) {
+                                const msg = typeof message === 'string' ? message : (message.message ||
+                                    'Upload failed');
+                                if (file.previewElement) {
+                                    file.previewElement.querySelectorAll('[data-dz-errormessage]')
+                                        .forEach(n => n.textContent = msg);
+                                }
+                            });
+                        },
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    initSingle('cvDropzone', 'cv', 'cv_temp', 5);
+                    initSingle('degreeDropzone', 'degree_proof', 'degree_proof_temp', 5);
+                    initSingle('introVideoDropzone', 'intro_video', 'intro_video_temp', 50);
+                    initMultiple('additionalDropzone', 'additional_document', 'additionalDocsContainer', 10, 5);
                 });
-
-                // Remove file handler
-                container.querySelectorAll('.file-remove-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const idx = parseInt(btn.getAttribute('data-file-idx'));
-                        // Remove the file at idx (input.files is read-only, so we need to recreate FileList)
-                        const dataTransfer = new DataTransfer();
-                        files.forEach((file, i) => {
-                            if (i !== idx) dataTransfer.items.add(file);
-                        });
-                        input.files = dataTransfer.files;
-                        handleMultipleFilesChange(input); // refresh list
-                    });
-                });
-            }
-
-            // Attach onchange events to the three file elements
-            document.addEventListener('DOMContentLoaded', function() {
-                // CV (single)
-                const cvInput = getFileInput('cv');
-                if (cvInput) {
-                    cvInput.addEventListener('change', function() {
-                        handleSingleFileChange(cvInput);
-                    });
-                    // On initial load in case of back nav or validation
-                    if (cvInput.files && cvInput.files.length > 0) {
-                        handleSingleFileChange(cvInput);
-                    }
-                }
-                // Degree proof (single)
-                const degreeInput = getFileInput('degree_proof');
-                if (degreeInput) {
-                    degreeInput.addEventListener('change', function() {
-                        handleSingleFileChange(degreeInput);
-                    });
-                    if (degreeInput.files && degreeInput.files.length > 0) {
-                        handleSingleFileChange(degreeInput);
-                    }
-                }
-                // Additional documents (multiple)
-                const addDocsInput = getFileInput('additional_documents[]');
-                if (addDocsInput) {
-                    addDocsInput.addEventListener('change', function() {
-                        handleMultipleFilesChange(addDocsInput);
-                    });
-                    if (addDocsInput.files && addDocsInput.files.length > 0) {
-                        handleMultipleFilesChange(addDocsInput);
-                    }
-                }
-            });
+            })();
         </script>
     @endpush
 </x-guest-layout>

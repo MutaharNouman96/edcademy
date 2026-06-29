@@ -6,22 +6,112 @@ use App\Http\Controllers\Controller;
 use App\Models\Educator\VerificationSetting;
 use App\Models\EducatorAdditionalDocument;
 use App\Models\EducatorProfile;
+use App\Services\EducatorDocumentStorageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
+use Illuminate\Validation\Rule;
 
 class VerificationSettingController extends Controller
 {
+    private const UPLOAD_RULES = [
+        'gov_id' => [
+            'folder' => 'gov_ids',
+            'mimes' => 'jpeg,png,jpg,gif,webp,pdf',
+            'max' => 5120,
+        ],
+        'degree_proof' => [
+            'folder' => 'degrees',
+            'mimes' => 'jpeg,png,jpg,gif,webp,pdf',
+            'max' => 5120,
+        ],
+        'intro_video' => [
+            'folder' => 'videos',
+            'mimetypes' => 'video/mp4,video/quicktime',
+            'max' => 51200,
+        ],
+        'additional_document' => [
+            'folder' => 'additional_documents',
+            'mimes' => 'jpeg,png,jpg,gif,webp,pdf',
+            'max' => 5120,
+        ],
+    ];
+
+    public function __construct(
+        private EducatorDocumentStorageService $storage
+    ) {
+    }
+
+    /**
+     * Dropzone endpoint — streams the file straight to S3 and returns the URL.
+     */
+    public function uploadDocument(Request $request)
+    {
+        $type = (string) $request->input('type');
+
+        if (!isset(self::UPLOAD_RULES[$type])) {
+            return response()->json(['message' => 'Invalid upload type.'], 422);
+        }
+
+        $rule = self::UPLOAD_RULES[$type];
+        $fileRule = ['required', 'file', 'max:' . $rule['max']];
+        if (isset($rule['mimes'])) {
+            $fileRule[] = 'mimes:' . $rule['mimes'];
+        }
+        if (isset($rule['mimetypes'])) {
+            $fileRule[] = 'mimetypes:' . $rule['mimetypes'];
+        }
+
+        $request->validate(['file' => $fileRule]);
+
+        $user = $request->user();
+        $file = $request->file('file');
+
+        try {
+            $url = $this->storage->uploadToS3($file, $user->id, $rule['folder']);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'path' => $url,
+            'url' => $url,
+            'original_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getClientMimeType(),
+            'size' => (string) $file->getSize(),
+        ]);
+    }
+
+    /**
+     * Dropzone removedfile — delete the S3 object the user dropped before submitting.
+     */
+    public function deleteUpload(Request $request)
+    {
+        $path = (string) $request->input('path');
+        $user = $request->user();
+
+        if (!$this->storage->isAllowedForUser($path, $user->id)) {
+            return response()->json(['message' => 'Invalid path.'], 422);
+        }
+
+        $this->storage->delete($path);
+
+        return response()->json(['success' => true]);
+    }
+
     public function store(Request $request)
     {
         $user = $request->user();
 
         $request->validate([
-            'gov_id_file' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6144',
-            'credential_file' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6144',
+            'gov_id_path' => 'nullable|url',
+            'degree_proof_path' => 'nullable|url',
+            'intro_video_path' => 'nullable|url',
+            'additional_documents_new' => 'nullable|array|max:10',
+            'additional_documents_new.*.path' => 'required|url',
+            'additional_documents_new.*.name' => 'required|string|max:255',
+            'additional_documents_new.*.type' => 'nullable|string|max:100',
+            'additional_documents_new.*.size' => 'nullable|string|max:50',
             'business_type' => 'required|in:individual,company',
             'tos' => 'accepted',
-            'additional_documents' => 'nullable|array|max:10',
-            'additional_documents.*' => 'file|mimes:jpeg,png,jpg,gif,webp,pdf|max:6144',
         ]);
 
         $profile = EducatorProfile::firstOrCreate(
@@ -29,47 +119,26 @@ class VerificationSettingController extends Controller
             ['hourly_rate' => 0]
         );
 
-        $this->ensurePublicDirs();
-
-        if ($request->hasFile('gov_id_file')) {
-            $file = $request->file('gov_id_file');
-            $name = time() . '_' . $user->id . '_gov_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
-            if ($profile->govt_id_path && File::exists(public_path($profile->govt_id_path))) {
-                File::delete(public_path($profile->govt_id_path));
-            }
-            $file->move(public_path('storage/educators/gov_ids'), $name);
-            $profile->govt_id_path = 'storage/educators/gov_ids/' . $name;
-        }
-
-        if ($request->hasFile('credential_file')) {
-            $file = $request->file('credential_file');
-            $name = time() . '_' . $user->id . '_cred_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
-            if ($profile->degree_proof_path && File::exists(public_path($profile->degree_proof_path))) {
-                File::delete(public_path($profile->degree_proof_path));
-            }
-            $file->move(public_path('storage/educators/degrees'), $name);
-            $profile->degree_proof_path = 'storage/educators/degrees/' . $name;
-        }
+        $this->assignProfilePath($profile, 'govt_id_path', $request->input('gov_id_path'), $user->id);
+        $this->assignProfilePath($profile, 'degree_proof_path', $request->input('degree_proof_path'), $user->id);
+        $this->assignProfilePath($profile, 'intro_video_path', $request->input('intro_video_path'), $user->id);
 
         $profile->consent_verified = true;
         $profile->save();
 
-        if ($request->hasFile('additional_documents')) {
-            foreach ($request->file('additional_documents') as $file) {
-                if (! $file || ! $file->isValid()) {
-                    continue;
-                }
-                $safeName = $user->id . '_' . uniqid('', true) . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
-                $file->move(public_path('storage/educators/additional_documents'), $safeName);
-                $relativePath = 'storage/educators/additional_documents/' . $safeName;
-                EducatorAdditionalDocument::create([
-                    'educator_id' => $user->id,
-                    'document_path' => $relativePath,
-                    'document_type' => $file->getClientMimeType(),
-                    'document_name' => $file->getClientOriginalName(),
-                    'document_size' => (string) $file->getSize(),
-                ]);
+        foreach ($request->input('additional_documents_new', []) as $doc) {
+            $path = $doc['path'] ?? null;
+            if (!$this->storage->isAllowedForUser($path, $user->id)) {
+                continue;
             }
+
+            EducatorAdditionalDocument::create([
+                'educator_id' => $user->id,
+                'document_path' => $path,
+                'document_type' => $doc['type'] ?? null,
+                'document_name' => $doc['name'],
+                'document_size' => $doc['size'] ?? null,
+            ]);
         }
 
         VerificationSetting::updateOrCreate(
@@ -94,10 +163,7 @@ class VerificationSettingController extends Controller
             abort(403);
         }
 
-        if ($document->document_path && File::exists(public_path($document->document_path))) {
-            File::delete(public_path($document->document_path));
-        }
-
+        $this->storage->delete($document->document_path);
         $document->delete();
 
         return response()->json([
@@ -106,16 +172,20 @@ class VerificationSettingController extends Controller
         ]);
     }
 
-    private function ensurePublicDirs(): void
+    /**
+     * Replace a profile document path, deleting the previous S3/local file first.
+     */
+    private function assignProfilePath(EducatorProfile $profile, string $column, ?string $newUrl, int $userId): void
     {
-        foreach ([
-            public_path('storage/educators/gov_ids'),
-            public_path('storage/educators/degrees'),
-            public_path('storage/educators/additional_documents'),
-        ] as $dir) {
-            if (! File::isDirectory($dir)) {
-                File::makeDirectory($dir, 0755, true);
-            }
+        if (!$newUrl || !$this->storage->isAllowedForUser($newUrl, $userId)) {
+            return;
         }
+
+        $old = $profile->{$column};
+        if ($old && $old !== $newUrl) {
+            $this->storage->delete($old);
+        }
+
+        $profile->{$column} = $newUrl;
     }
 }

@@ -4,11 +4,35 @@ namespace App\Http\Controllers\Educator\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\EducatorProfile;
-use App\Models\EducatorSessionSchedule;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProfileSettingController extends Controller
 {
+    private const SUBJECTS = [
+        'Mathematics',
+        'Science',
+        'English',
+        'Computer Science',
+        'Languages',
+        'Other',
+    ];
+
+    private const TEACHING_LEVELS = [
+        'Elementary',
+        'Middle School',
+        'High School',
+        'College',
+        'Professional',
+    ];
+
+    private const TEACHING_STYLES = [
+        'Interactive / Discussion-based',
+        'Lecture / Presentation',
+        'Hands-on / Practical',
+        'Assessment-driven',
+    ];
+
     /**
      * Display a listing of the resource.
      *
@@ -16,10 +40,8 @@ class ProfileSettingController extends Controller
      */
     public function index()
     {
-        //
         $user = auth()->user();
 
-        // Fetch all settings via relationships
         $profile        = $user->profileSetting;
         $security       = $user->securitySetting;
         $payment        = $user->paymentSetting;
@@ -63,18 +85,16 @@ class ProfileSettingController extends Controller
             'last_name'                => 'required|string|max:100',
             'handle'                   => 'required|string|max:50|unique:users,username,' . $user->id,
             'bio'                      => 'nullable|string|max:2000',
-            'subjects'                 => 'nullable|array',
+            'subjects'                 => 'nullable|array|min:1',
+            'subjects.*'               => ['string', Rule::in(self::SUBJECTS)],
             'rate'                     => 'nullable|numeric|min:0',
-            'teaching_levels'          => 'nullable|array',
+            'teaching_levels'          => 'nullable|array|min:1',
+            'teaching_levels.*'        => ['string', Rule::in(self::TEACHING_LEVELS)],
             'certifications'           => 'nullable|string|max:5000',
-            'preferred_teaching_style' => 'nullable|string|max:255',
-            'intro_video_path'         => 'nullable|file|mimes:mp4,mov,avi,wmv|max:51200',
+            'preferred_teaching_style' => ['nullable', 'string', Rule::in(self::TEACHING_STYLES)],
             'avatar'                   => 'nullable|image|max:2048',
         ]);
- 
-        /* ============================
-         | USER BASIC DATA
-         ============================*/
+
         $user->update([
             'first_name' => $request->first_name,
             'last_name'  => $request->last_name,
@@ -82,13 +102,12 @@ class ProfileSettingController extends Controller
             'bio'        => $request->bio,
         ]);
 
-        /* ============================
-         | AVATAR UPLOAD
-         ============================*/
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
-               $path = public_path( $user->avatar);
-               unlink($path);
+                $path = public_path($user->avatar);
+                if (is_file($path)) {
+                    @unlink($path);
+                }
             }
 
             $filename = time() . '_' . $request->file('avatar')->getClientOriginalName();
@@ -97,38 +116,20 @@ class ProfileSettingController extends Controller
             $user->save();
         }
 
-        /* ============================
-         | EDUCATOR PROFILE
-         ============================*/
-        $profileData = [
-            'primary_subject'          => $request->subjects ? json_encode($request->subjects) : null,
-            'hourly_rate'              => $request->rate,
-            'teaching_levels'          => $request->teaching_levels ? json_encode($request->teaching_levels) : null,
-            'certifications'           => $request->certifications,
-            'preferred_teaching_style' => $request->preferred_teaching_style,
-        ];
-
-        if ($request->hasFile('intro_video_path')) {
-            $profile = EducatorProfile::where('user_id', $user->id)->first();
-            if ($profile && $profile->intro_video_path) {
-                $oldPath = storage_path('app/public/' . $profile->intro_video_path);
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
-            }
-            $filename = time() . '_' . $request->file('intro_video_path')->getClientOriginalName();
-            $request->file('intro_video_path')->move(storage_path('app/public/educator_videos'), $filename);
-            $profileData['intro_video_path'] = 'educator_videos/' . $filename;
-        }
-
         EducatorProfile::updateOrCreate(
             ['user_id' => $user->id],
-            $profileData
+            [
+                'primary_subject'          => $request->subjects ? implode(', ', $request->subjects) : null,
+                'hourly_rate'              => $request->rate,
+                'teaching_levels'          => $request->teaching_levels ? json_encode($request->teaching_levels) : null,
+                'certifications'           => $request->certifications,
+                'preferred_teaching_style' => $request->preferred_teaching_style,
+            ]
         );
 
         return response()->json([
             'status'  => true,
-            'message' => 'Profile updated successfully'
+            'message' => 'Profile updated successfully',
         ]);
     }
 }

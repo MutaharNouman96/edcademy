@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="{{ asset('assets/css/select2-addon.css') }}" />
 
         <link rel="stylesheet" href="https://cdn.datatables.net/2.3.6/css/dataTables.bootstrap5.css">
-       
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 
 
@@ -310,6 +310,25 @@
         </script>
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            window.educatorToast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+
+            window.showEducatorToast = function(message, type) {
+                type = type || 'success';
+                var icon = type === 'danger' ? 'error' : type;
+                if (icon === 'info') icon = 'info';
+                educatorToast.fire({
+                    icon: icon,
+                    title: message,
+                });
+            };
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         <script>

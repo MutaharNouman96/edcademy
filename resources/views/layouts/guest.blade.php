@@ -45,6 +45,10 @@
                                 class="bi bi-journal d-lg-none me-2"></i>Courses</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('web.educators.index') }}"><i
+                                class="bi bi-people d-lg-none me-2"></i>Educators</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ route('web.how.it.works') }}"><i
                                 class="bi bi-lightbulb d-lg-none me-2"></i>How It Works</a>
                     </li>

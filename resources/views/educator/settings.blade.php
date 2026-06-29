@@ -103,6 +103,12 @@
                             class="bi bi-person me-1"></i>
                         Profile</button>
                 </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="verification-tab" data-bs-toggle="tab"
+                        data-bs-target="#tab-verification" type="button" role="tab"
+                        aria-controls="tab-verification" aria-selected="false"><i class="bi bi-patch-check me-1"></i>
+                      Intro & Verification Documents </button>
+                </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#tab-security"
                         type="button" role="tab" aria-controls="tab-security" aria-selected="false"><i
@@ -131,12 +137,7 @@
                         type="button" role="tab" aria-controls="tab-privacy" aria-selected="false"><i
                             class="bi bi-eye-slash me-1"></i> Privacy</button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="verification-tab" data-bs-toggle="tab"
-                        data-bs-target="#tab-verification" type="button" role="tab"
-                        aria-controls="tab-verification" aria-selected="false"><i class="bi bi-patch-check me-1"></i>
-                        Verification</button>
-                </li>
+              
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="connections-tab" data-bs-toggle="tab"
                         data-bs-target="#tab-connections" type="button" role="tab"
@@ -199,9 +200,20 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label">Subject</label>
-                            <input id="subjectsInput" class="form-control" placeholder="Type & press Enter" value="{{ $user->educatorProfile->primary_subject ?? '' }}">
-                            <div id="subjectsChips" class="mt-2"></div>
+                            <label class="form-label">Subjects</label>
+                            <select id="subjectsSelect" name="subjects[]" class="form-select select2" multiple
+                                data-placeholder="Select one or more subjects">
+                                @php
+                                    $subjectOptions = ['Mathematics', 'Science', 'English', 'Computer Science', 'Languages', 'Other'];
+                                    $savedSubjects = array_filter(array_map('trim', explode(',', $user->educatorProfile->primary_subject ?? '')));
+                                @endphp
+                                @foreach ($subjectOptions as $subject)
+                                    <option value="{{ $subject }}" {{ in_array($subject, $savedSubjects, true) ? 'selected' : '' }}>
+                                        {{ $subject }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="form-text">Select all subjects you teach.</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Hourly rate (USD)</label>
@@ -211,42 +223,16 @@
                                     placeholder="25"></div>
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Promo Video File</label>
-                            <div class="input-group">
-                                <input type="file" name="intro_video_path" class="form-control" accept="video/*">
-                                @if (!empty($user->educatorProfile->intro_video_path))
-                                <a 
-                                    class="btn btn-outline-secondary ms-2" 
-                                    href="{{ asset('storage/' . $user->educatorProfile->intro_video_path) }}" 
-                                    target="_blank"
-                                    title="Open video in new tab"
-                                    >
-                                    <i class="bi bi-box-arrow-up-right"></i>
-                                </a>
-                                @endif
-                            </div>
-                            @if (!empty($user->educatorProfile->intro_video_path))
-                                <small class="form-text text-muted">
-                                    Current file: 
-                                    <a href="{{ asset('storage/' . $user->educatorProfile->intro_video_path) }}" target="_blank">
-                                        View video
-                                    </a>
-                                </small>
-                            @endif
-                        </div>
-                   
-
                         <div class="col-md-4">
                             <label class="form-label">Teaching Levels</label>
                             <select id="teachingLevelsSelect" name="teaching_levels[]" class="form-select select2"
                                 multiple data-placeholder="Select one or more levels">
                                 @php
-                                    $levels = ['Primary', 'Middle School', 'High School', 'Undergraduate', 'Postgraduate', 'Professional'];
+                                    $levels = ['Elementary', 'Middle School', 'High School', 'College', 'Professional'];
                                     $savedLevels = json_decode($user->educatorProfile->teaching_levels ?? '[]', true) ?: [];
                                 @endphp
                                 @foreach($levels as $level)
-                                    <option value="{{ $level }}" {{ in_array($level, $savedLevels) ? 'selected' : '' }}>{{ $level }}</option>
+                                    <option value="{{ $level }}" {{ in_array($level, $savedLevels, true) ? 'selected' : '' }}>{{ $level }}</option>
                                 @endforeach
                             </select>
                             <div class="form-text">Search and select all levels you teach.</div>
@@ -262,8 +248,8 @@
                             <select name="preferred_teaching_style" class="form-select">
                                 <option value="">-- Select --</option>
                                 @php
-                                    $styles = ['Interactive', 'Lecture-based', 'Project-based', 'Hands-on', 'Discussion-based', 'Flipped Classroom', 'One-on-One Tutoring'];
-                                    $savedStyle = $user->educatorProfile->preferred_teaching_style ?? '';
+                                    $styles = ['Interactive / Discussion-based', 'Lecture / Presentation', 'Hands-on / Practical', 'Assessment-driven'];
+                                    $savedStyle = $user->educatorProfile?->decodedTeachingStyle() ?? '';
                                 @endphp
                                 @foreach($styles as $style)
                                     <option value="{{ $style }}" {{ $savedStyle === $style ? 'selected' : '' }}>{{ $style }}</option>
@@ -656,49 +642,124 @@
                             $v = $verification ?? null;
                             $ep = $user->educatorProfile;
                             $biz = old('business_type', $v->business_type ?? 'individual');
+
+                            $verificationDocs = collect([
+                                ['label' => 'CV', 'path' => $ep?->cv_path, 'icon' => 'bi-file-earmark-person'],
+                                ['label' => 'Government ID', 'path' => $ep?->govt_id_path, 'icon' => 'bi-person-badge'],
+                                ['label' => 'Teaching Credential', 'path' => $ep?->degree_proof_path, 'icon' => 'bi-mortarboard'],
+                                ['label' => 'Intro Video', 'path' => $ep?->intro_video_path, 'icon' => 'bi-camera-video'],
+                            ])->filter(fn ($doc) => !empty($doc['path']))->map(function ($doc) {
+                                $doc['url'] = \App\Models\EducatorProfile::resolveFileUrl($doc['path']);
+                                $doc['kind'] = \App\Models\EducatorProfile::fileKind($doc['path']);
+                                $doc['name'] = basename(parse_url($doc['path'], PHP_URL_PATH) ?: $doc['path']);
+                                return $doc;
+                            });
                         @endphp
+
+                        @if ($verificationDocs->isNotEmpty() || (isset($additionalDocuments) && $additionalDocuments->isNotEmpty()))
+                            <div class="col-12">
+                                <h6 class="mb-2"><i class="bi bi-folder2-open me-1"></i> Uploaded documents</h6>
+                                <p class="text-muted small mb-3">Preview your verification files below. Click Preview to open in a modal.</p>
+                                <div class="row g-3" id="verificationDocCards">
+                                    @foreach ($verificationDocs as $doc)
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="doc-preview-card h-100">
+                                                <div class="doc-preview-card__icon">
+                                                    <i class="bi {{ $doc['icon'] }}"></i>
+                                                </div>
+                                                <div class="doc-preview-card__body">
+                                                    <div class="doc-preview-card__label">{{ $doc['label'] }}</div>
+                                                    <div class="doc-preview-card__name" title="{{ $doc['name'] }}">{{ $doc['name'] }}</div>
+                                                    <div class="doc-preview-card__actions">
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-primary btn-doc-preview"
+                                                            data-url="{{ $doc['url'] }}"
+                                                            data-title="{{ $doc['label'] }}"
+                                                            data-kind="{{ $doc['kind'] }}">
+                                                            <i class="bi bi-eye me-1"></i> Preview
+                                                        </button>
+                                                        <a href="{{ $doc['url'] }}" target="_blank" rel="noopener"
+                                                            class="btn btn-sm btn-outline-secondary">
+                                                            <i class="bi bi-box-arrow-up-right"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+
+                                    @if (isset($additionalDocuments))
+                                        @foreach ($additionalDocuments as $doc)
+                                            @php
+                                                $docKind = \App\Models\EducatorProfile::fileKind($doc->document_path);
+                                                $docIcon = match ($docKind) {
+                                                    'pdf' => 'bi-file-earmark-pdf',
+                                                    'image' => 'bi-file-earmark-image',
+                                                    'video' => 'bi-camera-video',
+                                                    default => 'bi-file-earmark',
+                                                };
+                                            @endphp
+                                            <div class="col-md-6 col-lg-4" data-additional-doc-id="{{ $doc->id }}">
+                                                <div class="doc-preview-card h-100">
+                                                    <div class="doc-preview-card__icon">
+                                                        <i class="bi {{ $docIcon }}"></i>
+                                                    </div>
+                                                    <div class="doc-preview-card__body">
+                                                        <div class="doc-preview-card__label">Additional Document</div>
+                                                        <div class="doc-preview-card__name" title="{{ $doc->document_name }}">{{ $doc->document_name }}</div>
+                                                        <div class="doc-preview-card__actions">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-primary btn-doc-preview"
+                                                                data-url="{{ $doc->document_url }}"
+                                                                data-title="{{ $doc->document_name }}"
+                                                                data-kind="{{ $docKind }}">
+                                                                <i class="bi bi-eye me-1"></i> Preview
+                                                            </button>
+                                                            <a href="{{ $doc->document_url }}" target="_blank" rel="noopener"
+                                                                class="btn btn-sm btn-outline-secondary">
+                                                                <i class="bi bi-box-arrow-up-right"></i>
+                                                            </a>
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-danger btn-remove-additional-doc"
+                                                                data-url="{{ route('educator.verification.document.destroy', $doc) }}">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="col-12"><hr class="my-1"></div>
+                        @endif
+
                         <div class="col-md-6">
                             <label class="form-label">Government ID</label>
-                            <input id="idFile" name="gov_id_file" type="file" class="form-control"
-                                accept="image/*,application/pdf">
-                            <div class="form-text">Stored securely. Only admins can view.</div>
-                            @if (!empty($ep?->govt_id_path))
-                                <small class="text-muted d-block mt-1">
-                                    Current file:
-                                    <a href="{{ asset($ep->govt_id_path) }}" target="_blank">View uploaded ID</a>
-                                </small>
-                            @endif
+                            <div id="govIdDropzone" class="settings-dropzone dropzone" data-type="gov_id"></div>
+                            <input type="hidden" name="gov_id_path" id="gov_id_path" value="" />
+                            <small class="text-muted">JPG, PNG, or PDF — max 5MB. Uploaded directly to secure storage.</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Teaching credential (optional)</label>
-                            <input id="credFile" name="credential_file" type="file" class="form-control"
-                                accept="image/*,application/pdf">
-                            @if (!empty($ep?->degree_proof_path))
-                                <small class="text-muted d-block mt-1">
-                                    Current file:
-                                    <a href="{{ asset($ep->degree_proof_path) }}" target="_blank">View credential</a>
-                                </small>
-                            @endif
+                            <div id="credentialDropzone" class="settings-dropzone dropzone" data-type="degree_proof"></div>
+                            <input type="hidden" name="degree_proof_path" id="degree_proof_path" value="" />
+                            <small class="text-muted">JPG, PNG, or PDF — max 5MB.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Intro Video (optional)</label>
+                            <div id="introVideoDropzone" class="settings-dropzone dropzone" data-type="intro_video"></div>
+                            <input type="hidden" name="intro_video_path" id="intro_video_path" value="" />
+                            <small class="text-muted">MP4 or MOV — max 50MB.</small>
                         </div>
 
                         <div class="col-12">
                             <h6 class="mb-2"><i class="bi bi-paperclip me-1"></i> Additional documents</h6>
-                            <p class="text-muted small mb-2">Upload extra proof (certificates, references, etc.). PDF or images, up to 10 files per submission.</p>
-                            @if (isset($additionalDocuments) && $additionalDocuments->isNotEmpty())
-                                <ul class="list-group list-group-flush border rounded mb-3">
-                                    @foreach ($additionalDocuments as $doc)
-                                        <li class="list-group-item d-flex align-items-center justify-content-between gap-2 py-2">
-                                            <span class="text-truncate small" title="{{ $doc->document_name }}">{{ $doc->document_name }}</span>
-                                            <span class="d-flex align-items-center gap-2 flex-shrink-0">
-                                                <a href="{{ $doc->document_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">Open</a>
-                                                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-additional-doc" data-url="{{ route('educator.verification.document.destroy', $doc) }}">Remove</button>
-                                            </span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                            <label class="form-label">Add files</label>
-                            <input type="file" name="additional_documents[]" class="form-control" accept="image/*,application/pdf" multiple>
+                            <p class="text-muted small mb-2">Upload extra proof (certificates, references, etc.). PDF or images, up to 10 files, each max 5MB.</p>
+                            <div id="additionalDocsDropzone" class="settings-dropzone dropzone" data-type="additional_document"></div>
+                            <div id="additionalDocsNewContainer"></div>
                         </div>
 
                         <div class="col-md-6">
@@ -847,9 +908,29 @@
         </div>
     </div>
 
+    <!-- Document preview modal -->
+    <div class="modal fade" id="docPreviewModal" tabindex="-1" aria-labelledby="docPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="docPreviewModalLabel">Document Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" id="docPreviewBody"></div>
+                <div class="modal-footer py-2">
+                    <a href="#" id="docPreviewOpenLink" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Open in new tab
+                    </a>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
     @push('styles')
+        <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" />
         <style>
             .card {
                 border-radius: 16px;
@@ -959,6 +1040,103 @@
                 padding: .25rem .6rem;
                 font-size: .8rem;
             }
+
+            .doc-preview-card {
+                display: flex;
+                gap: 0.85rem;
+                align-items: flex-start;
+                border: 1px solid rgba(0, 0, 0, .08);
+                border-radius: 14px;
+                padding: 1rem;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(0, 74, 87, 0.06);
+                transition: box-shadow .2s, border-color .2s;
+            }
+
+            .doc-preview-card:hover {
+                border-color: rgba(0, 131, 143, .35);
+                box-shadow: 0 6px 16px rgba(0, 74, 87, 0.1);
+            }
+
+            .doc-preview-card__icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 12px;
+                background: var(--light-cyan, #e0f7fa);
+                color: var(--dark-cyan, #006b7d);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+                flex-shrink: 0;
+            }
+
+            .doc-preview-card__body {
+                min-width: 0;
+                flex: 1;
+            }
+
+            .doc-preview-card__label {
+                font-weight: 600;
+                color: var(--dark-cyan, #006b7d);
+                font-size: .9rem;
+            }
+
+            .doc-preview-card__name {
+                color: #6b7a8c;
+                font-size: .82rem;
+                margin-top: .15rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .doc-preview-card__actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: .35rem;
+                margin-top: .65rem;
+            }
+
+            #docPreviewModal .modal-body {
+                background: #0f172a;
+                min-height: 280px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #docPreviewModal .modal-body img,
+            #docPreviewModal .modal-body iframe {
+                max-width: 100%;
+                max-height: 75vh;
+            }
+
+            #docPreviewModal video-player {
+                width: 100%;
+                max-height: 75vh;
+            }
+
+            .settings-dropzone.dropzone {
+                border: 2px dashed #cbd5e1;
+                border-radius: 10px;
+                background: #f8fafc;
+                min-height: 110px;
+                padding: 14px;
+            }
+
+            .settings-dropzone.dropzone:hover,
+            .settings-dropzone.dropzone.dz-drag-hover {
+                border-color: var(--primary-cyan, #0891b2);
+                background: #f0f9ff;
+            }
+
+            .settings-dropzone .dz-message {
+                margin: 1.2em 0;
+                color: #64748b;
+                font-weight: 500;
+                font-size: .9rem;
+            }
         </style>
     @endpush
     @push('scripts')
@@ -966,33 +1144,17 @@
 
         <script>
             // ===== Utilities =====
-            function createToastContainer() {
-                const c = document.createElement('div');
-                c.id = 'toastContainer';
-                c.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-                c.style.zIndex = '1055';
-                document.body.appendChild(c);
-                return c;
-            }
-
             function showToast(message, type = 'info') {
-                const container = document.getElementById('toastContainer') || createToastContainer();
-                const el = document.createElement('div');
-                el.className = `toast align-items-center text-bg-${type} border-0`;
-                el.role = 'alert';
-                el.innerHTML = `
-        <div class='d-flex'>
-          <div class='toast-body'>
-            <i class='bi bi-${type==='success'?'check-circle':type==='danger'?'x-circle':'info-circle'} me-2'></i>
-            ${message}
-          </div>
-          <button type='button' class='btn-close btn-close-white me-2 m-auto' data-bs-dismiss='toast'></button>
-        </div>`;
-                container.appendChild(el);
-                new bootstrap.Toast(el, {
-                    delay: 3000
-                }).show();
-                el.addEventListener('hidden.bs.toast', () => el.remove());
+                if (typeof showEducatorToast === 'function') {
+                    showEducatorToast(message, type);
+                    return;
+                }
+                Swal.fire({
+                    icon: type === 'danger' ? 'error' : type,
+                    title: message,
+                    timer: type === 'success' ? 2000 : undefined,
+                    showConfirmButton: type !== 'success',
+                });
             }
 
             function serializeForm(form) {
@@ -1022,7 +1184,6 @@
                 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
                 document.getElementById('tzInput').value = tz;
 
-                initSubjectsChips();
                 initWeekGrid();
                 // wireSecurity();
                 // wirePayments();
@@ -1030,38 +1191,52 @@
                 // wireForms();
             });
 
-            // ===== Profile: subjects chips =====
-            function initSubjectsChips() {
-                const input = document.getElementById('subjectsInput');
-                const holder = document.getElementById('subjectsChips');
-                const subjects = new Set();
+            // ===== Document preview modal =====
+            let docPreviewModalInstance = null;
 
-                function render() {
-                    holder.innerHTML = '';
-                    subjects.forEach(s => {
-                        const span = document.createElement('span');
-                        span.className = 'chip';
-                        span.innerHTML =
-                            `<i class='bi bi-book me-1'></i>${s}<span class='x bi bi-x' data-x='${s}'></span>`;
-                        holder.appendChild(span);
-                    });
+            function openDocPreview(title, url, kind) {
+                const modalEl = document.getElementById('docPreviewModal');
+                const body = document.getElementById('docPreviewBody');
+                const titleEl = document.getElementById('docPreviewModalLabel');
+                const openLink = document.getElementById('docPreviewOpenLink');
+
+                if (!modalEl || !body) return;
+
+                body.innerHTML = '';
+                titleEl.textContent = title || 'Document Preview';
+                openLink.href = url;
+
+                if (kind === 'video') {
+                    body.style.background = '#0f172a';
+                    body.innerHTML = `
+                        <video-player style="width:100%;max-height:75vh;">
+                            <video src="${url}" playsinline controls style="width:100%;"></video>
+                        </video-player>`;
+                } else if (kind === 'image') {
+                    body.style.background = '#f8fafc';
+                    body.innerHTML = `<img src="${url}" alt="${title}" class="img-fluid">`;
+                } else if (kind === 'pdf') {
+                    body.style.background = '#fff';
+                    body.innerHTML = `<iframe src="${url}" title="${title}" style="width:100%;height:75vh;border:0;"></iframe>`;
+                } else {
+                    body.style.background = '#f8fafc';
+                    body.innerHTML = `<p class="text-muted p-4 mb-0">Preview not available for this file type.</p>`;
                 }
-                input.addEventListener('keydown', e => {
-                    if (e.key === 'Enter' && input.value.trim()) {
-                        e.preventDefault();
-                        subjects.add(input.value.trim());
-                        input.value = '';
-                        render();
-                    }
-                });
-                holder.addEventListener('click', e => {
-                    const x = e.target.getAttribute('data-x');
-                    if (x) {
-                        subjects.delete(x);
-                        render();
-                    }
-                });
+
+                docPreviewModalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+                docPreviewModalInstance.show();
             }
+
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-doc-preview');
+                if (!btn) return;
+                e.preventDefault();
+                openDocPreview(btn.dataset.title, btn.dataset.url, btn.dataset.kind);
+            });
+
+            document.getElementById('docPreviewModal')?.addEventListener('hidden.bs.modal', function() {
+                document.getElementById('docPreviewBody').innerHTML = '';
+            });
 
             // ===== Availability: weekly grid (session schedule: day + time) =====
             function initWeekGrid() {
@@ -1486,10 +1661,10 @@
                     data: $(this).serialize(),
 
                     success: function(res) {
-                        toastr.success("Password updated!");
+                        showEducatorToast("Password updated!");
                     },
                     error: function(err) {
-                        toastr.error("Incorrect current password or invalid data.");
+                        showEducatorToast("Incorrect current password or invalid data.", 'error');
                     }
                 });
             });
@@ -1509,10 +1684,10 @@
                     data,
 
                     success: function(res) {
-                        toastr.success("2FA saved.");
+                        showEducatorToast("2FA saved.");
                     },
                     error: function(err) {
-                        toastr.error("Error saving 2FA.");
+                        showEducatorToast("Error saving 2FA.", 'error');
                     }
                 });
             });
@@ -1531,10 +1706,10 @@
                     data,
 
                     success: function(res) {
-                        toastr.success("2FA saved.");
+                        showEducatorToast("2FA saved.");
                     },
                     error: function(err) {
-                        toastr.error("Error saving 2FA.");
+                        showEducatorToast("Error saving 2FA.", 'error');
                     }
                 });
             });
@@ -1555,10 +1730,10 @@
 
                     success: function(res) {
                         $("#methodModal").modal("hide");
-                        toastr.success("Payment method added.");
+                        showEducatorToast("Payment method added.");
                     },
                     error: function(err) {
-                        toastr.error("Error adding payment method.");
+                        showEducatorToast("Error adding payment method.", 'error');
                     }
                 });
             });
@@ -1572,10 +1747,10 @@
                     data: $(this).serialize(),
 
                     success: function(res) {
-                        toastr.success("Notification settings updated.");
+                        showEducatorToast("Notification settings updated.");
                     },
                     error: function(err) {
-                        toastr.error("Failed to update notification settings.");
+                        showEducatorToast("Failed to update notification settings.", 'error');
                     }
                 });
             });
@@ -1588,10 +1763,10 @@
                     data: $(this).serialize(),
 
                     success: function(res) {
-                        toastr.success("Privacy updated.");
+                        showEducatorToast("Privacy updated.");
                     },
                     error: function(err) {
-                        toastr.error("Error updating privacy.");
+                        showEducatorToast("Error updating privacy.", 'error');
                     }
                 });
             });
@@ -1608,8 +1783,14 @@
                     contentType: false,
 
                     success: function(res) {
-                        toastr.success(res.message || "Verification submitted.");
-                        window.location.reload();
+                        Swal.fire({
+                            icon: 'success',
+                            title: res.message || 'Verification submitted.',
+                            timer: 1500,
+                            showConfirmButton: false,
+                        }).then(function() {
+                            window.location.reload();
+                        });
                     },
                     error: function(xhr) {
                         var msg = "Error submitting verification.";
@@ -1617,7 +1798,7 @@
                             var first = Object.values(xhr.responseJSON.errors)[0];
                             msg = Array.isArray(first) ? first[0] : first;
                         }
-                        toastr.error(msg);
+                        showEducatorToast(msg, 'error');
                     }
                 });
             });
@@ -1625,6 +1806,7 @@
             $(document).on("click", ".btn-remove-additional-doc", function() {
                 if (!confirm("Remove this document?")) return;
                 var url = $(this).data("url");
+                var $card = $(this).closest('[data-additional-doc-id]');
                 $.ajax({
                     url: url,
                     method: "POST",
@@ -1633,11 +1815,11 @@
                         _method: "DELETE"
                     },
                     success: function(res) {
-                        toastr.success(res.message || "Document removed.");
-                        window.location.reload();
+                        showEducatorToast(res.message || "Document removed.");
+                        $card.remove();
                     },
                     error: function() {
-                        toastr.error("Could not remove document.");
+                        showEducatorToast("Could not remove document.", 'error');
                     }
                 });
             });
@@ -1650,10 +1832,10 @@
                     data: $(this).serialize(),
 
                     success: function(res) {
-                        toastr.success("Preferences saved.");
+                        showEducatorToast("Preferences saved.");
                     },
                     error: function(err) {
-                        toastr.error("Error saving preferences.");
+                        showEducatorToast("Error saving preferences.", 'error');
                     }
                 });
             });
@@ -1669,11 +1851,11 @@
                     },
 
                     success: function(res) {
-                        toastr.success("Account deleted.");
+                        showEducatorToast("Account deleted.");
                         window.location.href = "/";
                     },
                     error: function(err) {
-                        toastr.error("Could not delete account.");
+                        showEducatorToast("Could not delete account.", 'error');
                     }
                 });
             });
@@ -1747,6 +1929,150 @@
                 });
 
             });
+        </script>
+
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/video-minimal.js"></script>
+        <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+        <script>
+            Dropzone.autoDiscover = false;
+
+            (function() {
+                const csrfToken = $('meta[name="csrf-token"]').attr('content');
+                const uploadUrl = "{{ route('educator.verification.upload') }}";
+                const deleteUrl = "{{ route('educator.verification.upload.delete') }}";
+
+                const acceptedByType = {
+                    gov_id: 'image/jpeg,image/png,image/gif,image/webp,application/pdf',
+                    degree_proof: 'image/jpeg,image/png,image/gif,image/webp,application/pdf',
+                    additional_document: 'image/jpeg,image/png,image/gif,image/webp,application/pdf',
+                    intro_video: 'video/mp4,video/quicktime',
+                };
+
+                function deleteUploadedFile(path) {
+                    if (!path) return;
+                    $.ajax({
+                        url: deleteUrl,
+                        method: 'POST',
+                        data: JSON.stringify({ path }),
+                        contentType: 'application/json',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-HTTP-Method-Override': 'DELETE',
+                        },
+                    });
+                }
+
+                function initVerifySingle(elId, type, hiddenId, maxMb) {
+                    const el = document.getElementById(elId);
+                    if (!el) return;
+                    const hidden = document.getElementById(hiddenId);
+
+                    new Dropzone(el, {
+                        url: uploadUrl,
+                        method: 'post',
+                        paramName: 'file',
+                        maxFiles: 1,
+                        maxFilesize: maxMb,
+                        acceptedFiles: acceptedByType[type],
+                        addRemoveLinks: true,
+                        dictDefaultMessage: 'Drop file here or click to upload',
+                        headers: { 'X-CSRF-TOKEN': csrfToken },
+                        params: { type },
+                        init: function() {
+                            const dz = this;
+                            dz.on('addedfile', function() {
+                                if (dz.files.length > 1) dz.removeFile(dz.files[0]);
+                            });
+                            dz.on('success', function(file, response) {
+                                file._s3Path = response.path;
+                                if (hidden) hidden.value = response.path;
+                            });
+                            dz.on('removedfile', function(file) {
+                                deleteUploadedFile(file._s3Path);
+                                if (hidden) hidden.value = '';
+                            });
+                            dz.on('error', function(file, message) {
+                                const msg = typeof message === 'string' ? message : (message.message || 'Upload failed');
+                                if (file.previewElement) {
+                                    file.previewElement.querySelectorAll('[data-dz-errormessage]')
+                                        .forEach(n => n.textContent = msg);
+                                }
+                            });
+                        },
+                    });
+                }
+
+                let additionalDocIdx = 0;
+
+                function appendAdditionalDocFields(container, response) {
+                    const idx = additionalDocIdx++;
+                    const wrapper = document.createElement('div');
+                    wrapper.dataset.s3Path = response.path;
+
+                    const fields = {
+                        path: response.path,
+                        name: response.original_name,
+                        type: response.mime_type || '',
+                        size: response.size || '',
+                    };
+
+                    Object.entries(fields).forEach(([key, value]) => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = `additional_documents_new[${idx}][${key}]`;
+                        input.value = value;
+                        wrapper.appendChild(input);
+                    });
+
+                    container.appendChild(wrapper);
+                    return wrapper;
+                }
+
+                function initVerifyMultiple(elId, type, containerId, maxFiles, maxMb) {
+                    const el = document.getElementById(elId);
+                    if (!el) return;
+                    const container = document.getElementById(containerId);
+
+                    new Dropzone(el, {
+                        url: uploadUrl,
+                        method: 'post',
+                        paramName: 'file',
+                        maxFiles: maxFiles,
+                        maxFilesize: maxMb,
+                        acceptedFiles: acceptedByType[type],
+                        addRemoveLinks: true,
+                        dictDefaultMessage: 'Drop files here or click to upload (up to ' + maxFiles + ')',
+                        dictMaxFilesExceeded: 'Maximum ' + maxFiles + ' files allowed.',
+                        headers: { 'X-CSRF-TOKEN': csrfToken },
+                        params: { type },
+                        init: function() {
+                            const dz = this;
+                            dz.on('success', function(file, response) {
+                                file._s3Path = response.path;
+                                file._fieldWrapper = appendAdditionalDocFields(container, response);
+                            });
+                            dz.on('removedfile', function(file) {
+                                deleteUploadedFile(file._s3Path);
+                                file._fieldWrapper?.remove();
+                            });
+                            dz.on('error', function(file, message) {
+                                const msg = typeof message === 'string' ? message : (message.message || 'Upload failed');
+                                if (file.previewElement) {
+                                    file.previewElement.querySelectorAll('[data-dz-errormessage]')
+                                        .forEach(n => n.textContent = msg);
+                                }
+                            });
+                        },
+                    });
+                }
+
+                $(document).ready(function() {
+                    initVerifySingle('govIdDropzone', 'gov_id', 'gov_id_path', 5);
+                    initVerifySingle('credentialDropzone', 'degree_proof', 'degree_proof_path', 5);
+                    initVerifySingle('introVideoDropzone', 'intro_video', 'intro_video_path', 50);
+                    initVerifyMultiple('additionalDocsDropzone', 'additional_document', 'additionalDocsNewContainer', 10, 5);
+                });
+            })();
         </script>
     @endpush
 </x-educator-layout>

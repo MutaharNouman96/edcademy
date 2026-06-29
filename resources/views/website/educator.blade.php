@@ -23,9 +23,15 @@
                                 </span>
                             @endif
                         </div>
-                        <p class="educator-subject text-dark">
-                            {{ $educator_profile?->primary_subject ?? 'Educator' }}
-                        </p>
+                        @if (count($primarySubjects))
+                            <div class="header-subjects">
+                                @foreach ($primarySubjects as $subject)
+                                    <span class="subject-chip">{{ $subject }}</span>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="educator-subject text-dark mb-0">Educator</p>
+                        @endif
                         <div class="educator-meta">
                             <span class="rating-badge">
                                 <i class="fas fa-star"></i>
@@ -95,6 +101,25 @@
                     <div class="tab-content">
                         <!-- Overview Tab -->
                         <div class="tab-pane fade show active" id="overview">
+                            @if ($introVideoUrl)
+                                <div class="content-card" id="intro-video">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-video"></i>
+                                        Intro Video
+                                    </h3>
+                                    <div class="intro-video-player">
+                                        <video-player>
+                                            <video-minimal-skin>
+                                                <video
+                                                    data-src="{{ $introVideoUrl }}"
+                                                    playsinline
+                                                    preload="none"
+                                                ></video>
+                                            </video-minimal-skin>
+                                        </video-player>
+                                    </div>
+                                </div>
+                            @endif
                             <!-- Stats -->
                             <div class="content-card">
                                 <h3 class="section-title">
@@ -127,12 +152,26 @@
                                     <i class="fas fa-user"></i>
                                     About Me
                                 </h3>
-                                @if (filled($educator_profile?->bio))
-                                    <p class="about-text">{{ $educator_profile->bio }}</p>
+                                @if (filled($educatorBio))
+                                    <p class="about-text">{{ $educatorBio }}</p>
                                 @else
                                     <p class="text-muted mb-0">This educator has not added a bio yet.</p>
                                 @endif
                             </div>
+
+                            @if (count($primarySubjects))
+                                <div class="content-card">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-book-open"></i>
+                                        Primary Subjects
+                                    </h3>
+                                    <div class="teaching-style-list">
+                                        @foreach ($primarySubjects as $subject)
+                                            <span class="subject-tag">{{ $subject }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
 
                             @if (count($teachingStyles))
                                 <div class="content-card">
@@ -512,10 +551,10 @@
                                     <span>{{ $educator_profile->location }}</span>
                                 </li>
                             @endif
-                            @if ($educator_profile?->primary_subject)
+                            @if (count($primarySubjects))
                                 <li>
                                     <i class="fas fa-book"></i>
-                                    <span>Specializes in {{ $educator_profile->primary_subject }}</span>
+                                    <span>Specializes in {{ implode(', ', $primarySubjects) }}</span>
                                 </li>
                             @endif
                             <li>
@@ -784,6 +823,29 @@
                 videoFrame.src = '';
             });
         </script>
+        @if ($introVideoUrl)
+            <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/video-minimal.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const introVideo = document.querySelector('#intro-video video[data-src]');
+                    if (!introVideo) {
+                        return;
+                    }
+
+                    const loadIntroVideo = function () {
+                        if (!introVideo.dataset.src) {
+                            return;
+                        }
+
+                        introVideo.src = introVideo.dataset.src;
+                        introVideo.removeAttribute('data-src');
+                    };
+
+                    introVideo.closest('video-player')?.addEventListener('pointerdown', loadIntroVideo, { once: true, capture: true });
+                    introVideo.addEventListener('play', loadIntroVideo, { once: true });
+                });
+            </script>
+        @endif
     @endpush
     @push('styles')
         <style>
@@ -854,6 +916,47 @@
                 font-size: 1.15rem;
                 opacity: 0.95;
                 margin-bottom: 16px;
+            }
+
+            .header-subjects {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .subject-chip {
+                display: inline-flex;
+                align-items: center;
+                background: rgba(255, 255, 255, 0.2);
+                color: #fff;
+                border: 1px solid rgba(255, 255, 255, 0.35);
+                padding: 6px 14px;
+                border-radius: 999px;
+                font-size: 0.9rem;
+                font-weight: 600;
+            }
+
+            .subject-tag {
+                display: inline-flex;
+                align-items: center;
+                background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--dark-cyan) 100%);
+                color: white;
+                padding: 8px 14px;
+                border-radius: 999px;
+                font-size: 0.88rem;
+                font-weight: 600;
+            }
+
+            .intro-video-player {
+                border-radius: 14px;
+                overflow: hidden;
+                background: #0f172a;
+            }
+
+            .intro-video-player video-player {
+                display: block;
+                width: 100%;
             }
 
             .educator-meta {

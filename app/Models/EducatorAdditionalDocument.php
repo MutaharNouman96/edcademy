@@ -31,14 +31,6 @@ class EducatorAdditionalDocument extends Model
      */
     public function getDocumentUrlAttribute(): ?string
     {
-        $path = $this->attributes['document_path'] ?? null;
-        if (! $path) {
-            return null;
-        }
-        if (filter_var($path, FILTER_VALIDATE_URL)) {
-            return $path;
-        }
-
-        return asset($path);
+        return EducatorProfile::resolveFileUrl($this->attributes['document_path'] ?? null);
     }
 }

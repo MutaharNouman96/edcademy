@@ -50,6 +50,8 @@ use App\Http\Controllers\WatermarkController;
 Route::get('/', [WebsiteController::class, 'index'])->name('website.index');
 Route::get('become-an-educator', [WebsiteController::class, 'educator_signup'])->name('web.eudcator.signup');
 Route::post('educator/signup/store', [EducatorController::class, 'store'])->name('educator.signup.store');
+Route::post('educator/signup/temp-upload', [EducatorController::class, 'tempUpload'])->name('educator.signup.temp-upload');
+Route::delete('educator/signup/temp-upload', [EducatorController::class, 'tempUploadDelete'])->name('educator.signup.temp-upload.delete');
 Route::get('policies/{slug}', [WebsiteController::class, 'policy'])->name('web.policy');
 
 Route::get('courses', [WebsiteController::class, 'courses'])->name('web.courses');
@@ -418,6 +420,8 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
 
             // Verification
             Route::get('/verification', [VerificationSettingController::class, 'index'])->name('educator.verification.index');
+            Route::post('/verification/upload', [VerificationSettingController::class, 'uploadDocument'])->name('educator.verification.upload');
+            Route::delete('/verification/upload', [VerificationSettingController::class, 'deleteUpload'])->name('educator.verification.upload.delete');
             Route::post('/verification', [VerificationSettingController::class, 'store'])->name('educator.verification.store');
             Route::delete('/verification/documents/{document}', [VerificationSettingController::class, 'destroyDocument'])->name('educator.verification.document.destroy');
 

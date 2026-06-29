@@ -276,8 +276,11 @@ class WebsiteController extends Controller
 
         $teachingStyles = $this->parseTeachingStyles($educator_profile?->preferred_teaching_style);
         $teachingLevels = $this->decodeTeachingLevels($educator_profile?->teaching_levels);
+        $primarySubjects = $this->parsePrimarySubjects($educator_profile?->primary_subject);
+        $educatorBio = filled($educator->bio) ? $educator->bio : ($educator_profile?->bio ?? '');
+        $introVideoUrl = EducatorProfile::resolveFileUrl($educator_profile?->intro_video_path);
 
-        $bookingSubjects = collect([$educator_profile?->primary_subject])
+        $bookingSubjects = collect($primarySubjects)
             ->merge($courses->pluck('subject'))
             ->filter()
             ->unique()
@@ -297,6 +300,9 @@ class WebsiteController extends Controller
             'starPercentages',
             'teachingStyles',
             'teachingLevels',
+            'primarySubjects',
+            'educatorBio',
+            'introVideoUrl',
             'bookingSubjects',
             'availabilitySummary',
             'totalLessons',
@@ -310,6 +316,17 @@ class WebsiteController extends Controller
         }
 
         $parts = preg_split('/\s*\/\s*|,\s*/', $raw);
+
+        return array_values(array_filter(array_map('trim', $parts)));
+    }
+
+    private function parsePrimarySubjects(?string $raw): array
+    {
+        if (blank($raw)) {
+            return [];
+        }
+
+        $parts = preg_split('/\s*,\s*/', $raw);
 
         return array_values(array_filter(array_map('trim', $parts)));
     }

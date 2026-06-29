@@ -39,4 +39,67 @@ class EducatorProfile extends Model
     {
         return $this->hasMany(EducatorVerification::class);
     }
+
+    /**
+     * Resolve a stored path (S3 URL, temp/, storage/, or legacy key) to a public URL.
+     */
+    public static function resolveFileUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        if (str_starts_with($path, 'storage/') || str_starts_with($path, 'temp/')) {
+            return asset($path);
+        }
+
+        return asset('storage/' . ltrim($path, '/'));
+    }
+
+    /**
+     * Guess preview kind for modal rendering (image, pdf, video, other).
+     */
+    public static function fileKind(?string $path): string
+    {
+        if (!$path) {
+            return 'other';
+        }
+
+        $pathOnly = parse_url($path, PHP_URL_PATH) ?: $path;
+        $ext = strtolower(pathinfo($pathOnly, PATHINFO_EXTENSION));
+
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+            return 'image';
+        }
+
+        if ($ext === 'pdf') {
+            return 'pdf';
+        }
+
+        if (in_array($ext, ['mp4', 'mov', 'webm', 'avi', 'mkv'], true)) {
+            return 'video';
+        }
+
+        return 'other';
+    }
+
+    /**
+     * Decode preferred_teaching_style whether stored as plain text or JSON-encoded.
+     */
+    public function decodedTeachingStyle(): string
+    {
+        $style = $this->preferred_teaching_style ?? '';
+
+        if (is_string($style) && str_starts_with(trim($style), '"')) {
+            $decoded = json_decode($style);
+
+            return is_string($decoded) ? $decoded : $style;
+        }
+
+        return (string) $style;
+    }
 }
