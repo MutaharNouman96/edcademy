@@ -18,3 +18,6 @@ yarn-error.log
 /.vscode
 .DS_Store
 public/server.txt
+public/videos/
+public/documents/
+public/temp/

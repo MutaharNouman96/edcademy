@@ -159,12 +159,26 @@ class CourseCrudController extends Controller
 
     public function show($course)
     {
-        // $this->authorize('view', $course);
-        $course = Course::findOrFail($course)->load('sections.lessons', 'educator', 'category');
+        $course = Course::findOrFail($course);
 
-        // dd($course);
+        $this->authorize('view', $course);
 
-        return view('crm.educator.courses.show', compact('course'));
+        if ($course->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $course->load([
+            'educator',
+            'category',
+            'reviews.user',
+            'sections' => fn ($query) => $query->orderBy('id'),
+            'sections.lessons' => fn ($query) => $query->orderBy('id'),
+        ])->loadCount(['lessons', 'sections']);
+
+        $lessonCount = $course->lessons_count;
+        $studentCount = $course->coursePurchases()->where('is_active', true)->count();
+
+        return view('crm.educator.courses.show', compact('course', 'lessonCount', 'studentCount'));
     }
 
     public function edit($course)
@@ -743,5 +757,193 @@ class CourseCrudController extends Controller
         $key = ltrim($path, '/');
 
         return str_starts_with($key, 'lessons/videos/') ? $key : null;
+    }
+
+    /**
+     * Resolve a thumbnail URL for a lesson (own thumbnail, YouTube, or course fallback).
+     */
+    public static function resolveLessonThumbnail(Lesson $lesson, ?Course $course = null): ?string
+    {
+        if (!empty($lesson->thumbnail)) {
+            return str_starts_with($lesson->thumbnail, 'http')
+                ? $lesson->thumbnail
+                : asset('storage/' . ltrim($lesson->thumbnail, '/'));
+        }
+
+        if ($youtube = self::youtubeThumbnail($lesson->video_link)) {
+            return $youtube;
+        }
+
+        $course = $course ?? $lesson->course;
+        if ($course && !empty($course->thumbnail)) {
+            $thumb = $course->thumbnail;
+
+            return str_starts_with($thumb, 'http') ? $thumb : asset($thumb);
+        }
+
+        return null;
+    }
+
+    /**
+     * Build preview metadata for the content modal on the course show page.
+     *
+     * @return array{kind: string, url: ?string}
+     */
+    public static function resolveLessonPreview(Lesson $lesson): array
+    {
+        $assets = self::resolveLessonPreviewableAssets($lesson);
+
+        return $assets[0] ?? ['kind' => 'none', 'url' => null];
+    }
+
+    /**
+     * All previewable uploads attached to a lesson (video, worksheet, material).
+     *
+     * @return list<array{label: string, kind: string, url: string}>
+     */
+    public static function resolveLessonPreviewableAssets(Lesson $lesson): array
+    {
+        $assets = [];
+
+        if ($lesson->type === 'video' || $lesson->video_path || $lesson->video_link) {
+            $url = $lesson->lesson_video_path;
+            if ($url) {
+                $assets[] = [
+                    'label' => 'Video',
+                    'kind' => $lesson->uses_direct_video_player ? 'video' : 'embed',
+                    'url' => $lesson->uses_direct_video_player ? $url : self::toEmbedVideoUrl($url),
+                ];
+            }
+        }
+
+        if ($lesson->worksheets) {
+            $url = self::resolveLessonAssetUrl($lesson->worksheets);
+            if ($url) {
+                $assets[] = [
+                    'label' => 'Worksheet',
+                    'kind' => self::filePreviewKind($url),
+                    'url' => $url,
+                ];
+            }
+        }
+
+        if ($lesson->materials) {
+            $url = self::resolveLessonAssetUrl($lesson->materials);
+            if ($url) {
+                $assets[] = [
+                    'label' => 'Material',
+                    'kind' => self::filePreviewKind($url),
+                    'url' => $url,
+                ];
+            }
+        }
+
+        return $assets;
+    }
+
+    /**
+     * Resolve a stored lesson asset path (local storage key or S3 URL) to a preview URL.
+     */
+    public static function resolveLessonAssetUrl(?string $storedPath): ?string
+    {
+        if (blank($storedPath)) {
+            return null;
+        }
+
+        if (filter_var($storedPath, FILTER_VALIDATE_URL)) {
+            $key = self::extractS3ObjectKeyFromUrl($storedPath);
+            if ($key && Storage::disk('s3')->exists($key)) {
+                return Storage::disk('s3')->temporaryUrl($key, now()->addMinutes(30));
+            }
+
+            return $storedPath;
+        }
+
+        return asset('storage/' . ltrim($storedPath, '/'));
+    }
+
+    private static function extractS3ObjectKeyFromUrl(string $url): ?string
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+        if (!$path) {
+            return null;
+        }
+
+        $key = ltrim($path, '/');
+        $bucket = config('filesystems.disks.s3.bucket');
+
+        if ($bucket && str_starts_with($key, $bucket . '/')) {
+            $key = substr($key, strlen($bucket) + 1);
+        }
+
+        return $key !== '' ? $key : null;
+    }
+
+    private static function filePreviewKind(?string $url): string
+    {
+        if (!$url) {
+            return 'none';
+        }
+
+        $path = parse_url($url, PHP_URL_PATH) ?: $url;
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'], true)) {
+            return 'image';
+        }
+
+        if ($ext === 'pdf') {
+            return 'pdf';
+        }
+
+        if (in_array($ext, ['ppt', 'pptx'], true)) {
+            return 'other';
+        }
+
+        if (in_array($ext, ['mp4', 'mov', 'webm', 'avi', 'mkv'], true)) {
+            return 'video';
+        }
+
+        return 'other';
+    }
+
+    private static function youtubeThumbnail(?string $url): ?string
+    {
+        if (!$url) {
+            return null;
+        }
+
+        if (preg_match('~(?:youtu\.be/|youtube\.com/(?:watch\?v=|embed/|shorts/|v/))([\w-]{11})~', $url, $matches)) {
+            return "https://img.youtube.com/vi/{$matches[1]}/hqdefault.jpg";
+        }
+
+        return null;
+    }
+
+    private static function toEmbedVideoUrl(string $url): string
+    {
+        if (str_contains($url, 'youtube.com/watch')) {
+            $videoId = parse_url($url, PHP_URL_QUERY);
+            parse_str($videoId ?? '', $params);
+
+            return !empty($params['v'])
+                ? 'https://www.youtube.com/embed/' . $params['v']
+                : $url;
+        }
+
+        if (str_contains($url, 'youtu.be/')) {
+            $videoId = explode('youtu.be/', $url)[1] ?? null;
+            $videoId = $videoId ? explode('?', $videoId)[0] : null;
+
+            return $videoId ? 'https://www.youtube.com/embed/' . $videoId : $url;
+        }
+
+        if (str_contains($url, 'vimeo.com') && !str_contains($url, 'player.vimeo.com')) {
+            $videoId = trim(parse_url($url, PHP_URL_PATH) ?? '', '/');
+
+            return $videoId ? 'https://player.vimeo.com/video/' . $videoId : $url;
+        }
+
+        return $url;
     }
 }

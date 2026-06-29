@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -130,9 +131,58 @@ class UploadEducatorDocumentsToS3Job implements ShouldQueue
             return null;
         }
 
-        @unlink($absolute);
+        $this->deleteLocalTempFile($relativePath);
 
         return Storage::disk('s3')->url($key);
+    }
+
+    /**
+     * Remove a successfully uploaded scratch file from public/temp.
+     */
+    private function deleteLocalTempFile(string $relativePath): void
+    {
+        if (!$this->isTempPath($relativePath)) {
+            return;
+        }
+
+        $absolute = public_path($relativePath);
+
+        if (!is_file($absolute)) {
+            return;
+        }
+
+        if (!File::delete($absolute)) {
+            Log::warning('UploadEducatorDocumentsToS3Job: failed to delete temp file', [
+                'user' => $this->userId,
+                'path' => $relativePath,
+            ]);
+
+            return;
+        }
+
+        $directory = dirname($absolute);
+        while ($this->isTempDirectory($directory)) {
+            if (!@rmdir($directory)) {
+                break;
+            }
+
+            $directory = dirname($directory);
+        }
+    }
+
+    private function isTempDirectory(string $absoluteDirectory): bool
+    {
+        $tempRoot = realpath(public_path('temp/educators'));
+
+        if ($tempRoot === false) {
+            return false;
+        }
+
+        $directory = realpath($absoluteDirectory);
+
+        return $directory !== false
+            && $directory !== $tempRoot
+            && Str::startsWith($directory, $tempRoot . DIRECTORY_SEPARATOR);
     }
 
     private function isTempPath(?string $path): bool
