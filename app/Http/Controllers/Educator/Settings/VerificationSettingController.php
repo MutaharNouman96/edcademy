@@ -8,93 +8,227 @@ use App\Models\EducatorAdditionalDocument;
 use App\Models\EducatorProfile;
 use App\Services\EducatorDocumentStorageService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class VerificationSettingController extends Controller
 {
-    private const UPLOAD_RULES = [
-        'gov_id' => [
-            'folder' => 'gov_ids',
-            'mimes' => 'jpeg,png,jpg,gif,webp,pdf',
-            'max' => 5120,
-        ],
-        'degree_proof' => [
-            'folder' => 'degrees',
-            'mimes' => 'jpeg,png,jpg,gif,webp,pdf',
-            'max' => 5120,
-        ],
-        'intro_video' => [
-            'folder' => 'videos',
-            'mimetypes' => 'video/mp4,video/quicktime',
-            'max' => 51200,
-        ],
-        'additional_document' => [
-            'folder' => 'additional_documents',
-            'mimes' => 'jpeg,png,jpg,gif,webp,pdf',
-            'max' => 5120,
-        ],
-    ];
-
     public function __construct(
         private EducatorDocumentStorageService $storage
     ) {
     }
 
     /**
-     * Dropzone endpoint — streams the file straight to S3 and returns the URL.
+     * Document type definitions with the educator's currently stored files.
+     */
+    public function documentTypes(Request $request)
+    {
+        $user = $request->user();
+        $profile = EducatorProfile::firstOrCreate(
+            ['user_id' => $user->id],
+            ['hourly_rate' => 0]
+        );
+
+        $types = [];
+        foreach (EducatorProfile::verificationDocumentTypes() as $key => $definition) {
+            $entry = [
+                'type' => $key,
+                'label' => $definition['label'],
+                'icon' => $definition['icon'],
+                'accept' => $definition['accept'],
+                'max_kb' => $definition['max_kb'],
+                'max_mb' => (int) ceil($definition['max_kb'] / 1024),
+                'hint' => $definition['hint'],
+                'multiple' => (bool) ($definition['multiple'] ?? false),
+                'max_files' => $definition['max_files'] ?? 1,
+                'document' => null,
+                'documents' => [],
+            ];
+
+            if ($entry['multiple']) {
+                $entry['documents'] = $user->additionalDocuments()
+                    ->latest()
+                    ->get()
+                    ->map(fn (EducatorAdditionalDocument $doc) => $doc->toDocumentPayload())
+                    ->values()
+                    ->all();
+            } elseif (!empty($definition['column'])) {
+                $path = $profile->{$definition['column']} ?? null;
+                $entry['document'] = EducatorProfile::documentPayload(
+                    $path,
+                    $definition['label'],
+                    $definition['icon']
+                );
+            }
+
+            $types[] = $entry;
+        }
+
+        return response()->json(['types' => $types]);
+    }
+
+    /**
+     * Return a short-lived signed URL so private S3 objects can be previewed in the browser.
+     */
+    public function previewUrl(Request $request)
+    {
+        $request->validate([
+            'path' => 'required|string',
+        ]);
+
+        $path = (string) $request->input('path');
+        $user = $request->user();
+
+        if (!$this->userOwnsDocumentPath($user->id, $path)) {
+            return response()->json(['message' => 'Document not found.'], 403);
+        }
+
+        $minutes = 30;
+        $url = $this->storage->temporaryUrl($path, $minutes);
+
+        if (!$url) {
+            return response()->json(['message' => 'Could not generate preview URL.'], 404);
+        }
+
+        return response()->json([
+            'url' => $url,
+            'expires_at' => now()->addMinutes($minutes)->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Upload a file to S3, replace any existing file for profile types, and persist the path.
      */
     public function uploadDocument(Request $request)
     {
         $type = (string) $request->input('type');
+        $definition = EducatorProfile::verificationDocumentType($type);
 
-        if (!isset(self::UPLOAD_RULES[$type])) {
+        if (!$definition) {
             return response()->json(['message' => 'Invalid upload type.'], 422);
         }
 
-        $rule = self::UPLOAD_RULES[$type];
-        $fileRule = ['required', 'file', 'max:' . $rule['max']];
-        if (isset($rule['mimes'])) {
-            $fileRule[] = 'mimes:' . $rule['mimes'];
+        $fileRule = ['required', 'file', 'max:' . $definition['max_kb']];
+        if (isset($definition['mimes'])) {
+            $fileRule[] = 'mimes:' . $definition['mimes'];
         }
-        if (isset($rule['mimetypes'])) {
-            $fileRule[] = 'mimetypes:' . $rule['mimetypes'];
+        if (isset($definition['mimetypes'])) {
+            $fileRule[] = 'mimetypes:' . $definition['mimetypes'];
         }
 
         $request->validate(['file' => $fileRule]);
 
         $user = $request->user();
         $file = $request->file('file');
+        $profile = EducatorProfile::firstOrCreate(
+            ['user_id' => $user->id],
+            ['hourly_rate' => 0]
+        );
 
         try {
-            $url = $this->storage->uploadToS3($file, $user->id, $rule['folder']);
+            if (!empty($definition['multiple'])) {
+                $count = $user->additionalDocuments()->count();
+                $maxFiles = (int) ($definition['max_files'] ?? 10);
+                if ($count >= $maxFiles) {
+                    return response()->json([
+                        'message' => "Maximum {$maxFiles} additional documents allowed.",
+                    ], 422);
+                }
+
+                $path = $this->storage->uploadToS3($file, $user->id, $definition['folder']);
+                $document = EducatorAdditionalDocument::create([
+                    'educator_id' => $user->id,
+                    'document_path' => $path,
+                    'document_type' => $file->getClientMimeType(),
+                    'document_name' => $file->getClientOriginalName(),
+                    'document_size' => (string) $file->getSize(),
+                ]);
+
+                return response()->json([
+                    'type' => $type,
+                    'path' => $path,
+                    'url' => $path,
+                    'document' => $document->toDocumentPayload(),
+                ]);
+            }
+
+            $column = $definition['column'];
+            $previousPath = $profile->{$column};
+            $path = $this->storage->replaceOnS3(
+                $file,
+                $user->id,
+                $definition['folder'],
+                $previousPath
+            );
+
+            $profile->{$column} = $path;
+            $profile->save();
+
+            return response()->json([
+                'type' => $type,
+                'path' => $path,
+                'url' => $path,
+                'document' => EducatorProfile::documentPayload(
+                    $path,
+                    $definition['label'],
+                    $definition['icon']
+                ),
+            ]);
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Remove a profile document by type (deletes from S3 and clears the DB field).
+     */
+    public function destroyProfileDocument(Request $request, string $type)
+    {
+        $definition = EducatorProfile::verificationDocumentType($type);
+
+        if (!$definition || !empty($definition['multiple']) || empty($definition['column'])) {
+            return response()->json(['message' => 'Invalid document type.'], 422);
+        }
+
+        $user = $request->user();
+        $profile = EducatorProfile::where('user_id', $user->id)->first();
+
+        if (!$profile) {
+            return response()->json(['message' => 'Document not found.'], 404);
+        }
+
+        $column = $definition['column'];
+        $path = $profile->{$column};
+
+        if (!$path) {
+            return response()->json(['message' => 'Document not found.'], 404);
+        }
+
+        $this->storage->delete($path);
+        $profile->{$column} = null;
+        $profile->save();
 
         return response()->json([
-            'path' => $url,
-            'url' => $url,
-            'original_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getClientMimeType(),
-            'size' => (string) $file->getSize(),
+            'status' => true,
+            'message' => 'Document removed.',
+            'type' => $type,
         ]);
     }
 
     /**
-     * Dropzone removedfile — delete the S3 object the user dropped before submitting.
+     * Remove an additional document (deletes from S3 and DB).
      */
-    public function deleteUpload(Request $request)
+    public function destroyDocument(Request $request, EducatorAdditionalDocument $document)
     {
-        $path = (string) $request->input('path');
-        $user = $request->user();
-
-        if (!$this->storage->isAllowedForUser($path, $user->id)) {
-            return response()->json(['message' => 'Invalid path.'], 422);
+        if ((int) $document->educator_id !== (int) $request->user()->id) {
+            abort(403);
         }
 
-        $this->storage->delete($path);
+        $this->storage->delete($document->document_path);
+        $document->delete();
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'status' => true,
+            'message' => 'Document removed.',
+        ]);
     }
 
     public function store(Request $request)
@@ -102,14 +236,6 @@ class VerificationSettingController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'gov_id_path' => 'nullable|url',
-            'degree_proof_path' => 'nullable|url',
-            'intro_video_path' => 'nullable|url',
-            'additional_documents_new' => 'nullable|array|max:10',
-            'additional_documents_new.*.path' => 'required|url',
-            'additional_documents_new.*.name' => 'required|string|max:255',
-            'additional_documents_new.*.type' => 'nullable|string|max:100',
-            'additional_documents_new.*.size' => 'nullable|string|max:50',
             'business_type' => 'required|in:individual,company',
             'tos' => 'accepted',
         ]);
@@ -119,27 +245,8 @@ class VerificationSettingController extends Controller
             ['hourly_rate' => 0]
         );
 
-        $this->assignProfilePath($profile, 'govt_id_path', $request->input('gov_id_path'), $user->id);
-        $this->assignProfilePath($profile, 'degree_proof_path', $request->input('degree_proof_path'), $user->id);
-        $this->assignProfilePath($profile, 'intro_video_path', $request->input('intro_video_path'), $user->id);
-
         $profile->consent_verified = true;
         $profile->save();
-
-        foreach ($request->input('additional_documents_new', []) as $doc) {
-            $path = $doc['path'] ?? null;
-            if (!$this->storage->isAllowedForUser($path, $user->id)) {
-                continue;
-            }
-
-            EducatorAdditionalDocument::create([
-                'educator_id' => $user->id,
-                'document_path' => $path,
-                'document_type' => $doc['type'] ?? null,
-                'document_name' => $doc['name'],
-                'document_size' => $doc['size'] ?? null,
-            ]);
-        }
 
         VerificationSetting::updateOrCreate(
             ['educator_id' => $user->id],
@@ -157,35 +264,27 @@ class VerificationSettingController extends Controller
         ]);
     }
 
-    public function destroyDocument(Request $request, EducatorAdditionalDocument $document)
+    private function userOwnsDocumentPath(int $userId, string $path): bool
     {
-        if ((int) $document->educator_id !== (int) $request->user()->id) {
-            abort(403);
+        if ($this->storage->isAllowedForUser($path, $userId)) {
+            return true;
         }
 
-        $this->storage->delete($document->document_path);
-        $document->delete();
+        $profile = EducatorProfile::where('user_id', $userId)->first();
+        if ($profile) {
+            foreach (EducatorProfile::verificationDocumentTypes() as $definition) {
+                if (empty($definition['column'])) {
+                    continue;
+                }
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Document removed.',
-        ]);
-    }
-
-    /**
-     * Replace a profile document path, deleting the previous S3/local file first.
-     */
-    private function assignProfilePath(EducatorProfile $profile, string $column, ?string $newUrl, int $userId): void
-    {
-        if (!$newUrl || !$this->storage->isAllowedForUser($newUrl, $userId)) {
-            return;
+                if ($profile->{$definition['column']} === $path) {
+                    return true;
+                }
+            }
         }
 
-        $old = $profile->{$column};
-        if ($old && $old !== $newUrl) {
-            $this->storage->delete($old);
-        }
-
-        $profile->{$column} = $newUrl;
+        return EducatorAdditionalDocument::where('educator_id', $userId)
+            ->where('document_path', $path)
+            ->exists();
     }
 }

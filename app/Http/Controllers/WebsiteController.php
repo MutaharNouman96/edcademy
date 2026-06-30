@@ -24,6 +24,7 @@ use App\Models\Policy;
 use App\Models\EducatorProfile;
 use App\Models\EducatorSessionSchedule;
 use App\Models\Lesson;
+use App\Services\EducatorDocumentStorageService;
 use Carbon\Carbon;
 
 class WebsiteController extends Controller
@@ -186,6 +187,7 @@ class WebsiteController extends Controller
 
         return view("website.educators", compact("educators")); //asim
     }
+
     public function educator($id)
     {
         $educator = User::verifiedEducator()
@@ -278,7 +280,8 @@ class WebsiteController extends Controller
         $teachingLevels = $this->decodeTeachingLevels($educator_profile?->teaching_levels);
         $primarySubjects = $this->parsePrimarySubjects($educator_profile?->primary_subject);
         $educatorBio = filled($educator->bio) ? $educator->bio : ($educator_profile?->bio ?? '');
-        $introVideoUrl = EducatorProfile::resolveFileUrl($educator_profile?->intro_video_path);
+        $introVideoUrl = app(EducatorDocumentStorageService::class)
+            ->temporaryUrl($educator_profile?->intro_video_path);
 
         $bookingSubjects = collect($primarySubjects)
             ->merge($courses->pluck('subject'))

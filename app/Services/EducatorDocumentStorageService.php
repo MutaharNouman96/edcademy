@@ -45,6 +45,34 @@ class EducatorDocumentStorageService
     }
 
     /**
+     * Whether the path resolves to an object that exists on S3.
+     */
+    public function existsOnS3(?string $path): bool
+    {
+        if (!$path || !filter_var($path, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        $key = $this->s3KeyFromUrl($path);
+
+        return $key && Storage::disk('s3')->exists($key);
+    }
+
+    /**
+     * Delete the previous file (if any), then upload a replacement to S3.
+     *
+     * @return string Full public S3 URL
+     */
+    public function replaceOnS3(UploadedFile $file, int $userId, string $folder, ?string $previousPath): string
+    {
+        if ($previousPath && $this->isAllowedForUser($previousPath, $userId) && $this->existsOnS3($previousPath)) {
+            $this->delete($previousPath);
+        }
+
+        return $this->uploadToS3($file, $userId, $folder);
+    }
+
+    /**
      * Delete a file from S3, or from local temp/storage if not a remote URL.
      */
     public function delete(?string $path): void
@@ -104,5 +132,34 @@ class EducatorDocumentStorageService
         }
 
         return $path;
+    }
+
+    /**
+     * Resolve a stored path to a time-limited URL suitable for browser preview/download.
+     */
+    public function temporaryUrl(?string $path, int $minutes = 30): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        if (!filter_var($path, FILTER_VALIDATE_URL)) {
+            if (Str::startsWith($path, 'storage/') || Str::startsWith($path, 'temp/')) {
+                return asset($path);
+            }
+
+            return asset('storage/' . ltrim($path, '/'));
+        }
+
+        $key = $this->s3KeyFromUrl($path);
+        if (!$key) {
+            return $path;
+        }
+
+        if (!Storage::disk('s3')->exists($key)) {
+            return null;
+        }
+
+        return Storage::disk('s3')->temporaryUrl($key, now()->addMinutes($minutes));
     }
 }

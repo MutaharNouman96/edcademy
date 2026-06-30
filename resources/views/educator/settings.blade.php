@@ -23,20 +23,19 @@
     <!-- Main -->
 
     @php
-        $openPayoutRequest = ($user->isEducator() && ! $user->canReceivePayouts())
-            ? \App\Models\EducatorPayoutRequest::query()
-                ->where('educator_id', $user->id)
-                ->open()
-                ->latest()
-                ->first()
-            : null;
+        $openPayoutRequest =
+            $user->isEducator() && !$user->canReceivePayouts()
+                ? \App\Models\EducatorPayoutRequest::query()->where('educator_id', $user->id)->open()->latest()->first()
+                : null;
     @endphp
 
-    @if ($user->isEducator() && ! $user->canReceivePayouts())
-        <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2" id="stripeSetupAlert">
+    @if ($user->isEducator() && !$user->canReceivePayouts())
+        <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2"
+            id="stripeSetupAlert">
             <div>
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <strong>Payout setup recommended:</strong> Connect Stripe and add your IBAN / bank details to receive earnings from your courses.
+                <strong>Payout setup recommended:</strong> Connect Stripe and add your IBAN / bank details to receive
+                earnings from your courses.
             </div>
             <div class="d-flex flex-wrap gap-2">
                 <a href="{{ route('stripe.connect') }}" class="btn btn-sm btn-warning">
@@ -44,7 +43,8 @@
                 </a>
                 @if ($openPayoutRequest)
                     <span class="badge text-bg-info align-self-center">
-                        Assistance request {{ $openPayoutRequest->status === 'in_progress' ? 'in progress' : 'pending' }}
+                        Assistance request
+                        {{ $openPayoutRequest->status === 'in_progress' ? 'in progress' : 'pending' }}
                     </span>
                 @else
                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
@@ -56,7 +56,7 @@
         </div>
     @endif
 
-    @if ($user->isEducator() && ! $user->canReceivePayouts() && ! $openPayoutRequest)
+    @if ($user->isEducator() && !$user->canReceivePayouts() && !$openPayoutRequest)
         <div class="modal fade" id="payoutAssistModal" tabindex="-1" aria-labelledby="payoutAssistModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
@@ -67,19 +67,21 @@
                             <h5 class="modal-title" id="payoutAssistModalLabel">
                                 <i class="bi bi-headset me-2"></i>Request payout assistance
                             </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <p class="text-muted small">
-                                Tell us what you need help with. An admin can guide you through Stripe Connect and payout setup.
+                                Tell us what you need help with. An admin can guide you through Stripe Connect and
+                                payout setup.
                             </p>
                             <label class="form-label" for="payoutAssistMessage">Message (optional)</label>
-                            <textarea class="form-control" id="payoutAssistMessage" name="message" rows="4"
-                                maxlength="2000"
+                            <textarea class="form-control" id="payoutAssistMessage" name="message" rows="4" maxlength="2000"
                                 placeholder="e.g. I need help adding my IBAN / bank account for payouts.">{{ old('message') }}</textarea>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-send me-1"></i> Send request
                             </button>
@@ -103,11 +105,11 @@
                             class="bi bi-person me-1"></i>
                         Profile</button>
                 </li>
-                  <li class="nav-item" role="presentation">
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="verification-tab" data-bs-toggle="tab"
                         data-bs-target="#tab-verification" type="button" role="tab"
                         aria-controls="tab-verification" aria-selected="false"><i class="bi bi-patch-check me-1"></i>
-                      Intro & Verification Documents </button>
+                        Intro & Verification Documents </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#tab-security"
@@ -123,7 +125,8 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="availability-tab" data-bs-toggle="tab"
                         data-bs-target="#tab-availability" type="button" role="tab"
-                        aria-controls="tab-availability" aria-selected="false"><i class="bi bi-calendar2-week me-1"></i>
+                        aria-controls="tab-availability" aria-selected="false"><i
+                            class="bi bi-calendar2-week me-1"></i>
                         Availability</button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -137,7 +140,7 @@
                         type="button" role="tab" aria-controls="tab-privacy" aria-selected="false"><i
                             class="bi bi-eye-slash me-1"></i> Privacy</button>
                 </li>
-              
+
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="connections-tab" data-bs-toggle="tab"
                         data-bs-target="#tab-connections" type="button" role="tab"
@@ -157,7 +160,7 @@
                 <div class="tab-pane fade show active" id="tab-profile" role="tabpanel">
                     <form id="formProfile" class="row g-3">
                         <div class="col-12 d-flex align-items-center gap-3">
-                            <img id="avatarPreview" class="avatar" src="{{ url('public/'.$user->profile_picture)}}"
+                            <img id="avatarPreview" class="avatar" src="{{ url('public/' . $user->profile_picture) }}"
                                 alt="Avatar">
                             <div>
                                 <div class="btn-group">
@@ -183,7 +186,7 @@
                             <input name="last_name" class="form-control" placeholder="Your name"
                                 value="{{ $user->last_name }}" required>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <label class="form-label req">User name</label>
                             <div class="input-group">
@@ -204,11 +207,21 @@
                             <select id="subjectsSelect" name="subjects[]" class="form-select select2" multiple
                                 data-placeholder="Select one or more subjects">
                                 @php
-                                    $subjectOptions = ['Mathematics', 'Science', 'English', 'Computer Science', 'Languages', 'Other'];
-                                    $savedSubjects = array_filter(array_map('trim', explode(',', $user->educatorProfile->primary_subject ?? '')));
+                                    $subjectOptions = [
+                                        'Mathematics',
+                                        'Science',
+                                        'English',
+                                        'Computer Science',
+                                        'Languages',
+                                        'Other',
+                                    ];
+                                    $savedSubjects = array_filter(
+                                        array_map('trim', explode(',', $user->educatorProfile->primary_subject ?? '')),
+                                    );
                                 @endphp
                                 @foreach ($subjectOptions as $subject)
-                                    <option value="{{ $subject }}" {{ in_array($subject, $savedSubjects, true) ? 'selected' : '' }}>
+                                    <option value="{{ $subject }}"
+                                        {{ in_array($subject, $savedSubjects, true) ? 'selected' : '' }}>
                                         {{ $subject }}
                                     </option>
                                 @endforeach
@@ -219,8 +232,7 @@
                             <label class="form-label">Hourly rate (USD)</label>
                             <div class="input-group"><span class="input-group-text">$</span><input name="rate"
                                     type="number" step="1" min="0" class="form-control"
-                                    value="{{ $user->educatorProfile->hourly_rate ?? '' }}"
-                                    placeholder="25"></div>
+                                    value="{{ $user->educatorProfile->hourly_rate ?? '' }}" placeholder="25"></div>
                         </div>
 
                         <div class="col-md-4">
@@ -229,10 +241,13 @@
                                 multiple data-placeholder="Select one or more levels">
                                 @php
                                     $levels = ['Elementary', 'Middle School', 'High School', 'College', 'Professional'];
-                                    $savedLevels = json_decode($user->educatorProfile->teaching_levels ?? '[]', true) ?: [];
+                                    $savedLevels =
+                                        json_decode($user->educatorProfile->teaching_levels ?? '[]', true) ?: [];
                                 @endphp
-                                @foreach($levels as $level)
-                                    <option value="{{ $level }}" {{ in_array($level, $savedLevels, true) ? 'selected' : '' }}>{{ $level }}</option>
+                                @foreach ($levels as $level)
+                                    <option value="{{ $level }}"
+                                        {{ in_array($level, $savedLevels, true) ? 'selected' : '' }}>
+                                        {{ $level }}</option>
                                 @endforeach
                             </select>
                             <div class="form-text">Search and select all levels you teach.</div>
@@ -240,7 +255,8 @@
 
                         <div class="col-12">
                             <label class="form-label">Certifications</label>
-                            <textarea name="certifications" class="form-control" rows="3" placeholder="List your teaching certifications, degrees, or qualifications…">{{ $user->educatorProfile->certifications ?? '' }}</textarea>
+                            <textarea name="certifications" class="form-control" rows="3"
+                                placeholder="List your teaching certifications, degrees, or qualifications…">{{ $user->educatorProfile->certifications ?? '' }}</textarea>
                         </div>
 
                         <div class="col-md-6">
@@ -248,11 +264,17 @@
                             <select name="preferred_teaching_style" class="form-select">
                                 <option value="">-- Select --</option>
                                 @php
-                                    $styles = ['Interactive / Discussion-based', 'Lecture / Presentation', 'Hands-on / Practical', 'Assessment-driven'];
+                                    $styles = [
+                                        'Interactive / Discussion-based',
+                                        'Lecture / Presentation',
+                                        'Hands-on / Practical',
+                                        'Assessment-driven',
+                                    ];
                                     $savedStyle = $user->educatorProfile?->decodedTeachingStyle() ?? '';
                                 @endphp
-                                @foreach($styles as $style)
-                                    <option value="{{ $style }}" {{ $savedStyle === $style ? 'selected' : '' }}>{{ $style }}</option>
+                                @foreach ($styles as $style)
+                                    <option value="{{ $style }}"
+                                        {{ $savedStyle === $style ? 'selected' : '' }}>{{ $style }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -399,8 +421,10 @@
                     <form id="formAvail" class="row g-3">
                         <!-- Day availability schedule (main) -->
                         <div class="col-12">
-                            <h6 class="mb-2"><i class="bi bi-calendar2-range me-1"></i> When can students book you?</h6>
-                            <p class="text-muted small mb-3">Turn each day on or off and set your available time range. Only these slots will be shown on your profile.</p>
+                            <h6 class="mb-2"><i class="bi bi-calendar2-range me-1"></i> When can students book you?
+                            </h6>
+                            <p class="text-muted small mb-3">Turn each day on or off and set your available time range.
+                                Only these slots will be shown on your profile.</p>
                             <div class="schedule-grid border rounded p-3 bg-light">
                                 <div class="table-responsive">
                                     <table class="table table-borderless align-middle mb-0">
@@ -415,13 +439,15 @@
                                         <tbody id="weekBody">
                                             @php
                                                 $dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                                                $scheduleForView = isset($sessionSchedules) ? $sessionSchedules->groupBy('day_of_week') : collect();
+                                                $scheduleForView = isset($sessionSchedules)
+                                                    ? $sessionSchedules->groupBy('day_of_week')
+                                                    : collect();
                                             @endphp
-                                            @foreach($dayNames as $idx => $dayName)
+                                            @foreach ($dayNames as $idx => $dayName)
                                                 @php
                                                     $dayNum = $idx + 1;
                                                     $slot = $scheduleForView->get($dayNum)?->first();
-                                                    $active = $slot ? true : ($idx < 5);
+                                                    $active = $slot ? true : $idx < 5;
                                                     $start = $slot ? substr($slot->start_time, 0, 5) : '09:00';
                                                     $end = $slot ? substr($slot->end_time, 0, 5) : '17:00';
                                                 @endphp
@@ -429,11 +455,17 @@
                                                     <td><strong>{{ $dayName }}</strong></td>
                                                     <td>
                                                         <div class="form-check form-switch">
-                                                            <input class="form-check-input day-active" type="checkbox" data-day="{{ $idx }}" {{ $active ? 'checked' : '' }}>
+                                                            <input class="form-check-input day-active" type="checkbox"
+                                                                data-day="{{ $idx }}"
+                                                                {{ $active ? 'checked' : '' }}>
                                                         </div>
                                                     </td>
-                                                    <td><input class="form-control form-control-sm start" type="time" value="{{ $start }}" {{ $active ? '' : 'disabled' }}></td>
-                                                    <td><input class="form-control form-control-sm end" type="time" value="{{ $end }}" {{ $active ? '' : 'disabled' }}></td>
+                                                    <td><input class="form-control form-control-sm start"
+                                                            type="time" value="{{ $start }}"
+                                                            {{ $active ? '' : 'disabled' }}></td>
+                                                    <td><input class="form-control form-control-sm end" type="time"
+                                                            value="{{ $end }}"
+                                                            {{ $active ? '' : 'disabled' }}></td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -444,8 +476,8 @@
 
                         <div class="col-12 col-md-6">
                             <label class="form-label">Max sessions per day</label>
-                            <input name="max_per_day" type="number" class="form-control" min="1" max="20"
-                                value="{{ $maxSessionsPerDay ?? 6 }}">
+                            <input name="max_per_day" type="number" class="form-control" min="1"
+                                max="20" value="{{ $maxSessionsPerDay ?? 6 }}">
                             <div class="form-text">Maximum number of bookable sessions per day.</div>
                         </div>
 
@@ -642,138 +674,90 @@
                             $v = $verification ?? null;
                             $ep = $user->educatorProfile;
                             $biz = old('business_type', $v->business_type ?? 'individual');
-
-                            $verificationDocs = collect([
-                                ['label' => 'CV', 'path' => $ep?->cv_path, 'icon' => 'bi-file-earmark-person'],
-                                ['label' => 'Government ID', 'path' => $ep?->govt_id_path, 'icon' => 'bi-person-badge'],
-                                ['label' => 'Teaching Credential', 'path' => $ep?->degree_proof_path, 'icon' => 'bi-mortarboard'],
-                                ['label' => 'Intro Video', 'path' => $ep?->intro_video_path, 'icon' => 'bi-camera-video'],
-                            ])->filter(fn ($doc) => !empty($doc['path']))->map(function ($doc) {
-                                $doc['url'] = \App\Models\EducatorProfile::resolveFileUrl($doc['path']);
-                                $doc['kind'] = \App\Models\EducatorProfile::fileKind($doc['path']);
-                                $doc['name'] = basename(parse_url($doc['path'], PHP_URL_PATH) ?: $doc['path']);
-                                return $doc;
-                            });
+                            $profileDocTypes = collect(\App\Models\EducatorProfile::verificationDocumentTypes())->filter(
+                                fn($def) => empty($def['multiple']),
+                            );
+                            $additionalDocType = \App\Models\EducatorProfile::verificationDocumentType(
+                                'additional_document',
+                            );
                         @endphp
 
-                        @if ($verificationDocs->isNotEmpty() || (isset($additionalDocuments) && $additionalDocuments->isNotEmpty()))
-                            <div class="col-12">
-                                <h6 class="mb-2"><i class="bi bi-folder2-open me-1"></i> Uploaded documents</h6>
-                                <p class="text-muted small mb-3">Preview your verification files below. Click Preview to open in a modal.</p>
-                                <div class="row g-3" id="verificationDocCards">
-                                    @foreach ($verificationDocs as $doc)
-                                        <div class="col-md-6 col-lg-4">
-                                            <div class="doc-preview-card h-100">
-                                                <div class="doc-preview-card__icon">
-                                                    <i class="bi {{ $doc['icon'] }}"></i>
-                                                </div>
-                                                <div class="doc-preview-card__body">
-                                                    <div class="doc-preview-card__label">{{ $doc['label'] }}</div>
-                                                    <div class="doc-preview-card__name" title="{{ $doc['name'] }}">{{ $doc['name'] }}</div>
-                                                    <div class="doc-preview-card__actions">
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-primary btn-doc-preview"
-                                                            data-url="{{ $doc['url'] }}"
-                                                            data-title="{{ $doc['label'] }}"
-                                                            data-kind="{{ $doc['kind'] }}">
-                                                            <i class="bi bi-eye me-1"></i> Preview
-                                                        </button>
-                                                        <a href="{{ $doc['url'] }}" target="_blank" rel="noopener"
-                                                            class="btn btn-sm btn-outline-secondary">
-                                                            <i class="bi bi-box-arrow-up-right"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
+                        @foreach ($profileDocTypes as $typeKey => $def)
+                            @php
+                                $current = \App\Models\EducatorProfile::documentPayload(
+                                    $ep?->{$def['column']} ?? null,
+                                    $def['label'],
+                                    $def['icon'],
+                                );
+                            @endphp
+                            <div class="col-md-6 verification-doc-slot" data-doc-type="{{ $typeKey }}">
+                                <div class="verification-doc-block border rounded-3 p-3 h-100 bg-white">
+                                    <label class="form-label fw-semibold mb-2">
+                                        <i class="bi {{ $def['icon'] }} me-1"></i> {{ $def['label'] }}
+                                    </label>
 
+                                    <div class="verification-doc-current mb-2 {{ $current ? '' : 'd-none' }}"
+                                        data-current-for="{{ $typeKey }}">
+                                        @if ($current)
+                                            @include('educator.partials.verification-doc-preview', [
+                                                'doc' => $current,
+                                                'type' => $typeKey,
+                                                'removable' => true,
+                                            ])
+                                        @endif
+                                    </div>
+
+                                    <div id="{{ $typeKey }}Dropzone" class="settings-dropzone dropzone"
+                                        data-type="{{ $typeKey }}"
+                                        data-max-mb="{{ (int) ceil($def['max_kb'] / 1024) }}"
+                                        data-accept="{{ $def['accept'] }}"></div>
+                                    <small class="text-muted d-block mt-1">{{ $def['hint'] }}</small>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        <div class="col-12 verification-doc-slot" data-doc-type="additional_document">
+                            <div class="verification-doc-block border rounded-3 p-3 bg-white">
+                                <label class="form-label fw-semibold mb-2">
+                                    <i class="bi {{ $additionalDocType['icon'] }} me-1"></i> Additional documents
+                                </label>
+                                <p class="text-muted small mb-2">{{ $additionalDocType['hint'] }}</p>
+
+                                <div class="row g-3 mb-2" id="additionalDocsList">
                                     @if (isset($additionalDocuments))
                                         @foreach ($additionalDocuments as $doc)
-                                            @php
-                                                $docKind = \App\Models\EducatorProfile::fileKind($doc->document_path);
-                                                $docIcon = match ($docKind) {
-                                                    'pdf' => 'bi-file-earmark-pdf',
-                                                    'image' => 'bi-file-earmark-image',
-                                                    'video' => 'bi-camera-video',
-                                                    default => 'bi-file-earmark',
-                                                };
-                                            @endphp
                                             <div class="col-md-6 col-lg-4" data-additional-doc-id="{{ $doc->id }}">
-                                                <div class="doc-preview-card h-100">
-                                                    <div class="doc-preview-card__icon">
-                                                        <i class="bi {{ $docIcon }}"></i>
-                                                    </div>
-                                                    <div class="doc-preview-card__body">
-                                                        <div class="doc-preview-card__label">Additional Document</div>
-                                                        <div class="doc-preview-card__name" title="{{ $doc->document_name }}">{{ $doc->document_name }}</div>
-                                                        <div class="doc-preview-card__actions">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-primary btn-doc-preview"
-                                                                data-url="{{ $doc->document_url }}"
-                                                                data-title="{{ $doc->document_name }}"
-                                                                data-kind="{{ $docKind }}">
-                                                                <i class="bi bi-eye me-1"></i> Preview
-                                                            </button>
-                                                            <a href="{{ $doc->document_url }}" target="_blank" rel="noopener"
-                                                                class="btn btn-sm btn-outline-secondary">
-                                                                <i class="bi bi-box-arrow-up-right"></i>
-                                                            </a>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-outline-danger btn-remove-additional-doc"
-                                                                data-url="{{ route('educator.verification.document.destroy', $doc) }}">
-                                                                <i class="bi bi-trash"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                @include('educator.partials.verification-doc-preview', [
+                                                    'doc' => $doc->toDocumentPayload(),
+                                                    'type' => 'additional_document',
+                                                    'removable' => true,
+                                                ])
                                             </div>
                                         @endforeach
                                     @endif
                                 </div>
+
+                                <div id="additionalDocsDropzone" class="settings-dropzone dropzone"
+                                    data-type="additional_document"
+                                    data-max-mb="{{ (int) ceil($additionalDocType['max_kb'] / 1024) }}"
+                                    data-max-files="{{ $additionalDocType['max_files'] }}"
+                                    data-accept="{{ $additionalDocType['accept'] }}"></div>
                             </div>
-                            <div class="col-12"><hr class="my-1"></div>
-                        @endif
-
-                        <div class="col-md-6">
-                            <label class="form-label">Government ID</label>
-                            <div id="govIdDropzone" class="settings-dropzone dropzone" data-type="gov_id"></div>
-                            <input type="hidden" name="gov_id_path" id="gov_id_path" value="" />
-                            <small class="text-muted">JPG, PNG, or PDF — max 5MB. Uploaded directly to secure storage.</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Teaching credential (optional)</label>
-                            <div id="credentialDropzone" class="settings-dropzone dropzone" data-type="degree_proof"></div>
-                            <input type="hidden" name="degree_proof_path" id="degree_proof_path" value="" />
-                            <small class="text-muted">JPG, PNG, or PDF — max 5MB.</small>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Intro Video (optional)</label>
-                            <div id="introVideoDropzone" class="settings-dropzone dropzone" data-type="intro_video"></div>
-                            <input type="hidden" name="intro_video_path" id="intro_video_path" value="" />
-                            <small class="text-muted">MP4 or MOV — max 50MB.</small>
-                        </div>
-
-                        <div class="col-12">
-                            <h6 class="mb-2"><i class="bi bi-paperclip me-1"></i> Additional documents</h6>
-                            <p class="text-muted small mb-2">Upload extra proof (certificates, references, etc.). PDF or images, up to 10 files, each max 5MB.</p>
-                            <div id="additionalDocsDropzone" class="settings-dropzone dropzone" data-type="additional_document"></div>
-                            <div id="additionalDocsNewContainer"></div>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Business type</label>
                             <select name="business_type" class="form-select">
-                                <option value="individual" {{ $biz === 'individual' ? 'selected' : '' }}>Individual</option>
+                                <option value="individual" {{ $biz === 'individual' ? 'selected' : '' }}>Individual
+                                </option>
                                 <option value="company" {{ $biz === 'company' ? 'selected' : '' }}>Company</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Agreement</label>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="tos" value="1" id="verifyTos"
-                                    {{ old('tos', $v?->tos) ? 'checked' : '' }} required>
+                                <input class="form-check-input" type="checkbox" name="tos" value="1"
+                                    id="verifyTos" {{ old('tos', $v?->tos) ? 'checked' : '' }} required>
                                 <label class="form-check-label" for="verifyTos">I agree to the Educator Terms of
                                     Service</label>
                             </div>
@@ -812,9 +796,10 @@
                         <div class="col-md-6">
                             <div class="p-3 border rounded-3 bg-white h-100">
                                 <h6><i class="bi bi-credit-card-2-front me-1"></i> Stripe Connect &amp; Payouts</h6>
-                                <p class="help mb-2">Add your IBAN / bank details through Stripe to receive your earnings when students purchase your content.</p>
+                                <p class="help mb-2">Add your IBAN / bank details through Stripe to receive your
+                                    earnings when students purchase your content.</p>
                                 <div id="stripeConn" class="mb-2">
-                                    @if($user->canReceivePayouts())
+                                    @if ($user->canReceivePayouts())
                                         <span class="badge text-bg-success">Connected &amp; payouts enabled</span>
                                     @elseif($user->stripe_connect_id)
                                         <span class="badge text-bg-warning">Setup incomplete</span>
@@ -822,7 +807,8 @@
                                         <span class="badge text-bg-warning">Not connected</span>
                                     @endif
                                 </div>
-                                <a href="{{ route('stripe.connect') }}" class="btn btn-sm {{ $user->canReceivePayouts() ? 'btn-outline-secondary' : 'btn-outline-primary' }}">
+                                <a href="{{ route('stripe.connect') }}"
+                                    class="btn btn-sm {{ $user->canReceivePayouts() ? 'btn-outline-secondary' : 'btn-outline-primary' }}">
                                     <i class="bi bi-link-45deg me-1"></i>
                                     {{ $user->canReceivePayouts() ? 'Manage payout details' : 'Connect & add IBAN' }}
                                 </a>
@@ -909,7 +895,8 @@
     </div>
 
     <!-- Document preview modal -->
-    <div class="modal fade" id="docPreviewModal" tabindex="-1" aria-labelledby="docPreviewModalLabel" aria-hidden="true">
+    <div class="modal fade" id="docPreviewModal" tabindex="-1" aria-labelledby="docPreviewModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -918,7 +905,8 @@
                 </div>
                 <div class="modal-body p-0" id="docPreviewBody"></div>
                 <div class="modal-footer py-2">
-                    <a href="#" id="docPreviewOpenLink" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                    <a href="#" id="docPreviewOpenLink" target="_blank" rel="noopener"
+                        class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-box-arrow-up-right me-1"></i> Open in new tab
                     </a>
                     <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -1137,6 +1125,10 @@
                 font-weight: 500;
                 font-size: .9rem;
             }
+
+            .verification-doc-block {
+                box-shadow: 0 2px 8px rgba(0, 74, 87, 0.05);
+            }
         </style>
     @endpush
     @push('scripts')
@@ -1193,6 +1185,22 @@
 
             // ===== Document preview modal =====
             let docPreviewModalInstance = null;
+            const docPreviewUrlEndpoint = "{{ route('educator.verification.preview-url') }}";
+
+            async function fetchDocumentPreviewUrl(path) {
+                const params = new URLSearchParams({ path });
+                const res = await fetch(`${docPreviewUrlEndpoint}?${params.toString()}`, {
+                    headers: { 'Accept': 'application/json' },
+                });
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.message || 'Could not load document preview.');
+                }
+
+                const data = await res.json();
+                return data.url;
+            }
 
             function openDocPreview(title, url, kind) {
                 const modalEl = document.getElementById('docPreviewModal');
@@ -1227,11 +1235,35 @@
                 docPreviewModalInstance.show();
             }
 
-            document.addEventListener('click', function(e) {
-                const btn = e.target.closest('.btn-doc-preview');
-                if (!btn) return;
-                e.preventDefault();
-                openDocPreview(btn.dataset.title, btn.dataset.url, btn.dataset.kind);
+            document.addEventListener('click', async function(e) {
+                const previewBtn = e.target.closest('.btn-doc-preview');
+                if (previewBtn) {
+                    e.preventDefault();
+                    const path = previewBtn.dataset.path;
+                    if (!path) return;
+
+                    try {
+                        const url = await fetchDocumentPreviewUrl(path);
+                        openDocPreview(previewBtn.dataset.title, url, previewBtn.dataset.kind);
+                    } catch (err) {
+                        showToast(err.message || 'Could not load document preview.', 'danger');
+                    }
+                    return;
+                }
+
+                const openBtn = e.target.closest('.btn-doc-open');
+                if (openBtn) {
+                    e.preventDefault();
+                    const path = openBtn.dataset.path;
+                    if (!path) return;
+
+                    try {
+                        const url = await fetchDocumentPreviewUrl(path);
+                        window.open(url, '_blank', 'noopener');
+                    } catch (err) {
+                        showToast(err.message || 'Could not open document.', 'danger');
+                    }
+                }
             });
 
             document.getElementById('docPreviewModal')?.addEventListener('hidden.bs.modal', function() {
@@ -1245,7 +1277,8 @@
                 body.addEventListener('change', function(e) {
                     if (e.target.classList.contains('day-active')) {
                         const row = e.target.closest('tr');
-                        if (row) row.querySelectorAll('input[type="time"]').forEach(inp => inp.disabled = !e.target.checked);
+                        if (row) row.querySelectorAll('input[type="time"]').forEach(inp => inp.disabled = !e.target
+                            .checked);
                     }
                 });
             }
@@ -1481,9 +1514,12 @@
                         end: tr.querySelector('.end').value,
                     }));
                     const maxPerDay = parseInt(e.target.querySelector('input[name="max_per_day"]').value, 10) || 6;
-                    const payload = { grid, max_per_day: maxPerDay };
+                    const payload = {
+                        grid,
+                        max_per_day: maxPerDay
+                    };
                     try {
-                        const res = await fetch('{{ route("educator.availability.update") }}', {
+                        const res = await fetch('{{ route('educator.availability.update') }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1823,6 +1859,28 @@
                     }
                 });
             });
+
+            $(document).on("click", ".btn-remove-profile-doc", function() {
+                if (!confirm("Remove this document?")) return;
+                var url = $(this).data("url");
+                var type = $(this).data("type");
+                var $current = $('[data-current-for="' + type + '"]');
+                $.ajax({
+                    url: url,
+                    method: "POST",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr("content"),
+                        _method: "DELETE"
+                    },
+                    success: function(res) {
+                        showEducatorToast(res.message || "Document removed.");
+                        $current.addClass('d-none').empty();
+                    },
+                    error: function() {
+                        showEducatorToast("Could not remove document.", 'error');
+                    }
+                });
+            });
             $("#formPrefs").on("submit", function(e) {
                 e.preventDefault();
 
@@ -1939,33 +1997,97 @@
             (function() {
                 const csrfToken = $('meta[name="csrf-token"]').attr('content');
                 const uploadUrl = "{{ route('educator.verification.upload') }}";
-                const deleteUrl = "{{ route('educator.verification.upload.delete') }}";
+                const profileDocDeleteUrlTemplate =
+                    "{{ route('educator.verification.profile-document.destroy', ['type' => '__TYPE__']) }}";
+                const additionalDocDeleteUrlTemplate =
+                    "{{ route('educator.verification.document.destroy', ['document' => '__ID__']) }}";
 
-                const acceptedByType = {
-                    gov_id: 'image/jpeg,image/png,image/gif,image/webp,application/pdf',
-                    degree_proof: 'image/jpeg,image/png,image/gif,image/webp,application/pdf',
-                    additional_document: 'image/jpeg,image/png,image/gif,image/webp,application/pdf',
-                    intro_video: 'video/mp4,video/quicktime',
-                };
-
-                function deleteUploadedFile(path) {
-                    if (!path) return;
-                    $.ajax({
-                        url: deleteUrl,
-                        method: 'POST',
-                        data: JSON.stringify({ path }),
-                        contentType: 'application/json',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'X-HTTP-Method-Override': 'DELETE',
-                        },
-                    });
+                function escapeHtml(value) {
+                    return String(value ?? '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;');
                 }
 
-                function initVerifySingle(elId, type, hiddenId, maxMb) {
-                    const el = document.getElementById(elId);
-                    if (!el) return;
-                    const hidden = document.getElementById(hiddenId);
+                function iconForKind(kind) {
+                    if (kind === 'pdf') return 'bi-file-earmark-pdf';
+                    if (kind === 'image') return 'bi-file-earmark-image';
+                    if (kind === 'video') return 'bi-camera-video';
+                    return 'bi-file-earmark';
+                }
+
+                function buildProfileDocPreviewHtml(type, doc) {
+                    const icon = doc.icon || iconForKind(doc.kind);
+                    const title = doc.label || doc.name || 'Document';
+                    const deleteUrl = profileDocDeleteUrlTemplate.replace('__TYPE__', encodeURIComponent(type));
+
+                    return `
+                        <div class="doc-preview-card h-100">
+                            <div class="doc-preview-card__icon"><i class="bi ${escapeHtml(icon)}"></i></div>
+                            <div class="doc-preview-card__body">
+                                <div class="doc-preview-card__label">${escapeHtml(title)}</div>
+                                <div class="doc-preview-card__name" title="${escapeHtml(doc.name)}">${escapeHtml(doc.name)}</div>
+                                <div class="doc-preview-card__actions">
+                                    <button type="button" class="btn btn-sm btn-primary btn-doc-preview"
+                                        data-path="${escapeHtml(doc.path)}" data-title="${escapeHtml(title)}"
+                                        data-kind="${escapeHtml(doc.kind || 'other')}">
+                                        <i class="bi bi-eye me-1"></i> Preview
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary btn-doc-open"
+                                        data-path="${escapeHtml(doc.path)}">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-doc"
+                                        data-type="${escapeHtml(type)}" data-url="${escapeHtml(deleteUrl)}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+
+                function buildAdditionalDocPreviewHtml(doc) {
+                    const icon = doc.icon || iconForKind(doc.kind);
+                    const title = doc.label || doc.name || 'Document';
+                    const deleteUrl = additionalDocDeleteUrlTemplate.replace('__ID__', encodeURIComponent(doc.id));
+
+                    return `
+                        <div class="col-md-6 col-lg-4" data-additional-doc-id="${escapeHtml(doc.id)}">
+                            <div class="doc-preview-card h-100">
+                                <div class="doc-preview-card__icon"><i class="bi ${escapeHtml(icon)}"></i></div>
+                                <div class="doc-preview-card__body">
+                                    <div class="doc-preview-card__label">${escapeHtml(title)}</div>
+                                    <div class="doc-preview-card__name" title="${escapeHtml(doc.name)}">${escapeHtml(doc.name)}</div>
+                                    <div class="doc-preview-card__actions">
+                                        <button type="button" class="btn btn-sm btn-primary btn-doc-preview"
+                                            data-path="${escapeHtml(doc.path)}" data-title="${escapeHtml(doc.name)}"
+                                            data-kind="${escapeHtml(doc.kind || 'other')}">
+                                            <i class="bi bi-eye me-1"></i> Preview
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary btn-doc-open"
+                                            data-path="${escapeHtml(doc.path)}">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-remove-additional-doc"
+                                            data-url="${escapeHtml(deleteUrl)}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+
+                function showProfileDocPreview(type, doc) {
+                    const $current = $(`[data-current-for="${type}"]`);
+                    $current.removeClass('d-none').html(buildProfileDocPreviewHtml(type, doc));
+                }
+
+                function initProfileDropzone(el) {
+                    const type = el.dataset.type;
+                    const maxMb = parseInt(el.dataset.maxMb || '5', 10);
+                    const accept = el.dataset.accept || null;
 
                     new Dropzone(el, {
                         url: uploadUrl,
@@ -1973,26 +2095,30 @@
                         paramName: 'file',
                         maxFiles: 1,
                         maxFilesize: maxMb,
-                        acceptedFiles: acceptedByType[type],
+                        acceptedFiles: accept,
                         addRemoveLinks: true,
                         dictDefaultMessage: 'Drop file here or click to upload',
-                        headers: { 'X-CSRF-TOKEN': csrfToken },
-                        params: { type },
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        params: {
+                            type
+                        },
                         init: function() {
                             const dz = this;
                             dz.on('addedfile', function() {
                                 if (dz.files.length > 1) dz.removeFile(dz.files[0]);
                             });
                             dz.on('success', function(file, response) {
-                                file._s3Path = response.path;
-                                if (hidden) hidden.value = response.path;
-                            });
-                            dz.on('removedfile', function(file) {
-                                deleteUploadedFile(file._s3Path);
-                                if (hidden) hidden.value = '';
+                                if (response.document) {
+                                    showProfileDocPreview(type, response.document);
+                                }
+                                dz.removeFile(file);
+                                showEducatorToast('Document uploaded.', 'success');
                             });
                             dz.on('error', function(file, message) {
-                                const msg = typeof message === 'string' ? message : (message.message || 'Upload failed');
+                                const msg = typeof message === 'string' ? message :
+                                    (message.message || 'Upload failed');
                                 if (file.previewElement) {
                                     file.previewElement.querySelectorAll('[data-dz-errormessage]')
                                         .forEach(n => n.textContent = msg);
@@ -2002,36 +2128,12 @@
                     });
                 }
 
-                let additionalDocIdx = 0;
-
-                function appendAdditionalDocFields(container, response) {
-                    const idx = additionalDocIdx++;
-                    const wrapper = document.createElement('div');
-                    wrapper.dataset.s3Path = response.path;
-
-                    const fields = {
-                        path: response.path,
-                        name: response.original_name,
-                        type: response.mime_type || '',
-                        size: response.size || '',
-                    };
-
-                    Object.entries(fields).forEach(([key, value]) => {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = `additional_documents_new[${idx}][${key}]`;
-                        input.value = value;
-                        wrapper.appendChild(input);
-                    });
-
-                    container.appendChild(wrapper);
-                    return wrapper;
-                }
-
-                function initVerifyMultiple(elId, type, containerId, maxFiles, maxMb) {
-                    const el = document.getElementById(elId);
-                    if (!el) return;
-                    const container = document.getElementById(containerId);
+                function initAdditionalDropzone(el) {
+                    const type = el.dataset.type;
+                    const maxMb = parseInt(el.dataset.maxMb || '5', 10);
+                    const maxFiles = parseInt(el.dataset.maxFiles || '10', 10);
+                    const accept = el.dataset.accept || null;
+                    const list = document.getElementById('additionalDocsList');
 
                     new Dropzone(el, {
                         url: uploadUrl,
@@ -2039,24 +2141,29 @@
                         paramName: 'file',
                         maxFiles: maxFiles,
                         maxFilesize: maxMb,
-                        acceptedFiles: acceptedByType[type],
+                        acceptedFiles: accept,
                         addRemoveLinks: true,
                         dictDefaultMessage: 'Drop files here or click to upload (up to ' + maxFiles + ')',
                         dictMaxFilesExceeded: 'Maximum ' + maxFiles + ' files allowed.',
-                        headers: { 'X-CSRF-TOKEN': csrfToken },
-                        params: { type },
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        params: {
+                            type
+                        },
                         init: function() {
                             const dz = this;
                             dz.on('success', function(file, response) {
-                                file._s3Path = response.path;
-                                file._fieldWrapper = appendAdditionalDocFields(container, response);
-                            });
-                            dz.on('removedfile', function(file) {
-                                deleteUploadedFile(file._s3Path);
-                                file._fieldWrapper?.remove();
+                                if (response.document && list) {
+                                    list.insertAdjacentHTML('beforeend', buildAdditionalDocPreviewHtml(response
+                                        .document));
+                                }
+                                dz.removeFile(file);
+                                showEducatorToast('Document uploaded.', 'success');
                             });
                             dz.on('error', function(file, message) {
-                                const msg = typeof message === 'string' ? message : (message.message || 'Upload failed');
+                                const msg = typeof message === 'string' ? message :
+                                    (message.message || 'Upload failed');
                                 if (file.previewElement) {
                                     file.previewElement.querySelectorAll('[data-dz-errormessage]')
                                         .forEach(n => n.textContent = msg);
@@ -2067,10 +2174,13 @@
                 }
 
                 $(document).ready(function() {
-                    initVerifySingle('govIdDropzone', 'gov_id', 'gov_id_path', 5);
-                    initVerifySingle('credentialDropzone', 'degree_proof', 'degree_proof_path', 5);
-                    initVerifySingle('introVideoDropzone', 'intro_video', 'intro_video_path', 50);
-                    initVerifyMultiple('additionalDocsDropzone', 'additional_document', 'additionalDocsNewContainer', 10, 5);
+                    document.querySelectorAll('.verification-doc-slot .dropzone[data-type]').forEach(function(el) {
+                        if (el.dataset.type === 'additional_document') {
+                            initAdditionalDropzone(el);
+                        } else {
+                            initProfileDropzone(el);
+                        }
+                    });
                 });
             })();
         </script>

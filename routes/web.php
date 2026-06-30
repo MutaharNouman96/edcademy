@@ -419,9 +419,11 @@ Route::middleware(['auth', 'role:educator', 'verified', 'educator.profile.verifi
             Route::post('/privacy', [PrivacySettingController::class, 'update'])->name('educator.privacy.update');
 
             // Verification
+            Route::get('/verification/document-types', [VerificationSettingController::class, 'documentTypes'])->name('educator.verification.document-types');
+            Route::get('/verification/documents/preview-url', [VerificationSettingController::class, 'previewUrl'])->name('educator.verification.preview-url');
             Route::get('/verification', [VerificationSettingController::class, 'index'])->name('educator.verification.index');
             Route::post('/verification/upload', [VerificationSettingController::class, 'uploadDocument'])->name('educator.verification.upload');
-            Route::delete('/verification/upload', [VerificationSettingController::class, 'deleteUpload'])->name('educator.verification.upload.delete');
+            Route::delete('/verification/documents/type/{type}', [VerificationSettingController::class, 'destroyProfileDocument'])->name('educator.verification.profile-document.destroy');
             Route::post('/verification', [VerificationSettingController::class, 'store'])->name('educator.verification.store');
             Route::delete('/verification/documents/{document}', [VerificationSettingController::class, 'destroyDocument'])->name('educator.verification.document.destroy');
 
